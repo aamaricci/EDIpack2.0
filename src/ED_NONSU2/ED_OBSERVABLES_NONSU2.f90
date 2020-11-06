@@ -22,40 +22,44 @@ MODULE ED_OBSERVABLES_NONSU2
   public :: local_energy_nonsu2
 
 
-  logical,save                        :: iolegend=.true.
-  real(8),dimension(:),allocatable    :: dens,dens_up,dens_dw
-  real(8),dimension(:),allocatable    :: docc
-  real(8),dimension(:),allocatable    :: magZ,magX,magY
-  real(8),dimension(:),allocatable    :: phisc
-  real(8),dimension(:,:),allocatable  :: sz2,n2
-  real(8),dimensioN(:,:),allocatable  :: zimp,simp
-  real(8)                             :: s2tot
-  real(8)                             :: Egs
-  real(8)                             :: Ei
+  logical,save                          :: iolegend=.true.
+  real(8),dimension(:),allocatable      :: dens,dens_up,dens_dw
+  real(8),dimension(:),allocatable      :: docc
+  real(8),dimension(:),allocatable      :: magZ,magX,magY
+  real(8),dimension(:),allocatable      :: phisc
+  real(8),dimension(:,:),allocatable    :: sz2,n2
+  real(8),dimension(:,:),allocatable    :: exct_s0
+  real(8),dimension(:,:),allocatable    :: exct_tz
+  complex(8),dimension(:,:),allocatable :: exct_tx
+  complex(8),dimension(:,:),allocatable :: exct_ty
+  real(8),dimensioN(:,:),allocatable    :: zimp,simp
+  real(8)                               :: s2tot
+  real(8)                               :: Egs
+  real(8)                               :: Ei
   !
-  integer                             :: iorb,jorb,istate
-  integer                             :: ispin,jspin
-  integer                             :: isite,jsite
-  integer                             :: ibath
-  integer                             :: r,m,k,k1,k2,k3,k4
-  integer                             :: iup,idw
-  integer                             :: jup,jdw
-  integer                             :: mup,mdw
-  integer                             :: iph,i_el,isz
-  real(8)                             :: sgn,sgn1,sgn2,sg1,sg2,sg3,sg4
-  real(8)                             :: gs_weight
+  integer                               :: iorb,jorb,istate
+  integer                               :: ispin,jspin
+  integer                               :: isite,jsite
+  integer                               :: ibath
+  integer                               :: r,m,k,k1,k2,k3,k4
+  integer                               :: iup,idw
+  integer                               :: jup,jdw
+  integer                               :: mup,mdw
+  integer                               :: iph,i_el,isz
+  real(8)                               :: sgn,sgn1,sgn2,sg1,sg2,sg3,sg4
+  real(8)                               :: gs_weight
   !
-  real(8)                             :: peso
-  real(8)                             :: norm
+  real(8)                               :: peso
+  real(8)                               :: norm
   !
-  integer                             :: i,j,ii
-  integer                             :: isector,jsector
+  integer                               :: i,j,ii
+  integer                               :: isector,jsector
   !
-  complex(8),dimension(:),allocatable :: vvinit
-  complex(8),dimension(:),pointer     :: state_cvec
-  logical                             :: Jcondition
+  complex(8),dimension(:),allocatable   :: vvinit
+  complex(8),dimension(:),pointer       :: state_cvec
+  logical                               :: Jcondition
   !
-  type(sector)                        :: sectorI,sectorJ
+  type(sector)                          :: sectorI,sectorJ
 
 
 
@@ -69,6 +73,7 @@ contains
   subroutine observables_nonsu2()
     integer,dimension(Nlevels)      :: ib
     real(8),dimension(Norb)         :: nup,ndw,Sz,nt
+    real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw,theta_updw,theta_dwup
     !
     !LOCAL OBSERVABLES:
     ! density, 
@@ -93,6 +98,14 @@ contains
     sz2     = 0.d0
     n2      = 0.d0
     s2tot   = 0.d0
+    exct_s0 = 0d0
+    exct_tz = 0d0
+    exct_tx = zero
+    exct_ty = zero
+    theta_upup = 0d0
+    theta_dwdw = 0d0
+    theta_updw = 0d0
+    theta_dwup = 0d0
     !
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
@@ -162,6 +175,7 @@ contains
        !
     enddo
 
+    !
     !EVALUATE <SX> AND <SY>
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
@@ -246,7 +260,148 @@ contains
     enddo
     magx = 0.5d0*(magx - dens_up - dens_dw)
     magy = 0.5d0*(magy - dens_up - dens_dw)
+
     !
+    !EVALUATE EXCITON OP <S_ab> AND <T^x,y,z_ab>
+    !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
+    !<T^z_ab>:=   <C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}>
+    !<T^x_ab>:=   <C^+_{a,up}C_{b,dw} + C^+_{a,dw}C_{b,up}>
+    !<T^y_ab>:= -i<C^+_{a,up}C_{b,dw} - C^+_{a,dw}C_{b,up}>
+    do istate=1,state_list%size
+       isector = es_return_sector(state_list,istate)
+       Ei      = es_return_energy(state_list,istate)
+#ifdef _MPI
+       if(MpiStatus)then
+          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+       else
+          state_cvec => es_return_cvector(state_list,istate)
+       endif
+#else
+       state_cvec => es_return_cvector(state_list,istate)
+#endif
+       !
+       peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
+       peso = peso/zeta_function
+       !
+       if(Mpimaster)call build_sector(isector,sectorI)
+       !    
+       do iorb=1,Norb
+          do jorb=iorb+1,Norb
+             !
+             !\Theta_upup = <v|v>, |v> = (C_aup + C_bup)|>
+             jsector = getCsector(1,1,isector)
+             if(jsector/=0)then
+                if(Mpimaster)then
+                   call build_sector(jsector,sectorJ)
+                   allocate(vvinit(sectorJ%Dim));vvinit=zero
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !c_b,up
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = sgn*state_cvec(i)
+                   enddo
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                   enddo
+                   call delete_sector(sectorJ)
+                   !
+                   theta_upup(iorb,jorb) = theta_upup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   if(allocated(vvinit))deallocate(vvinit)
+                endif
+             endif
+             !
+             !\Theta_dwdw = <v|v>, |v> = (C_adw + C_bdw)|>
+             jsector = getCsector(1,2,isector)
+             if(jsector/=0)then
+                if(Mpimaster)then
+                   call build_sector(jsector,sectorJ)
+                   allocate(vvinit(sectorJ%Dim));vvinit=zero
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !c_b,dw
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = sgn*state_cvec(i)
+                   enddo
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                   enddo
+                   call delete_sector(sectorJ)
+                   !
+                   theta_dwdw(iorb,jorb) = theta_dwdw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   if(allocated(vvinit))deallocate(vvinit)
+                endif
+             endif
+             !
+             !\Theta_updw = <v|v>, |v> = (C_aup + C_bdw)|>
+             jsector = getCsector(1,1,isector)
+             if(jsector/=0)then
+                if(Mpimaster)then
+                   call build_sector(jsector,sectorJ)
+                   allocate(vvinit(sectorJ%Dim));vvinit=zero
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !c_b,dw
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = sgn*state_cvec(i)
+                   enddo
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                   enddo
+                   call delete_sector(sectorJ)
+                   !
+                   theta_updw(iorb,jorb) = theta_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   if(allocated(vvinit))deallocate(vvinit)
+                endif
+             endif
+             !
+             !\Theta_dwup = <v|v>, |v> = (C_adw + C_bup)|>
+             jsector = getCsector(1,1,isector)
+             if(jsector/=0)then
+                if(Mpimaster)then
+                   call build_sector(jsector,sectorJ)
+                   allocate(vvinit(sectorJ%Dim));vvinit=zero
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !c_b,up
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = sgn*state_cvec(i)
+                   enddo
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                   enddo
+                   call delete_sector(sectorJ)
+                   !
+                   theta_dwup(iorb,jorb) = theta_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   if(allocated(vvinit))deallocate(vvinit)
+                endif
+             endif
+          enddo
+       enddo
+       !
+#ifdef _MPI
+       if(MpiStatus)then
+          if(associated(state_cvec))deallocate(state_cvec)
+       else
+          if(associated(state_cvec))nullify(state_cvec)
+       endif
+#else
+       if(associated(state_cvec))nullify(state_cvec)
+#endif
+       !
+    enddo
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          exct_s0(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb))
+          exct_tz(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb))
+          exct_tx(iorb,jorb) = 0.5d0*(theta_updw(iorb,jorb) + theta_dwup(iorb,jorb) - dens(iorb) - dens(jorb))
+          exct_ty(iorb,jorb) = -xi*0.5d0*(theta_updw(iorb,jorb) - theta_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb))
+       enddo
+    enddo
+
     !
     !IMPURITY DENSITY MATRIX
     if(allocated(imp_density_matrix))deallocate(imp_density_matrix)
@@ -660,6 +815,11 @@ contains
          ((reg(txtfy((7+Norb)*Norb+2+(iorb-1)*Norb+jorb))//"n2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
          ((reg(txtfy((7+2*Norb)*Norb+2+(ispin-1)*Nspin+iorb))//"z_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin),&
          ((reg(txtfy((8+2*Norb)*Norb+2+Nspin+(ispin-1)*Nspin+iorb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    open(unit,file="exciton_info.ed")
+    write(unit,"(A1,6(A10,6X))")"#","1S_0","2T_z","3reT_x","4imT_x","5reT_y","6imT_y"
+    close(unit)
     !
     unit = free_unit()
     open(unit,file="parameters_info.ed")
@@ -709,7 +869,7 @@ contains
          ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb),&
          ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin),&
          ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-
+    close(unit)
     !
     unit = free_unit()
     open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
@@ -731,6 +891,19 @@ contains
          ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb),&
          ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin),&
          ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="exciton_last"//reg(ed_file_suffix)//".ed")
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          write(unit,"(90(F15.9,1X))")&
+               exct_s0(iorb,jorb),exct_tz(iorb,jorb),&
+               dreal(exct_tx(iorb,jorb)),dimag(exct_tx(iorb,jorb)),&
+               dreal(exct_ty(iorb,jorb)),dimag(exct_ty(iorb,jorb))
+       enddo
+    enddo
+    close(unit)
 
   end subroutine write_observables
 
