@@ -904,7 +904,6 @@ contains
        enddo
     enddo
     close(unit)
-
   end subroutine write_observables
 
   subroutine write_energy()

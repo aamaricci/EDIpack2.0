@@ -1,8 +1,8 @@
-#  Lanczos Exact Diagonalization for Quantum Impurity problems 
+#   Generic Exact Diagonalization for Quantum Impurity problems
 
-A Lanczos based solver for Quantum Impurity problems with a special application to Dynamical Mean-Field Theory. 
+A serial/parallel Lanczos based solver for Quantum Impurity problems, with a special application to Dynamical Mean-Field Theory. 
 
-This library provides a simple, yet generic, interface to the solution of multi-orbital quantum impurity models with a finite, discrete electronic bath. The solution is obtained in either for *normal*, *superconducting* (s-wave) or *Sz-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases. The code works at zero and finite, but low, temperature. 
+This library provides a simple, yet generic, interface to the solution of multi-orbital quantum impurity models with a finite, discrete electronic bath. The solution is obtained in either for *normal*, *superconducting* (s-wave) or *Sz-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases. The code works at zero and  low temperatures.   
 
 
 
@@ -11,6 +11,8 @@ This library provides a simple, yet generic, interface to the solution of multi-
 The code is based on:  
 
 * SciFortran [https://github.com/aamaricci/SciFortran](https://github.com/aamaricci/SciFortran)  
+
+* MPI 
 
   
 
@@ -57,17 +59,23 @@ adriano DOT amaricci @ gmail DOT com
 --
 
 ***LICENSE***  
-Copyright 2020- (C) Adriano Amaricci
+Copyright 2020- (C) Adriano Amaricci, Lorenzo Crippa, Alberto Scazzola, Giacomo Mazza, Francesco Petocchi, Luca de Medici and Massimo Capone. 
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+The software is provided with no license, as such it is protected by copyright.
+The software is provided as it is and can be read and copied, in agreement with 
+the Terms of Service of GITHUB. Use of the code is constrained to author agreement.   
+
+<!--This program is free software: you can redistribute it and/or modify-->
+<!--it under the terms of the GNU General Public License as published by-->
+<!--the Free Software Foundation, either version 3 of the License, or-->
+<!--(at your option) any later version.-->
+
+<!--You should have received a copy of the GNU General Public License-->
+<!--along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
