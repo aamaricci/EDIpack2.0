@@ -114,18 +114,22 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             m  = sectorI%H(1)%map(i)
-             ib = bdecomp(m,2*Ns)
-             !
+             ! m  = sectorI%H(1)%map(i)
+             ! ib = bdecomp(m,2*Ns)
+             ! !
+             ! gs_weight=peso*abs(state_cvec(i))**2
+             ! !
+             ! !Get operators:
+             ! do iorb=1,Norb
+             !    nup(iorb)= dble(ib(iorb))
+             !    ndw(iorb)= dble(ib(iorb+Ns))
+             !    sz(iorb) = (nup(iorb) - ndw(iorb))/2.d0
+             !    nt(iorb) =  nup(iorb) + ndw(iorb)
+             ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             !
-             !Get operators:
-             do iorb=1,Norb
-                nup(iorb)= dble(ib(iorb))
-                ndw(iorb)= dble(ib(iorb+Ns))
-                sz(iorb) = (nup(iorb) - ndw(iorb))/2.d0
-                nt(iorb) =  nup(iorb) + ndw(iorb)
-             enddo
+             call get_op_Ns(i,nup,ndw,sectorI)
+             sz = (nup-ndw)/2d0
+             nt =  nup+ndw
              !
              !Evaluate averages of observables:
              do iorb=1,Norb
@@ -184,7 +188,6 @@ contains
           if(jsector/=0)then
              if(Mpimaster)then
                 call build_sector(isector,sectorI)
-                !
                 call build_sector(jsector,sectorJ)
                 allocate(vvinit(sectorJ%Dim));vvinit=zero
                 do i=1,sectorI%Dim
@@ -407,16 +410,15 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
-             m  = sectorI%H(1)%map(i)
-             ib = bdecomp(m,2*Ns)
-             !
+             ! m  = sectorI%H(1)%map(i)
+             ! ib = bdecomp(m,2*Ns)
+             ! gs_weight=peso*abs(state_cvec(i))**2
+             ! do iorb=1,Norb
+             !    nup(iorb)= dble(ib(iorb))
+             !    ndw(iorb)= dble(ib(iorb+Ns))
+             ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             !
-             !Get occupations:
-             do iorb=1,Norb
-                nup(iorb)= dble(ib(iorb))
-                ndw(iorb)= dble(ib(iorb+Ns))
-             enddo
+             call get_op_Ns(i,nup,ndw,sectorI)
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY

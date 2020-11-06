@@ -45,7 +45,8 @@ MODULE ED_SECTOR
   public :: apply_op_CDG
   public :: apply_op_Sz
   public :: apply_op_N
-
+  public :: build_op_Ns
+  !
   public :: get_Sector
   public :: get_QuantumNumbers
   public :: get_Nup
@@ -427,6 +428,41 @@ contains
   end subroutine apply_op_N
 
 
+  subroutine build_op_Ns(i,Nup,Ndw,sectorI) 
+    integer, intent(in)             :: i
+    type(sector),intent(in)         :: sectorI
+    integer,dimension(Ns)           :: Nup,Ndw  ![Ns]
+    integer                         :: iph,i_el,ii,iorb
+    integer,dimension(2*Ns_Ud)      :: Indices
+    integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
+    integer,dimension(2*Ns)         :: Ib
+    integer,dimension(2)            :: Iud
+    !
+    select case(ed_mode)
+    case default
+       iph = (i-1)/(sectorI%DimEl) + 1
+       i_el = mod(i-1,sectorI%DimEl) + 1
+       !
+       call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+       do ii=1,Ns_Ud
+          iud(1) = sectorI%H(ii)%map(Indices(ii))
+          iud(2) = sectorI%H(ii+Ns_Ud)%map(Indices(ii+Ns_ud))
+          Nups(ii,:) = Bdecomp(iud(1),Ns_Orb) ![Norb,1+Nbath]
+          Ndws(ii,:) = Bdecomp(iud(2),Ns_Orb)
+       enddo
+       Nup = Breorder(Nups)
+       Ndw = Breorder(Ndws)
+       !
+    case("superc","nonsu2")
+       ii = sectorI%H(1)%map(i)
+       Ib = bdecomp(ii,2*Ns)
+       do iorb=1,Norb
+          Nup(iorb)= dble(ib(iorb))
+          Ndw(iorb)= dble(ib(iorb+Ns))
+       enddo
+    end select
+    !
+  end subroutine build_op_Ns
 
 
 

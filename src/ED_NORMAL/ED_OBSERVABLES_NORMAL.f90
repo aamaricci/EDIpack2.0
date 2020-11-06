@@ -117,28 +117,29 @@ contains
        if(MpiMaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             iph = (i-1)/(sectorI%DimEl) + 1
-             i_el = mod(i-1,sectorI%DimEl) + 1
-             !
-             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-             do ii=1,Ns_Ud
-                mup = sectorI%H(ii)%map(Indices(ii))
-                mdw = sectorI%H(ii+Ns_Ud)%map(Indices(ii+Ns_ud))
-                Nups(ii,:) = Bdecomp(mup,Ns_Orb) ![Norb,1+Nbath]
-                Ndws(ii,:) = Bdecomp(mdw,Ns_Orb)
-             enddo
-             IbUp = Breorder(Nups)
-             IbDw = Breorder(Ndws)
+             ! iph = (i-1)/(sectorI%DimEl) + 1
+             ! i_el = mod(i-1,sectorI%DimEl) + 1
+             ! !
+             ! call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+             ! do ii=1,Ns_Ud
+             !    mup = sectorI%H(ii)%map(Indices(ii))
+             !    mdw = sectorI%H(ii+Ns_Ud)%map(Indices(ii+Ns_ud))
+             !    Nups(ii,:) = Bdecomp(mup,Ns_Orb) ![Norb,1+Nbath]
+             !    Ndws(ii,:) = Bdecomp(mdw,Ns_Orb)
+             ! enddo
+             ! IbUp = Breorder(Nups)
+             ! IbDw = Breorder(Ndws)
              !
              gs_weight=peso*abs(state_dvec(i))**2
-             !
-             !Get operators:
-             do iorb=1,Norb
-                nup(iorb)= ibup(iorb)
-                ndw(iorb)= ibdw(iorb)
-                sz(iorb) = (nup(iorb) - ndw(iorb))/2d0
-                nt(iorb) =  nup(iorb) + ndw(iorb)
-             enddo
+             call get_op_Ns(i,nup,ndw,sectorI)
+             sz = (nup-ndw)/2d0
+             nt =  nup+ndw
+             ! do iorb=1,Norb
+             !    nup(iorb)= ibup(iorb)
+             !    ndw(iorb)= ibdw(iorb)
+             !    sz(iorb) = (nup(iorb) - ndw(iorb))/2d0
+             !    nt(iorb) =  nup(iorb) + ndw(iorb)
+             ! enddo
              !
              !Configuration probability
              iprob=1
@@ -164,11 +165,13 @@ contains
                 enddo
              enddo
              s2tot = s2tot  + (sum(sz))**2*gs_weight
+             !
+             iph = (i-1)/(sectorI%DimEl) + 1
              prob_ph(iph) = prob_ph(iph) + gs_weight
              dens_ph = dens_ph + (iph-1)*gs_weight
              !
              !compute the lattice probability distribution function
-             if(Dimph>1 .and. iph.eq.1) then
+             if(Dimph>1 .AND. iph==1) then
                 val = 1
                 do iorb=1,Norb
                    val = val + abs(nint(sign((nt(iorb) - 1.d0),g_ph(iorb))))
@@ -216,18 +219,19 @@ contains
        if(MpiMaster)then
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
-             iph = (i-1)/(sectorI%DimEl) + 1
-             i_el = mod(i-1,sectorI%DimEl) + 1
-             !
-             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-             do ii=1,Ns_Ud
-                mup = sectorI%H(ii)%map(Indices(ii))
-                mdw = sectorI%H(ii+Ns_Ud)%map(Indices(ii+Ns_ud))
-                Nups(ii,:) = Bdecomp(mup,Ns_Orb) ![Norb,1+Nbath]
-                Ndws(ii,:) = Bdecomp(mdw,Ns_Orb)
-             enddo
-             Nud(1,:) = Breorder(Nups)
-             Nud(2,:) = Breorder(Ndws)
+             ! iph = (i-1)/(sectorI%DimEl) + 1
+             ! i_el = mod(i-1,sectorI%DimEl) + 1
+             ! !
+             ! call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+             ! do ii=1,Ns_Ud
+             !    mup = sectorI%H(ii)%map(Indices(ii))
+             !    mdw = sectorI%H(ii+Ns_Ud)%map(Indices(ii+Ns_ud))
+             !    Nups(ii,:) = Bdecomp(mup,Ns_Orb) ![Norb,1+Nbath]
+             !    Ndws(ii,:) = Bdecomp(mdw,Ns_Orb)
+             ! enddo
+             ! Nud(1,:) = Breorder(Nups)
+             ! Nud(2,:) = Breorder(Ndws)
+             call get_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              !
              !Diagonal densities
              do ispin=1,Nspin
