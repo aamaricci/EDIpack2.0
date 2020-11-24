@@ -101,7 +101,7 @@ contains
        !
        !C^+_as C_bs => jsector == isector
        if(MpiMaster)then
-          call build_sector_normal(isector,sectorI)
+          call build_sector(isector,sectorI)
           if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                'Apply \sum_s C^+_as.C_bs :',isector,sectorI%Nups,sectorI%Ndws
           allocate(vvinit(sectorI%Dim))     ;  vvinit=0d0
@@ -112,7 +112,7 @@ contains
        ksector = getCsector(jalfa,2,isector)       
        if(ksector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(ksector,sectorK)
+             call build_sector(ksector,sectorK)
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              !C_b,up|gs>=|tmp>
              do i=1,sectorI%Dim
@@ -127,13 +127,13 @@ contains
                 vvinit(i) = sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorK)
+             call delete_sector(sectorK)
           endif
        endif
        ksector = getCsector(jalfa,1,isector)
        if(ksector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(ksector,sectorK)
+             call build_sector(ksector,sectorK)
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              !C_b,dw|gs>=|tmp>
              do i=1,sectorI%Dim
@@ -148,10 +148,10 @@ contains
                 vvinit(i) = vvinit(i) + sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorK)
+             call delete_sector(sectorK)
           endif
        endif
-       call delete_sector_normal(sectorI)
+       call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
        call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,0)
@@ -210,7 +210,7 @@ contains
        !Z - Component:
        !Z_{ab}= C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}
        if(MpiMaster)then
-          call build_sector_normal(isector,sectorI)
+          call build_sector(isector,sectorI)
           allocate(vvinit(sectorI%Dim))     ;  vvinit=0d0
           if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                'Apply \sum_s C^+_as.C_bs :',isector,sectorI%Nups,sectorI%Ndws
@@ -221,7 +221,7 @@ contains
        ksector = getCsector(jalfa,2,isector)
        if(ksector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(ksector,sectorK)
+             call build_sector(ksector,sectorK)
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              !C_b,dw|gs>=|tmp>
              do i=1,sectorI%Dim
@@ -236,13 +236,13 @@ contains
                 vvinit(i) = sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorK)
+             call delete_sector(sectorK)
           endif
        endif
        ksector = getCsector(jalfa,1,isector)
        if(ksector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(ksector,sectorK)
+             call build_sector(ksector,sectorK)
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              !C_b,up|gs>=|tmp>
              do i=1,sectorI%Dim
@@ -257,10 +257,10 @@ contains
                 vvinit(i) =  sgn*vvinit_tmp(k) - vvinit(i)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorK)
+             call delete_sector(sectorK)
           endif
        endif
-       call delete_sector_normal(sectorI)
+       call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
        call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,2)
@@ -342,9 +342,9 @@ contains
        jsector = getCDGsector(ialfa,2,ksector)
        if(ksector/=0.AND.jsector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(isector,sectorI)
-             call build_sector_normal(ksector,sectorK)
-             call build_sector_normal(jsector,sectorJ)
+             call build_sector(isector,sectorI)
+             call build_sector(ksector,sectorK)
+             call build_sector(jsector,sectorJ)
              if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                   'Apply C^+_{a,dw}C_{b,up}: :',isector,sectorI%Nups,sectorI%Ndws
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
@@ -362,9 +362,9 @@ contains
                 vvinit(i) = sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorI)
-             call delete_sector_normal(sectorK)
-             call delete_sector_normal(sectorJ)
+             call delete_sector(sectorI)
+             call delete_sector(sectorK)
+             call delete_sector(sectorJ)
           else
              allocate(vvinit(1));vvinit=0.d0
           endif
@@ -380,9 +380,9 @@ contains
        jsector = getCDGsector(ialfa,1,ksector)
        if(ksector/=0.AND.jsector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(isector,sectorI)
-             call build_sector_normal(ksector,sectorK)
-             call build_sector_normal(jsector,sectorJ)
+             call build_sector(isector,sectorI)
+             call build_sector(ksector,sectorK)
+             call build_sector(jsector,sectorJ)
              if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                   'Apply C^+_{a,dw}C_{b,up}: :',isector,sectorI%Nups,sectorI%Ndws
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
@@ -400,9 +400,9 @@ contains
                 vvinit(i) = sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorI)
-             call delete_sector_normal(sectorK)
-             call delete_sector_normal(sectorJ)
+             call delete_sector(sectorI)
+             call delete_sector(sectorK)
+             call delete_sector(sectorJ)
           else
              allocate(vvinit(1));vvinit=0.d0
           endif

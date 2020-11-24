@@ -125,7 +125,7 @@ contains
 #endif
        !
        if(MpiMaster)then
-          call build_sector_normal(isector,sectorI)
+          call build_sector(isector,sectorI)
           if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                'Apply Sz  :',isector,sectorI%Nups,sectorI%Ndws
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
@@ -133,7 +133,7 @@ contains
              call apply_op_Sz(i,sgn,ipos,ialfa,sectorI)            
              vvinit(i) = sgn*state_dvec(i)
           enddo
-          call delete_sector_normal(sectorI)
+          call delete_sector(sectorI)
        else
           allocate(vvinit(1));vvinit=0.d0
        endif
@@ -196,7 +196,7 @@ contains
        !
        !EVALUATE (Sz_jorb + Sz_iorb)|gs> = Sz_jorb|gs> + Sz_iorb|gs>
        if(MpiMaster)then
-          call build_sector_normal(isector,sectorI)
+          call build_sector(isector,sectorI)
           if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                'From sector  :',isector,sectorI%Nups,sectorI%Ndws
           if(ed_verbose==3)write(LOGfile,"(A,I15)")'Apply (Sz_jorb + Sz_iorb):',isector
@@ -207,7 +207,7 @@ contains
              sgn       = Siorb + Sjorb
              vvinit(i) = sgn*state_dvec(i)
           enddo
-          call delete_sector_normal(sectorI)
+          call delete_sector(sectorI)
        else
           allocate(vvinit(1));vvinit=0.d0
        endif

@@ -130,6 +130,7 @@ INCLUDE_DIRECTORIES(BEFORE ${SCIFOR_INCLUDE_DIRS})
 
 
 
+
 ############################################################
 # Set Fortran options based on BUILD_TYPE and FC ID
 ############################################################
@@ -146,6 +147,19 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
   SET(CMAKE_Fortran_FLAGS_TESTING "-O2 -ftz")
   SET(CMAKE_Fortran_FLAGS_DEBUG   "-p -O0 -g -fpe1 -warn -debug extended -traceback -nocheck")# all,noarg_temp_created") these options break the parallel vector transposition because some node has no columns of data to send but still need to participate into the communication. we support democratic inclusion of everyone. no one is left behind even if it is just a bunch of data!  
   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ftz")
+# elseif(CMAKE_Fortran_COMPILER_ID MATCHES G95)
+#   SET(CMAKE_Fortran_MODDIR_FLAG   "-fmod=")
+#   SET(CMAKE_Fortran_FLAGS         "-cpp")
+#   SET(CMAKE_Fortran_FLAGS_TESTING "-O1  -fsloppy-char")
+#   SET(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -ftrace=full")
+#   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3")
+  
+# elseif(CMAKE_Fortran_COMPILER_ID MATCHES PGI)
+#   SET(CMAKE_Fortran_MODDIR_FLAG   "-module ")
+#   SET(CMAKE_Fortran_FLAGS         "-")
+#   SET(CMAKE_Fortran_FLAGS         "")
+#   SET(CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -Mframe")
+#   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3 -mcmodel=medium -fast -Munroll")
 endif()
 
 
@@ -236,6 +250,7 @@ ADD_LIBRARY(dmft_ed STATIC
 
 
 
+
 SET(REVISION_FILE ${LIB_SRC}/revision.inc)
 MESSAGE( STATUS "${Yellow}Creating: ${ColourReset} ${REVISION_FILE}" )
 FILE(WRITE  ${REVISION_FILE} "character(len=41),parameter,public :: revision = \"${GIT_SHA1}\"\n")
@@ -247,15 +262,19 @@ SET(PERMISSION_777
   WORLD_WRITE WORLD_READ WORLD_EXECUTE)
 
 
+
+
+
+
 #Contains the functions used in the following:
 #BUILD_ENV_MODULE
 #BUILD_CONFIGVARS
 #BUILD_PKCONFIG
 INCLUDE(${CMAKE_MODULE_PATH}/PostBuildLibrary.cmake)
 
-#Build the scifor module for environment modules
+#Build the lanc_ed module for environment modules
 FILE(REMOVE_RECURSE ${LIB_TMP_ETC}/modules/)
-SET(TMP_MODULE_NAME "${FC_PLAT}" CACHE PATH "Prefix prepended to install directories")
+SET(TMP_MODULE_NAME "${FULL_VER}" CACHE PATH "Prefix prepended to install directories")
 SET(TMP_ENV_MODULE_FILE ${LIB_TMP_ETC}/modules/${PROJECT_NAME}/${TMP_MODULE_NAME})
 BUILD_ENV_MODULE(${TMP_ENV_MODULE_FILE})
 
@@ -294,7 +313,7 @@ $ make post-install
 
 ADD_CUSTOM_TARGET(
   post-install
-  COMMAND "${CMAKE_COMMAND}" -P ${CMAKE_MODULE_PATH}/HomeInstall.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_INSTALL_PREFIX} ${PROJECT_NAME} ${FC_PLAT} 
+  COMMAND "${CMAKE_COMMAND}" -P ${CMAKE_MODULE_PATH}/HomeInstall.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_INSTALL_PREFIX} ${PROJECT_NAME} ${FULL_VER} 
   WORKING_DIRECTORY
   "${CMAKE_BINARY_DIR}"
 )

@@ -115,9 +115,9 @@ contains
        if(jsector/=0.AND.ksector/=0)then
           !
           if(MpiMaster)then
-             call build_sector_normal(isector,sectorI)
-             call build_sector_normal(ksector,sectorK)
-             call build_sector_normal(jsector,sectorJ)
+             call build_sector(isector,sectorI)
+             call build_sector(ksector,sectorK)
+             call build_sector(jsector,sectorJ)
              if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                   'Apply Cup*Cdw  :',isector,sectorI%Nups,sectorI%Ndws
 
@@ -136,9 +136,9 @@ contains
                 vvinit(j) = sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorI)
-             call delete_sector_normal(sectorK)
-             call delete_sector_normal(sectorJ)
+             call delete_sector(sectorI)
+             call delete_sector(sectorK)
+             call delete_sector(sectorJ)
           else
              allocate(vvinit(1));vvinit=0.d0
           endif
@@ -205,9 +205,9 @@ contains
        jsector = getCsector(jalfa,1,ksector)
        if(jsector/=0.AND.ksector/=0)then
           if(MpiMaster)then
-             call build_sector_normal(isector,sectorI)
-             call build_sector_normal(ksector,sectorK)
-             call build_sector_normal(jsector,sectorJ)
+             call build_sector(isector,sectorI)
+             call build_sector(ksector,sectorK)
+             call build_sector(jsector,sectorJ)
              if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
                   'Apply C_bup*C_bdw + C_aup*C_adw  :',isector,sectorI%Nups,sectorI%Ndws
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
@@ -238,9 +238,9 @@ contains
                 vvinit(j) = vvinit(j) + sgn*vvinit_tmp(k)
              enddo
              deallocate(vvinit_tmp)
-             call delete_sector_normal(sectorI)
-             call delete_sector_normal(sectorK)
-             call delete_sector_normal(sectorJ)
+             call delete_sector(sectorI)
+             call delete_sector(sectorK)
+             call delete_sector(sectorJ)
           else
              allocate(vvinit(1));vvinit=0.d0
           endif

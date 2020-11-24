@@ -85,6 +85,8 @@ contains
     allocate(docc(Norb))
     allocate(magZ(Norb),sz2(Norb,Norb),n2(Norb,Norb))
     allocate(magX(Norb),magY(Norb))
+    allocate(exct_S0(Norb,Norb),exct_Tz(Norb,Norb))
+    allocate(exct_Tx(Norb,Norb),exct_Ty(Norb,Norb))
     allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
     !
     Egs     = state_list%emin
@@ -817,6 +819,7 @@ contains
          ((reg(txtfy((8+2*Norb)*Norb+2+Nspin+(ispin-1)*Nspin+iorb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
+    unit = free_unit()
     open(unit,file="exciton_info.ed")
     write(unit,"(A1,6(A10,6X))")"#","1S_0","2T_z","3reT_x","4imT_x","5reT_y","6imT_y"
     close(unit)
