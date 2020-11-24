@@ -1,8 +1,8 @@
-#   Generic Exact Diagonalization for Quantum Impurity problems
+#   Exact Diagonalization for Quantum Impurity problems
 
-A serial/parallel Lanczos based solver for Quantum Impurity problems, with a special application to Dynamical Mean-Field Theory. 
+A serial/parallel Lanczos based method for the solution of single-site Quantum Impurity problems, with a special application as Dynamical Mean-Field Theory solver. 
 
-This library provides a simple, yet generic, interface to the solution of multi-orbital quantum impurity models with a finite, discrete electronic bath. The solution is obtained in either for *normal*, *superconducting* (s-wave) or *Sz-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases. The code works at zero and  low temperatures.   
+This library provides a simple, yet generic, interface to the solution of single-site, multi-orbital quantum impurity models with a finite, discrete electronic bath. The solution is obtained in either for *normal*, *superconducting* (s-wave) or *Sz-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases. The code works at zero and  low temperatures.   
 
 
 
