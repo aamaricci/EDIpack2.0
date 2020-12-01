@@ -289,8 +289,6 @@ contains
           !
           call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
           call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,-1,ichan=3)
-          call delete_Hv_sector()
-          !
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)          
        endif
@@ -397,8 +395,6 @@ contains
           !
           call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
           call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,-1,ichan=3)
-          call delete_Hv_sector()
-          !
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)          
        endif

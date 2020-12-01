@@ -22,8 +22,8 @@ MODULE ED_OBSERVABLES_NORMAL
   real(8),dimension(:),allocatable   :: docc
   real(8),dimension(:),allocatable   :: magz
   real(8),dimension(:,:),allocatable :: sz2,n2
-  real(8),dimension(:,:),allocatable    :: exct_s0
-  real(8),dimension(:,:),allocatable    :: exct_tz
+  real(8),dimension(:,:),allocatable :: exct_s0
+  real(8),dimension(:,:),allocatable :: exct_tz
   real(8),dimension(:,:),allocatable :: zimp,simp
   real(8)                            :: dens_ph
   real(8)                            :: s2tot
@@ -77,7 +77,7 @@ contains
     allocate(docc(Norb))
     allocate(magz(Norb),sz2(Norb,Norb),n2(Norb,Norb))
     allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
-    !
+    allocate(exct_S0(Norb,Norb),exct_Tz(Norb,Norb))
     allocate(Prob(3**Norb))
     allocate(prob_ph(DimPh))
     allocate(pdf_ph(Lpos))
@@ -125,7 +125,9 @@ contains
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
              gs_weight=peso*abs(state_dvec(i))**2
-             call get_op_Ns(i,nup,ndw,sectorI)
+             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             nup = Nud(1,1:Norb)
+             ndw = Nud(2,1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -275,9 +277,8 @@ contains
           exct_tz(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb))
        enddo
     enddo
-
-
-
+    !
+    !
     !IMPURITY DENSITY MATRIX
     if(allocated(imp_density_matrix)) deallocate(imp_density_matrix)
     allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb));imp_density_matrix=zero
@@ -300,7 +301,11 @@ contains
        if(MpiMaster)then
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
-             call get_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             iph = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+             !
+             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              !
              !Diagonal densities
              do ispin=1,Nspin
@@ -390,6 +395,7 @@ contains
 #endif
     !
     deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2,Prob)
+    deallocate(exct_S0,exct_Tz)
     deallocate(simp,zimp,prob_ph,pdf_ph,pdf_part)
   end subroutine observables_normal
 
@@ -848,7 +854,9 @@ contains
              jstart = i_el + (j_ph-1)*sectorI%DimEl
              !
              pdf_ph(i) = pdf_ph(i) + peso*psi(i_ph-1)*psi(j_ph-1)*vec(istart)*vec(jstart)
+             ! if(ph_type==1 .and. Norb==2 .and. val<4) then	!all this conditions should disappear soon or later...
              pdf_part(i,val) = pdf_part(i,val) + peso*psi(i_ph-1)*psi(j_ph-1)*vec(istart)*vec(jstart)
+             ! endif
           enddo
        enddo
        !

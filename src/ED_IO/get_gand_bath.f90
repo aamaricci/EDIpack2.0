@@ -1,4 +1,4 @@
-function ed_get_g0imp_function(x,bath_,axis) result(G0and)
+function ed_get_g0and_function(x,bath_,axis) result(G0and)
   complex(8),dimension(:),intent(in)                  :: x
   type(effective_bath)                                :: dmft_bath_
   character(len=*),optional                           :: axis
@@ -13,10 +13,10 @@ function ed_get_g0imp_function(x,bath_,axis) result(G0and)
   call set_dmft_bath(bath_,dmft_bath_)
   G0and = g0and_bath_function(x,dmft_bath_)
   call deallocate_dmft_bath(dmft_bath_)
-end function ed_get_g0imp_function
+end function ed_get_g0and_function
 
 
-function ed_get_f0imp_function(x,bath_,axis) result(f0and)
+function ed_get_f0and_function(x,bath_,axis) result(f0and)
   complex(8),dimension(:),intent(in)                  :: x
   type(effective_bath)                                :: dmft_bath_
   character(len=*),optional                           :: axis
@@ -31,7 +31,7 @@ function ed_get_f0imp_function(x,bath_,axis) result(f0and)
   call set_dmft_bath(bath_,dmft_bath_)
   F0and = f0and_bath_function(x,dmft_bath_)
   call deallocate_dmft_bath(dmft_bath_)
-end function ed_get_f0imp_function
+end function ed_get_f0and_function
 
 
 

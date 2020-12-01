@@ -34,7 +34,7 @@ subroutine chi2_fitgf_replica(fg,bath_)
   if(size(fg,3)/=Norb)stop "chi2_fitgf_replica error: size[fg,3]!=Norb"
   if(size(fg,4)/=Norb)stop "chi2_fitgf_replica error: size[fg,4]!=Norb"
   !
-  check= check_bath_dimension(bath_,impHloc)
+  check= check_bath_dimension(bath_)
   if(.not.check)stop "chi2_fitgf_replica error: wrong bath dimensions"
   !
   call allocate_dmft_bath(dmft_bath)

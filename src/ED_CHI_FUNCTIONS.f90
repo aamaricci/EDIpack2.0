@@ -38,27 +38,27 @@ contains
        spinChi_tau=zero
        spinChi_w=zero
        spinChi_iv=zero
-       if(chispin_flag)call build_chi_spin()
+       if(chispin_flag)call build_chi_spin_normal()
        !
        !
        !BUILD CHARGE SUSCEPTIBILITY
        densChi_tau=zero
        densChi_w=zero
        densChi_iv=zero
-       if(chidens_flag)call build_chi_dens()
+       if(chidens_flag)call build_chi_dens_normal()
        !
        !
        !BUILD PAIR SUSCEPTIBILITY
        pairChi_tau=zero
        pairChi_w=zero
        pairChi_iv=zero
-       if(chipair_flag)call build_chi_pair()
+       if(chipair_flag)call build_chi_pair_normal()
        !
        !BUILD EXCITON SUSCEPTIBILITY
        exctChi_tau=zero
        exctChi_w=zero
        exctChi_iv=zero
-       if(chiexct_flag)call build_chi_exct()
+       if(chiexct_flag)call build_chi_exct_normal()
        !
        !
        !PRINTING:

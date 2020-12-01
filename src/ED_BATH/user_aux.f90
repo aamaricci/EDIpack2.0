@@ -18,6 +18,55 @@
 !    matrix
 ! - given a dmft bath pull/push the nonsu2 components
 !+-------------------------------------------------------------------+
+subroutine impose_equal_lambda(bath_,ibath,lambdaindex_vec)
+  real(8),dimension(:) :: bath_
+  type(effective_bath) :: dmft_bath_
+  real(8)              :: val
+  integer,dimension(:) :: lambdaindex_vec
+  integer              :: i,N,ibath
+  !
+  call allocate_dmft_bath(dmft_bath_)
+  call set_dmft_bath(bath_,dmft_bath_)
+  !
+  N=size(lambdaindex_vec)
+  val=0.d0
+  do i=1,N
+     val=val+dmft_bath_%item(ibath)%lambda(lambdaindex_vec(i))/N
+  enddo
+  !
+  do i=1,N
+     dmft_bath_%item(ibath)%lambda(lambdaindex_vec(i))=val
+  enddo
+  !
+  call get_dmft_bath(dmft_bath_,bath_)
+  call deallocate_dmft_bath(dmft_bath_)
+end subroutine impose_equal_lambda
+
+
+subroutine impose_bath_offset(bath_,ibath,offset)
+  real(8),dimension(:) :: bath_
+  type(effective_bath) :: dmft_bath_
+  real(8)              :: offset
+  integer              :: isym,N,ibath
+  !
+  call allocate_dmft_bath(dmft_bath_)
+  call set_dmft_bath(bath_,dmft_bath_)
+  !
+  if(size(lambda_impHloc) .ne. dmft_bath_%item(ibath)%N_dec)then
+     dmft_bath_%item(ibath)%lambda(dmft_bath_%item(ibath)%N_dec)=offset
+  else
+     do isym=1,size(lambda_impHloc)
+        if(is_identity(H_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
+        return
+     enddo
+  endif
+  !
+  call get_dmft_bath(dmft_bath_,bath_)
+  call deallocate_dmft_bath(dmft_bath_)
+  !
+end subroutine impose_bath_offset
+
+
 subroutine break_symmetry_bath_site(bath_,field,sign,save)
   real(8),dimension(:)   :: bath_
   type(effective_bath)   :: dmft_bath_
@@ -60,6 +109,7 @@ subroutine spin_symmetrize_bath_site(bath_,save)
   type(effective_bath)   :: dmft_bath_
   logical,optional       :: save
   logical                :: save_
+  if(bath_type=="replica")stop "spin_symmetry_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   if(Nspin==1)then
      write(LOGfile,"(A)")"spin_symmetrize_bath: Nspin=1 nothing to symmetrize"
@@ -67,16 +117,10 @@ subroutine spin_symmetrize_bath_site(bath_,save)
   endif
   !
   call allocate_dmft_bath(dmft_bath_)
-  if (bath_type=="replica")call init_dmft_bath_mask(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
-  !
-  if (bath_type/="replica") then
-     dmft_bath_%e(Nspin,:,:)=dmft_bath_%e(1,:,:)
-     dmft_bath_%v(Nspin,:,:)=dmft_bath_%v(1,:,:)
-     if(ed_mode=="superc")dmft_bath_%d(Nspin,:,:)=dmft_bath_%d(1,:,:)
-  else
-     stop "spin symmetrize not implemented for replica"
-  endif
+  dmft_bath_%e(Nspin,:,:)=dmft_bath_%e(1,:,:)
+  dmft_bath_%v(Nspin,:,:)=dmft_bath_%v(1,:,:)
+  if(ed_mode=="superc")dmft_bath_%d(Nspin,:,:)=dmft_bath_%d(1,:,:)
   if(save_)call save_dmft_bath(dmft_bath_)
   call get_dmft_bath(dmft_bath_,bath_)
   call deallocate_dmft_bath(dmft_bath_)
@@ -104,6 +148,7 @@ subroutine orb_symmetrize_bath_site(bath_,save)
   logical                :: save_
   integer                :: iorb
   real(8),allocatable    :: lvl(:,:),hyb(:,:)
+  if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   if(Norb==1)then
      write(LOGfile,"(A)")"orb_symmetrize_bath: Norb=1 nothing to symmetrize"
@@ -111,19 +156,16 @@ subroutine orb_symmetrize_bath_site(bath_,save)
   endif
   !
   call allocate_dmft_bath(dmft_bath_)
-  if (bath_type=="replica")call init_dmft_bath_mask(dmft_bath_)
+  ! if (bath_type=="replica")call init_dmft_bath_mask(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
   !
-  if (bath_type/="replica") then
-     if(allocated(lvl))deallocate(lvl);allocate(lvl(Nspin,Nbath));lvl=0d0;lvl=sum(dmft_bath_%e,dim=2)/Norb
-     if(allocated(hyb))deallocate(hyb);allocate(hyb(Nspin,Nbath));hyb=0d0;hyb=sum(dmft_bath_%v,dim=2)/Norb
-     do iorb=1,Norb
-        dmft_bath_%e(:,iorb,:)=lvl
-        dmft_bath_%v(:,iorb,:)=hyb
-     enddo
-  else
-     stop "orb symmetrize not implemented for replica"
-  endif
+  if(allocated(lvl))deallocate(lvl);allocate(lvl(Nspin,Nbath));lvl=0d0;lvl=sum(dmft_bath_%e,dim=2)/Norb
+  if(allocated(hyb))deallocate(hyb);allocate(hyb(Nspin,Nbath));hyb=0d0;hyb=sum(dmft_bath_%v,dim=2)/Norb
+  do iorb=1,Norb
+     dmft_bath_%e(:,iorb,:)=lvl
+     dmft_bath_%v(:,iorb,:)=hyb
+  enddo
+  !
   if(save_)call save_dmft_bath(dmft_bath_)
   call get_dmft_bath(dmft_bath_,bath_)
   call deallocate_dmft_bath(dmft_bath_)
@@ -133,6 +175,7 @@ subroutine orb_symmetrize_bath_lattice(bath_,save)
   logical,optional       :: save
   logical                :: save_
   integer                :: Nsites,ilat
+  if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   Nsites=size(bath_,1)
   do ilat=1,Nsites
@@ -154,6 +197,7 @@ subroutine orb_equality_bath_site(bath_,indx,save)
   logical                :: save_
   integer                :: iorb
   real(8),allocatable    :: lvl(:,:),hyb(:,:)
+  if(bath_type=="replica")stop "orb_equality_bath_site ERROR: can not be used with bath_type=replica"
   indx_=1     ;if(present(indx))indx_=indx
   save_=.true.;if(present(save))save_=save
   if(Norb==1)then
@@ -162,20 +206,17 @@ subroutine orb_equality_bath_site(bath_,indx,save)
   endif
   !
   call allocate_dmft_bath(dmft_bath_)
-  if (bath_type=="replica")call init_dmft_bath_mask(dmft_bath_)
+  ! if (bath_type=="replica")call init_dmft_bath_mask(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
   !
-  if (bath_type/="replica") then
-     if(allocated(lvl))deallocate(lvl);allocate(lvl(Nspin,Nbath));lvl=0d0;lvl=dmft_bath_%e(:,indx_,:)
-     if(allocated(hyb))deallocate(hyb);allocate(hyb(Nspin,Nbath));hyb=0d0;hyb=dmft_bath_%v(:,indx_,:)
-     do iorb=1,Norb
-        if(iorb==indx_)cycle
-        dmft_bath_%e(:,iorb,:)=lvl
-        dmft_bath_%v(:,iorb,:)=hyb
-     enddo
-  else
-     stop "orb equality not implemented for replica"
-  endif
+  if(allocated(lvl))deallocate(lvl);allocate(lvl(Nspin,Nbath));lvl=0d0;lvl=dmft_bath_%e(:,indx_,:)
+  if(allocated(hyb))deallocate(hyb);allocate(hyb(Nspin,Nbath));hyb=0d0;hyb=dmft_bath_%v(:,indx_,:)
+  do iorb=1,Norb
+     if(iorb==indx_)cycle
+     dmft_bath_%e(:,iorb,:)=lvl
+     dmft_bath_%v(:,iorb,:)=hyb
+  enddo
+  !
   if(save_)call save_dmft_bath(dmft_bath_)
   call get_dmft_bath(dmft_bath_,bath_)
   call deallocate_dmft_bath(dmft_bath_)
@@ -188,6 +229,7 @@ subroutine orb_equality_bath_lattice(bath_,indx,save)
   logical                :: save_
   integer                :: iorb
   integer                :: Nsites,ilat
+  if(bath_type=="replica")stop "orb_equality_bath_site ERROR: can not be used with bath_type=replica"
   indx_=1     ;if(present(indx))indx_=indx
   save_=.true.;if(present(save))save_=save
   Nsites=size(bath_,1)
@@ -208,6 +250,7 @@ subroutine ph_symmetrize_bath_site(bath_,save)
   integer                :: i
   logical,optional       :: save
   logical                :: save_
+  if(bath_type=="replica")stop "ph_symmetry_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   call allocate_dmft_bath(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
@@ -235,6 +278,7 @@ subroutine ph_symmetrize_bath_lattice(bath_,save)
   logical,optional       :: save
   logical                :: save_
   integer                :: Nsites,ilat
+  if(bath_type=="replica")stop "ph_symmetry_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   Nsites=size(bath_,1)
   do ilat=1,Nsites
@@ -286,6 +330,7 @@ subroutine ph_trans_bath_lattice(bath_,save)
   logical,optional       :: save
   logical                :: save_
   integer                :: Nsites,ilat
+  if(bath_type=="replica")stop "ph_trans_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   Nsites=size(bath_,1)
   do ilat=1,Nsites
@@ -333,6 +378,22 @@ end subroutine enforce_normal_bath_lattice
 
 
 
+!+-----------------------------------------------------------------------------+!
+!PURPOSE:  check if the specified itype is consistent with the input parameters.
+!+-----------------------------------------------------------------------------+!
+subroutine check_bath_component(type)
+  character(len=1) :: type
+  select case(ed_mode)
+  case default
+     if(type/="e".OR.type/='v')stop "check_bath_component error: type!=e,v"
+  case ("superc")
+     if(type/="e".OR.type/='v'.OR.type/='d')stop "check_bath_component error: type!=e,v,d"
+  case ("nonsu2")
+     if(type/="e".OR.type/='v'.OR.type/='u')stop "check_bath_component error: type!=e,v,u"
+  end select
+  return
+end subroutine check_bath_component
+
 
 !+-------------------------------------------------------------------+
 !PURPOSE  : Inquire the correct bath size to allocate the 
@@ -344,80 +405,53 @@ end subroutine enforce_normal_bath_lattice
 ! 2 for get_spin_component_size_bath & get_orb_component_size_bath
 ! 1 for get_spin_orb_component_size_bath
 !+-------------------------------------------------------------------+
-function get_component_bath_dimension(itype) result(Ndim)
-  integer                  :: itype
-  integer                  :: Ndim(3)
-  call check_type_bath(itype)
+function get_bath_component_dimension(type) result(Ndim)
+  character(len=1) :: type
+  integer          :: Ndim(3)
+  call  check_bath_component(type)
   select case(bath_type)
   case default
      Ndim=[Nspin,Norb,Nbath]
   case('hybrid')
      select case(ed_mode)
      case default
-        if(itype==1)then
+        select case(type)
+        case('e')
            Ndim=[Nspin,1,Nbath]
-        else
+        case('v')
            Ndim=[Nspin,Norb,Nbath]
-        endif
+        end select
      case ("superc")
-        if(itype==1.OR.itype==2)then
+        select case(type)
+        case('e','d')
            Ndim=[Nspin,1,Nbath]
-        else
+        case('v')
            Ndim=[Nspin,Norb,Nbath]
-        endif
+        end select
      case ("nonsu2")
-        if(itype==1)then
+        select case(type)
+        case('e')
            Ndim=[Nspin,1,Nbath]
-        else
+        case('v','u')
            Ndim=[Nspin,Norb,Nbath]
-        endif
+        end select
      end select
   end select
-end function get_component_bath_dimension
-!
-function get_spin_component_bath_dimension(itype) result(Ndim) 
-  integer                  :: itype
-  integer                  :: Ndim(2)
-  call check_type_bath(itype)
-  select case(bath_type)
-  case default
-     Ndim=[Norb,Nbath]
-  case('hybrid')
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           Ndim=[1,Nbath]
-        else
-           Ndim=[Norb,Nbath]
-        endif
-     case ("superc")
-        if(itype==1.OR.itype==2)then
-           Ndim=[1,Nbath]
-        else
-           Ndim=[Norb,Nbath]
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           Ndim=[1,Nbath]
-        else
-           Ndim=[Norb,Nbath]
-        endif
-     end select
-  end select
-end function get_spin_component_bath_dimension
-!
-function get_orb_component_bath_dimension(itype) result(Ndim)
-  integer                  :: itype
-  integer                  :: Ndim(2)
-  Ndim=[Nspin,Nbath]
-end function get_orb_component_bath_dimension
-!
-function get_spin_orb_component_bath_dimension(itype) result(Ndim)
-  integer                  :: itype
-  integer                  :: Ndim
-  Ndim=Nbath
-end function get_spin_orb_component_bath_dimension
+end function get_bath_component_dimension
 
+
+!+-----------------------------------------------------------------------------+!
+!PURPOSE: check that the input array hsa the correct dimensions specified 
+! for the choice of itype and possiblty ispin and/or iorb.
+!+-----------------------------------------------------------------------------+!
+subroutine assert_bath_component_size(array,type,string1,string2)
+  real(8),dimension(:,:,:) :: array
+  character(len=1)         :: type
+  character(len=*)         :: string1,string2
+  integer                  :: Ndim(3)
+  Ndim = get_bath_component_dimension(type)
+  call assert_shape(Array,Ndim,reg(string1),reg(string2))
+end subroutine assert_bath_component_size
 
 
 
@@ -433,10 +467,10 @@ end function get_spin_orb_component_bath_dimension
 ! get_spin_component_bath    : return the itype component for the select ispin (D=2)
 ! get_spin_orb_component_bath: return the itype component for the select ispin & iorb (D=1)
 !+-----------------------------------------------------------------------------+!
-subroutine get_full_component_bath(array,bath_,itype)
+subroutine  get_bath_component(array,bath_,type)
   real(8),dimension(:,:,:) :: array
   real(8),dimension(:)     :: bath_
-  integer                  :: itype
+  character(len=1)         :: type
   logical                  :: check
   type(effective_bath)     :: dmft_bath_
   !
@@ -444,158 +478,46 @@ subroutine get_full_component_bath(array,bath_,itype)
   if(.not.check)stop "get_component_bath error: wrong bath dimensions"
   call allocate_dmft_bath(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
-  call assert_component_size_bath(array,itype,"get_component_bath","Array")
-  call check_type_bath(itype)
+  call assert_bath_component_size(array,type,"get_bath_component","Array")
+  call check_bath_component(type)
   select case(ed_mode)
   case default
-     if(itype==1)then
+     select case(type)
+     case('e')
         Array = dmft_bath_%e(:,:,:)
-     else
+     case('v')
         Array = dmft_bath_%v(:,:,:)
-     endif
+     end select
   case ("superc")
-     if(itype==1)then
+     select case(type)
+     case('e')
         Array = dmft_bath_%e(:,:,:)           
-     elseif(itype==2)then
+     case('d')
         Array = dmft_bath_%d(:,:,:)
-     else
+     case('v')
         Array = dmft_bath_%v(:,:,:)
-     endif
+     end select
   case ("nonsu2")
-     if(itype==1)then
+     select case(type)
+     case('e')
         Array = dmft_bath_%e(:,:,:)           
-     elseif(itype==2)then
+     case('v')
         Array = dmft_bath_%v(:,:,:)
-     else
+     case('u')
         Array = dmft_bath_%u(:,:,:)
-     endif
-  end select
-  call deallocate_dmft_bath(dmft_bath_)
-end subroutine get_full_component_bath
-
-subroutine get_spin_component_bath(array,bath_,itype,ispin)
-  real(8),dimension(:,:) :: array
-  real(8),dimension(:)   :: bath_
-  integer                :: itype,ispin
-  logical                :: check
-  type(effective_bath)   :: dmft_bath_
-  !
-  check= check_bath_dimension(bath_)
-  if(.not.check)stop "get_spin_component_bath error: wrong bath dimensions"
-  call allocate_dmft_bath(dmft_bath_)
-  call set_dmft_bath(bath_,dmft_bath_)
-  call assert_spin_component_size_bath(array,itype,"get_spin_component_bath","Array")
-  call check_type_bath(itype)
-  if(ispin>Nspin)stop "get_spin_component_bath error: ispin > Nspin"
-  select case(ed_mode)
-  case default
-     if(itype==1)then
-        Array = dmft_bath_%e(ispin,:,:)
-     else
-        Array = dmft_bath_%v(ispin,:,:)
-     endif
-  case ("superc")
-     if(itype==1)then
-        Array = dmft_bath_%e(ispin,:,:)           
-     elseif(itype==2)then
-        Array = dmft_bath_%d(ispin,:,:)
-     else
-        Array = dmft_bath_%v(ispin,:,:)
-     endif
-  case ("nonsu2")
-     if(itype==1)then
-        Array = dmft_bath_%e(ispin,:,:)           
-     elseif(itype==2)then
-        Array = dmft_bath_%v(ispin,:,:)
-     else
-        Array = dmft_bath_%u(ispin,:,:)
-     endif
-  end select
-  call deallocate_dmft_bath(dmft_bath_)
-end subroutine get_spin_component_bath
-
-subroutine get_spin_orb_component_bath(array,bath_,itype,ispin,iorb)
-  real(8),dimension(:) :: array
-  real(8),dimension(:) :: bath_
-  integer              :: itype,ispin,iorb
-  logical              :: check
-  type(effective_bath) :: dmft_bath_
-  !
-  check= check_bath_dimension(bath_)
-  if(.not.check)stop "get_spin_orb_component_bath error: wrong bath dimensions"
-  call allocate_dmft_bath(dmft_bath_)
-  call set_dmft_bath(bath_,dmft_bath_)
-  call assert_spin_orb_component_size_bath(array,itype,"get_spin_orb_component_bath","Array")
-  call check_type_bath(itype)
-  if(ispin>Nspin)stop "get_spin_orb_component_bath error: ispin > Nspin"
-  if(iorb>Norb)stop "get_spin_orb_component_bath error: iorb > Norb"
-  select case(bath_type)
-  case default
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           Array = dmft_bath_%e(ispin,iorb,:)
-        else
-           Array = dmft_bath_%v(ispin,iorb,:)
-        endif
-     case ("superc")
-        if(itype==1)then
-           Array = dmft_bath_%e(ispin,iorb,:)           
-        elseif(itype==2)then
-           Array = dmft_bath_%d(ispin,iorb,:)
-        else
-           Array = dmft_bath_%v(ispin,iorb,:)
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           Array = dmft_bath_%e(ispin,iorb,:)           
-        elseif(itype==2)then
-           Array = dmft_bath_%v(ispin,iorb,:)
-        else
-           Array = dmft_bath_%u(ispin,iorb,:)
-        endif
-     end select
-  case('hybrid')
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           Array = dmft_bath_%e(ispin,1,:)
-        else
-           Array = dmft_bath_%v(ispin,iorb,:)
-        endif
-     case ("superc")
-        if(itype==1)then
-           Array = dmft_bath_%e(ispin,1,:)           
-        elseif(itype==2)then
-           Array = dmft_bath_%d(ispin,1,:)
-        else
-           Array = dmft_bath_%v(ispin,iorb,:)
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           Array = dmft_bath_%e(ispin,1,:)           
-        elseif(itype==2)then
-           Array = dmft_bath_%v(ispin,iorb,:)
-        else
-           Array = dmft_bath_%u(ispin,iorb,:)
-        endif
      end select
   end select
   call deallocate_dmft_bath(dmft_bath_)
-end subroutine get_spin_orb_component_bath
+end subroutine get_bath_component
 
 
 !+-----------------------------------------------------------------------------+!
 !PURPOSE: Set a specified itype,ispin,iorb component of the user bath.
-! The component is set from an Array of rank D
-! set_full_component_bath    : return the entire itype component (D=3)
-! set_spin_component_bath    : return the itype component for the select ispin (D=2)
-! set_spin_orb_component_bath: return the itype component for the select ispin & iorb (D=1)
 !+-----------------------------------------------------------------------------+!
-subroutine set_full_component_bath(array,bath_,itype)
+subroutine set_bath_component(array,bath_,type)
   real(8),dimension(:,:,:) :: array
   real(8),dimension(:)     :: bath_
-  integer                  :: itype
+  character(len=1)         :: type
   logical                  :: check
   type(effective_bath)     :: dmft_bath_
   !
@@ -603,160 +525,47 @@ subroutine set_full_component_bath(array,bath_,itype)
   if(.not.check)stop "set_component_bath error: wrong bath dimensions"
   call allocate_dmft_bath(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
-  call assert_component_size_bath(array,itype,"set_component_bath","Array")
-  call check_type_bath(itype)
+  call assert_bath_component_size(array,type,"set_bath_component","Array")
+  call check_bath_component(type)
   select case(ed_mode)
   case default
-     if(itype==1)then
-        dmft_bath_%e(:,:,:)  = Array
-     else
-        dmft_bath_%v(:,:,:)  = Array
-     endif
-  case ("superc")
-     if(itype==1)then
-        dmft_bath_%e(:,:,:)  = Array           
-     elseif(itype==2)then
-        dmft_bath_%d(:,:,:)  = Array
-     else
-        dmft_bath_%v(:,:,:)  = Array
-     endif
-  case ("nonsu2")
-     if(itype==1)then
-        dmft_bath_%e(:,:,:)  = Array           
-     elseif(itype==2)then
-        dmft_bath_%v(:,:,:)  = Array
-     else
-        dmft_bath_%u(:,:,:)  = Array
-     endif
-  end select
-  call get_dmft_bath(dmft_bath_,bath_)
-  call deallocate_dmft_bath(dmft_bath_)
-end subroutine set_full_component_bath
-
-subroutine set_spin_component_bath(array,bath_,itype,ispin)
-  real(8),dimension(:,:) :: array
-  real(8),dimension(:)   :: bath_
-  integer                :: itype,ispin
-  logical                :: check
-  type(effective_bath)   :: dmft_bath_
-  !
-  check= check_bath_dimension(bath_)
-  if(.not.check)stop "set_spin_component_bath error: wrong bath dimensions"
-  call allocate_dmft_bath(dmft_bath_)
-  call set_dmft_bath(bath_,dmft_bath_)
-  call assert_spin_component_size_bath(array,itype,"set_spin_component_bath","Array")
-  call check_type_bath(itype)
-  if(ispin>Nspin)stop "set_spin_component_bath error: ispin > Nspin"
-  select case(ed_mode)
-  case default
-     if(itype==1)then
-        dmft_bath_%e(ispin,:,:)  = Array
-     else
-        dmft_bath_%v(ispin,:,:)  = Array
-     endif
-  case ("superc")
-     if(itype==1)then
-        dmft_bath_%e(ispin,:,:)  = Array           
-     elseif(itype==2)then
-        dmft_bath_%d(ispin,:,:)  = Array
-     else
-        dmft_bath_%v(ispin,:,:)  = Array
-     endif
-  case ("nonsu2")
-     if(itype==1)then
-        dmft_bath_%e(ispin,:,:)  = Array           
-     elseif(itype==2)then
-        dmft_bath_%v(ispin,:,:)  = Array
-     else
-        dmft_bath_%u(ispin,:,:)  = Array
-     endif
-  end select
-  call get_dmft_bath(dmft_bath_,bath_)
-  call deallocate_dmft_bath(dmft_bath_)
-end subroutine set_spin_component_bath
-
-subroutine set_spin_orb_component_bath(array,bath_,itype,ispin,iorb)
-  real(8),dimension(:) :: array
-  real(8),dimension(:) :: bath_
-  integer              :: itype,ispin,iorb
-  logical              :: check
-  type(effective_bath) :: dmft_bath_
-  !
-  check= check_bath_dimension(bath_)
-  if(.not.check)stop "set_spin_orb_component_bath error: wrong bath dimensions"
-  call allocate_dmft_bath(dmft_bath_)
-  call set_dmft_bath(bath_,dmft_bath_)
-  call assert_spin_orb_component_size_bath(array,itype,"set_spin_orb_component_bath","Array")
-  call check_type_bath(itype)
-  if(ispin>Nspin)stop "set_spin_orb_component_bath error: ispin > Nspin"
-  if(iorb>Norb)stop "set_spin_orb_component_bath error: iorb > Norb"
-  select case(bath_type)
-  case default
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           dmft_bath_%e(ispin,iorb,:)  = Array
-        else
-           dmft_bath_%v(ispin,iorb,:)  = Array
-        endif
-     case ("superc")
-        if(itype==1)then
-           dmft_bath_%e(ispin,iorb,:)  = Array           
-        elseif(itype==2)then
-           dmft_bath_%d(ispin,iorb,:)  = Array
-        else
-           dmft_bath_%v(ispin,iorb,:)  = Array
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           dmft_bath_%e(ispin,iorb,:)  = Array           
-        elseif(itype==2)then
-           dmft_bath_%v(ispin,iorb,:)  = Array
-        else
-           dmft_bath_%u(ispin,iorb,:)  = Array
-        endif
+     select case(type)
+     case('e')
+        dmft_bath_%e(:,:,:) = Array 
+     case('v')
+        dmft_bath_%v(:,:,:) = Array
      end select
-  case('hybrid')
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           dmft_bath_%e(ispin,1,:)  = Array
-        else
-           dmft_bath_%v(ispin,iorb,:)  = Array
-        endif
-     case ("superc")
-        if(itype==1)then
-           dmft_bath_%e(ispin,1,:)  = Array           
-        elseif(itype==2)then
-           dmft_bath_%d(ispin,1,:)  = Array
-        else
-           dmft_bath_%v(ispin,iorb,:)  = Array
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           dmft_bath_%e(ispin,1,:)  = Array           
-        elseif(itype==2)then
-           dmft_bath_%v(ispin,iorb,:)  = Array
-        else
-           dmft_bath_%u(ispin,iorb,:)  = Array
-        endif
+  case ("superc")
+     select case(type)
+     case('e')
+        dmft_bath_%e(:,:,:) = Array   
+     case('d')
+        dmft_bath_%d(:,:,:) = Array
+     case('v')
+        dmft_bath_%v(:,:,:) = Array
+     end select
+  case ("nonsu2")
+     select case(type)
+     case('e')
+        dmft_bath_%e(:,:,:) = Array   
+     case('v')
+        dmft_bath_%v(:,:,:) = Array
+     case('u')
+        dmft_bath_%u(:,:,:) = Array
      end select
   end select
   call get_dmft_bath(dmft_bath_,bath_)
   call deallocate_dmft_bath(dmft_bath_)
-end subroutine set_spin_orb_component_bath
+end subroutine set_bath_component
 
 
 
 !+-----------------------------------------------------------------------------+!
 !PURPOSE: Copy a specified component of IN bath to the OUT bath.
-! copy_full_component_bath    : copy the entire itype component
-! copy_spin_component_bath    : copy ispin to jspin component
-! copy_spin_orb_component_bath: copy ispin.iorb to jspin.jorb components
 !+-----------------------------------------------------------------------------+!
-subroutine copy_full_component_bath(bathIN,bathOUT,itype)
+subroutine copy_bath_component(bathIN,bathOUT,type)
   real(8),dimension(:)     :: bathIN,bathOUT
-  integer                  :: itype
+  character(len=1)         :: type
   logical                  :: check
   type(effective_bath)     :: dIN,dOUT
   !
@@ -768,318 +577,43 @@ subroutine copy_full_component_bath(bathIN,bathOUT,itype)
   call allocate_dmft_bath(dOUT)
   call set_dmft_bath(bathIN,dIN)
   call set_dmft_bath(bathOUT,dOUT)
-  call check_type_bath(itype)
+  call check_bath_component(type)
   select case(ed_mode)
   case default
-     if(itype==1)then
+     select case(type)
+     case('e')
         dOUT%e(:,:,:)  = dIN%e(:,:,:)
-     else
+     case('v')
         dOUT%v(:,:,:)  = dIN%v(:,:,:)
-     endif
+     end select
   case ("superc")
-     if(itype==1)then
+     select case(type)
+     case('e')
         dOUT%e(:,:,:)  = dIN%e(:,:,:)
-     elseif(itype==2)then
+     case('d')
         dOUT%d(:,:,:)  = dIN%d(:,:,:)
-     else
+     case('v')
         dOUT%v(:,:,:)  = dIN%v(:,:,:)
-     endif
+     end select
   case ("nonsu2")
-     if(itype==1)then
+     select case(type)
+     case('e')
         dOUT%e(:,:,:)  = dIN%e(:,:,:)
-     elseif(itype==2)then
+     case('v')
         dOUT%v(:,:,:)  = dIN%v(:,:,:)
-     else
+     case('u')
         dOUT%u(:,:,:)  = dIN%u(:,:,:)
-     endif
-  end select
-  call get_dmft_bath(dOUT,bathOUT)
-  call deallocate_dmft_bath(dIN)
-  call deallocate_dmft_bath(dOUT)
-end subroutine copy_full_component_bath
-
-subroutine copy_spin_component_bath(bathIN,ispin,bathOUT,jspin,itype)
-  real(8),dimension(:)     :: bathIN,bathOUT
-  integer                  :: ispin,jspin
-  integer,optional         :: itype
-  logical                  :: check
-  type(effective_bath)     :: dIN,dOUT
-  !
-  check= check_bath_dimension(bathIN)
-  if(.not.check)stop "copy_component_bath error: wrong bath dimensions IN"
-  check= check_bath_dimension(bathOUT)
-  if(.not.check)stop "copy_component_bath error: wrong bath dimensions OUT"
-  call allocate_dmft_bath(dIN)
-  call allocate_dmft_bath(dOUT)
-  call set_dmft_bath(bathIN,dIN)
-  call set_dmft_bath(bathOUT,dOUT)
-  if(present(itype))call check_type_bath(itype)
-  if(ispin>Norb.OR.jspin>Nspin)stop "copy_spin_component_bath error: ispin/jspin > Nspin"
-  select case(ed_mode)
-  case default
-     if(present(itype))then          
-        if(itype==1)then
-           dOUT%e(jspin,:,:)  = dIN%e(ispin,:,:)
-        else
-           dOUT%v(jspin,:,:)  = dIN%v(ispin,:,:)
-        endif
-     else
-        dOUT%e(jspin,:,:)  = dIN%e(ispin,:,:)
-        dOUT%v(jspin,:,:)  = dIN%v(ispin,:,:)
-     endif
-  case ("superc")
-     if(present(itype))then
-        if(itype==1)then
-           dOUT%e(jspin,:,:)  = dIN%e(ispin,:,:)
-        elseif(itype==2)then
-           dOUT%d(jspin,:,:)  = dIN%d(ispin,:,:)
-        else
-           dOUT%v(jspin,:,:)  = dIN%v(ispin,:,:)
-        endif
-     else
-        dOUT%e(jspin,:,:)  = dIN%e(ispin,:,:)
-        dOUT%d(jspin,:,:)  = dIN%d(ispin,:,:)
-        dOUT%v(jspin,:,:)  = dIN%v(ispin,:,:)
-     endif
-  case ("nonsu2")
-     if(present(itype))then
-        if(itype==1)then
-           dOUT%e(jspin,:,:)  = dIN%e(ispin,:,:)
-        elseif(itype==2)then
-           dOUT%v(jspin,:,:)  = dIN%v(ispin,:,:)
-        else
-           dOUT%u(jspin,:,:)  = dIN%u(ispin,:,:)
-        endif
-     else
-        dOUT%e(jspin,:,:)  = dIN%e(ispin,:,:)
-        dOUT%v(jspin,:,:)  = dIN%v(ispin,:,:)
-        dOUT%u(jspin,:,:)  = dIN%u(ispin,:,:)
-     endif
-  end select
-  call get_dmft_bath(dOUT,bathOUT)
-  call deallocate_dmft_bath(dIN)
-  call deallocate_dmft_bath(dOUT)
-end subroutine copy_spin_component_bath
-
-subroutine copy_spin_orb_component_bath(bathIN,ispin,iorb,bathOUT,jspin,jorb,itype)
-  real(8),dimension(:)     :: bathIN,bathOUT
-  integer                  :: ispin,jspin
-  integer                  :: iorb,jorb
-  integer,optional         :: itype
-  logical                  :: check
-  type(effective_bath)     :: dIN,dOUT
-  !
-  check= check_bath_dimension(bathIN)
-  if(.not.check)stop "copy_spin_orb_component_bath error: wrong bath dimensions IN"
-  check= check_bath_dimension(bathOUT)
-  if(.not.check)stop "copy_spin_orb_component_bath error: wrong bath dimensions OUT"
-  call allocate_dmft_bath(dIN)
-  call allocate_dmft_bath(dOUT)
-  call set_dmft_bath(bathIN,dIN)
-  call set_dmft_bath(bathOUT,dOUT)
-  if(present(itype))call check_type_bath(itype)
-  if(ispin>Norb.OR.jspin>Nspin)stop "copy_spin_orb_component_bath error: ispin/jspin > Nspin"
-  if(iorb>Norb.OR.jorb>Norb)stop "copy_spin_orb_component_bath error: iorb/jorb > Norb"
-  !
-  select case(bath_type)      
-  case default
-     select case(ed_mode)
-     case default
-        if(present(itype))then
-           if(itype==1)then
-              dOUT%e(jspin,jorb,:)  = dIN%e(ispin,iorb,:)
-           else
-              dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-           endif
-        else
-           dOUT%e(jspin,jorb,:)  = dIN%e(ispin,iorb,:)
-           dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-        endif
-     case ("superc")
-        if(present(itype))then
-           if(itype==1)then
-              dOUT%e(jspin,jorb,:)  = dIN%e(ispin,iorb,:)
-           elseif(itype==2)then
-              dOUT%d(jspin,jorb,:)  = dIN%d(ispin,iorb,:)
-           else
-              dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-           endif
-        else
-           dOUT%e(jspin,jorb,:)  = dIN%e(ispin,iorb,:)
-           dOUT%d(jspin,jorb,:)  = dIN%d(ispin,iorb,:)
-           dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-        endif
-     case ("nonsu2")
-        if(present(itype))then
-           if(itype==1)then
-              dOUT%e(jspin,jorb,:)  = dIN%e(ispin,iorb,:)
-           elseif(itype==2)then
-              dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-           else
-              dOUT%u(jspin,jorb,:)  = dIN%u(ispin,iorb,:)
-           endif
-        else
-           dOUT%e(jspin,jorb,:)  = dIN%e(ispin,iorb,:)
-           dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-           dOUT%u(jspin,jorb,:)  = dIN%u(ispin,iorb,:)
-        endif
-     end select
-  case('hybrid')
-     select case(ed_mode)
-     case default
-        if(present(itype))then
-           if(itype==1)then
-              dOUT%e(jspin,1,:)    = dIN%e(ispin,1,:)
-           else
-              dOUT%v(jspin,jorb,:) = dIN%v(ispin,iorb,:)
-           endif
-        else
-           dOUT%e(jspin,1,:)     = dIN%e(ispin,1,:)
-           dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-        endif
-     case ("superc")
-        if(present(itype))then
-           if(itype==1)then
-              dOUT%e(jspin,1,:)    = dIN%e(ispin,1,:)
-           elseif(itype==2)then
-              dOUT%d(jspin,1,:)    = dIN%d(ispin,1,:)
-           else
-              dOUT%v(jspin,jorb,:) = dIN%v(ispin,iorb,:)
-           endif
-        else
-           dOUT%e(jspin,1,:)    = dIN%e(ispin,1,:)
-           dOUT%d(jspin,1,:)    = dIN%d(ispin,1,:)
-           dOUT%v(jspin,jorb,:) = dIN%v(ispin,iorb,:)
-        endif
-     case ("nonsu2")
-        if(present(itype))then
-           if(itype==1)then
-              dOUT%e(jspin,1,:)     = dIN%e(ispin,1,:)
-           elseif(itype==2)then
-              dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-           else
-              dOUT%u(jspin,jorb,:)  = dIN%u(ispin,iorb,:)
-           endif
-        else
-           dOUT%e(jspin,1,:)     = dIN%e(ispin,1,:)
-           dOUT%v(jspin,jorb,:)  = dIN%v(ispin,iorb,:)
-           dOUT%u(jspin,jorb,:)  = dIN%u(ispin,iorb,:)
-        endif
      end select
   end select
   call get_dmft_bath(dOUT,bathOUT)
   call deallocate_dmft_bath(dIN)
   call deallocate_dmft_bath(dOUT)
-end subroutine copy_spin_orb_component_bath
+end subroutine copy_bath_component
 
 
 
 
-!+-----------------------------------------------------------------------------+!
-!PURPOSE:  check if the specified itype is consistent with the input parameters.
-!+-----------------------------------------------------------------------------+!
-subroutine check_type_bath(itype)
-  integer :: itype
-  select case(ed_mode)
-  case default
-     if(itype<1.OR.itype>2)stop "check_type_bath error: ed_mode=normal, itype!=1,2"
-  case ("superc")
-     if(itype<1.OR.itype>3)stop "check_type_bath error: ed_mode=superc, itype!=1,2,3"
-  case ("nonsu2")
-     if(itype<1.OR.itype>3)stop "check_type_bath error: ed_mode=nonsu2, itype!=1,2,3"
-  end select
-  return
-end subroutine check_type_bath
 
-!+-----------------------------------------------------------------------------+!
-!PURPOSE: check that the input array hsa the correct dimensions specified 
-! for the choice of itype and possiblty ispin and/or iorb.
-!+-----------------------------------------------------------------------------+!
-subroutine assert_component_size_bath(array,itype,string1,string2)
-  real(8),dimension(:,:,:) :: array
-  integer                  :: itype
-  character(len=*)         :: string1,string2
-  integer                  :: Ndim(3)
-  call check_type_bath(itype)
-  select case(bath_type)
-  case default
-     Ndim=[Nspin,Norb,Nbath]
-  case('hybrid')
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           Ndim=[Nspin,1,Nbath]
-        else
-           Ndim=[Nspin,Norb,Nbath]
-        endif
-     case ("superc")
-        if(itype==1.OR.itype==2)then
-           Ndim=[Nspin,1,Nbath]
-        else
-           Ndim=[Nspin,Norb,Nbath]
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           Ndim=[Nspin,1,Nbath]
-        else
-           Ndim=[Nspin,Norb,Nbath]
-        endif
-     end select
-  end select
-  call assert_shape(Array,Ndim,reg(string1),reg(string2))
-end subroutine assert_component_size_bath
-!
-subroutine assert_spin_component_size_bath(array,itype,string1,string2)
-  real(8),dimension(:,:) :: array
-  integer                  :: itype
-  character(len=*)         :: string1,string2
-  integer                  :: Ndim(2)
-  call check_type_bath(itype)
-  select case(bath_type)
-  case default
-     Ndim=[Norb,Nbath]
-  case('hybrid')
-     select case(ed_mode)
-     case default
-        if(itype==1)then
-           Ndim=[1,Nbath]
-        else
-           Ndim=[Norb,Nbath]
-        endif
-     case ("superc")
-        if(itype==1.OR.itype==2)then
-           Ndim=[1,Nbath]
-        else
-           Ndim=[Norb,Nbath]
-        endif
-     case ("nonsu2")
-        if(itype==1)then
-           Ndim=[1,Nbath]
-        else
-           Ndim=[Norb,Nbath]
-        endif
-     end select
-  end select
-  call assert_shape(Array,Ndim,reg(string1),reg(string2))
-end subroutine assert_spin_component_size_bath
-!
-subroutine assert_orb_component_size_bath(array,itype,string1,string2)
-  real(8),dimension(:,:) :: array
-  integer                  :: itype
-  character(len=*)         :: string1,string2
-  integer                  :: Ndim(2)
-  Ndim=[Nspin,Nbath]
-  call assert_shape(Array,Ndim,reg(string1),reg(string2))
-end subroutine assert_orb_component_size_bath
-!
-subroutine assert_spin_orb_component_size_bath(array,itype,string1,string2)
-  real(8),dimension(:) :: array
-  integer              :: itype
-  character(len=*)     :: string1,string2
-  integer              :: Ndim
-  Ndim=Nbath
-  if(size(array)/=Nbath)stop "assert_spin_orb_component_size_bath error: size(array)!=Ndim"
-end subroutine assert_spin_orb_component_size_bath
 
 
 

@@ -179,8 +179,10 @@ MODULE ED_IO
   public :: ed_get_g0imp_realaxis
   public :: ed_get_f0imp_realaxis
 
-  public :: ed_get_g0imp_function
+  public :: ed_get_g0and_function
+  public :: ed_get_f0and_function
   public :: ed_get_delta_function
+  public :: ed_get_fdelta_function
 
   public :: ed_get_dens
   public :: ed_get_mag

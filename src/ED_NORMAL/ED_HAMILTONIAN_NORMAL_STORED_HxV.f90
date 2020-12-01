@@ -566,6 +566,8 @@ contains
 
 
 #ifdef _MPI
+
+
   subroutine spMatVec_mpi_normal_main(Nloc,v,Hv)
     integer                          :: Nloc
     real(8),dimension(Nloc)          :: v
@@ -582,17 +584,16 @@ contains
     !
     ! if(MpiComm==Mpi_Comm_Null)return
     ! if(MpiComm==MPI_UNDEFINED)stop "spMatVec_mpi_cc ERROR: MpiComm = MPI_UNDEFINED"
-    if(.not.MpiStatus)stop "spMatVec_mpi_cc ERROR: MpiStatus = F"
-    iter = iter+1
+    if(.not.MpiStatus)stop "spMatVec_mpi_normal_main ERROR: MpiStatus = F"
     !
     !Evaluate the local contribution: Hv_loc = Hloc*v
     Hv=0d0
     do i=1,Nloc                 !==spH0%Nrow
        i_el = mod(i-1,DimUp*MpiQdw) + 1
-       do j_el=1,spH0d%row(i_el)%Size
-          val = spH0d%row(i_el)%dvals(j_el)
-          Hv(i) = Hv(i) + val*v(i)
-       enddo
+       ! do j_el=1,spH0d%row(i_el)%Size
+       val = spH0d%row(i_el)%dvals(1)!(j_el)
+       Hv(i) = Hv(i) + val*v(i)
+       ! enddo
     end do
     !
     !Non-local terms.

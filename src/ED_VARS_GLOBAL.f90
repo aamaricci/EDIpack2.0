@@ -12,8 +12,6 @@ MODULE ED_VARS_GLOBAL
   type H_operator
      complex(8),dimension(:,:,:,:),allocatable               :: O          !Replica hamilt
   end type H_operator
-  type(H_operator),dimension(:),allocatable                  :: H_basis
-  real(8),dimension(:),allocatable                           :: lambda_impHloc
 
 
 
@@ -117,11 +115,6 @@ MODULE ED_VARS_GLOBAL
   integer                                            :: Nhel
   integer,save                                       :: DimPh    !Number of phonon states
 
-  !local part of the Hamiltonian
-  !INTERNAL USE (accessed thru functions)
-  !=========================================================
-  complex(8),dimension(:,:,:,:),allocatable          :: impHloc           !local hamiltonian
-
   !Some maps between sectors and full Hilbert space (pointers)
   !PRIVATE:
   !=========================================================
@@ -142,10 +135,12 @@ MODULE ED_VARS_GLOBAL
 
 
   !Effective Bath used in the ED code (this is opaque to user)
-  !PRIVATE
+  !local part of the Hamiltonian
   !=========================================================
   type(effective_bath)                               :: dmft_bath
-
+  type(H_operator),dimension(:),allocatable          :: H_basis
+  real(8),dimension(:),allocatable                   :: lambda_impHloc
+  complex(8),dimension(:,:,:,:),allocatable          :: impHloc           !local hamiltonian
 
   !Variables for DIAGONALIZATION
   !PRIVATE

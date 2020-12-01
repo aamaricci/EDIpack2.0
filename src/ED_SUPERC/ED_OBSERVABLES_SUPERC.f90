@@ -63,7 +63,7 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_superc()
-    integer,dimension(Nlevels)      :: ib
+    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
     real(8),dimension(Norb)         :: nup,ndw,Sz,nt
     !
     allocate(dens(Norb),dens_up(Norb),dens_dw(Norb))
@@ -116,7 +116,9 @@ contains
              !    nt(iorb) =  nup(iorb) + ndw(iorb)
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call get_op_Ns(i,nup,ndw,sectorI)
+             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             nup = Nud(1,1:Norb)
+             ndw = Nud(2,1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -231,7 +233,7 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_superc()
-    integer,dimension(Nlevels)      :: ib
+    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
     real(8),dimension(Norb)         :: nup,ndw
     real(8),dimension(Nspin,Norb)   :: eloc
     !
@@ -280,7 +282,9 @@ contains
              !    ndw(iorb)= dble(ib(iorb+Ns))
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call get_op_Ns(i,nup,ndw,sectorI)
+             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             nup = Nud(1,1:Norb)
+             ndw = Nud(2,1:Norb)
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY

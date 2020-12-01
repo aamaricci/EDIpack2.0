@@ -136,7 +136,7 @@ INCLUDE_DIRECTORIES(BEFORE ${SCIFOR_INCLUDE_DIRS})
 ############################################################
 if(CMAKE_Fortran_COMPILER_ID MATCHES GNU) # this is gfortran
   SET(CMAKE_Fortran_MODDIR_FLAG   "-J")
-  SET(CMAKE_Fortran_FLAGS         "-cpp -ffree-line-length-none ") # -mcmodel=large  this is to remove the 2Gb limit of virtual memory allocation
+  SET(CMAKE_Fortran_FLAGS         "-cpp -ffree-line-length-none -w ") #  -fallow-argument-mismatch -mcmodel=large  this is to remove the 2Gb limit of virtual memory allocation
   SET(CMAKE_Fortran_FLAGS_TESTING "-O2 -funroll-loops")
   SET(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -p -g -Wsurprising -Waliasing -fwhole-file -fcheck=all -pedantic -fbacktrace -fbounds-check")
   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3  -funroll-loops")  ##-fno-protect-parens -flto -ffast-math -march=native
@@ -223,9 +223,6 @@ SET(CMAKE_Fortran_MODULE_DIRECTORY ${LIB_TMP_INC})
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_Fortran_MODULE_DIRECTORY})
 
 
-
-
-
 ADD_SUBDIRECTORY(${LIB_SRC}/ED_BATH)
 
 ADD_SUBDIRECTORY(${LIB_SRC}/ED_IO)
@@ -248,7 +245,14 @@ ADD_LIBRARY(dmft_ed STATIC
   $<TARGET_OBJECTS:ED_GLOB_LIB>
   )
 
-
+ADD_DEPENDENCIES(ED_GLOB_LIB
+  ED_INIT_LIB
+  ED_BATH_LIB
+  ED_IO_LIB
+  ED_NORMAL_LIB
+  ED_SUPERC_LIB
+  ED_NONSU2_LIB
+  )
 
 
 SET(REVISION_FILE ${LIB_SRC}/revision.inc)

@@ -85,11 +85,7 @@ contains
        endif
     endif
     !
-    if(present(Hloc))then
-       check = check_bath_dimension(bath,Hloc)
-    else
-       check = check_bath_dimension(bath)
-    endif
+    check = check_bath_dimension(bath)
     if(.not.check)stop "init_ed_solver_single error: wrong bath dimensions"
     !
     bath = 0d0
@@ -134,11 +130,7 @@ contains
        endif
     endif
     !
-    if(present(Hloc))then
-       check = check_bath_dimension(bath,Hloc)
-    else
-       check = check_bath_dimension(bath)
-    endif
+    check = check_bath_dimension(bath)
     if(.not.check)stop "init_ed_solver_single error: wrong bath dimensions"
     !
     bath = 0d0
@@ -351,11 +343,7 @@ contains
     !
     if(present(Hloc).AND.(bath_type/="replica"))call set_Hloc(Hloc)
     !
-    if(present(Hloc))then
-       check = check_bath_dimension(bath,(Hloc))
-    else
-       check = check_bath_dimension(bath)
-    endif
+    check = check_bath_dimension(bath)
     if(.not.check)stop "ED_SOLVE_SINGLE Error: wrong bath dimensions"
     !
     call allocate_dmft_bath(dmft_bath)
@@ -402,11 +390,7 @@ contains
     !
     if(present(Hloc).AND.(bath_type/="replica"))call set_Hloc(Hloc)
     !
-    if(present(Hloc))then
-       check = check_bath_dimension(bath,(Hloc))
-    else
-       check = check_bath_dimension(bath)
-    endif
+    check = check_bath_dimension(bath)
     if(.not.check)stop "ED_SOLVE_SINGLE Error: wrong bath dimensions"
     !
     call allocate_dmft_bath(dmft_bath)

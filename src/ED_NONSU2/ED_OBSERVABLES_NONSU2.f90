@@ -1,6 +1,3 @@
-!########################################################################
-!PURPOSE  : Obtain some physical quantities and print them out
-!########################################################################
 MODULE ED_OBSERVABLES_NONSU2
   USE SF_CONSTANTS, only:zero,pi,xi
   USE SF_IOTOOLS, only:free_unit,reg,txtfy
@@ -71,7 +68,7 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_nonsu2()
-    integer,dimension(Nlevels)      :: ib
+    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
     real(8),dimension(Norb)         :: nup,ndw,Sz,nt
     real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw,theta_updw,theta_dwup
     !
@@ -142,7 +139,9 @@ contains
              !    nt(iorb) =  nup(iorb) + ndw(iorb)
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call get_op_Ns(i,nup,ndw,sectorI)
+             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             nup = Nud(1,1:Norb)
+             ndw = Nud(2,1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -176,7 +175,6 @@ contains
 #endif
        !
     enddo
-
     !
     !EVALUATE <SX> AND <SY>
     do istate=1,state_list%size
@@ -262,7 +260,6 @@ contains
     enddo
     magx = 0.5d0*(magx - dens_up - dens_dw)
     magy = 0.5d0*(magy - dens_up - dens_dw)
-
     !
     !EVALUATE EXCITON OP <S_ab> AND <T^x,y,z_ab>
     !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
@@ -403,7 +400,6 @@ contains
           exct_ty(iorb,jorb) = -xi*0.5d0*(theta_updw(iorb,jorb) - theta_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb))
        enddo
     enddo
-
     !
     !IMPURITY DENSITY MATRIX
     if(allocated(imp_density_matrix))deallocate(imp_density_matrix)
@@ -513,7 +509,10 @@ contains
     endif
 #endif
     !
-    deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2,magx,magy)
+    deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2)
+    deallocate(magX,magY)
+    deallocate(exct_S0,exct_Tz)
+    deallocate(exct_Tx,exct_Ty)
     deallocate(simp,zimp)
   end subroutine observables_nonsu2
 
@@ -527,7 +526,7 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_nonsu2()
-    integer,dimension(Nlevels)      :: ib
+    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
     real(8),dimension(Norb)         :: nup,ndw
     real(8),dimension(Nspin,Norb)   :: eloc
     !
@@ -575,7 +574,9 @@ contains
              !    ndw(iorb)= dble(ib(iorb+Ns))
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call get_op_Ns(i,nup,ndw,sectorI)
+             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             nup = Nud(1,1:Norb)
+             ndw = Nud(2,1:Norb)
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY

@@ -183,7 +183,7 @@ contains
     integer                           :: i
     type(sparse_row_csr),pointer          :: row
     !
-    if(.not.sparse%status)stop "Warning SPARSE/sp_delete_matrix: sparse not allocated already."
+    if(.not.sparse%status)return !stop "Error SPARSE/_sp_delete_matrix: sparse is not allocated."
     !
     do i=1,sparse%Nrow
        deallocate(sparse%row(i)%dvals)
@@ -207,7 +207,7 @@ contains
     integer                              :: i
     type(sparse_row_csr),pointer          :: row
     !
-    if(.not.sparse%status)stop "Error SPARSE/mpi_sp_delete_matrix: sparse is not allocated."
+    if(.not.sparse%status)return !stop "Error SPARSE/mpi_sp_delete_matrix: sparse is not allocated."
     !
     do i=1,sparse%Nrow
        deallocate(sparse%row(i)%dvals)
@@ -321,15 +321,13 @@ contains
     integer                               :: column,pos
     logical                               :: iadd
     !
+    if(MpiComm==Mpi_Comm_Null)return
+    !
     call sp_test_matrix_mpi(MpiComm,sparse," mpi_sp_insert_element_csr")
     !
     column = j
     !
-    if(column>=sparse%Istart.AND.column<=sparse%Iend)then
-       row => sparse%loc(i-sparse%Ishift)
-    else
-       row => sparse%row(i-sparse%Ishift)
-    endif
+    row => sparse%row(i-sparse%Ishift)
     !
     iadd = .false.                          !check if column already exist
     if(any(row%cols == column))then         !
@@ -455,12 +453,6 @@ contains
     allocate(matrix_tmp(Ndim1,Ndim2)) ; matrix_tmp=0d0
     do i=sparse%Istart,sparse%Iend
        impi = i - sparse%Ishift
-       !Local part:
-       do j=1,sparse%loc(impi)%Size
-          matrix_tmp(i,sparse%loc(impi)%cols(j))=matrix_tmp(i,sparse%loc(impi)%cols(j))+sparse%loc(impi)%dvals(j)
-       enddo
-       !
-       !Non-local part:
        do j=1,sparse%row(impi)%Size
           matrix_tmp(i,sparse%row(impi)%cols(j))=matrix_tmp(i,sparse%row(impi)%cols(j))+sparse%row(impi)%dvals(j)
        enddo

@@ -13,38 +13,15 @@ MODULE ED_BATH
 
 
 
-  !##################################################################
-  !
-  !     USER BATH ROUTINES:
-  !
-  !##################################################################
+  interface get_bath_dimension
+     module procedure ::  get_bath_dimension_direct
+     module procedure ::  get_bath_dimension_symmetries
+  end interface get_bath_dimension
 
-  !Interface for user bath I/O operations: get,set,copy
-  interface get_component_bath
-     module procedure get_full_component_bath
-     module procedure get_spin_component_bath
-     module procedure get_spin_orb_component_bath
-  end interface get_component_bath
-
-  interface set_component_bath
-     module procedure set_full_component_bath
-     module procedure set_spin_component_bath
-     module procedure set_spin_orb_component_bath
-  end interface set_component_bath
-
-  interface copy_component_bath
-     module procedure copy_full_component_bath
-     module procedure copy_spin_component_bath
-     module procedure copy_spin_orb_component_bath
-  end interface copy_component_bath
-
-
-  !explicit symmetries:
   interface break_symmetry_bath
      module procedure break_symmetry_bath_site
      module procedure break_symmetry_bath_lattice
   end interface break_symmetry_bath
-
 
   interface spin_symmetrize_bath
      module procedure spin_symmetrize_bath_site
@@ -92,6 +69,30 @@ MODULE ED_BATH
      module procedure ::  is_diagonal_nn
   end interface is_diagonal
 
+  !##################################################################
+  !
+  !     USER BATH ROUTINES:
+  !
+  !##################################################################
+  public :: get_bath_dimension
+  public :: check_bath_dimension
+  !
+  public :: get_bath_component_dimension
+  public :: get_bath_component
+  public :: set_bath_component
+  public :: copy_bath_component
+  !
+  public :: impose_equal_lambda
+  public :: impose_bath_offset
+  public :: break_symmetry_bath              
+  public :: spin_symmetrize_bath
+  public :: orb_symmetrize_bath
+  public :: orb_equality_bath
+  public :: ph_symmetrize_bath
+  public :: ph_trans_bath
+  public :: enforce_normal_bath
+  public :: get_Whyb_matrix
+
 
   !##################################################################
   !
@@ -109,31 +110,6 @@ MODULE ED_BATH
   public :: mask_hloc
 
 
-  !##################################################################
-  !
-  !     USER BATH ROUTINES:
-  !
-  !##################################################################
-  public :: get_bath_dimension
-  public :: check_bath_dimension
-  !
-  public :: get_component_bath_dimension
-  public :: get_spin_component_bath_dimension
-  public :: get_orb_component_bath_dimension
-  public :: get_spin_orb_component_bath_dimension
-  !
-  public :: get_component_bath
-  public :: set_component_bath
-  public :: copy_component_bath
-  !
-  public :: break_symmetry_bath              
-  public :: spin_symmetrize_bath
-  public :: orb_symmetrize_bath
-  public :: orb_equality_bath
-  public :: ph_symmetrize_bath
-  public :: ph_trans_bath
-  public :: enforce_normal_bath
-  public :: get_Whyb_matrix
 
 
 
@@ -154,39 +130,37 @@ contains
   ! 2 for get_spin_component_size_bath & get_orb_component_size_bath
   ! 1 for get_spin_orb_component_size_bath
   !+-------------------------------------------------------------------+
-  function get_bath_dimension(Hloc_nn,ispin_) result(bath_size)
+  function get_bath_dimension_direct(Hloc_nn) result(bath_size)
     complex(8),optional,intent(in) :: Hloc_nn(:,:,:,:)
-    integer,optional               :: ispin_
     integer                        :: bath_size,ndx,ispin,iorb,jspin,jorb,io,jo,Maxspin
     complex(8),allocatable         :: Hloc(:,:,:,:)
 
     select case(bath_type)
+       !
     case default
+       !
        select case(ed_mode)
        case default
-          !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
-          bath_size = Norb*Nbath + Norb*Nbath
+          bath_size = Norb*Nbath + Norb*Nbath              !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
        case ("superc")
-          !( e [Nspin][Norb][Nbath] + d [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
-          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath
+          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath !( e [Nspin][Norb][Nbath] + d [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
        case ("nonsu2")
-          !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
-          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath
+          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
        end select
-       if(.not.present(ispin_))bath_size=Nspin*bath_size
+       bath_size=Nspin*bath_size
+       !
     case('hybrid')
+       !
        select case(ed_mode)
-       case default
-          !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
-          bath_size = Nbath + Norb*Nbath
+       case default          
+          bath_size = Nbath + Norb*Nbath         !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
        case ("superc")
-          !(e [Nspin][1][Nbath] + d [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
-          bath_size = Nbath + Nbath + Norb*Nbath
+          bath_size = Nbath + Nbath + Norb*Nbath !(e [Nspin][1][Nbath] + d [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
        case ("nonsu2")
-          !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
-          bath_size = Nbath + Norb*Nbath + Norb*Nbath
+          bath_size = Nbath + Norb*Nbath + Norb*Nbath !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
        end select
-       if(.not.present(ispin_))bath_size=Nspin*bath_size
+       bath_size=Nspin*bath_size
+       !
     case('replica')
        !
        !Re/Im off-diagonal non-vanishing elements
@@ -212,22 +186,20 @@ contains
                 do jorb=1,Norb
                    io = iorb + (ispin-1)*Norb
                    jo = jorb + (jspin-1)*Norb
-                   if(io < jo)then
-                      if(abs(dreal(Hloc(ispin,jspin,iorb,jorb))) > 1d-6)ndx=ndx+1
-                      if(abs(dimag(Hloc(ispin,jspin,iorb,jorb))) > 1d-6)ndx=ndx+1
-                   endif
+                   if(io > jo)cycle
+                   if(DREAL(Hloc(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
+                   if(DIMAG(Hloc(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
                 enddo
              enddo
           enddo
        enddo
-       ndx = ndx + Nspin*Norb  !Real diagonal elements (always assumed)
-       ndx = ndx * Nbath       !number of non vanishing elements for each replica       
-       ndx = ndx + Nbath       !real diagonal hybridizations
        !
+       ndx = ndx + 1     !we also print n_Dec
+       ndx = ndx * Nbath !number of non vanishing elements for each replica
+       ndx = ndx + Nbath !diagonal hybridizations: Vs
        bath_size = ndx
-       !
     end select
-  end function get_bath_dimension
+  end function get_bath_dimension_direct
 
   function get_bath_dimension_symmetries(Hloc_nn) result(bath_size)
     complex(8),dimension(:,:,:,:,:),intent(in) :: Hloc_nn
@@ -255,19 +227,14 @@ contains
   !+-------------------------------------------------------------------+
   !PURPOSE  : Check if the dimension of the bath array are consistent
   !+-------------------------------------------------------------------+
-  function check_bath_dimension(bath_,Hloc_nn) result(bool)
+  function check_bath_dimension(bath_) result(bool)
     real(8),dimension(:)           :: bath_
     integer                        :: Ntrue,i
     logical                        :: bool
-    complex(8),optional,intent(in) :: Hloc_nn(:,:,:,:)
     complex(8),allocatable         :: Hbasis_rebuild(:,:,:,:,:)![Nspin][:][Norb][:][Nsym]
     select case (bath_type)
     case default
-       if (present(Hloc_nn))then
-          Ntrue = get_bath_dimension(Hloc_nn)
-       else
-          Ntrue = get_bath_dimension()
-       endif
+       Ntrue = get_bath_dimension()
     case ('replica')
        if(.not.allocated(H_basis))STOP "check_bath_dimension: Hbasis not allocated"
        if(.not.allocated(Hbasis_rebuild))allocate(Hbasis_rebuild(Nspin,Nspin,Norb,Norb,size(H_basis)))
@@ -278,21 +245,9 @@ contains
     end select
     bool  = ( size(bath_) == Ntrue )
   end function check_bath_dimension
-  ! !+-------------------------------------------------------------------+
-  ! !PURPOSE  : Check if the dimension of the bath array are consistent
-  ! !+-------------------------------------------------------------------+
-  ! function check_bath_dimension(bath_,Hloc_nn) result(bool)
-  !   real(8),dimension(:)           :: bath_
-  !   integer                        :: Ntrue
-  !   logical                        :: bool
-  !   complex(8),optional,intent(in) :: Hloc_nn(:,:,:,:)
-  !   if (present(Hloc_nn))then
-  !      Ntrue = get_bath_dimension(Hloc_nn)
-  !   else
-  !      Ntrue = get_bath_dimension()
-  !   endif
-  !   bool  = ( size(bath_) == Ntrue )
-  ! end function check_bath_dimension
+
+
+
 
 
   !##################################################################
@@ -325,7 +280,7 @@ contains
   !PURPOSE  : Check if a matrix is the identity
   !+-------------------------------------------------------------------+
   function is_identity_nn(mnnn) result(flag)
-    real(8),dimension(nspin,nspin,norb,norb) :: mnnn
+    complex(8),dimension(nspin,nspin,norb,norb) :: mnnn
     real(8),dimension(nspin*norb,nspin*norb) :: mtmp
     integer                                  :: i,j
     logical                                  :: flag
@@ -347,7 +302,7 @@ contains
   end function is_identity_nn
 
   function is_identity_so(mlso) result(flag)
-    real(8),dimension(nspin*norb,nspin*norb) :: mlso
+    complex(8),dimension(nspin*norb,nspin*norb) :: mlso
     real(8),dimension(nspin*norb,nspin*norb) :: mtmp
     integer                                  :: i,j
     logical                                  :: flag
