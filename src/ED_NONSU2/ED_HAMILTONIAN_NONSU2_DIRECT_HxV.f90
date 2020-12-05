@@ -63,7 +63,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = bath_from_sym(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -152,7 +152,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = bath_from_sym(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo

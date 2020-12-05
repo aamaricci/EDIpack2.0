@@ -67,6 +67,7 @@ subroutine chi2_fitgf_normal_nonsu2(fg,bath_)
   call allocate_dmft_bath(dmft_bath)
   call set_dmft_bath(bath_,dmft_bath)
   !
+  !Dimension for a given orbital
   Asize = Nbath + Nbath + Nbath
   Asize = Nspin*Asize
   ! if(.not.para_)Asize=Nspin*Asize !fit all spin components

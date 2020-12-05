@@ -79,7 +79,7 @@ subroutine chi2_fitgf_hybrid_nonsu2(fg,bath_)
      Gdelta(i,1:Ldelta) = fg(getIspin(i),getJspin(i),getIorb(i),getJorb(i),1:Ldelta)
   enddo
   !
-  Asize = Nbath + Nbath + Nbath
+  Asize = Nbath + Norb*Nbath + Norb*Nbath
   Asize = Nspin*Asize
   ! if(.not.para_)Asize=Nspin*Asize !fit all spin components
   allocate(array_bath(Asize))

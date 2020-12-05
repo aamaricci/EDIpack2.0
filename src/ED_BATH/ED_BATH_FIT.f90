@@ -59,7 +59,7 @@ MODULE ED_BATH_FIT
 
   !This contains the number of the lambda expansion
   !for each replica of the impurity
-  integer,dimension(:),allocatable      :: Nlambdas
+  integer                              :: Nlambdas
   !
   !This is a dummy object which is used here to point
   !to the replica bath lambdas, i.e. the coefficients

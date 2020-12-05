@@ -275,6 +275,7 @@ contains
        do jorb=iorb+1,Norb
           exct_s0(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb))
           exct_tz(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb))
+          print*,exct_s0(iorb,jorb),exct_tz(iorb,jorb)
        enddo
     enddo
     !
@@ -368,13 +369,17 @@ contains
        if(DimPh>1) w_ph = sqrt(-2.d0*w0_ph/impDmats_ph(0)) !renormalized phonon frequency
        if(iolegend)call write_legend
        call write_observables()
-       write(LOGfile,"(A,10f18.12,f18.12,A)")&
-            "dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
-       write(LOGfile,"(A,10f18.12,A)")&
-            "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
+       write(LOGfile,"(A,10f18.12,f18.12)")&
+            " dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
+       write(LOGfile,"(A,10f18.12)")&
+            " docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
+       if(any(exct_S0/=0d0))write(LOGfile,"(A,10f18.12)")&
+            "excS0"//reg(ed_file_suffix)//"=",((exct_S0(iorb,jorb),iorb=1,Norb),jorb=1,Norb)
+       if(any(exct_tz/=0d0))write(LOGfile,"(A,10f18.12)")&
+            "excTZ"//reg(ed_file_suffix)//"=",((exct_Tz(iorb,jorb),iorb=1,Norb),jorb=1,Norb)
        if(Nspin==2)then
           write(LOGfile,"(A,10f18.12,A)")&
-               "mag "//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
+               " magZ"//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
        endif
        if(DimPh>1)call write_pdf()
        !

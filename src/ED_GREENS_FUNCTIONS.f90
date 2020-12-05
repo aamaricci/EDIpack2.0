@@ -48,13 +48,13 @@ contains
     select case(ed_mode)
     case default  ;call build_gf_normal()
     case("superc");call build_gf_superc()
-       ! case("nonsu2");call build_gf_nonsu2()
+    case("nonsu2");call build_gf_nonsu2()
     end select
 
     select case(ed_mode)
     case default  ;call build_sigma_normal()
     case("superc");call build_sigma_superc()
-       ! case("nonsu2");call build_sigma_nonsu2()
+    case("nonsu2");call build_sigma_nonsu2()
     end select
     !
     if(MPIMASTER)then

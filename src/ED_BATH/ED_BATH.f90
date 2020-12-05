@@ -123,12 +123,6 @@ contains
   !+-------------------------------------------------------------------+
   !PURPOSE  : Inquire the correct bath size to allocate the 
   ! the bath array in the calling program.
-  !
-  ! Get size of each dimension of the component array. 
-  ! The Result is an rank 1 integer array Ndim with dimension:
-  ! 3 for get_component_size_bath
-  ! 2 for get_spin_component_size_bath & get_orb_component_size_bath
-  ! 1 for get_spin_orb_component_size_bath
   !+-------------------------------------------------------------------+
   function get_bath_dimension_direct(Hloc_nn) result(bath_size)
     complex(8),optional,intent(in) :: Hloc_nn(:,:,:,:)
@@ -194,9 +188,9 @@ contains
           enddo
        enddo
        !
-       ndx = ndx + 1     !we also print n_Dec
        ndx = ndx * Nbath !number of non vanishing elements for each replica
-       ndx = ndx + Nbath !diagonal hybridizations: Vs
+       ndx = ndx + Nbath !diagonal hybridizations: Vs (different per spin)
+       ndx = ndx + 1     !we also print Nbasis
        bath_size = ndx
     end select
   end function get_bath_dimension_direct
@@ -208,16 +202,15 @@ contains
     !number of symmetries
     Nsym=size(Hloc_nn,5)
     !
-    !add identity
     ndx=Nsym
-    !
-    !for each replica we also print N_dec
-    ndx=ndx+1
     !
     !number of replicas
     ndx = ndx * Nbath
     !diagonal hybridizations: Vs
     ndx = ndx + Nbath
+    !
+    !include Nbasis
+    ndx=ndx+1
     !
     bath_size = ndx
     !

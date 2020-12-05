@@ -210,12 +210,8 @@ contains
              invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
              call inv(invH_k)
              invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
-             do ispin=1,Nspin
-                do jspin=1,Nspin 
-                   Delta(ispin,jspin,:,:,i)=Delta(ispin,jspin,:,:,i) + &
-                        dmft_bath_%item(ibath)%v(ispin)*invH_knn(ispin,jspin,:,:)*dmft_bath_%item(ibath)%v(jspin)
-                enddo
-             enddo
+             Delta(:,:,:,:,i)=Delta(:,:,:,:,i) + &
+                  dmft_bath_%item(ibath)%v*invH_knn*dmft_bath_%item(ibath)%v
           enddo
           !
        enddo
@@ -243,6 +239,8 @@ contains
     L = size(x)
     !
     select case(bath_type)
+    case ("replica")
+       stop "Fdelta_bath_mats error: called with bath_type=replica"
     case default                !normal: only _{aa} are allowed (no inter-orbital local mixing)
        select case(ed_mode)
        case default

@@ -8,26 +8,28 @@ MODULE ED_VARS_GLOBAL
   implicit none
 
 
-  !-------------------- H EXPANSION STRUCTURE ----------------------!
+  !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type H_operator
-     complex(8),dimension(:,:,:,:),allocatable               :: O          !Replica hamilt
+     complex(8),dimension(:,:,:,:),allocatable               :: O      !Replica hamilt
   end type H_operator
 
-
-
-  !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type effective_bath_component
-     integer                                                 :: N_dec
-     real(8),dimension(:),allocatable                        :: v     ![Nspin]
-     real(8),dimension(:),allocatable                        :: lambda
+     real(8)                                                 :: v
+     real(8),dimension(:),allocatable                        :: lambda![Nsym]
   end type effective_bath_component
 
   type effective_bath
+     !normal
      real(8),dimension(:,:,:),allocatable                    :: e     !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
      real(8),dimension(:,:,:),allocatable                    :: v     !spin-keep hyb. [Nspin][Norb][Nbath]
+     !superc
      real(8),dimension(:,:,:),allocatable                    :: d     !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
+     !nonsu2
      real(8),dimension(:,:,:),allocatable                    :: u     !spin-flip hyb. [Nspin][Norb][Nbath]
-     type(effective_bath_component),dimension(:),allocatable :: item  ![Nbath] Replica bath components, V included
+     !replica
+     integer                                                 :: Nbasis  !H Basis dimension     
+     type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica bath components, V included
+     !
      logical                                                 :: status=.false.
   end type effective_bath
 

@@ -29,7 +29,7 @@ MODULE ED_GF_NONSU2
   integer                               :: iph,i_el
   real(8)                               :: sgn,norm2
   complex(8)                            :: cnorm2
-  
+
   complex(8),allocatable                :: vvinit(:)
   real(8),allocatable                   :: alfa_(:),beta_(:)
 
@@ -53,8 +53,9 @@ contains
   !                            NONSU2
   !+------------------------------------------------------------------+
   subroutine build_gf_nonsu2()
-    integer :: iorb,jorb,ispin,jspin,i,io,jo,ifreq
-    integer :: isect0,numstates
+    integer                                     :: iorb,jorb,ispin,jspin,i,io,jo
+    logical                                     :: MaskBool
+    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
     if(.not.allocated(impGmats))stop "build_gf_nonsu2: Gmats not allocated"
     if(.not.allocated(impGreal))stop "build_gf_nonsu2: Greal not allocated"
@@ -64,21 +65,29 @@ contains
     !Here we evaluate the same orbital, same spin GF: G_{aa}^{ss}(z)
     do ispin=1,Nspin
        do iorb=1,Norb
+          write(LOGfile,"(A)")""
           write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(iorb)//"_s"//str(ispin)//str(ispin)
           if(MPIMASTER)call start_timer()
-          call lanc_build_gf_nonsu2_diagOrb_diagSpin_c(iorb,ispin)
+          call lanc_build_gf_nonsu2_diagOrb_diagSpin(iorb,ispin)
           if(MPIMASTER)call stop_timer(unit=logfile)
        enddo
     enddo
+    !
+    Hmask=mask_hloc(impHloc,wdiag=.true.,uplo=.true.)
     !
     !same orbital, different spin GF: G_{aa}^{ss'}(z)
     do ispin=1,Nspin
        do jspin=1,Nspin
           if(ispin==jspin)cycle
-          do iorb=1,Norb                   
+          do iorb=1,Norb
+             MaskBool=.true.   
+             if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,iorb)
+             if(.not.MaskBool)cycle
+             !
+             write(LOGfile,"(A)")""
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(iorb)//"_s"//str(ispin)//str(jspin)
              if(MPIMASTER)call start_timer()
-             call lanc_build_gf_nonsu2_mixOrb_mixSpin_c(iorb,jorb,ispin,jspin)
+             call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,iorb,ispin,jspin)
              if(MPIMASTER)call stop_timer(unit=logfile)
           enddo
        enddo
@@ -93,7 +102,7 @@ contains
                   - (one+xi)*impGmats(ispin,ispin,iorb,iorb,:) &
                   - (one+xi)*impGmats(jspin,jspin,iorb,iorb,:))
              !
-             impGreal(ispin,jspin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,jspin,iorb,iorb,:) &
+             impGreal(ispin,jspin,iorb,iorb,:) = 0.5d0*(impGreal(ispin,jspin,iorb,iorb,:) &
                   - (one+xi)*impGreal(ispin,ispin,iorb,iorb,:) &
                   - (one+xi)*impGreal(jspin,jspin,iorb,iorb,:))
              !
@@ -110,9 +119,14 @@ contains
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
+                MaskBool=.true.   
+                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(.not.MaskBool)cycle
+                !
+                write(LOGfile,"(A)")""
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(ispin)
                 if(MPIMASTER)call start_timer()
-                call lanc_build_gf_nonsu2_mixOrb_mixSpin_c(iorb,jorb,ispin,ispin)
+                call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,ispin)
                 if(MPIMASTER)call stop_timer(unit=logfile)
              enddo
           enddo
@@ -141,9 +155,14 @@ contains
              do iorb=1,Norb
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
+                   MaskBool=.true.   
+                   if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,jorb)
+                   if(.not.MaskBool)cycle
+                   !
+                   write(LOGfile,"(A)")""
                    write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
                    if(MPIMASTER)call start_timer()
-                   call lanc_build_gf_nonsu2_mixOrb_mixSpin_c(iorb,jorb,ispin,jspin)
+                   call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
                    if(MPIMASTER)call stop_timer(unit=logfile)
                 enddo
              enddo
@@ -187,9 +206,12 @@ contains
 
 
   !PURPOSE: Evaluate the same orbital IORB, same spin ISPIN impurity GF.
-  subroutine lanc_build_gf_nonsu2_diagOrb_diagSpin_c(iorb,ispin)
-    integer      :: iorb,ispin
+  subroutine lanc_build_gf_nonsu2_diagOrb_diagSpin(iorb,ispin)
+    integer      :: iorb,ispin,isite
     type(sector) :: sectorI,sectorJ
+    integer :: ib(2*Ns)
+    !
+    isite = iorb+(ispin-1)*Ns
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
@@ -212,7 +234,7 @@ contains
                      "add Jz:",Lzdiag(iorb)+Szdiag(ispin)/2.,&
                      "  from:",gettwoJz(isector)/2.,"  to:",gettwoJz(jsector)/2.
              else
-                write(LOGfile,"(A15,I6)")' From sector:',isector,sectorI%Ntot
+                write(LOGfile,"(A15,2I6)")' From sector:',isector,sectorI%Ntot
              endif
           endif
        endif
@@ -227,9 +249,9 @@ contains
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
              if(Jz_basis)then
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,s:',sectorJ%twoJz/2.
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_a,s:',sectorJ%twoJz/2.
              else
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,s:',sectorJ%Ntot
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_a,s:',sectorJ%Ntot
              endif
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
@@ -260,9 +282,9 @@ contains
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
              if(Jz_basis)then
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,s:',sectorJ%twoJz/2.
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c_a,s:',sectorJ%twoJz/2.
              else
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,s:',sectorJ%Ntot
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c_a,s:',sectorJ%Ntot
              endif
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
@@ -294,13 +316,13 @@ contains
        !
     enddo
     return
-  end subroutine lanc_build_gf_nonsu2_diagOrb_diagSpin_c
+  end subroutine lanc_build_gf_nonsu2_diagOrb_diagSpin
 
 
 
 
   !PURPOSE: Evaluate the  different orbital IORB,JORB, different spin ISPIN,JSPIN impurity GF.
-  subroutine lanc_build_gf_nonsu2_mixOrb_mixSpin_c(iorb,jorb,ispin,jspin)
+  subroutine lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
     integer      :: iorb,jorb,ispin,jspin
     type(sector) :: sectorI,sectorJ
     !
@@ -325,7 +347,7 @@ contains
                      "add Jz:",Lzdiag(iorb)+Szdiag(ispin)/2.,&
                      "  from:",gettwoJz(isector)/2.,"  to:",gettwoJz(jsector)/2.
              else
-                write(LOGfile,"(A15,I6)")' From sector:',isector,sectorI%Ntot
+                write(LOGfile,"(A15,2I6)")' From sector:',isector,sectorI%Ntot
              endif
           endif
        endif
@@ -343,9 +365,9 @@ contains
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
              if(Jz_basis)then
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%twoJz/2.
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%twoJz/2.
              else
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%Ntot
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%Ntot
              endif
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
@@ -382,9 +404,9 @@ contains
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
              if(Jz_basis)then
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_b,s + c_a,s:',sectorJ%twoJz/2.
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c_b,s + c_a,s:',sectorJ%twoJz/2.
              else
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_b,s + c_a,s:',sectorJ%Ntot
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c_b,s + c_a,s:',sectorJ%Ntot
              endif
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
@@ -422,9 +444,9 @@ contains
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
              if(Jz_basis)then
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply i*c^+_b,s + c^+_a,s:',sectorJ%twoJz/2.
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply i*c^+_b,s + c^+_a,s:',sectorJ%twoJz/2.
              else
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply i*c^+_b,s + c^+_a,s:',sectorJ%Ntot
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply i*c^+_b,s + c^+_a,s:',sectorJ%Ntot
              endif
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
@@ -461,9 +483,9 @@ contains
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
              if(Jz_basis)then
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply -i*c_b,s + c_a,s:',sectorJ%twoJz/2.
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply -i*c_b,s + c_a,s:',sectorJ%twoJz/2.
              else
-                if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply -i*c_b,s + c_a,s:',sectorJ%Ntot
+                if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply -i*c_b,s + c_a,s:',sectorJ%Ntot
              endif
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
@@ -500,7 +522,7 @@ contains
        !
     enddo
     return
-  end subroutine lanc_build_gf_nonsu2_mixOrb_mixSpin_c
+  end subroutine lanc_build_gf_nonsu2_mixOrb_mixSpin
 
 
 

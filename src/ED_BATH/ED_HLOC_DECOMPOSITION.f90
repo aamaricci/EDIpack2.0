@@ -8,8 +8,6 @@ MODULE ED_HLOC_DECOMPOSITION
 
 
   interface print_Hloc
-     module procedure print_Hloc_so_d
-     module procedure print_Hloc_nn_d
      module procedure print_Hloc_so_c
      module procedure print_Hloc_nn_c
   end interface print_Hloc
@@ -18,13 +16,10 @@ MODULE ED_HLOC_DECOMPOSITION
      module procedure init_Hloc_direct_so
      module procedure init_Hloc_direct_nn
      module procedure init_Hloc_symmetries
-     ! module procedure set_Hloc_so
-     ! module procedure set_Hloc_nn
   end interface set_Hloc
 
-  public:: set_Hloc
-  ! public:: allocate_h_basis
-  ! public:: deallocate_h_basis
+  public :: set_Hloc
+
 
 contains
 
@@ -58,8 +53,6 @@ contains
     enddo
     deallocate(H_basis)
   end subroutine deallocate_h_basis
-
-
 
 
   !+------------------------------------------------------------------+
@@ -109,6 +102,7 @@ contains
           enddo
        enddo
     enddo
+    !
   end subroutine init_hloc_direct_nn
 
   subroutine init_hloc_direct_so(Hloc)
@@ -135,13 +129,14 @@ contains
     !
     impHloc=H_from_sym(lambda_impHloc)
     !
+    if(ed_verbose>2)call print_hloc(impHloc)
   end subroutine init_hloc_symmetries
 
   !reconstruct [Nspin][][Norb][] hamiltonian from basis expansion given [lambda]
   function H_from_sym(lambdavec) result (H)
-    real(8),dimension(:)                     :: lambdavec
-    integer                                  :: isym
-    real(8),dimension(Nspin,Nspin,Norb,Norb) :: H
+    real(8),dimension(:)                        :: lambdavec
+    integer                                     :: isym
+    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: H
     !
     if(size(lambdavec).ne.size(H_basis)) STOP "H_from_sym: Wrong coefficient vector size"
     H=zero
@@ -161,44 +156,6 @@ contains
   !+------------------------------------------------------------------+
   !PURPOSE  : Print Hloc
   !+------------------------------------------------------------------+
-  subroutine print_Hloc_nn_d(hloc,file)![Nspin][Nspin][Norb][Norb]
-    real(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
-    character(len=*),optional     :: file
-    integer                       :: iorb,jorb,ispin,jspin
-    integer                       :: unit
-    unit=LOGfile
-    if(present(file))then
-       open(free_unit(unit),file=reg(file))
-       write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
-    endif
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          write(unit,"(20(F7.3,2x))")&
-               ((Hloc(ispin,jspin,iorb,jorb),jorb =1,Norb),jspin=1,Nspin)
-       enddo
-    enddo
-    write(unit,*)""
-    if(present(file))close(unit)
-  end subroutine print_Hloc_nn_d
-
-  subroutine print_Hloc_so_d(hloc,file) ![Nlso][Nlso]
-    real(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
-    character(len=*),optional                :: file
-    integer                                  :: iorb,jorb,unit,Nso
-    unit=LOGfile
-    if(present(file))then
-       open(free_unit(unit),file=reg(file))
-       write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
-    endif
-    !
-    Nso = Nspin*Norb
-    do iorb=1,Nso
-       write(unit,"(20(F7.3,2x))")(Hloc(iorb,jorb),jorb =1,Nso)
-    enddo
-    write(unit,*)""
-    if(present(file))close(unit)
-  end subroutine print_Hloc_so_d
-
   subroutine print_Hloc_nn_c(hloc,file)
     complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
     character(len=*),optional                   :: file
@@ -212,11 +169,14 @@ contains
        write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
     endif
     !
-    Nso = Nspin*Norb
-    write(fmt,"(A,I0,A)")"(",Nso,"A)"
     do ispin=1,Nspin
        do iorb=1,Norb
-          write(unit,fmt)((str(Hloc(ispin,jspin,iorb,jorb)),jorb=1,Norb),jspin=1,Nspin)
+          write(unit,"(100(A1,F8.4,A1,F8.4,A1,2x))")&
+               (&
+               (&
+               '(',dreal(Hloc(ispin,jspin,iorb,jorb)),',',dimag(Hloc(ispin,jspin,iorb,jorb)),')',&
+               jorb =1,Norb),&
+               jspin=1,Nspin)
        enddo
     enddo
     write(unit,*)""
@@ -238,9 +198,9 @@ contains
     endif
     !
     Nso = Nspin*Norb
-    write(fmt,"(A,I0,A)")"(",Nso,"A)"
     do is=1,Nso
-       write(unit,fmt)(str(Hloc(is,js),d=4),js =1,Nso)
+       write(unit,"(20(A1,F8.4,A1,F8.4,A1,2x))")&
+            ('(',dreal(Hloc(is,js)),',',dimag(Hloc(is,js)),')',js =1,Nso)
     enddo
     write(unit,*)""
     !

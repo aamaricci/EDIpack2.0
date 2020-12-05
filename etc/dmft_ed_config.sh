@@ -31,4 +31,3 @@ add_library_to_system(){
 	fi
     fi
 }
-add_library_to_system /Users/amaricci/opt/dmft_ed/GNU_;FORCE

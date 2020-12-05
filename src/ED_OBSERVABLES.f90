@@ -15,7 +15,7 @@ MODULE ED_OBSERVABLES
   !
   USE ED_OBSERVABLES_NORMAL
   USE ED_OBSERVABLES_SUPERC
-  ! USE ED_OBSERVABLES_NONSU2
+  USE ED_OBSERVABLES_NONSU2
   !
   implicit none
   private 
@@ -31,7 +31,7 @@ contains
     select case(ed_mode)
     case default  ;call observables_normal()
     case("superc");call observables_superc()
-       ! case("nonsu2");call observables__nonsu2()
+    case("nonsu2");call observables_nonsu2()
     end select
   end subroutine observables_impurity
 
@@ -41,7 +41,7 @@ contains
     select case(ed_mode)
     case default  ;call local_energy_normal()
     case("superc");call local_energy_superc()
-       ! case("nonsu2");call local_energy__nonsu2()
+    case("nonsu2");call local_energy_nonsu2()
     end select
   end subroutine local_energy_impurity
 

@@ -573,9 +573,9 @@ contains        !some routine to perform simple operation on the lists
     integer                          :: dim
     integer,dimension(:),allocatable :: order
     !
-    if(.not.space%status) stop "es_return_cvector ERRROR: espace not allocated"
+    if(.not.space%status) stop "es_return_dvector ERRROR: espace not allocated"
     pos= space%size ; if(present(n))pos=n
-    if(pos>space%size)      stop "es_return_cvector ERRROR: n > espace.size"
+    if(pos>space%size)      stop "es_return_dvector ERRROR: n > espace.size"
     if(space%size==0)stop "es_return_cvector ERRROR: espace emtpy"
     !
     c => space%root
@@ -645,12 +645,12 @@ contains        !some routine to perform simple operation on the lists
     integer,dimension(:),allocatable :: order
     !
     if(MpiComm==MPI_COMM_NULL)return
-    if(MpiComm==MPI_UNDEFINED)stop "es_return_dvector ERRROR: MpiComm = MPI_UNDEFINED"
+    if(MpiComm==MPI_UNDEFINED)stop "es_return_dvector_MPI ERRROR: MpiComm = MPI_UNDEFINED"
     !
-    if(.not.space%status) stop "es_return_dvector ERRROR: espace not allocated"
+    if(.not.space%status) stop "es_return_dvector_MPI ERRROR: espace not allocated"
     pos= space%size ; if(present(n))pos=n
-    if(pos>space%size)      stop "es_return_dvector ERRROR: n > espace.size"
-    if(space%size==0)stop "es_return_dvector ERRROR: espace emtpy"
+    if(pos>space%size)      stop "es_return_dvector_MPI ERRROR: n > espace.size"
+    if(space%size==0)stop "es_return_dvector_MPI ERRROR: espace emtpy"
     !
     c => space%root
     do i=1,pos
@@ -668,7 +668,7 @@ contains        !some routine to perform simple operation on the lists
     Dim  = getdim(c%sector)
     Ndim = 0
     call Allreduce_MPI(MpiComm,Nloc,Ndim)
-    if(Dim/=Ndim)stop "es_return_dvector ERROR: Dim != Ndim from v chunks"
+    if(Dim/=Ndim)stop "es_return_dvector_MPI ERROR: Dim != Ndim from v chunks"
     !
     MpiMaster = get_master_MPI(MpiComm)
     !
@@ -739,7 +739,7 @@ contains        !some routine to perform simple operation on the lists
     Dim  = getdim(c%sector)
     Ndim = 0
     call Allreduce_MPI(MpiComm,Nloc,Ndim)
-    if(Dim/=Ndim)stop "es_return_cvector ERROR: Dim != Ndim from v chunks"
+    if(Dim/=Ndim)stop "es_return_cvector_MPI ERROR: Dim != Ndim from v chunks"
     !
     MpiMaster = get_master_MPI(MpiComm)
     !

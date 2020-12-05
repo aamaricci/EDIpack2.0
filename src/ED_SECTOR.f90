@@ -284,7 +284,7 @@ contains
     type(sector),intent(in)     :: sectorI,sectorJ
     integer,intent(out)         :: j
     real(8),intent(out)         :: sgn
-    integer                     :: ibeta
+    integer                     :: ibeta,isite
     integer                     :: r
     integer                     :: iph,i_el
     integer,dimension(2*Ns_Ud)  :: Indices
@@ -293,11 +293,11 @@ contains
     integer,dimension(2)        :: Iud
     integer,dimension(2*Ns)     :: ib
     !
+    j=0
+    sgn=0d0
+    !
     select case(ed_mode)
     case default
-       j=0
-       sgn=0d0
-       !
        ibeta  = ialfa + (ispin-1)*Ns_Ud
        iph = (i-1)/(sectorI%DimEl) + 1
        i_el = mod(i-1,sectorI%DimEl) + 1
@@ -316,11 +316,11 @@ contains
        j = j + (iph-1)*sectorJ%DimEl
        !
     case("superc","nonsu2")
-       ibeta= ipos + (ispin-1)*Ns
+       isite= ipos + (ispin-1)*Ns
        i_el = sectorI%H(1)%map(i)
        ib   = bdecomp(i_el,2*Ns)
-       if(ib(ibeta)/=1)return
-       call c(ibeta,i,r,sgn)
+       if(ib(isite)/=1)return
+       call c(isite,i_el,r,sgn)
        !
        j    = binary_search(sectorJ%H(1)%map,r)
        !
@@ -344,6 +344,7 @@ contains
     !
     j=0
     sgn=0d0
+    !
     select case(ed_mode)
     case default
        ibeta  = ialfa + (ispin-1)*Ns_Ud
@@ -368,7 +369,7 @@ contains
        i_el = sectorI%H(1)%map(i)
        ib   = bdecomp(i_el,2*Ns)
        if(ib(ibeta)/=0)return
-       call cdg(ibeta,i,r,sgn)
+       call cdg(ibeta,i_el,r,sgn)
        !
        j    = binary_search(sectorJ%H(1)%map,r)
        !

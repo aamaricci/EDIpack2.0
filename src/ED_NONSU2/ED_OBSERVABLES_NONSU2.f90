@@ -177,28 +177,29 @@ contains
     enddo
     !
     !EVALUATE <SX> AND <SY>
-    do istate=1,state_list%size
-       isector = es_return_sector(state_list,istate)
-       Ei      = es_return_energy(state_list,istate)
+    do iorb=1,Norb
+       !
+       do istate=1,state_list%size
+          isector = es_return_sector(state_list,istate)
+          Ei      = es_return_energy(state_list,istate)
 #ifdef _MPI
-       if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
-       else
-          state_cvec => es_return_cvector(state_list,istate)
-       endif
+          if(MpiStatus)then
+             state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          else
+             state_cvec => es_return_cvector(state_list,istate)
+          endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+          state_cvec => es_return_cvector(state_list,istate)
 #endif
-       !
-       peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
-       peso = peso/zeta_function
-       !
-       !GET <(CDG_UP + CDG_DW)(C_UP + C_DW)> = 
-       !<CDG_UP*C_UP> + <CDG_DW*C_DW> + <CDG_UP*C_DW + CDG_DW*C_UP> = 
-       !<N_UP> + <N_DW> + 2*<Sx>
-       !<Sx> = <CDG_UP*C_DW + CDG_DW*C_UP>
-       do iorb=1,Norb
-          jsector = getCsector(1,ispin,isector)
+          !
+          peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
+          peso = peso/zeta_function
+          !
+          !GET <(CDG_UP + CDG_DW)(C_UP + C_DW)> = 
+          !<CDG_UP*C_UP> + <CDG_DW*C_DW> + <CDG_UP*C_DW + CDG_DW*C_UP> = 
+          !<N_UP> + <N_DW> + 2*<Sx>
+          !<Sx> = <CDG_UP*C_DW + CDG_DW*C_UP>
+          jsector = getCsector(1,1,isector)
           if(jsector/=0)then
              if(Mpimaster)then
                 call build_sector(isector,sectorI)
@@ -225,7 +226,7 @@ contains
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> - i<CDG_UP*C_DW - CDG_DW*C_UP> = 
           !<N_UP> + <N_DW> + 2*<Sy>
           !<Sy> = -i/2<CDG_UP*C_DW - CDG_DW*C_UP>         
-          jsector = getCsector(1,ispin,isector)
+          jsector = getCsector(1,1,isector)
           if(jsector/=0)then
              if(Mpimaster)then
                 call build_sector(isector,sectorI)
@@ -247,19 +248,21 @@ contains
                 if(allocated(vvinit))deallocate(vvinit)
              endif
           endif
-       enddo
 #ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
+          if(MpiStatus)then
+             if(associated(state_cvec))deallocate(state_cvec)
+          else
+             if(associated(state_cvec))nullify(state_cvec)
+          endif
 #else
-       if(associated(state_cvec))nullify(state_cvec)
+          if(associated(state_cvec))nullify(state_cvec)
 #endif
+       enddo
+       magx(iorb) = 0.5d0*(magx(iorb) - dens_up(iorb) - dens_dw(iorb))
+       magy(iorb) = 0.5d0*(magy(iorb) - dens_up(iorb) - dens_dw(iorb))
     enddo
-    magx = 0.5d0*(magx - dens_up - dens_dw)
-    magy = 0.5d0*(magy - dens_up - dens_dw)
+
+
     !
     !EVALUATE EXCITON OP <S_ab> AND <T^x,y,z_ab>
     !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
@@ -426,7 +429,7 @@ contains
           !Diagonal densities
           do ispin=1,Nspin
              do iorb=1,Norb
-                isite=impIndex(iorb,ispin)
+                isite=iorb + (ispin-1)*Norb
                 do m=1,sectorI%Dim
                    i  = sectorI%H(1)%map(m)
                    ib = bdecomp(i,2*Ns)
@@ -446,8 +449,8 @@ contains
                       !    if((.not.dmft_bath%mask(ispin,jspin,iorb,jorb,1)).AND.&
                       !         (.not.dmft_bath%mask(ispin,jspin,iorb,jorb,2)))cycle
                       ! endif
-                      isite=impIndex(iorb,ispin)
-                      jsite=impIndex(jorb,jspin)
+                      isite=iorb + (ispin-1)*Norb
+                      jsite=jorb + (jspin-1)*Norb
                       do m=1,sectorI%Dim
                          i  = sectorI%H(1)%map(m)
                          ib = bdecomp(i,2*Ns)
@@ -483,11 +486,36 @@ contains
        if(iolegend)call write_legend
        call write_observables()
     endif
-    write(LOGfile,"(A,10f18.12,f18.12,A)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
-    write(LOGfile,"(A,10f18.12,A)")    "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
-    write(LOGfile,"(A,10f18.12,A)")    "magX"//reg(ed_file_suffix)//"=",(magX(iorb),iorb=1,Norb)
-    write(LOGfile,"(A,10f18.12,A)")    "magY"//reg(ed_file_suffix)//"=",(magY(iorb),iorb=1,Norb)
-    write(LOGfile,"(A,10f18.12,A)")    "magZ"//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
+    write(LOGfile,"(A,10f18.12,f18.12)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
+    write(LOGfile,"(A,10f18.12)")    "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
+    write(LOGfile,"(A,10f18.12)")    "magX"//reg(ed_file_suffix)//"=",(magX(iorb),iorb=1,Norb)
+    write(LOGfile,"(A,10f18.12)")    "magY"//reg(ed_file_suffix)//"=",(magY(iorb),iorb=1,Norb)
+    write(LOGfile,"(A,10f18.12)")    "magZ"//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
+    !
+    write(LOGfile,"(A)",advance="no")"exS0"//reg(ed_file_suffix)//"="
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          write(LOGfile,"(20(F18.12,1X))")exct_s0(iorb,jorb)
+       enddo
+    enddo
+    write(LOGfile,"(A)",advance="no")"exTX"//reg(ed_file_suffix)//"="
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          write(LOGfile,"(20(F18.12,1X))")dreal(exct_tx(iorb,jorb)),dimag(exct_tx(iorb,jorb))
+       enddo
+    enddo
+    write(LOGfile,"(A)",advance="no")"exTY"//reg(ed_file_suffix)//"="
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          write(LOGfile,"(20(F18.12,1X))")dreal(exct_ty(iorb,jorb)),dimag(exct_ty(iorb,jorb))
+       enddo
+    enddo
+    write(LOGfile,"(A)",advance="no")"exTZ"//reg(ed_file_suffix)//"="
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          write(LOGfile,"(20(F18.12,1X))")exct_tz(iorb,jorb)
+       enddo
+    enddo
     !
     do iorb=1,Norb
        ed_dens_up(iorb)=dens_up(iorb)
@@ -566,13 +594,8 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
-             ! m  = sectorI%H(1)%map(i)
-             ! ib = bdecomp(m,2*Ns)
-             ! gs_weight=peso*abs(state_cvec(i))**2
-             ! do iorb=1,Norb
-             !    nup(iorb)= dble(ib(iorb))
-             !    ndw(iorb)= dble(ib(iorb+Ns))
-             ! enddo
+             m  = sectorI%H(1)%map(i)
+             ib = bdecomp(m,2*Ns)
              gs_weight=peso*abs(state_cvec(i))**2
              call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              nup = Nud(1,1:Norb)

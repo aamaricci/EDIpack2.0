@@ -52,8 +52,8 @@ subroutine impose_bath_offset(bath_,ibath,offset)
   call allocate_dmft_bath(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
   !
-  if(size(lambda_impHloc) .ne. dmft_bath_%item(ibath)%N_dec)then
-     dmft_bath_%item(ibath)%lambda(dmft_bath_%item(ibath)%N_dec)=offset
+  if(size(lambda_impHloc) .ne. dmft_bath_%Nbasis)then
+     dmft_bath_%item(ibath)%lambda(dmft_bath_%Nbasis)=offset
   else
      do isym=1,size(lambda_impHloc)
         if(is_identity(H_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
@@ -109,6 +109,7 @@ subroutine spin_symmetrize_bath_site(bath_,save)
   type(effective_bath)   :: dmft_bath_
   logical,optional       :: save
   logical                :: save_
+  integer :: ibath
   if(bath_type=="replica")stop "spin_symmetry_bath_site ERROR: can not be used with bath_type=replica"
   save_=.true.;if(present(save))save_=save
   if(Nspin==1)then
@@ -118,9 +119,15 @@ subroutine spin_symmetrize_bath_site(bath_,save)
   !
   call allocate_dmft_bath(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
-  dmft_bath_%e(Nspin,:,:)=dmft_bath_%e(1,:,:)
-  dmft_bath_%v(Nspin,:,:)=dmft_bath_%v(1,:,:)
-  if(ed_mode=="superc")dmft_bath_%d(Nspin,:,:)=dmft_bath_%d(1,:,:)
+  select case(ed_mode)
+  case default
+     dmft_bath_%e(Nspin,:,:)=dmft_bath_%e(1,:,:)
+     dmft_bath_%v(Nspin,:,:)=dmft_bath_%v(1,:,:)
+  case ("superc")
+     dmft_bath_%e(Nspin,:,:)=dmft_bath_%e(1,:,:)
+     dmft_bath_%v(Nspin,:,:)=dmft_bath_%v(1,:,:)
+     dmft_bath_%d(Nspin,:,:)=dmft_bath_%d(1,:,:)
+  end select
   if(save_)call save_dmft_bath(dmft_bath_)
   call get_dmft_bath(dmft_bath_,bath_)
   call deallocate_dmft_bath(dmft_bath_)
@@ -383,13 +390,18 @@ end subroutine enforce_normal_bath_lattice
 !+-----------------------------------------------------------------------------+!
 subroutine check_bath_component(type)
   character(len=1) :: type
-  select case(ed_mode)
+  select case(bath_type)
   case default
-     if(type/="e".OR.type/='v')stop "check_bath_component error: type!=e,v"
-  case ("superc")
-     if(type/="e".OR.type/='v'.OR.type/='d')stop "check_bath_component error: type!=e,v,d"
-  case ("nonsu2")
-     if(type/="e".OR.type/='v'.OR.type/='u')stop "check_bath_component error: type!=e,v,u"
+     select case(ed_mode)
+     case default
+        if(type/="e".OR.type/='v')stop "check_bath_component error: type!=e,v"
+     case ("superc")
+        if(type/="e".OR.type/='v'.OR.type/='d')stop "check_bath_component error: type!=e,v,d"
+     case ("nonsu2")
+        if(type/="e".OR.type/='v'.OR.type/='u')stop "check_bath_component error: type!=e,v,u"
+     end select
+  case ("replica")
+     if(type/="v".OR.type/="l")stop "check_bath_component error: type!=v,l"
   end select
   return
 end subroutine check_bath_component
@@ -467,7 +479,7 @@ end subroutine assert_bath_component_size
 ! get_spin_component_bath    : return the itype component for the select ispin (D=2)
 ! get_spin_orb_component_bath: return the itype component for the select ispin & iorb (D=1)
 !+-----------------------------------------------------------------------------+!
-subroutine  get_bath_component(array,bath_,type)
+subroutine get_bath_component(array,bath_,type)
   real(8),dimension(:,:,:) :: array
   real(8),dimension(:)     :: bath_
   character(len=1)         :: type
