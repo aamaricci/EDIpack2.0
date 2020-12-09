@@ -152,7 +152,7 @@ contains
              call delete_sector(sectorK)
           endif
        endif
-       call delete_sector(sectorI)
+       if(MpiMaster)call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
        call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,0)
@@ -261,7 +261,7 @@ contains
              call delete_sector(sectorK)
           endif
        endif
-       call delete_sector(sectorI)
+       if(MpiMaster)call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
        call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,2)

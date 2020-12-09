@@ -394,7 +394,7 @@ contains
     !
     Nsites=size(bath,1)
     !
-    do ilat = 1+MPI_RANK,Nsites,MPI_SIZE
+    do ilat = 1,Nsites
        check_dim = check_bath_dimension(bath(ilat,:))
        if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
     end do

@@ -73,7 +73,7 @@ contains
        enddo
     enddo
     !
-    Hmask=mask_hloc(impHloc,wdiag=.true.,uplo=.true.)
+    Hmask=.true.!mask_hloc(impHloc,wdiag=.true.,uplo=.true.)
     !
     !same orbital, different spin GF: G_{aa}^{ss'}(z)
     do ispin=1,Nspin
@@ -625,9 +625,9 @@ contains
   subroutine build_sigma_nonsu2
     integer                                           :: i,j,isign,unit(7),iorb,jorb,ispin,jspin,io,jo
     complex(8)                                        :: fg0
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: invG0mats,invimpG0mats,impDeltamats
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: invG0real,invimpG0real,impDeltareal
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)       :: invGimp,Foo
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: invG0mats
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: invG0real
+    complex(8),dimension(Nspin*Norb,Nspin*Norb)       :: invGimp,invG0imp
     character(len=20)                                 :: suffix
     !
     !
@@ -637,17 +637,10 @@ contains
     invG0real = zero
     !
     !Get G0^-1
-    invG0mats(:,:,:,:,:)=invg0_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
-    invG0real(:,:,:,:,:)=invg0_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !Get impDelta_anderson
-    impDeltamats(:,:,:,:,:)=delta_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
-    impDeltareal(:,:,:,:,:)=delta_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !Get inverse functions
-    invimpG0mats=invG0mats
-    invimpG0real=invG0real
-    !
+    invG0mats = invg0_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
+    invG0real = invg0_bath_function(dcmplx(wr(:),eps),dmft_bath)
+
     select case(bath_type)
-       !
     case ("normal")
        !
        !Get Gimp^-1 - Matsubara freq.
@@ -715,17 +708,18 @@ contains
        !
        !Get Gimp^-1 - Matsubara freq.
        do i=1,Lmats
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      io = iorb + (ispin-1)*Norb
-                      jo = jorb + (jspin-1)*Norb
-                      invGimp(io,jo) = impGmats(ispin,jspin,iorb,jorb,i)
-                   enddo
-                enddo
-             enddo
-          enddo
+          invGimp  = nn2so_reshape(impGmats(:,:,:,:,i),Nspin,Norb)
+          ! do ispin=1,Nspin
+          !    do jspin=1,Nspin
+          !       do iorb=1,Norb
+          !          do jorb=1,Norb
+          !             io = iorb + (ispin-1)*Norb
+          !             jo = jorb + (jspin-1)*Norb
+          !             invGimp(io,jo) = impGmats(ispin,jspin,iorb,jorb,i)
+          !          enddo
+          !       enddo
+          !    enddo
+          ! enddo
           call inv(invGimp)!<--- get [G_{imp}]^-1
           do ispin=1,Nspin
              do jspin=1,Nspin
@@ -738,20 +732,22 @@ contains
                 enddo
              enddo
           enddo
+          
        enddo
        !Get Gimp^-1 - Real freq.
        do i=1,Lreal
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      io = iorb + (ispin-1)*Norb
-                      jo = jorb + (jspin-1)*Norb
-                      invGimp(io,jo) = impGreal(ispin,jspin,iorb,jorb,i)
-                   enddo
-                enddo
-             enddo
-          enddo
+          invGimp  = nn2so_reshape(impGreal(:,:,:,:,i),Nspin,Norb)
+          ! do ispin=1,Nspin
+          !    do jspin=1,Nspin
+          !       do iorb=1,Norb
+          !          do jorb=1,Norb
+          !             io = iorb + (ispin-1)*Norb
+          !             jo = jorb + (jspin-1)*Norb
+          !             invGimp(io,jo) = impGreal(ispin,jspin,iorb,jorb,i)
+          !          enddo
+          !       enddo
+          !    enddo
+          ! enddo
           call inv(invGimp)!<--- get [G_{imp}]^-1
           do ispin=1,Nspin
              do jspin=1,Nspin
