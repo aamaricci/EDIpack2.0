@@ -152,6 +152,7 @@ contains
              call delete_sector(sectorK)
           endif
        endif
+       !
        if(MpiMaster)call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)

@@ -15,7 +15,7 @@ subroutine print_impG0_normal
         getJorb(l)=iorb
      enddo
      totNorb=l
-  case ('hybrid')             !Diagonal in spin only. Full Orbital structure
+  case ('hybrid','replica')             !Diagonal in spin only. Full Orbital structure
      totNorb=Norb*(Norb+1)/2
      allocate(getIorb(totNorb),getJorb(totNorb))
      l=0
@@ -63,7 +63,7 @@ subroutine print_impG0_superc
         getIorb(l)=iorb
         getJorb(l)=iorb
      enddo
-  case ("hybrid")
+  case ("hybrid",'replica')
      totNorb=Norb*(Norb+1)/2
      allocate(getIorb(totNorb),getJorb(totNorb))
      l=0
@@ -131,7 +131,7 @@ subroutine print_impG0_nonsu2
            enddo
         enddo
      enddo
-  case ("hybrid")
+  case ("hybrid",'replica')
      totNso  = (Norb*Nspin)**2
      allocate(getIorb(totNso),getJorb(totNso),getIspin(totNso),getJspin(totNso))
      l=0

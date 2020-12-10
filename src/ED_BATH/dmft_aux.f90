@@ -116,15 +116,12 @@ subroutine init_dmft_bath(dmft_bath_)
   integer              :: io,jo,iorb,ispin,jorb,jspin,ibath
   logical              :: IOfile
   real(8)              :: de
-  real(8)              :: rescale(Nbath),offset_b(Nbath)
+  real(8)              :: offset(Nbath)
   !
   if(.not.dmft_bath_%status)stop "init_dmft_bath error: bath not allocated"
   !
-  if(Nbath>1)then
-     rescale=linspace(HWBAND/Nbath,HWBAND,Nbath)
-  else
-     rescale(1)=0.d0
-  endif
+  offset=0.d0
+  if(Nbath>1) offset=linspace(-1d-1,1d-1,Nbath)
   !
   select case(bath_type)
   case default
@@ -171,11 +168,8 @@ subroutine init_dmft_bath(dmft_bath_)
      Nsym = dmft_bath%Nbasis
      do ibath=1,Nbath
         do isym=1,Nsym
-           if(is_diagonal(H_basis(isym)%O))then
-              dmft_bath%item(ibath)%lambda(isym)=rescale(ibath)*lambda_impHloc(isym)
-           else
-              dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym)
-           endif
+           dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym)
+           if(is_diagonal(H_basis(isym)%O)) dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym) + offset(ibath)
         enddo
      enddo
      !

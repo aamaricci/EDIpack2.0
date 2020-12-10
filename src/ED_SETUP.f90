@@ -46,7 +46,6 @@ contains
 
     if(Nspin>1.AND.ed_twin.eqv..true.)then
        write(LOGfile,"(A)")"WARNING: using twin_sector with Nspin>1"
-       call sleep(1)
     end if
     !
     if(lanc_method=="lanczos")then
@@ -199,7 +198,6 @@ contains
        end select
        write(LOGfile,"(A)")"--------------------------------------------"
     endif
-    call sleep(1)
     !
     allocate(spH0ups(Ns_Ud))
     allocate(spH0dws(Ns_Ud))
@@ -255,22 +253,18 @@ contains
           write(LOGfile,"(A,I3)")"Nstates   Total  = ", lanc_nstates_total
           !
           write(LOGfile,"(A)")"Lanczos FINITE temperature calculation:"
-          call sleep(1)
        else
           write(LOGfile,"(A)")"Lanczos ZERO temperature calculation:"
-          call sleep(1)
        endif
     else
        if(finiteT)then
           write(LOGfile,"(A)")"Full ED finite T calculation"
-          call sleep(1)
        else
           ed_diag_type='lanc'
           lanc_nstates_total=1
           lanc_dim_threshold=product(DimUps)*product(DimDws)*Dimph
           write(LOGfile,"(A)")"Full ED T=0 calculation. Set LANC_DIM_THRESHOLD to "//str(lanc_dim_threshold)
           if(lanc_dim_threshold>2**13)stop "Full ED T=0: LANC_DIM_THRESHOLD > 2**13=8192!"
-          call sleep(1)
        endif
     endif
     !
@@ -433,7 +427,6 @@ contains
           if(any(Nups < Ndws))twin_mask(isector)=.false.
        enddo
        write(LOGfile,"(A,I6,A,I9)")"Looking into ",count(twin_mask)," sectors out of ",Nsectors
-       call sleep(1)
     endif
     !
     select case(bath_type)
@@ -556,7 +549,7 @@ contains
     endif
     twin_mask=.true.
     if(ed_twin)then
-       write(LOGfile,*)"USE WITH CAUTION: TWIN STATES IN SC CHANNEL!!";call sleep(1)
+       write(LOGfile,*)"USE WITH CAUTION: TWIN STATES IN SC CHANNEL!!"
        do isector=1,Nsectors
           sz=getsz(isector)
           if(sz>0)twin_mask(isector)=.false.
@@ -711,7 +704,6 @@ contains
     twin_mask=.true.
     if(ed_twin)then
        write(LOGfile,*)"TWIN STATES IN nonSU2 CHANNEL: NOT TESTED!!"
-       call sleep(3)
        do isector=1,Nsectors
           call get_Ntot(isector,in)
           if(in>Ns)twin_mask(isector)=.false.

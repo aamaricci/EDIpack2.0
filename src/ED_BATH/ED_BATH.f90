@@ -367,7 +367,7 @@ contains
     logical,optional                            :: wdiag,uplo
     logical                                     :: wdiag_,uplo_
     logical,dimension(Nspin,Nspin,Norb,Norb)    :: Hmask
-    integer                                  :: iorb,jorb,ispin,io,jo
+    integer                                  :: iorb,jorb,ispin,jspin,io,jo
     !
     wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
     uplo_ =.false.;if(present(uplo))  uplo_=uplo
@@ -386,11 +386,13 @@ contains
     !
     if(uplo_)then
        do ispin=1,Nspin
-          do iorb=1,Norb
-             do jorb=1,Norb
-                io = index_stride_so(ispin,iorb)
-                jo = index_stride_so(ispin,jorb)
-                if(io>jo)Hmask(ispin,ispin,iorb,jorb)=.false.
+          do jspin=1,Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   io = index_stride_so(ispin,iorb)
+                   jo = index_stride_so(jspin,jorb)
+                   if(io>jo)Hmask(ispin,jspin,iorb,jorb)=.false.
+                enddo
              enddo
           enddo
        enddo

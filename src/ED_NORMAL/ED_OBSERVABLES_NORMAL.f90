@@ -275,7 +275,6 @@ contains
        do jorb=iorb+1,Norb
           exct_s0(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb))
           exct_tz(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb))
-          print*,exct_s0(iorb,jorb),exct_tz(iorb,jorb)
        enddo
     enddo
     !

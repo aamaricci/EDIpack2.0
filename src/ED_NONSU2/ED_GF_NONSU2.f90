@@ -62,6 +62,17 @@ contains
     impGmats=zero
     impGreal=zero
     !
+    write(LOGfile,"(A)")""
+    write(LOGfile,"(A)")"Get mask(G):"
+    Hmask= .true.
+    if(.not.ed_all_g)Hmask=mask_hloc(impHloc,wdiag=.true.,uplo=.false.)
+    do ispin=1,Nspin
+       do iorb=1,Norb
+          write(*,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
+       enddo
+    enddo
+
+    !
     !Here we evaluate the same orbital, same spin GF: G_{aa}^{ss}(z)
     do ispin=1,Nspin
        do iorb=1,Norb
@@ -73,7 +84,6 @@ contains
        enddo
     enddo
     !
-    Hmask=.true.!mask_hloc(impHloc,wdiag=.true.,uplo=.true.)
     !
     !same orbital, different spin GF: G_{aa}^{ss'}(z)
     do ispin=1,Nspin
