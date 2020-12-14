@@ -68,9 +68,9 @@ contains
        if(MPIMASTER)call stop_timer(unit=logfile)
        !
        impGmats(ispin,ispin,iorb,iorb,:) = auxGmats(1,:) !this is G_{iorb,iorb} = G_{up,up;iorb,iorb}
-       impGreal(ispin,ispin,iorb,iorb,:) = auxGreal(1,:)
+       impGreal(ispin,ispin,iorb,iorb,:) = auxGreal(1,:)  
        barGmats(                 iorb,:) = auxGmats(2,:) !this is \bar{G}_{iorb,iorb} = \bar{G}_{dw,dw;iorb,iorb}
-       barGreal(                 iorb,:) = auxGreal(2,:)
+       barGreal(                 iorb,:) = auxGreal(2,:)    
        impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-auxGmats(1,:)-auxGmats(2,:))
        impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-auxGreal(1,:)-auxGreal(2,:))
        !
@@ -195,7 +195,7 @@ contains
              if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
-                call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)
+                call apply_op_C(i,j,sgn,iorb,ialfa,2,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
                 vvinit(j) = sgn*state_cvec(i)
              enddo
@@ -509,16 +509,16 @@ contains
     !
     Nlanc = size(alanc)
     !
-    if((finiteT).and.(beta*(Ei-Egs).lt.200))then
-       pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
-    elseif(.not.finiteT)then
-       pesoBZ = vnorm2/zeta_function
-    else
-       pesoBZ=0.d0
-    endif
+    ! if((finiteT).and.(beta*(Ei-Egs).lt.200))then
+    !    pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
+    ! elseif(.not.finiteT)then
+    !    pesoBZ = vnorm2/zeta_function
+    ! else
+    !    pesoBZ=0.d0
+    ! endif
     !
-    ! pesoBZ = vnorm2/zeta_function
-    ! if(finiteT)pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
+    pesoBZ = vnorm2/zeta_function
+    if(finiteT)pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
     !
     !Only the nodes in Mpi_Comm_Group did get the alanc,blanc.
     !However after delete_sectorHv MpiComm returns to be the global one
@@ -532,13 +532,6 @@ contains
     endif
 #endif
     !
-    ! itype=(3+isign)/2
-    ! diag             = 0.d0
-    ! subdiag          = 0.d0
-    ! Z                = eye(Nlanc)
-    ! diag(1:Nlanc)    = alanc(1:Nlanc)
-    ! subdiag(2:Nlanc) = blanc(2:Nlanc)
-    ! call tql2(Nlanc,diag,subdiag,Z,ierr)
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))

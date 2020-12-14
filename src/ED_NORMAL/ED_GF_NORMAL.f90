@@ -48,7 +48,7 @@ contains
   !PURPOSE  : Evaluate the Green's function of the impurity electrons
   ! & phonons D = -<x(\tau)x(0)> with x = (b + b^+)
   subroutine build_gf_normal()
-    integer                                     :: iorb,jorb,ispin,i
+    integer                                     :: iorb,jorb,ispin,jspin,i
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
@@ -63,7 +63,15 @@ contains
     enddo
     !
     if(offdiag_gf_flag)then
-       Hmask=mask_hloc(impHloc,wdiag=.true.,uplo=.true.)
+       write(LOGfile,"(A)")""
+       write(LOGfile,"(A)")"Get mask(G):"
+       Hmask= .true.
+       if(.not.ed_all_g)Hmask=mask_hloc(impHloc,wdiag=.true.,uplo=.false.)
+       do ispin=1,Nspin
+          do iorb=1,Norb
+             write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
+          enddo
+       enddo
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb

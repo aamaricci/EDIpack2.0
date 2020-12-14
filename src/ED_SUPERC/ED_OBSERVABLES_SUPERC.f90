@@ -170,7 +170,10 @@ contains
                 if(allocated(vvinit))deallocate(vvinit)
              enddo
           enddo
-          phisc(iorb) = 0.5d0*(phisc(iorb) - dens_up(iorb) - (1.d0-dens_dw(iorb)))
+          !
+          do iorb=1,Norb
+             phisc(iorb) = 0.5d0*(phisc(iorb) - dens_up(iorb) - (1.d0-dens_dw(iorb)))
+          enddo
        endif
        !
 #ifdef _MPI
@@ -205,7 +208,7 @@ contains
        ed_dens(iorb)   =dens(iorb)
        ed_docc(iorb)   =docc(iorb)
        ed_phisc(iorb)  =phisc(iorb)
-       ed_mag(1,iorb)  =magX(iorb)
+       ed_mag(1,iorb)  =magZ(iorb)
     enddo
 #ifdef _MPI
     if(MpiStatus)then

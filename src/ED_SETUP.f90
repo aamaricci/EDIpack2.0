@@ -29,12 +29,11 @@ contains
     if(.not.ed_total_ud)then
        if(bath_type=="hybrid")stop "ED ERROR: ed_total_ud=F can not be used with bath_type=hybrid"
        if(Jhflag)stop "ED ERROR: ed_total_ud=F can not be used with Jx!=0 OR Jp!=0"
-       ! !<ACTHUNG:
-       ! lanc_dim_threshold=2
     endif
     !
     if(ed_mode=="superc")then
-       if(Nspin>1)stop "ED ERROR: SC + AFM is currently not supported ." 
+       if(Nspin>1)stop "ED ERROR: SC + AFM is currently not supported ."
+       if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
     endif
     if(ed_mode=="nonsu2")then
        if(Nspin/=2)then
@@ -73,6 +72,12 @@ contains
     if(ed_sectors.AND.ed_mode/="normal")then
        stop "ED_ERROR: using ed_sectors with ed_mode=[superc,nonsu2] NOT TESTED! Uncomment this line in ED_SETUP if u want to take the risk.."
     endif
+
+    ! if(ed_mode=="superc".AND.cg_grad==0)then
+    !    write(LOGfile,*)"ED_WARNING: chi2_figgf_*_superc: revert to cg_grad=1(numeric)"
+    !    cg_grad=1
+    ! endif
+
   end subroutine ed_checks_global
 
 

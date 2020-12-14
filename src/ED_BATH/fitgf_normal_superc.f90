@@ -68,7 +68,7 @@ subroutine chi2_fitgf_normal_superc(fg,bath_,ispin,iorb)
      if(present(iorb))then
         if(jorb/=iorb)cycle
      endif
-     Orb_indx=iorb
+     Orb_indx=jorb
      Spin_indx=ispin
      !
      Gdelta(1,1:Ldelta) = fg(1,jorb,jorb,1:Ldelta)
@@ -98,6 +98,7 @@ subroutine chi2_fitgf_normal_superc(fg,bath_,ispin,iorb)
            select case (cg_scheme)
            case ("weiss")
               call fmin_cg(array_bath,chi2_weiss_normal_superc,grad_chi2_weiss_normal_superc,&
+                                ! call fmin_cg(array_bath,chi2_weiss_normal_superc,&
                    iter,chi,&
                    itmax=cg_niter,&
                    ftol=cg_Ftol,  &
@@ -105,6 +106,7 @@ subroutine chi2_fitgf_normal_superc(fg,bath_,ispin,iorb)
                    iverbose=(ed_verbose>3))
            case ("delta")
               call fmin_cg(array_bath,chi2_delta_normal_superc,grad_chi2_delta_normal_superc,&
+                                ! call fmin_cg(array_bath,chi2_delta_normal_superc,&
                    iter,chi,&
                    itmax=cg_niter,&
                    ftol=cg_Ftol,  &
@@ -221,7 +223,7 @@ contains
           write(gunit,"(5F24.15)")Xdelta(i),&
                dimag(fg(1,jorb,jorb,i)),dimag(fgand(ispin,ispin,jorb,jorb,i)),&
                dreal(fg(1,jorb,jorb,i)),dreal(fgand(ispin,ispin,jorb,jorb,i))
-          write(gunit,"(5F24.15)")Xdelta(i),&
+          write(funit,"(5F24.15)")Xdelta(i),&
                dimag(fg(2,jorb,jorb,i)),dimag(ffand(ispin,ispin,jorb,jorb,i)),&
                dreal(fg(2,jorb,jorb,i)),dreal(ffand(ispin,ispin,jorb,jorb,i))
        enddo
@@ -407,7 +409,7 @@ function grad_delta_normal_superc(a) result(dDelta)
   !
   !\grad_{\D_{a}(k)} \Delta_{bb} = V_{a}(k)*V_{a}(k)*\D_{a}(k)*(iw_n + E_{a}(k)) /den(k)**2
   !
-  !\grad_{ V_{a}(k)} \Delta_{bb} =  2*V_{a}(k)*(iw_n + E_{a}(k))/den(k)
+  !\grad_{ V_{a}(k)} \Delta_{bb} = -2*V_{a}(k)*(iw_n + E_{a}(k))/den(k)
   !
   !
   !
@@ -461,7 +463,7 @@ function grad_delta_normal_superc(a) result(dDelta)
   stride = Nbath
   do k=1,Nbath
      ik = stride + k
-     dDelta(2,:,ik) = vps(k)*vps(k)*(1d0/Den(:,k) - 2d0*dps(k)*dps(k)/Den(:,k)**2)
+     dDelta(2,:,ik) = vps(k)*vps(k)*(1d0/Den(:,k) - 2d0*dps(k)*dps(k)/Den(:,k)**2) 
   enddo
   stride = 2*Nbath
   do k=1,Nbath
