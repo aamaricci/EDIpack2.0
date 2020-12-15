@@ -310,26 +310,56 @@ INSTALL(FILES ${TMP_CONFIGVARS_FILE} DESTINATION ${LIB_TARGET_ETC}/
 INSTALL(FILES ${TMP_VER_FILE} DESTINATION ${LIB_TARGET_DIR} 
   PERMISSIONS ${PERMISSION_777} SETUID)
 
+INSTALL(FILES ${LIB_TARGET_ETC}/${PROJECT_NAME}.pc DESTINATION $ENV{HOME}/.pkgconfig.d/
+  PERMISSIONS ${PERMISSION_777} SETUID)
+
+INSTALL(DIRECTORY ${LIB_TARGET_ETC}/modules/ DESTINATION $ENV{HOME}/.modules.d)
 
 
 MESSAGE( STATUS "${Red}Library version:${ColourReset} ${VERSION}")
 MESSAGE( STATUS "${Red}Library will be installed in:${ColourReset} ${CMAKE_INSTALL_PREFIX}")
-MESSAGE( STATUS "${Yellow}To conclude installation:${ColourReset} 
+MESSAGE( STATUS "
+>> ${Red}TO CONCLUDE INSTALLATION${ColourReset} <<
+Compile with:
 $ make
+
+Install with:
 $ make install
-$ make post-install
+
+Uninstall with:
+$ make uninstall
+
+Add library to your OS: 
+pick ONE method below  [add it in your bash profile to make it permanent (e.g. ~/.bashrc)]:
+${Yellow}Method 1: use the provided ${PROJECT_NAME} environment module${ColourReset}:
+   $ module use $HOME/.modules.d
+   $ module load ${PROJECT_NAME}/${FC_PLAT}
+
+${Yellow}Method 2: source the config script${ColourReset}:
+   $ source ${LIB_TARGET_ETC}/dmft_ed_config.sh
+
+${Yellow}Method 3: use pkg-config with the provided ${PROJECT_NAME}.pc${ColourReset}:
+   $ export PKG_CONFIG_PATH=${LIB_TARGET_ETC}/:$PKG_CONFIG_PATH
+   $ pkg-config --cflags --libs ${PROJECT_NAME} (to get lib info)
 ")
 
-
-ADD_CUSTOM_TARGET(
-  post-install
-  COMMAND "${CMAKE_COMMAND}" -P ${CMAKE_MODULE_PATH}/HomeInstall.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_INSTALL_PREFIX} ${PROJECT_NAME} ${FULL_VER} 
-  WORKING_DIRECTORY
-  "${CMAKE_BINARY_DIR}"
-)
 
 
 # Add a distclean target to the Makefile
 ADD_CUSTOM_TARGET(distclean 
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/distclean.cmake
 )
+
+
+# Uninstall target
+if(NOT TARGET uninstall)
+  CONFIGURE_FILE(
+    "${CMAKE_MODULE_PATH}/ConfigUninstall.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+  ADD_CUSTOM_TARGET(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+    "${PROJECT_NAME}/${TMP_MODULE_NAME}" "${PROJECT_NAME}.pc" )
+  
+ENDIF()
