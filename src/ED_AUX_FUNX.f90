@@ -38,6 +38,13 @@ MODULE ED_AUX_FUNX
   end interface print_state_vector
 
 
+  interface ed_set_suffix
+     module procedure :: ed_set_suffix_i
+     module procedure :: ed_set_suffix_d
+     module procedure :: ed_set_suffix_c
+  end interface ed_set_suffix
+
+
   !FERMIONIC OPERATORS IN BITWISE OPERATIONS
   public :: c,cdg
   !AUX BIT OPERATIONS
@@ -98,8 +105,31 @@ MODULE ED_AUX_FUNX
   !PRINT STATE VECTORS
   public :: print_state_vector 
 
+  public :: ed_set_suffix
+  public :: ed_reset_suffix
+
 
 contains
+
+
+  subroutine ed_reset_suffix()
+    ed_file_suffix=''
+  end subroutine ed_reset_suffix
+
+  subroutine ed_set_suffix_i(indx)
+    integer :: indx
+    ed_file_suffix=reg(ineq_site_suffix)//str(indx,site_indx_padding)
+  end subroutine ed_set_suffix_i
+  subroutine ed_set_suffix_d(indx)
+    real(8) :: indx
+    ed_file_suffix=reg(ineq_site_suffix)//str(indx)
+  end subroutine ed_set_suffix_d
+  subroutine ed_set_suffix_c(indx)
+    character(len=*) :: indx
+    ed_file_suffix=reg(ineq_site_suffix)//reg(indx)
+  end subroutine ed_set_suffix_c
+
+
 
 
   !##################################################################

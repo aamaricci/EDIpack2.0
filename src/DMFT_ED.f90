@@ -21,6 +21,7 @@ MODULE DMFT_ED
 
 
   USE ED_AUX_FUNX, only:                        &
+       ed_set_suffix,ed_reset_suffix           ,&       
        ed_so2os_reshape                 => so2os_reshape                          ,&
        ed_os2so_reshape                 => os2so_reshape                          ,&
        ed_search_variable                     ,&
