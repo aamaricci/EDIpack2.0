@@ -519,7 +519,6 @@ contains
        phisc_ineq(ilat,1:Norb)     = ed_phisc(1:Norb)
        e_ineq(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
        dd_ineq(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-       !
        imp_density_matrix_ineq(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
        !
     enddo
@@ -532,12 +531,13 @@ contains
 
 
   !FALL BACK: DO A VERSION THAT DOES THE SITES IN PARALLEL USING SERIAL ED CODE
-#ifdef _MPI
-  subroutine ed_solve_lattice_mpi(MpiComm,bath,Hloc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii)
+#ifdef _MPI  
+  subroutine ed_solve_lattice_mpi(MpiComm,bath,Hloc,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii)
     integer          :: MpiComm
     !inputs
     real(8)          :: bath(:,:) ![Nlat][Nb]
     complex(8)       :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
+    logical,optional :: mpi_lanc
     real(8),optional :: Uloc_ii(size(bath,1),Norb)
     real(8),optional :: Ust_ii(size(bath,1))
     real(8),optional :: Jh_ii(size(bath,1))
@@ -560,7 +560,7 @@ contains
     real(8)          :: phisc_tmp(size(bath,1),Norb)
     real(8)          :: e_tmp(size(bath,1),4)
     real(8)          :: dd_tmp(size(bath,1),4)
-    !
+    !    
     complex(8)       :: imp_density_matrix_tmp(size(bath,1),Nspin,Nspin,Norb,Norb)
     !
     integer          :: neigen_sectortmp(size(bath,1),Nsectors)
@@ -568,7 +568,7 @@ contains
     ! 
     integer          :: i,j,ilat,iorb,jorb,ispin,jspin
     integer          :: Nineq
-    logical          :: check_dim
+    logical          :: check_dim,mpi_lanc_
     character(len=5) :: tmp_suffix
     !
     integer          :: MPI_ID=0
@@ -581,124 +581,150 @@ contains
     MPI_SIZE   = get_Size_MPI(MpiComm)
     MPI_MASTER = get_Master_MPI(MpiComm)
     !
+    mpi_lanc_=.false.;if(present(mpi_lanc))mpi_lanc_=mpi_lanc
+    !
     ! Check dimensions !
     Nineq=size(bath,1)
     !
     if(size(neigen_sector_ineq,1)<Nineq)stop "ed_solve_lattice error: size(neigen_sectorii,1)<Nineq"
     if(size(neigen_total_ineq)<Nineq)stop "ed_solve_lattice error: size(neigen_totalii,1)<Nineq"
     !
-    !Check the dimensions of the bath are ok:
+    !Check the dimensions of the bath are ok.
+    !This can always be done in parallel no issues with mpi_lanc
     do ilat=1+MPI_ID,Nineq,MPI_SIZE
        check_dim = check_bath_dimension(bath(ilat,:))
        if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
     end do
-    Smats_tmp  = zero
-    Sreal_tmp  = zero
-    SAmats_tmp = zero
-    SAreal_tmp = zero
-    Gmats_tmp  = zero
-    Greal_tmp  = zero
-    Fmats_tmp  = zero
-    Freal_tmp  = zero
-    Dmats_tmp  = zero
-    Dreal_tmp  = zero
-    dens_tmp   = 0d0
-    docc_tmp   = 0d0
-    mag_tmp    = 0d0
-    phisc_tmp  = 0d0
-    e_tmp      = 0d0
-    dd_tmp     = 0d0
-    imp_density_matrix_tmp = zero
+    !
+    Smats_ineq    = zero ; Sreal_ineq    = zero ; SAmats_ineq   = zero ; SAreal_ineq   = zero 
+    Gmats_ineq    = zero ; Greal_ineq    = zero ; Fmats_ineq    = zero ; Freal_ineq    = zero
+    Dmats_ph_ineq = zero ; Dreal_ph_ineq = zero 
+    dens_ineq     = 0d0  ; docc_ineq     = 0d0
+    mag_ineq      = 0d0  ; phisc_ineq    = 0d0  
+    e_ineq        = 0d0  ; dd_ineq       = 0d0 
+    neigen_sector_ineq=0 ; neigen_total_ineq =0
+    imp_density_matrix_ineq = zero
+    !
+    Smats_tmp  = zero ; Sreal_tmp  = zero ; SAmats_tmp = zero ; SAreal_tmp = zero
+    Gmats_tmp  = zero ; Greal_tmp  = zero ; Fmats_tmp  = zero ; Freal_tmp  = zero
+    Dmats_tmp  = zero ; Dreal_tmp  = zero
+    dens_tmp   = 0d0  ; docc_tmp   = 0d0
+    mag_tmp    = 0d0  ; phisc_tmp  = 0d0
+    e_tmp      = 0d0  ; dd_tmp     = 0d0
     neigen_sectortmp = 0
     neigen_totaltmp  = 0
+    imp_density_matrix_tmp = zero
     !
-    if(MPI_MASTER)call start_timer
-    do ilat = 1 + MPI_ID, Nineq, MPI_SIZE
-       write(LOGfile,*)str(MPI_ID)//" SOLVES INEQ SITE: "//str(ilat,Npad=4)
+    select case(mpi_lanc_)
+    case default              !mpi_lanc=False => solve sites with MPI
+       if(MPI_MASTER)call start_timer
+       do ilat = 1 + MPI_ID, Nineq, MPI_SIZE
+          write(LOGfile,*)str(MPI_ID)//" SOLVES INEQ SITE: "//str(ilat,Npad=4)
+          !
+          ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
+          !
+          !If required set the local value of U per each site
+          if(present(Uloc_ii))Uloc(1:Norb) = Uloc_ii(ilat,1:Norb)
+          if(present(Ust_ii)) Ust = Ust_ii(ilat)
+          if(present(Jh_ii))  Jh  = Jh_ii(ilat)
+          if(present(Jp_ii))  Jp  = Jp_ii(ilat)
+          if(present(Jx_ii))  Jx  = Jx_ii(ilat)
+          !
+          !Solve the impurity problem for the ilat-th site
+          neigen_sector(:)   = neigen_sector_ineq(ilat,:)
+          lanc_nstates_total = neigen_total_ineq(ilat)
+          !
+          !Call ed_solve in SERIAL MODE!! This is parallel on the ineq. sites
+          call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:))
+          !
+          neigen_sectortmp(ilat,:)   = neigen_sector(:)
+          neigen_totaltmp(ilat)      = lanc_nstates_total
+          Smats_tmp(ilat,:,:,:,:,:)  = impSmats(:,:,:,:,:)
+          Sreal_tmp(ilat,:,:,:,:,:)  = impSreal(:,:,:,:,:)
+          SAmats_tmp(ilat,:,:,:,:,:) = impSAmats(:,:,:,:,:)
+          SAreal_tmp(ilat,:,:,:,:,:) = impSAreal(:,:,:,:,:)
+          Gmats_tmp(ilat,:,:,:,:,:)  = impGmats(:,:,:,:,:)
+          Greal_tmp(ilat,:,:,:,:,:)  = impGreal(:,:,:,:,:)
+          Fmats_tmp(ilat,:,:,:,:,:)  = impFmats(:,:,:,:,:)
+          Freal_tmp(ilat,:,:,:,:,:)  = impFreal(:,:,:,:,:)
+          Dmats_tmp(ilat,:)          = impDmats_ph(:)
+          Dreal_tmp(ilat,:)          = impDreal_ph(:)
+          dens_tmp(ilat,1:Norb)      = ed_dens(1:Norb)
+          docc_tmp(ilat,1:Norb)      = ed_docc(1:Norb)
+          mag_tmp(ilat,:,1:Norb)     = ed_mag(:,1:Norb)
+          phisc_tmp(ilat,1:Norb)     = ed_phisc(1:Norb)
+          e_tmp(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
+          dd_tmp(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
+          imp_density_matrix_tmp(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+       enddo
+       call MPI_Barrier(MpiComm,MPI_ERR)
+       if(MPI_MASTER)call stop_timer(unit=LOGfile)
+       ed_file_suffix=""
        !
-       ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
+       call AllReduce_MPI(MpiComm,Smats_tmp,Smats_ineq)
+       call AllReduce_MPI(MpiComm,Sreal_tmp,Sreal_ineq)
+       call AllReduce_MPI(MpiComm,SAmats_tmp,SAmats_ineq)
+       call AllReduce_MPI(MpiComm,SAreal_tmp,SAreal_ineq)
+       call AllReduce_MPI(MpiComm,Gmats_tmp,Gmats_ineq)
+       call AllReduce_MPI(MpiComm,Greal_tmp,Greal_ineq)
+       call AllReduce_MPI(MpiComm,Fmats_tmp,Fmats_ineq)
+       call AllReduce_MPI(MpiComm,Freal_tmp,Freal_ineq)
+       call AllReduce_MPI(MpiComm,Dmats_tmp,Dmats_ph_ineq)
+       call AllReduce_MPI(MpiComm,Dreal_tmp,Dreal_ph_ineq)
+       call AllReduce_MPI(MpiComm,dens_tmp,dens_ineq)
+       call AllReduce_MPI(MpiComm,docc_tmp,docc_ineq)
+       call AllReduce_MPI(MpiComm,mag_tmp,mag_ineq)
+       call AllReduce_MPI(MpiComm,phisc_tmp,phisc_ineq)
+       call AllReduce_MPI(MpiComm,e_tmp,e_ineq)
+       call AllReduce_MPI(MpiComm,dd_tmp,dd_ineq)
+       call AllReduce_MPI(MpiComm,imp_density_matrix_tmp,imp_density_matrix_ineq)
+       call AllReduce_MPI(MpiComm,neigen_sectortmp,neigen_sector_ineq)
+       call AllReduce_MPI(MpiComm,neigen_totaltmp,neigen_total_ineq)
        !
-       !If required set the local value of U per each site
-       if(present(Uloc_ii))Uloc(1:Norb) = Uloc_ii(ilat,1:Norb)
-       if(present(Ust_ii)) Ust = Ust_ii(ilat)
-       if(present(Jh_ii))  Jh  = Jh_ii(ilat)
-       if(present(Jp_ii))  Jp  = Jp_ii(ilat)
-       if(present(Jx_ii))  Jx  = Jx_ii(ilat)
-       !
-       !Solve the impurity problem for the ilat-th site
-       neigen_sector(:)   = neigen_sector_ineq(ilat,:)
-       lanc_nstates_total = neigen_total_ineq(ilat)
-       !
-       !Call ed_solve in SERIAL MODE!! This is parallel on the ineq. sites
-       call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:))
-       !
-       neigen_sectortmp(ilat,:)   = neigen_sector(:)
-       neigen_totaltmp(ilat)      = lanc_nstates_total
-       Smats_tmp(ilat,:,:,:,:,:)  = impSmats(:,:,:,:,:)
-       Sreal_tmp(ilat,:,:,:,:,:)  = impSreal(:,:,:,:,:)
-       SAmats_tmp(ilat,:,:,:,:,:) = impSAmats(:,:,:,:,:)
-       SAreal_tmp(ilat,:,:,:,:,:) = impSAreal(:,:,:,:,:)
-       Gmats_tmp(ilat,:,:,:,:,:)  = impGmats(:,:,:,:,:)
-       Greal_tmp(ilat,:,:,:,:,:)  = impGreal(:,:,:,:,:)
-       Fmats_tmp(ilat,:,:,:,:,:)  = impFmats(:,:,:,:,:)
-       Freal_tmp(ilat,:,:,:,:,:)  = impFreal(:,:,:,:,:)
-       Dmats_tmp(ilat,:)          = impDmats_ph(:)
-       Dreal_tmp(ilat,:)          = impDreal_ph(:)
-       dens_tmp(ilat,1:Norb)      = ed_dens(1:Norb)
-       docc_tmp(ilat,1:Norb)      = ed_docc(1:Norb)
-       mag_tmp(ilat,:,1:Norb)     = ed_mag(:,1:Norb)
-       phisc_tmp(ilat,1:Norb)     = ed_phisc(1:Norb)
-       e_tmp(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
-       dd_tmp(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-       imp_density_matrix_tmp(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
-    enddo
-    !
-    call MPI_Barrier(MpiComm,MPI_ERR)
-    !
-    if(MPI_MASTER)call stop_timer(unit=LOGfile)
-    !
-    ed_file_suffix=""
-    !
-    !
-    Smats_ineq    = zero 
-    Sreal_ineq    = zero 
-    SAmats_ineq   = zero 
-    SAreal_ineq   = zero 
-    Gmats_ineq    = zero 
-    Greal_ineq    = zero 
-    Fmats_ineq    = zero 
-    Freal_ineq    = zero
-    Dmats_ph_ineq = zero 
-    Dreal_ph_ineq = zero 
-    dens_ineq     = 0d0  
-    docc_ineq     = 0d0  
-    mag_ineq      = 0d0  
-    phisc_ineq    = 0d0  
-    e_ineq        = 0d0  
-    dd_ineq       = 0d0  
-    imp_density_matrix_ineq = zero
-    neigen_sector_ineq=0
-    neigen_total_ineq =0
-    !
-    call AllReduce_MPI(MpiComm,Smats_tmp,Smats_ineq)
-    call AllReduce_MPI(MpiComm,Sreal_tmp,Sreal_ineq)
-    call AllReduce_MPI(MpiComm,SAmats_tmp,SAmats_ineq)
-    call AllReduce_MPI(MpiComm,SAreal_tmp,SAreal_ineq)
-    call AllReduce_MPI(MpiComm,Gmats_tmp,Gmats_ineq)
-    call AllReduce_MPI(MpiComm,Greal_tmp,Greal_ineq)
-    call AllReduce_MPI(MpiComm,Fmats_tmp,Fmats_ineq)
-    call AllReduce_MPI(MpiComm,Freal_tmp,Freal_ineq)
-    call AllReduce_MPI(MpiComm,Dmats_tmp,Dmats_ph_ineq)
-    call AllReduce_MPI(MpiComm,Dreal_tmp,Dreal_ph_ineq)
-    call AllReduce_MPI(MpiComm,dens_tmp,dens_ineq)
-    call AllReduce_MPI(MpiComm,docc_tmp,docc_ineq)
-    call AllReduce_MPI(MpiComm,mag_tmp,mag_ineq)
-    call AllReduce_MPI(MpiComm,phisc_tmp,phisc_ineq)
-    call AllReduce_MPI(MpiComm,e_tmp,e_ineq)
-    call AllReduce_MPI(MpiComm,dd_tmp,dd_ineq)
-    call AllReduce_MPI(MpiComm,imp_density_matrix_tmp,imp_density_matrix_ineq)
-    call AllReduce_MPI(MpiComm,neigen_sectortmp,neigen_sector_ineq)
-    call AllReduce_MPI(MpiComm,neigen_totaltmp,neigen_total_ineq)
+       !       
+    case(.true.)                !solve sites serial, Lanczos with MPI
+       if(MPI_MASTER)call start_timer
+       do ilat = 1, Nineq
+          write(LOGfile,*)" SOLVES INEQ SITE: "//str(ilat,Npad=4)
+          ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
+          !
+          !If required set the local value of U per each site
+          if(present(Uloc_ii))Uloc(1:Norb) = Uloc_ii(ilat,1:Norb)
+          if(present(Ust_ii)) Ust = Ust_ii(ilat)
+          if(present(Jh_ii))  Jh  = Jh_ii(ilat)
+          if(present(Jp_ii))  Jp  = Jp_ii(ilat)
+          if(present(Jx_ii))  Jx  = Jx_ii(ilat)
+          !
+          !Solve the impurity problem for the ilat-th site
+          neigen_sector(:)   = neigen_sector_ineq(ilat,:)
+          lanc_nstates_total = neigen_total_ineq(ilat)
+          !
+          !Call ed_solve in SERIAL MODE!! This is parallel on the ineq. sites
+          call ed_solve_single_mpi(MpiComm,bath(ilat,:),Hloc(ilat,:,:,:,:))
+          !
+          neigen_sector_ineq(ilat,:)  = neigen_sector(:)
+          neigen_total_ineq(ilat)     = lanc_nstates_total
+          Smats_ineq(ilat,:,:,:,:,:)  = impSmats(:,:,:,:,:)
+          Sreal_ineq(ilat,:,:,:,:,:)  = impSreal(:,:,:,:,:)
+          SAmats_ineq(ilat,:,:,:,:,:) = impSAmats(:,:,:,:,:)
+          SAreal_ineq(ilat,:,:,:,:,:) = impSAreal(:,:,:,:,:)
+          Gmats_ineq(ilat,:,:,:,:,:)  = impGmats(:,:,:,:,:)
+          Greal_ineq(ilat,:,:,:,:,:)  = impGreal(:,:,:,:,:)
+          Fmats_ineq(ilat,:,:,:,:,:)  = impFmats(:,:,:,:,:)
+          Freal_ineq(ilat,:,:,:,:,:)  = impFreal(:,:,:,:,:)
+          Dmats_ph_ineq(ilat,:)       = impDmats_ph(:)
+          Dreal_ph_ineq(ilat,:)       = impDreal_ph(:)
+          dens_ineq(ilat,1:Norb)      = ed_dens(1:Norb)
+          docc_ineq(ilat,1:Norb)      = ed_docc(1:Norb)
+          mag_ineq(ilat,:,1:Norb)     = ed_mag(:,1:Norb)
+          phisc_ineq(ilat,1:Norb)     = ed_phisc(1:Norb)
+          e_ineq(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
+          dd_ineq(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
+          imp_density_matrix_ineq(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+       enddo
+       if(MPI_MASTER)call stop_timer(unit=LOGfile)
+       ed_file_suffix=""
+    end select
     !
   end subroutine ed_solve_lattice_mpi
 #endif
@@ -711,22 +737,3 @@ end module ED_MAIN
 
 
 
-
-! call MPI_ALLREDUCE(Smats_tmp,Smats_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lmats,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(Sreal_tmp,Sreal_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lreal,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(SAmats_tmp,SAmats_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lmats,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(SAreal_tmp,SAreal_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lreal,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(Gmats_tmp,Gmats_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lmats,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(Greal_tmp,Greal_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lreal,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(Fmats_tmp,Fmats_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lmats,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(Freal_tmp,Freal_ineq,Nineq*Nspin*Nspin*Norb*Norb*Lreal,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(dens_tmp,n_ineq,Nineq*Norb,MPI_DOUBLE_PRECISION,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(docc_tmp,dens_ineq,Nineq*Norb,MPI_DOUBLE_PRECISION,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(mag_tmp,mag_ineq,Nineq*Norb,MPI_DOUBLE_PRECISION,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(phisc_tmp,phisc_ineq,Nineq*Norb,MPI_DOUBLE_PRECISION,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(e_tmp,e_ineq,Nineq*4,MPI_DOUBLE_PRECISION,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(dd_tmp,dd_ineq,Nineq*4,MPI_DOUBLE_PRECISION,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(imp_density_matrix_tmp,imp_density_matrix_ineq,Nineq*Nspin*Nspin*Norb*Norb,MPI_DOUBLE_COMPLEX,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(neigen_sectortmp,neigen_sector_ineq,Nineq*Nsectors,MPI_INTEGER,MPI_SUM,MpiComm,mpi_err)
-! call MPI_ALLREDUCE(neigen_totaltmp,neigen_total_ineq,Nineq,MPI_INTEGER,MPI_SUM,MpiComm,mpi_err)
-!
