@@ -27,8 +27,8 @@ MODULE ED_OBSERVABLES_NONSU2
   real(8),dimension(:,:),allocatable    :: sz2,n2
   real(8),dimension(:,:),allocatable    :: exct_s0
   real(8),dimension(:,:),allocatable    :: exct_tz
-  complex(8),dimension(:,:),allocatable :: exct_tx
-  complex(8),dimension(:,:),allocatable :: exct_ty
+  real(8),dimension(:,:),allocatable    :: exct_tx
+  real(8),dimension(:,:),allocatable    :: exct_ty
   real(8),dimensioN(:,:),allocatable    :: zimp,simp
   real(8)                               :: s2tot
   real(8)                               :: Egs
@@ -70,7 +70,9 @@ contains
   subroutine observables_nonsu2()
     integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
     real(8),dimension(Norb)         :: nup,ndw,Sz,nt
-    real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw,theta_updw,theta_dwup
+    real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw
+    real(8),dimension(Norb,Norb)    :: theta_updw,theta_dwup
+    real(8),dimension(Norb,Norb)    :: omega_updw,omega_dwup
     !
     !LOCAL OBSERVABLES:
     ! density, 
@@ -99,12 +101,14 @@ contains
     s2tot   = 0.d0
     exct_s0 = 0d0
     exct_tz = 0d0
-    exct_tx = zero
-    exct_ty = zero
+    exct_tx = 0d0
+    exct_ty = 0d0
     theta_upup = 0d0
     theta_dwdw = 0d0
     theta_updw = 0d0
     theta_dwup = 0d0
+    omega_updw = 0d0
+    omega_dwup = 0d0
     !
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
@@ -265,10 +269,7 @@ contains
 
     !
     !EVALUATE EXCITON OP <S_ab> AND <T^x,y,z_ab>
-    !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
-    !<T^z_ab>:=   <C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}>
-    !<T^x_ab>:=   <C^+_{a,up}C_{b,dw} + C^+_{a,dw}C_{b,up}>
-    !<T^y_ab>:= -i<C^+_{a,up}C_{b,dw} - C^+_{a,dw}C_{b,up}>
+
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
@@ -286,11 +287,19 @@ contains
        peso = peso/zeta_function
        !
        if(Mpimaster)call build_sector(isector,sectorI)
-       !    
+       !
+       !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
+       !<T^z_ab>:=   <C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}>
+       ! O_uu  = a_up + b_up
+       ! O_dd  = a_dw + b_dw
+       !|v_up> = O_uu|v>
+       !|v_dw> = O_dd|v> 
+       ! Theta_uu = <v_up|v_up>
+       ! Theta_dd = <v_dw|v_dw>
        do iorb=1,Norb
           do jorb=iorb+1,Norb
              !
-             !\Theta_upup = <v|v>, |v> = (C_aup + C_bup)|>
+             !|v_up> = (C_aup + C_bup)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
                 if(Mpimaster)then
@@ -313,7 +322,7 @@ contains
                 endif
              endif
              !
-             !\Theta_dwdw = <v|v>, |v> = (C_adw + C_bdw)|>
+             !|v_dw> = (C_adw + C_bdw)|>
              jsector = getCsector(1,2,isector)
              if(jsector/=0)then
                 if(Mpimaster)then
@@ -335,8 +344,20 @@ contains
                    if(allocated(vvinit))deallocate(vvinit)
                 endif
              endif
+          enddo
+       enddo
+       !
+       !<T^x_ab>:=   <C^+_{a,up}C_{b,dw} + C^+_{a,dw}C_{b,up}>
+       ! O_ud  = a_up + b_dw
+       ! O_du  = a_dw + b_up
+       !|v_ud> = O_ud|v>
+       !|v_du> = O_du|v> 
+       ! Theta_ud = <v_ud|v_ud>
+       ! Theta_du = <v_du|v_du>       
+       do iorb=1,Norb
+          do jorb=iorb+1,Norb
              !
-             !\Theta_updw = <v|v>, |v> = (C_aup + C_bdw)|>
+             !|v_ud> = (C_aup + C_bdw)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
                 if(Mpimaster)then
@@ -353,13 +374,13 @@ contains
                       vvinit(j) = vvinit(j) + sgn*state_cvec(i)
                    enddo
                    call delete_sector(sectorJ)
-                   !
+                   !Theta_ud = <v_ud|v_ud>
                    theta_updw(iorb,jorb) = theta_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
                    if(allocated(vvinit))deallocate(vvinit)
                 endif
              endif
              !
-             !\Theta_dwup = <v|v>, |v> = (C_adw + C_bup)|>
+             !|v_du> = (C_adw + C_bup)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
                 if(Mpimaster)then
@@ -376,11 +397,69 @@ contains
                       vvinit(j) = vvinit(j) + sgn*state_cvec(i)
                    enddo
                    call delete_sector(sectorJ)
-                   !
+                   !Theta_du = <v_du|v_du>
                    theta_dwup(iorb,jorb) = theta_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
                    if(allocated(vvinit))deallocate(vvinit)
                 endif
              endif
+          enddo
+       enddo
+       !
+       !<T^y_ab>:= -i<C^+_{a,up}C_{b,dw} - C^+_{a,dw}C_{b,up}>
+       ! K_ud  = a_up - i*b_dw
+       ! K_du  = a_dw - i*b_up
+       !|w_ud> = K_ud|v>
+       !|w_du> = K_du|v> 
+       ! Omega_ud = <v_ud|v_ud>
+       ! Omega_du = <v_du|v_du>    
+       do iorb=1,Norb
+          do jorb=iorb+1,Norb
+             !|w_ud> = (C_aup - xi*C_bdw)|>
+             jsector = getCsector(1,1,isector)
+             if(jsector/=0)then
+                if(Mpimaster)then
+                   call build_sector(jsector,sectorJ)
+                   allocate(vvinit(sectorJ%Dim));vvinit=zero
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !-i*c_b,dw
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = -xi*sgn*state_cvec(i)
+                   enddo
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                   enddo
+                   call delete_sector(sectorJ)
+                   !Omega_ud = <w_ud|w_ud>
+                   omega_updw(iorb,jorb) = omega_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   if(allocated(vvinit))deallocate(vvinit)
+                endif
+             endif
+             !
+             !|w_du> = (C_adw - i*C_bup)|>
+             jsector = getCsector(1,1,isector)
+             if(jsector/=0)then
+                if(Mpimaster)then
+                   call build_sector(jsector,sectorJ)
+                   allocate(vvinit(sectorJ%Dim));vvinit=zero
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !-i*c_b,up
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = -xi*sgn*state_cvec(i)
+                   enddo
+                   do i=1,sectorI%Dim
+                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
+                      if(sgn==0d0.OR.j==0)cycle
+                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                   enddo
+                   call delete_sector(sectorJ)
+                   !Omega_du = <w_du|w_du>
+                   omega_dwup(iorb,jorb) = omega_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   if(allocated(vvinit))deallocate(vvinit)
+                endif
+             endif
+             !
           enddo
        enddo
        !
@@ -395,12 +474,16 @@ contains
 #endif
        !
     enddo
+    ! <S_ab>  = Theta_uu + Theta_dd - n_a - n_b
+    ! <T^z_ab>= Theta_uu - Theta_dd - m_a - m_b
+    ! <T^x_ab>= Theta_ud + Theta_du - n_a - n_b
+    ! <T^y_ab>= Omega_ud - Omega_du - m_a - m_b
     do iorb=1,Norb
        do jorb=iorb+1,Norb
-          exct_s0(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb))
-          exct_tz(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb))
-          exct_tx(iorb,jorb) = 0.5d0*(theta_updw(iorb,jorb) + theta_dwup(iorb,jorb) - dens(iorb) - dens(jorb))
-          exct_ty(iorb,jorb) = -xi*0.5d0*(theta_updw(iorb,jorb) - theta_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb))
+          exct_s0(iorb,jorb) = theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb)
+          exct_tz(iorb,jorb) = theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb)
+          exct_tx(iorb,jorb) = theta_updw(iorb,jorb) + theta_dwup(iorb,jorb) - dens(iorb) - dens(jorb)
+          exct_ty(iorb,jorb) = omega_updw(iorb,jorb) - omega_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb)
        enddo
     enddo
     !
@@ -501,13 +584,13 @@ contains
     write(LOGfile,"(A)",advance="no")"exTX"//reg(ed_file_suffix)//"="
     do iorb=1,Norb
        do jorb=iorb+1,Norb
-          write(LOGfile,"(20(F18.12,1X))")dreal(exct_tx(iorb,jorb)),dimag(exct_tx(iorb,jorb))
+          write(LOGfile,"(20(F18.12,1X))")exct_tx(iorb,jorb)
        enddo
     enddo
     write(LOGfile,"(A)",advance="no")"exTY"//reg(ed_file_suffix)//"="
     do iorb=1,Norb
        do jorb=iorb+1,Norb
-          write(LOGfile,"(20(F18.12,1X))")dreal(exct_ty(iorb,jorb)),dimag(exct_ty(iorb,jorb))
+          write(LOGfile,"(20(F18.12,1X))")exct_ty(iorb,jorb)
        enddo
     enddo
     write(LOGfile,"(A)",advance="no")"exTZ"//reg(ed_file_suffix)//"="
@@ -845,7 +928,7 @@ contains
     !
     unit = free_unit()
     open(unit,file="exciton_info.ed")
-    write(unit,"(A1,6(A10,6X))")"#","1S_0","2T_z","3reT_x","4imT_x","5reT_y","6imT_y"
+    write(unit,"(A1,4(A10,6X))")"#","1S_0","2T_z","3T_x","4T_y"
     close(unit)
     !
     unit = free_unit()
@@ -920,14 +1003,23 @@ contains
          ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
+
+    unit = free_unit()
+    open(unit,file="exciton_all"//reg(ed_file_suffix)//".ed",position='append')
+    do iorb=1,Norb
+       do jorb=iorb+1,Norb
+          write(unit,"(90(F15.9,1X))")&
+               exct_s0(iorb,jorb),exct_tz(iorb,jorb),exct_tx(iorb,jorb),exct_ty(iorb,jorb)
+       enddo
+    enddo
+    close(unit)
+
     unit = free_unit()
     open(unit,file="exciton_last"//reg(ed_file_suffix)//".ed")
     do iorb=1,Norb
        do jorb=iorb+1,Norb
           write(unit,"(90(F15.9,1X))")&
-               exct_s0(iorb,jorb),exct_tz(iorb,jorb),&
-               dreal(exct_tx(iorb,jorb)),dimag(exct_tx(iorb,jorb)),&
-               dreal(exct_ty(iorb,jorb)),dimag(exct_ty(iorb,jorb))
+               exct_s0(iorb,jorb),exct_tz(iorb,jorb),exct_tx(iorb,jorb),exct_ty(iorb,jorb)
        enddo
     enddo
     close(unit)

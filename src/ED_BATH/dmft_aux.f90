@@ -120,29 +120,26 @@ subroutine init_dmft_bath(dmft_bath_)
   !
   if(.not.dmft_bath_%status)stop "init_dmft_bath error: bath not allocated"
   !
-  offset=0.d0
-  if(Nbath>1) offset=linspace(-1d-1,1d-1,Nbath)
-  !
   select case(bath_type)
   case default
      !Get energies:
-     dmft_bath_%e(:,:,1)    =-hwband
-     dmft_bath_%e(:,:,Nbath)= hwband
+     dmft_bath_%e(:,:,1)    =-ed_hw_bath
+     dmft_bath_%e(:,:,Nbath)= ed_hw_bath
      Nh=Nbath/2
      if(mod(Nbath,2)==0.and.Nbath>=4)then
-        de=hwband/max(Nh-1,1)
+        de=ed_hw_bath/max(Nh-1,1)
         dmft_bath_%e(:,:,Nh)  = -1.d-1
         dmft_bath_%e(:,:,Nh+1)=  1.d-1
         do i=2,Nh-1
-           dmft_bath_%e(:,:,i)   =-hwband + (i-1)*de
-           dmft_bath_%e(:,:,Nbath-i+1)= hwband - (i-1)*de
+           dmft_bath_%e(:,:,i)   =-ed_hw_bath + (i-1)*de
+           dmft_bath_%e(:,:,Nbath-i+1)= ed_hw_bath - (i-1)*de
         enddo
      elseif(mod(Nbath,2)/=0.and.Nbath>=3)then
-        de=hwband/Nh
+        de=ed_hw_bath/Nh
         dmft_bath_%e(:,:,Nh+1)= 0d0
         do i=2,Nh
-           dmft_bath_%e(:,:,i)        =-hwband + (i-1)*de
-           dmft_bath_%e(:,:,Nbath-i+1)= hwband - (i-1)*de
+           dmft_bath_%e(:,:,i)        =-ed_hw_bath + (i-1)*de
+           dmft_bath_%e(:,:,Nbath-i+1)= ed_hw_bath - (i-1)*de
         enddo
      endif
      !Get spin-keep yhbridizations
@@ -159,6 +156,9 @@ subroutine init_dmft_bath(dmft_bath_)
      endif
      !
   case('replica')
+     offset=0.d0
+     if(Nbath>1) offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
+     !     
      !BATH V INITIALIZATION
      do ibath=1,Nbath
         dmft_bath%item(ibath)%v=max(0.1d0,1d0/sqrt(dble(Nbath)))
@@ -166,11 +166,16 @@ subroutine init_dmft_bath(dmft_bath_)
      !
      !BATH LAMBDAS INITIALIZATION
      Nsym = dmft_bath%Nbasis
-     do ibath=1,Nbath
-        do isym=1,Nsym
+     do isym=1,Nsym
+        do ibath=1,Nbath
            dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym)
-           if(is_diagonal(H_basis(isym)%O)) dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym) + offset(ibath)
         enddo
+        if(is_diagonal(H_basis(isym)%O))then
+           offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
+           do ibath=1,Nbath
+              dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym) + offset(ibath)
+           enddo
+        endif
      enddo
      !
   end select

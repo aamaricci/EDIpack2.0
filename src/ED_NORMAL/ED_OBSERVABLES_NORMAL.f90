@@ -765,7 +765,7 @@ contains
          ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin),&
          ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin),&
          dens_ph,w_ph
-    close(unit)    
+    close(unit)
     !
     unit = free_unit()
     open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
