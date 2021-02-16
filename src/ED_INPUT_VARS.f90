@@ -2,10 +2,8 @@ MODULE ED_INPUT_VARS
   USE SF_VERSION
   USE SF_PARSE_INPUT
   USE SF_IOTOOLS, only:str
+  USE ED_VERSION
   implicit none
-
-  !GIT VERSION
-  include "revision.inc"  !this file is generated at compilation time in the Makefile
 
 
   !input variables
@@ -22,8 +20,8 @@ MODULE ED_INPUT_VARS
   real(8)              :: Jp                  !J_P: coupling constant for the Pair-hopping interaction term 
   real(8)              :: xmu                 !chemical potential
   real(8)              :: beta                !inverse temperature
-
   !
+  integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
   real(8),dimension(5) :: g_ph                !g_ph: electron-phonon coupling constant
   real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
   !
@@ -255,7 +253,7 @@ contains
        call print_input()
        call save_input(INPUTunit)
        call scifor_version()
-       call code_version(revision)
+       call code_version(version)
     endif
     !Act on the input variable only after printing.
     !In the new parser variables are hard-linked into the list:

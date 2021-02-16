@@ -41,7 +41,7 @@ subroutine allocate_dmft_bath(dmft_bath_)
      !
   case('replica')
      !
-     if(.not.allocated(lambda_impHloc))stop "lambda_impHloc not allocated in allocate_dmft_bath" !FIXME
+     if(.not.allocated(lambda_impHloc))stop "lambda_impHloc not allocated in allocate_dmft_bath"
      call deallocate_dmft_bath(dmft_bath_)     !
      Nsym=size(lambda_impHloc)
      !     

@@ -119,7 +119,7 @@ contains
     integer                               :: i
     !
     !put here a delete statement to avoid problems
-    if(sparse%status)stop "sp_init_matrix: alreay allocate can not init"
+    if(sparse%status)stop "sp_init_matrix: already allocated can not init"
     !
     sparse%Nrow=N
     sparse%Ncol=N 
@@ -183,7 +183,7 @@ contains
     integer                           :: i
     type(sparse_row_csr),pointer          :: row
     !
-    if(.not.sparse%status)return !stop "Error SPARSE/_sp_delete_matrix: sparse is not allocated."
+    if(.not.sparse%status)return !stop "Error SPARSE/sp_delete_matrix: sparse is not allocated."
     !
     do i=1,sparse%Nrow
        deallocate(sparse%row(i)%dvals)

@@ -1,3 +1,4 @@
+prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}/bin
 includedir=${prefix}/include
 libdir=${prefix}/lib
@@ -5,4 +6,7 @@ libdir=${prefix}/lib
 Name: dmft_ed
 Description: The DMFT_ED library
 Cflags: -I${includedir}
+Libs: -L${libdir} -ldmft_ed
+Version:@VERSION@
+
 

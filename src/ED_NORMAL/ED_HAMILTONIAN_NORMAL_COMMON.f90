@@ -17,11 +17,8 @@ MODULE ED_HAMILTONIAN_NORMAL_COMMON
   integer,allocatable,dimension(:)          :: DimUps
   integer,allocatable,dimension(:)          :: DimDws
   !
-  ! integer                                   :: Hsector=0
-  ! logical                                   :: Hstatus=.false.
-  ! type(sector_map),dimension(:),allocatable :: Hs
   type(sector)                              :: Hsector
-
+  !
   integer                                   :: iiup,iidw,jjup,jjdw
   integer                                   :: iud,jj
   integer                                   :: ishift

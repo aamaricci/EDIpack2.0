@@ -531,7 +531,7 @@ contains
 
 
   !FALL BACK: DO A VERSION THAT DOES THE SITES IN PARALLEL USING SERIAL ED CODE
-#ifdef _MPI  
+#ifdef _MPI
   subroutine ed_solve_lattice_mpi(MpiComm,bath,Hloc,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii)
     integer          :: MpiComm
     !inputs

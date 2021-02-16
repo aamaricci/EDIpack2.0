@@ -12,12 +12,19 @@ MODULE ED_BATH
   private
 
 
+  !##################################################################
+  !
+  !     USER BATH ROUTINES:
+  !
+  !##################################################################
 
+  !Interface for user bath I/O operations: get,set,copy
   interface get_bath_dimension
      module procedure ::  get_bath_dimension_direct
      module procedure ::  get_bath_dimension_symmetries
   end interface get_bath_dimension
 
+  !explicit symmetries:
   interface break_symmetry_bath
      module procedure break_symmetry_bath_site
      module procedure break_symmetry_bath_lattice
@@ -53,12 +60,14 @@ MODULE ED_BATH
      module procedure enforce_normal_bath_lattice
   end interface enforce_normal_bath
 
+
+  !Aux:
   interface get_Whyb_matrix
      module procedure get_Whyb_matrix_1orb
      module procedure get_Whyb_matrix_Aorb
      module procedure get_Whyb_matrix_dmft_bath
   end interface get_Whyb_matrix
-
+  
   interface is_identity
      module procedure ::  is_identity_so
      module procedure ::  is_identity_nn
@@ -68,6 +77,11 @@ MODULE ED_BATH
      module procedure ::  is_diagonal_so
      module procedure ::  is_diagonal_nn
   end interface is_diagonal
+
+
+
+
+  
 
   !##################################################################
   !
@@ -82,8 +96,7 @@ MODULE ED_BATH
   public :: set_bath_component
   public :: copy_bath_component
   !
-  public :: impose_equal_lambda
-  public :: impose_bath_offset
+
   public :: break_symmetry_bath              
   public :: spin_symmetrize_bath
   public :: orb_symmetrize_bath
@@ -92,7 +105,8 @@ MODULE ED_BATH
   public :: ph_trans_bath
   public :: enforce_normal_bath
   public :: get_Whyb_matrix
-
+  public :: impose_equal_lambda
+  public :: impose_bath_offset
 
   !##################################################################
   !

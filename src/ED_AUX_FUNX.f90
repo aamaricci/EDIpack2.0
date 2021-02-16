@@ -126,7 +126,7 @@ contains
   end subroutine ed_set_suffix_d
   subroutine ed_set_suffix_c(indx)
     character(len=*) :: indx
-    ed_file_suffix=reg(ineq_site_suffix)//reg(indx)
+    ed_file_suffix=reg(ineq_site_suffix)//str(indx)
   end subroutine ed_set_suffix_c
 
 
@@ -282,17 +282,6 @@ contains
   !AUXILIARY COMPUTATIONAL ROUTINES ARE HERE BELOW:
   !##################################################################
   !##################################################################
-
-  !> Get stride position in the one-particle many-body space 
-  function index_stride_so(ispin,iorb) result(indx)
-    integer :: iorb
-    integer :: ispin
-    integer :: indx
-    indx = iorb  + (ispin-1)*Norb
-  end function index_stride_so
-
-
-
 
 #ifdef _MPI
   !! Scatter V into the arrays Vloc on each thread: sum_threads(size(Vloc)) must be equal to size(v)
@@ -601,6 +590,17 @@ contains
   !##################################################################
   !                   RESHAPE ROUTINES
   !##################################################################
+  
+  !> Get stride position in the one-particle many-body space 
+  function index_stride_so(ispin,iorb) result(indx)
+    integer :: iorb
+    integer :: ispin
+    integer :: indx
+    indx = iorb  + (ispin-1)*Norb
+  end function index_stride_so
+
+
+  
   !+-----------------------------------------------------------------------------+!
   !PURPOSE: 
   ! reshape a matrix from the [Nlso][Nlso] shape

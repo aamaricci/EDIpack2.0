@@ -1,7 +1,7 @@
 ##################################################
 # DMFTED PROJECT
 ##################################################
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 PROJECT(dmft_ed Fortran)
 SET(VERSION 0.0.1)
 
@@ -259,10 +259,6 @@ ADD_DEPENDENCIES(ED_GLOB_LIB
   )
 
 
-SET(REVISION_FILE ${LIB_SRC}/revision.inc)
-MESSAGE( STATUS "${Yellow}Creating: ${ColourReset} ${REVISION_FILE}" )
-FILE(WRITE  ${REVISION_FILE} "character(len=41),parameter,public :: revision = \"${GIT_SHA1}\"\n")
-
 
 SET(PERMISSION_777
   OWNER_WRITE OWNER_READ OWNER_EXECUTE
@@ -271,29 +267,22 @@ SET(PERMISSION_777
 
 
 
-
-
-
-#Contains the functions used in the following:
-#BUILD_ENV_MODULE
-#BUILD_CONFIGVARS
-#BUILD_PKCONFIG
-INCLUDE(${CMAKE_MODULE_PATH}/PostBuildLibrary.cmake)
-
 #Build the lanc_ed module for environment modules
 FILE(REMOVE_RECURSE ${LIB_TMP_ETC}/modules/)
 SET(TMP_MODULE_NAME "${FULL_VER}" CACHE PATH "Prefix prepended to install directories")
 SET(TMP_ENV_MODULE_FILE ${LIB_TMP_ETC}/modules/${PROJECT_NAME}/${TMP_MODULE_NAME})
 SET(TMP_VER_MODULE_FILE ${LIB_TMP_ETC}/modules/${PROJECT_NAME}/${FC_ID}/.version)
-BUILD_ENV_MODULE(${TMP_ENV_MODULE_FILE})
-BUILD_VERSION_MODULE(${TMP_VER_MODULE_FILE})
+configure_file(${LIB_ENV}/module.in ${TMP_ENV_MODULE_FILE} @ONLY)
+configure_file(${LIB_ENV}/version.in ${TMP_VER_MODULE_FILE} @ONLY)
 
-#Build the user config script (sourced in user shell config file, i.e. .bashrc)
-SET(TMP_CONFIGVARS_FILE ${LIB_TMP_ETC}/dmft_ed_config.sh)
-BUILD_CONFIGVARS_USER(${TMP_CONFIGVARS_FILE})
 
 SET(TMP_PKCONFIG_FILE ${LIB_TMP_ETC}/${PROJECT_NAME}.pc)
-BUILD_PKCONFIG(${TMP_PKCONFIG_FILE})
+configure_file( ${LIB_ETC}/${PROJECT_NAME}.pc.in ${TMP_PKCONFIG_FILE} @ONLY)
+
+
+SET(CONFIG_SCRIPT dmft_ed_config.sh)
+SET(TMP_CONFIGVARS_FILE ${LIB_TMP_ETC}/${CONFIG_SCRIPT})
+configure_file(${LIB_ETC}/config_dmft_ed.sh.in ${TMP_CONFIGVARS_FILE} @ONLY)
 
 
 FILE(WRITE  ${LIB_TMP_VER}  "${VERSION}\n")
@@ -333,10 +322,10 @@ Add library to your OS:
 pick ONE method below  [add it in your bash profile to make it permanent (e.g. ~/.bashrc)]:
 ${Yellow}Method 1: use the provided ${PROJECT_NAME} environment module${ColourReset}:
    $ module use $HOME/.modules.d
-   $ module load ${PROJECT_NAME}/${FC_PLAT}
+   $ module load ${PROJECT_NAME}
 
 ${Yellow}Method 2: source the config script${ColourReset}:
-   $ source ${LIB_TARGET_ETC}/dmft_ed_config.sh
+   $ source ${LIB_TARGET_ETC}/${CONFIG_SCRIPT}
 
 ${Yellow}Method 3: use pkg-config with the provided ${PROJECT_NAME}.pc${ColourReset}:
    $ export PKG_CONFIG_PATH=${LIB_TARGET_ETC}/:$PKG_CONFIG_PATH
