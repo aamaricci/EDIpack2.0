@@ -272,66 +272,52 @@ FILE(REMOVE_RECURSE ${LIB_TMP_ETC}/modules/)
 SET(TMP_MODULE_NAME "${FULL_VER}" CACHE PATH "Prefix prepended to install directories")
 SET(TMP_ENV_MODULE_FILE ${LIB_TMP_ETC}/modules/${PROJECT_NAME}/${TMP_MODULE_NAME})
 SET(TMP_VER_MODULE_FILE ${LIB_TMP_ETC}/modules/${PROJECT_NAME}/${FC_ID}/.version)
-configure_file(${LIB_ENV}/module.in ${TMP_ENV_MODULE_FILE} @ONLY)
-configure_file(${LIB_ENV}/version.in ${TMP_VER_MODULE_FILE} @ONLY)
+CONFIGURE_FILE(${LIB_ENV}/module.in ${TMP_ENV_MODULE_FILE} @ONLY)
+CONFIGURE_FILE(${LIB_ENV}/version.in ${TMP_VER_MODULE_FILE} @ONLY)
 
 
 SET(TMP_PKCONFIG_FILE ${LIB_TMP_ETC}/${PROJECT_NAME}.pc)
-configure_file( ${LIB_ETC}/${PROJECT_NAME}.pc.in ${TMP_PKCONFIG_FILE} @ONLY)
+CONFIGURE_FILE( ${LIB_ETC}/${PROJECT_NAME}.pc.in ${TMP_PKCONFIG_FILE} @ONLY)
 
 
 SET(CONFIG_SCRIPT dmft_ed_config.sh)
 SET(TMP_CONFIGVARS_FILE ${LIB_TMP_ETC}/${CONFIG_SCRIPT})
-configure_file(${LIB_ETC}/config_dmft_ed.sh.in ${TMP_CONFIGVARS_FILE} @ONLY)
+CONFIGURE_FILE(${LIB_ETC}/config_dmft_ed.sh.in ${TMP_CONFIGVARS_FILE} @ONLY)
 
 
 FILE(WRITE  ${LIB_TMP_VER}  "${VERSION}\n")
 
 INSTALL(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION ${LIB_TARGET_INC})
-
 INSTALL(TARGETS dmft_ed DESTINATION ${LIB_TARGET_LIB})
-
 INSTALL(DIRECTORY ${LIB_TMP_ETC}/ DESTINATION ${LIB_TARGET_ETC})
-
 INSTALL(FILES ${TMP_CONFIGVARS_FILE} DESTINATION ${LIB_TARGET_ETC}/
   PERMISSIONS ${PERMISSION_777} SETUID)
-
 INSTALL(FILES ${TMP_VER_FILE} DESTINATION ${LIB_TARGET_DIR} 
   PERMISSIONS ${PERMISSION_777} SETUID)
-
 INSTALL(FILES ${LIB_TARGET_ETC}/${PROJECT_NAME}.pc DESTINATION $ENV{HOME}/.pkgconfig.d/
   PERMISSIONS ${PERMISSION_777} SETUID)
-
 INSTALL(DIRECTORY ${LIB_TARGET_ETC}/modules/ DESTINATION $ENV{HOME}/.modules.d)
 
 
 MESSAGE( STATUS "${Red}Library version:${ColourReset} ${VERSION}")
 MESSAGE( STATUS "${Red}Library will be installed in:${ColourReset} ${CMAKE_INSTALL_PREFIX}")
 MESSAGE( STATUS "
->> ${Red}TO CONCLUDE INSTALLATION${ColourReset} <<
-Compile with:
+${Red}TO CONCLUDE INSTALLATION${ColourReset}
 $ make
-
-Install with:
 $ make install
 
-Uninstall with:
-$ make uninstall
-
-Add library to your OS: 
-pick ONE method below  [add it in your bash profile to make it permanent (e.g. ~/.bashrc)]:
-${Yellow}Method 1: use the provided ${PROJECT_NAME} environment module${ColourReset}:
+Uninstall:
+$ make uninstall")
+		 
+MESSAGE( STATUS "
+${Red}Load library in your OS:${ColourReset} 
    $ module use $HOME/.modules.d
    $ module load ${PROJECT_NAME}
-
-${Yellow}Method 2: source the config script${ColourReset}:
+OR
    $ source ${LIB_TARGET_ETC}/${CONFIG_SCRIPT}
-
-${Yellow}Method 3: use pkg-config with the provided ${PROJECT_NAME}.pc${ColourReset}:
+OR
    $ export PKG_CONFIG_PATH=${LIB_TARGET_ETC}/:$PKG_CONFIG_PATH
-   $ pkg-config --cflags --libs ${PROJECT_NAME} (to get lib info)
-")
-
+   $ pkg-config --cflags --libs ${PROJECT_NAME} (to get lib info)")
 
 
 # Add a distclean target to the Makefile

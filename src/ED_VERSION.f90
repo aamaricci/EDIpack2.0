@@ -1,5 +1,5 @@
 MODULE ED_VERSION
   implicit none
   !GIT VERSION
-  character(len=41),parameter,public :: version = "78175b92c6fd93bf2a9f449ebe189fc1630b09fc"
+  character(len=41),parameter,public :: version = "45f4211c6e98a1967b083e2028cd739dcbcd26b9"
 END MODULE ED_VERSION
