@@ -157,6 +157,7 @@ contains
              s2tot = s2tot  + (sum(sz))**2*gs_weight
              !
              iph = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
              prob_ph(iph) = prob_ph(iph) + gs_weight
              dens_ph = dens_ph + (iph-1)*gs_weight
              !

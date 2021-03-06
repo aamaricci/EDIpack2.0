@@ -300,7 +300,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
              "Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
              iorb=1,Norb),ispin=1,Nspin)
         do i=1,Nbath
-           write(unit_,"(90(F21.12,1X))")((&
+           write(unit_,"(90(ES21.12,1X))")((&
                 dmft_bath_%e(ispin,iorb,i),&
                 dmft_bath_%v(ispin,iorb,i),&
                 iorb=1,Norb),ispin=1,Nspin)
@@ -313,7 +313,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
              "Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
              iorb=1,Norb),ispin=1,Nspin)
         do i=1,Nbath
-           write(unit_,"(90(F21.12,1X))")((&
+           write(unit_,"(90(ES21.12,1X))")((&
                 dmft_bath_%e(ispin,iorb,i),&
                 dmft_bath_%d(ispin,iorb,i),&
                 dmft_bath_%v(ispin,iorb,i),&
@@ -327,7 +327,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
              "Vbk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
              iorb=1,Norb), ispin=1,Nspin)
         do i=1,Nbath
-           write(unit,"(90(F21.12,1X))")((&
+           write(unit,"(90(ES21.12,1X))")((&
                 dmft_bath_%e(ispin,iorb,i),&
                 dmft_bath_%v(ispin,iorb,i),&
                 dmft_bath_%u(ispin,iorb,i),&
@@ -344,7 +344,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
              ("Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),iorb=1,Norb),&
              ispin=1,Nspin)
         do i=1,Nbath
-           write(unit_,"(90(F21.12,1X))")(&
+           write(unit_,"(90(ES21.12,1X))")(&
                 dmft_bath_%e(ispin,1,i),&
                 (dmft_bath_%v(ispin,iorb,i),iorb=1,Norb),&
                 ispin=1,Nspin)
@@ -356,7 +356,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
              ("Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),iorb=1,Norb),&
              ispin=1,Nspin)
         do i=1,Nbath
-           write(unit_,"(90(F21.12,1X))")(&
+           write(unit_,"(90(ES21.12,1X))")(&
                 dmft_bath_%e(ispin,1,i),&
                 dmft_bath_%d(ispin,1,i),&
                 (dmft_bath_%v(ispin,iorb,i),iorb=1,Norb),&
@@ -371,7 +371,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
              iorb=1,Norb),&
              ispin=1,Nspin)
         do i=1,Nbath
-           write(unit_,"(90(F21.12,1X))")(&
+           write(unit_,"(90(ES21.12,1X))")(&
                 dmft_bath_%e(ispin,1,i),    &
                 (dmft_bath_%v(ispin,iorb,i),dmft_bath_%u(ispin,iorb,i),iorb=1,Norb),&
                 ispin=1,Nspin)
@@ -385,7 +385,7 @@ subroutine write_dmft_bath(dmft_bath_,unit)
      write(unit_,"(90(A21,1X))")"#V_i",("Lambda_i"//reg(txtfy(io)),io=1,dmft_bath_%Nbasis)
      write(unit_,"(I3)")dmft_bath_%Nbasis
      do i=1,Nbath
-        write(unit_,"(90(F21.12,1X))")dmft_bath_%item(i)%v,&
+        write(unit_,"(90(ES21.12,1X))")dmft_bath_%item(i)%v,&
              (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
      enddo
      !
