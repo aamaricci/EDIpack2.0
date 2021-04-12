@@ -162,7 +162,7 @@ contains
   !+-----------------------------------------------------------------------------+!
   subroutine ed_init_solver_lattice(bath,Hloc)
     real(8),dimension(:,:)         :: bath ![Nlat][:]
-    complex(8),intent(in)          :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8),intent(in),optional :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
     integer                        :: ilat,Nineq
     logical                        :: check_dim
     character(len=5)               :: tmp_suffix
@@ -175,7 +175,20 @@ contains
        !
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
        !
-       call ed_init_solver_single(bath(ilat,:),Hloc(ilat,:,:,:,:))
+       !Init bath:
+       if(present(Hloc))then
+         if(bath_type/="replica")then
+            call set_Hloc(Hloc(ilat,:,:,:,:)) !Sets impHloc directly from Hloc(ilat,...) (one imp for each lattice site)
+         endif
+       else
+         !With replica bath impHloc should have been defined already from Hsym_basis and lambdasym_vector (same imp for all sites)
+         if(.not.allocated(impHloc))then
+            print*,"ed_init ERROR: impHloc not allocated. requires calling set_Hloc befor ed_init"
+            stop
+         endif
+       endif
+       !
+       call ed_init_solver_single(bath(ilat,:),impHloc(:,:,:,:)) !Here we init the solver using impHloc, whatever its origin.
        !
     end do
     !
@@ -236,7 +249,7 @@ contains
   subroutine ed_init_solver_lattice_mpi(MpiComm,bath,Hloc)
     integer                        :: MpiComm
     real(8),dimension(:,:)         :: bath ![Nlat][:]
-    complex(8),intent(in)          :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8),intent(in),optional :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
     integer                        :: ilat,Nineq,Nsect
     logical                        :: check_dim
     character(len=5)               :: tmp_suffix
@@ -246,12 +259,25 @@ contains
     Nineq = size(bath,1)
     !
     do ilat=1,Nineq             !all nodes check the bath, u never know...
-       !
-       ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
-       !
-       call ed_init_solver_single(bath(ilat,:),Hloc(ilat,:,:,:,:))
-       !
-    end do
+      !
+      ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
+      !
+      !Init bath:
+      if(present(Hloc))then
+        if(bath_type/="replica")then
+           call set_Hloc(Hloc(ilat,:,:,:,:)) !Sets impHloc directly from Hloc(ilat,...) (one imp for each lattice site)
+        endif
+      else
+        !With replica bath impHloc should have been defined already from Hsym_basis and lambdasym_vector (same imp for all sites)
+        if(.not.allocated(impHloc))then
+           print*,"ed_init ERROR: impHloc not allocated. requires calling set_Hloc befor ed_init"
+           stop
+        endif
+      endif
+      !
+      call ed_init_solver_single(bath(ilat,:),impHloc(:,:,:,:)) !Here we init the solver using impHloc, whatever its origin.
+      !
+   end do
     !
     if(allocated(dens_ineq))deallocate(dens_ineq)
     if(allocated(docc_ineq))deallocate(docc_ineq)
