@@ -294,18 +294,9 @@ contains
              sectors_mask(isector)=.true.
              write(unit2,*)isector,sectors_mask(isector),Indices
              !
-             do i=1,2*Ns_Ud
-                do ishift=1,ed_sectors_shift
-                   do isign=-1,1,2
-                      Jndices    = Indices
-                      Jndices(i) = Indices(i) + isign*ishift
-                      call get_Sector(Jndices,Ns_Orb,jsector)
-                      sectors_mask(jsector)=.true.
-                      write(unit2,*)jsector,sectors_mask(jsector),Jndices
-                   enddo
-                enddo
+             do isign=-1,1,2
+                if(ed_sectors_shift > 0) call shift_sector(Indices,1,isign,unit2)
              enddo
-             !
           enddo
           close(unit)
           close(unit2)
@@ -315,8 +306,24 @@ contains
     !
   end subroutine ed_pre_diag
 
-
-
+  recursive subroutine shift_sector(Indices,ishift,isign,unit2)
+    integer                          :: Indices(2*Ns_Ud),Jndices(2*Ns_Ud)
+    integer                          :: jsector
+    integer                          :: ishift,isign,i,unit2
+    !
+    do i=1,2*Ns_Ud
+       Jndices    = Indices
+       Jndices(i) = Indices(i) + isign
+       call get_Sector(Jndices,Ns_Orb,jsector)
+       if(.not. sectors_mask(jsector)) then
+          sectors_mask(jsector)=.true.
+          write(unit2,*)jsector,sectors_mask(jsector),Jndices
+       endif
+       if(ishift+1 <= ed_sectors_shift) then
+          call shift_sector(Jndices,ishift+1,isign,unit2)
+       endif
+    enddo
+  end subroutine
 
   !###################################################################################################
   !
