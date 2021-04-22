@@ -682,7 +682,7 @@ contains
           i_el = mod(i-1,DimUp*MpiQdw) + 1
           matmul: do j_el=1,spH0nd%row(i_el)%Size
              val = spH0nd%row(i_el)%dvals(j_el)
-             j = spH0nd%row(i_el)%cols(j_el) + (iph-1)*DimUp*MpiQdw
+             j = spH0nd%row(i_el)%cols(j_el) + (iph-1)*DimUp*DimDw
              Hv(i) = Hv(i) + val*Vt(j)
           enddo matmul
        enddo
