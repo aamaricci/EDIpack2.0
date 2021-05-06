@@ -172,9 +172,6 @@ contains
           !
           call delete_sector(sectorI)
           !
-          do iorb=1,Norb
-             phisc(iorb) = 0.5d0*(phisc(iorb) - dens_up(iorb) - (1.d0-dens_dw(iorb)))
-          enddo
        endif
        !
 #ifdef _MPI
@@ -189,6 +186,9 @@ contains
        !
     enddo
     !
+    do iorb=1,Norb
+       phisc(iorb) = 0.5d0*(phisc(iorb) - dens_up(iorb) - (1.d0-dens_dw(iorb)))
+    enddo
     !
     !
     if(MPIMASTER)then
