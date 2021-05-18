@@ -628,7 +628,6 @@ contains
     dens_ineq     = 0d0  ; docc_ineq     = 0d0
     mag_ineq      = 0d0  ; phisc_ineq    = 0d0  
     e_ineq        = 0d0  ; dd_ineq       = 0d0 
-    neigen_sector_ineq=0 ; neigen_total_ineq =0
     imp_density_matrix_ineq = zero
     !
     Smats_tmp  = zero ; Sreal_tmp  = zero ; SAmats_tmp = zero ; SAreal_tmp = zero
@@ -656,7 +655,7 @@ contains
           if(present(Jp_ii))  Jp  = Jp_ii(ilat)
           if(present(Jx_ii))  Jx  = Jx_ii(ilat)
           !
-          !Solve the impurity problem for the ilat-th site
+          !Solve the impurity problem for the ilat-th site, this are set at init time
           neigen_sector(:)   = neigen_sector_ineq(ilat,:)
           lanc_nstates_total = neigen_total_ineq(ilat)
           !
@@ -704,6 +703,8 @@ contains
        call AllReduce_MPI(MpiComm,e_tmp,e_ineq)
        call AllReduce_MPI(MpiComm,dd_tmp,dd_ineq)
        call AllReduce_MPI(MpiComm,imp_density_matrix_tmp,imp_density_matrix_ineq)
+       neigen_sector_ineq=0
+       neigen_total_ineq=0
        call AllReduce_MPI(MpiComm,neigen_sectortmp,neigen_sector_ineq)
        call AllReduce_MPI(MpiComm,neigen_totaltmp,neigen_total_ineq)
        !
