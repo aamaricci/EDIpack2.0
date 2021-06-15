@@ -15,7 +15,7 @@ MODULE ED_VARS_GLOBAL
 
   type effective_bath_component
      real(8)                                                 :: v
-     real(8),dimension(:),allocatable                        :: lambda![Nsym]
+     real(8),dimension(:),allocatable                        :: lambda ![Nsym]
   end type effective_bath_component
 
   type effective_bath
@@ -137,13 +137,21 @@ MODULE ED_VARS_GLOBAL
 
 
   !Effective Bath used in the ED code (this is opaque to user)
-  !local part of the Hamiltonian
   !=========================================================
   type(effective_bath)                               :: dmft_bath
-  type(H_operator),dimension(:),allocatable          :: H_basis
-  real(8),dimension(:),allocatable                   :: lambda_impHloc
+
+  !Replica bath basis set
+  !=========================================================
+  type(H_operator),dimension(:),allocatable          :: Hreplica_basis
+  real(8),dimension(:),allocatable                   :: Hreplica_lambda
+  logical                                            :: Hreplica_status=.false.
+
+  !local part of the Hamiltonian
+  !=========================================================
   complex(8),dimension(:,:,:,:),allocatable          :: impHloc           !local hamiltonian
 
+
+  
   !Variables for DIAGONALIZATION
   !PRIVATE
   !=========================================================  
@@ -262,8 +270,8 @@ MODULE ED_VARS_GLOBAL
   real(8),dimension(:,:),allocatable,save            :: dd_ineq,e_ineq
   integer,allocatable,dimension(:,:)                 :: neigen_sector_ineq
   integer,allocatable,dimension(:)                   :: neigen_total_ineq
-
-
+  real(8),dimension(:,:),allocatable                 :: Hreplica_lambda_ineq
+  
   !File suffixes for printing fine tuning.
   !=========================================================
   character(len=32)                                  :: ed_file_suffix=""       !suffix string attached to the output files.

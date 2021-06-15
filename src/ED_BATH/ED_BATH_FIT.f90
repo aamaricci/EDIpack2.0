@@ -9,7 +9,6 @@ MODULE ED_BATH_FIT
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL  
   USE ED_AUX_FUNX
-  USE ED_HLOC_DECOMPOSITION
   USE ED_BATH
   USE ED_BATH_FUNCTIONS
 #ifdef _MPI
@@ -358,7 +357,7 @@ contains
     bath_tmp=0d0
     do ilat = 1, Nsites
        bath_tmp(ilat,:)=bath(ilat,:)
-       call set_Hloc(Hloc(ilat,:,:,:,:))
+       impHloc = Hloc(ilat,:,:,:,:)
        !
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
        !
@@ -400,8 +399,7 @@ contains
     do ilat=1, Nsites
        !
        bath_tmp(ilat,:) = bath(ilat,:)
-       !
-       call set_Hloc(Hloc(ilat,:,:,:,:))
+       impHloc = Hloc(ilat,:,:,:,:)
        !
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
        !
@@ -451,7 +449,7 @@ contains
     bath_tmp=0d0
     do ilat = 1+MPI_RANK,Nsites,MPI_SIZE
        bath_tmp(ilat,:)=bath(ilat,:)
-       call set_Hloc(Hloc(ilat,:,:,:,:))
+       impHloc = Hloc(ilat,:,:,:,:)
        !
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
        !
@@ -498,8 +496,7 @@ contains
     do ilat= 1 + MPI_RANK, Nsites, MPI_SIZE
        !
        bath_tmp(ilat,:) = bath(ilat,:)
-       !
-       call set_Hloc(Hloc(ilat,:,:,:,:))
+       impHloc = Hloc(ilat,:,:,:,:)
        !
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
        !

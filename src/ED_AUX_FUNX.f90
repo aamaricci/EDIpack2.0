@@ -38,6 +38,12 @@ MODULE ED_AUX_FUNX
   end interface print_state_vector
 
 
+  interface print_Hloc
+     module procedure print_Hloc_so_c
+     module procedure print_Hloc_nn_c
+  end interface print_Hloc
+
+
   interface ed_set_suffix
      module procedure :: ed_set_suffix_i
      module procedure :: ed_set_suffix_d
@@ -103,8 +109,10 @@ MODULE ED_AUX_FUNX
   public :: allocate_grids
   public :: deallocate_grids
   !PRINT STATE VECTORS
-  public :: print_state_vector 
-
+  public :: print_state_vector
+  !PRINT LOCAL HAMILTONIAN
+  public :: print_hloc
+  !SET/RESET GLOBAL FILE SUFFIX
   public :: ed_set_suffix
   public :: ed_reset_suffix
 
@@ -131,6 +139,8 @@ contains
 
 
 
+
+  
 
   !##################################################################
   !##################################################################
@@ -590,7 +600,7 @@ contains
   !##################################################################
   !                   RESHAPE ROUTINES
   !##################################################################
-  
+
   !> Get stride position in the one-particle many-body space 
   function index_stride_so(ispin,iorb) result(indx)
     integer :: iorb
@@ -600,7 +610,7 @@ contains
   end function index_stride_so
 
 
-  
+
   !+-----------------------------------------------------------------------------+!
   !PURPOSE: 
   ! reshape a matrix from the [Nlso][Nlso] shape
@@ -1382,6 +1392,61 @@ contains
 
 
 
+
+  !+------------------------------------------------------------------+
+  !PURPOSE  : Print Hloc
+  !+------------------------------------------------------------------+
+  subroutine print_Hloc_nn_c(hloc,file)
+    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
+    character(len=*),optional                   :: file
+    integer                                     :: iorb,jorb,ispin,jspin,Nso,unit
+    character(len=32)                           :: fmt
+    !
+    unit=LOGfile
+    !
+    if(present(file))then
+       open(free_unit(unit),file=reg(file))
+       write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
+    endif
+    !
+    do ispin=1,Nspin
+       do iorb=1,Norb
+          write(unit,"(100(A1,F8.4,A1,F8.4,A1,2x))")&
+               (&
+               (&
+               '(',dreal(Hloc(ispin,jspin,iorb,jorb)),',',dimag(Hloc(ispin,jspin,iorb,jorb)),')',&
+               jorb =1,Norb),&
+               jspin=1,Nspin)
+       enddo
+    enddo
+    write(unit,*)""
+    !
+    if(present(file))close(unit)
+  end subroutine print_Hloc_nn_c
+
+  subroutine print_Hloc_so_c(hloc,file)
+    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
+    character(len=*),optional                   :: file
+    integer                                     :: is,js,Nso,unit
+    character(len=32)                           :: fmt
+    !
+    unit=LOGfile
+    !
+    if(present(file))then
+       open(free_unit(unit),file=reg(file))
+       write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
+    endif
+    !
+    Nso = Nspin*Norb
+    do is=1,Nso
+       write(unit,"(20(A1,F8.4,A1,F8.4,A1,2x))")&
+            ('(',dreal(Hloc(is,js)),',',dimag(Hloc(is,js)),')',js =1,Nso)
+    enddo
+    write(unit,*)""
+    !
+    if(present(file))close(unit)
+  end subroutine print_Hloc_so_c
+  !
 
 
 

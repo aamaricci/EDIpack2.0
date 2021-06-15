@@ -17,7 +17,7 @@
 !+-------------------------------------------------------------+
 subroutine chi2_fitgf_replica(fg,bath_)
   complex(8),dimension(:,:,:,:,:)             :: fg ![Nspin][Nspin][Norb][Norb][Lmats]
-  logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+  logical,dimension(Nspin,Nspin,Norb,Norb)    :: Hmask
   real(8),dimension(:),intent(inout)          :: bath_
   real(8),dimension(:),allocatable            :: array_bath
   integer                                     :: i,j,iorb,jorb,ispin,jspin,io,jo,ibath
@@ -42,8 +42,8 @@ subroutine chi2_fitgf_replica(fg,bath_)
   allocate(array_bath(size(bath_)-1))
   Nlambdas  =bath_(1)
   array_bath=bath_(2:)
-  !
-  Hmask=mask_hloc(impHloc,wdiag=.true.,uplo=.true.)
+  !  
+  Hmask =Hreplica_mask(wdiag=.false.,uplo=.true.)
   totNso=count(Hmask)
   !
   allocate(getIspin(totNso),getJspin(totNso))
@@ -380,7 +380,7 @@ function delta_replica(a) result(Delta)
   !
   Delta=zero
   do ibath=1,Nbath
-     invH_knn = bath_from_sym(dummy_lambda(ibath)%element)
+     invH_knn = Hreplica_build(dummy_lambda(ibath)%element)
      Htmp     = nn2so_reshape( invH_knn,Nspin,Norb)
      do i=1,Ldelta
         Haux     = zeye(Nspin*Norb)*xi*Xdelta(i) - Htmp
@@ -438,7 +438,7 @@ function grad_delta_replica(a) result(dDelta)
   dDelta=zero
   counter=0
   do ibath=1,Nbath
-     H_reconstructed     = nn2so_reshape( bath_from_sym(dummy_lambda(ibath)%element) ,Nspin,Norb)
+     H_reconstructed= nn2so_reshape( Hreplica_build(dummy_lambda(ibath)%element) ,Nspin,Norb)
      do i=1,Ldelta
         Haux(:,:,i) = zeye(Nspin*Norb)*xi*Xdelta(i) - H_reconstructed
         call inv(Haux(:,:,i))
@@ -451,11 +451,8 @@ function grad_delta_replica(a) result(dDelta)
      !Derivate_lambda_p
      do k=1,Nlambdas
         counter = counter + 1
-        Hbasis_so=nn2so_reshape(H_basis(k)%O,Nspin,Norb)
+        Hbasis_so=nn2so_reshape(Hreplica_basis(k)%O,Nspin,Norb)
         do l=1,Ldelta
-           ! Hbasis_lso=nnn2lso_reshape(H_basis(k)%O,Nlat,Nspin,Norb)
-           ! Htmp=matmul(Haux(:,:,l),Hbasis_lso)
-           ! Htmp=matmul(Htmp,Haux(:,:,l))
            Htmp = ((Haux(:,:,l) .x. Hbasis_so)) .x. Haux(:,:,l)
            dDelta(:,:,:,:,l,counter)=so2nn_reshape(dummy_Vbath(ibath)**2*Htmp,Nspin,Norb)
         enddo

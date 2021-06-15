@@ -5,6 +5,7 @@ MODULE ED_SETUP
   USE ED_SECTOR
   USE SF_TIMER
   USE SF_IOTOOLS, only:free_unit,reg,file_length
+  USE SF_MISC, only: assert_shape
 #ifdef _MPI
   USE MPI
   USE SF_MPI
@@ -13,10 +14,15 @@ MODULE ED_SETUP
   private
 
 
+  interface set_Himpurity
+     module procedure :: set_Himpurity_so_c
+     module procedure :: set_Himpurity_nn_c
+  end interface set_Himpurity
+
 
   public :: init_ed_structure
   public :: setup_global
-
+  public :: set_Himpurity
 
 contains
 
@@ -290,6 +296,13 @@ contains
        niter=nloop/3
     endif
     !
+    !ALLOCATE impHloc
+    if(.not.allocated(impHloc))then
+       allocate(impHloc(Nspin,Nspin,Norb,Norb))
+       impHloc=zero
+    else
+       call assert_shape(impHloc,[Nspin,Nspin,Norb,Norb],"init_ed_structure","impHloc")
+    endif
     !
     !allocate functions
     allocate(impSmats(Nspin,Nspin,Norb,Norb,Lmats))
@@ -351,6 +364,30 @@ contains
     allocate(exctChi_iv(0:2,Norb,Norb,0:Lmats))
     !
   end subroutine init_ed_structure
+
+
+
+
+
+  !+------------------------------------------------------------------+
+  !PURPOSE  : Setup Himpurity, the local part of the non-interacting Hamiltonian
+  !+------------------------------------------------------------------+
+  subroutine set_Himpurity_nn_c(hloc)
+    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
+    if(allocated(impHloc))deallocate(impHloc)
+    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
+    impHloc = Hloc
+    if(ed_verbose>2)call print_hloc(impHloc)
+  end subroutine set_Himpurity_nn_c
+
+  subroutine set_Himpurity_so_c(hloc)
+    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
+    if(allocated(impHloc))deallocate(impHloc)
+    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
+    impHloc = so2nn_reshape(Hloc,Nspin,Norb)
+    if(ed_verbose>2)call print_hloc(impHloc)
+  end subroutine set_Himpurity_so_c
+
 
 
 

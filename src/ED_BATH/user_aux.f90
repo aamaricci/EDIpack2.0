@@ -52,11 +52,11 @@ subroutine impose_bath_offset(bath_,ibath,offset)
   call allocate_dmft_bath(dmft_bath_)
   call set_dmft_bath(bath_,dmft_bath_)
   !
-  if(size(lambda_impHloc) .ne. dmft_bath_%Nbasis)then
+  if(size(Hreplica_basis) .ne. dmft_bath_%Nbasis)then
      dmft_bath_%item(ibath)%lambda(dmft_bath_%Nbasis)=offset
   else
-     do isym=1,size(lambda_impHloc)
-        if(is_identity(H_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
+     do isym=1,size(Hreplica_basis)
+        if(is_identity(Hreplica_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
         return
      enddo
   endif

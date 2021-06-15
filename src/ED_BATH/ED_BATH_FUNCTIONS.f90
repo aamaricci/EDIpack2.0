@@ -205,7 +205,7 @@ contains
        invH_k=zero
        do i=1,L
           do ibath=1,Nbath
-             invH_knn = bath_from_sym(dmft_bath_%item(ibath)%lambda)
+             invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
              invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
              invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
              call inv(invH_k)

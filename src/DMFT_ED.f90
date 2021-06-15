@@ -4,8 +4,8 @@ MODULE DMFT_ED
        wini,wfin,xmin,xmax,Nsuccess,dmft_error,sb_field,cg_Scheme    ,&
        nread,Lmats,Lreal,Lpos,Hfile,HLOCfile,LOGfile,ed_mode,bath_type 
 
-  USE ED_HLOC_DECOMPOSITION, only: ed_set_Hloc => set_Hloc
   USE ED_BATH, only:                                                    &
+       ed_set_Hreplica                 => set_Hreplica                 ,&
        ed_get_bath_dimension           => get_bath_dimension           ,&
        ed_get_bath_component_dimension => get_bath_component_dimension ,&
        ed_get_bath_component           => get_bath_component           ,&

@@ -15,21 +15,25 @@ MODULE ED_IO
   interface ed_get_sigma_matsubara
      module procedure ed_get_sigma_matsubara_main
      module procedure ed_get_sigma_matsubara_site
+     module procedure ed_get_sigma_matsubara_lattice
   end interface ed_get_sigma_matsubara
 
   interface ed_get_self_matsubara
      module procedure ed_get_self_matsubara_main
      module procedure ed_get_self_matsubara_site
+     module procedure ed_get_self_matsubara_lattice
   end interface ed_get_self_matsubara
 
   interface ed_get_sigma_realaxis
      module procedure ed_get_sigma_realaxis_main
      module procedure ed_get_sigma_realaxis_site
+     module procedure ed_get_sigma_realaxis_lattice
   end interface ed_get_sigma_realaxis
 
   interface ed_get_self_realaxis
      module procedure ed_get_self_realaxis_main
      module procedure ed_get_self_realaxis_site
+     module procedure ed_get_self_realaxis_lattice
   end interface ed_get_self_realaxis
 
 
@@ -37,21 +41,25 @@ MODULE ED_IO
   interface ed_get_gimp_matsubara
      module procedure ed_get_gimp_matsubara_main
      module procedure ed_get_gimp_matsubara_site
+     module procedure ed_get_gimp_matsubara_lattice
   end interface ed_get_gimp_matsubara
 
   interface ed_get_fimp_matsubara
      module procedure ed_get_fimp_matsubara_main
      module procedure ed_get_fimp_matsubara_site
+     module procedure ed_get_fimp_matsubara_lattice
   end interface ed_get_fimp_matsubara
 
   interface ed_get_gimp_realaxis
      module procedure ed_get_gimp_realaxis_main
      module procedure ed_get_gimp_realaxis_site
+     module procedure ed_get_gimp_realaxis_lattice
   end interface ed_get_gimp_realaxis
 
   interface ed_get_fimp_realaxis
      module procedure ed_get_fimp_realaxis_main
      module procedure ed_get_fimp_realaxis_site
+     module procedure ed_get_fimp_realaxis_lattice
   end interface ed_get_fimp_realaxis
 
 

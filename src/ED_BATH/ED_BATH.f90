@@ -11,18 +11,23 @@ MODULE ED_BATH
 
   private
 
-
   !##################################################################
   !
   !     USER BATH ROUTINES:
   !
   !##################################################################
-
   !Interface for user bath I/O operations: get,set,copy
   interface get_bath_dimension
      module procedure ::  get_bath_dimension_direct
      module procedure ::  get_bath_dimension_symmetries
   end interface get_bath_dimension
+
+  interface set_Hreplica
+     module procedure init_Hreplica_direct_so
+     module procedure init_Hreplica_direct_nn
+     module procedure init_Hreplica_symmetries_site
+     module procedure init_Hreplica_symmetries_lattice
+  end interface set_Hreplica
 
   !explicit symmetries:
   interface break_symmetry_bath
@@ -60,14 +65,13 @@ MODULE ED_BATH
      module procedure enforce_normal_bath_lattice
   end interface enforce_normal_bath
 
-
   !Aux:
   interface get_Whyb_matrix
      module procedure get_Whyb_matrix_1orb
      module procedure get_Whyb_matrix_Aorb
      module procedure get_Whyb_matrix_dmft_bath
   end interface get_Whyb_matrix
-  
+
   interface is_identity
      module procedure ::  is_identity_so
      module procedure ::  is_identity_nn
@@ -81,7 +85,7 @@ MODULE ED_BATH
 
 
 
-  
+
 
   !##################################################################
   !
@@ -107,6 +111,9 @@ MODULE ED_BATH
   public :: get_Whyb_matrix
   public :: impose_equal_lambda
   public :: impose_bath_offset
+  !
+  public :: set_Hreplica
+
 
   !##################################################################
   !
@@ -120,11 +127,10 @@ MODULE ED_BATH
   public :: save_dmft_bath                   !INTERNAL (for effective_bath)
   public :: set_dmft_bath                    !INTERNAL (for effective_bath)
   public :: get_dmft_bath                    !INTERNAL (for effective_bath)
-  public :: bath_from_sym                    !INTERNAL (for effective_bath)
-  public :: mask_hloc
-
-
-
+  !
+  public :: hreplica_build                   !INTERNAL (for effective_bath)
+  public :: hreplica_mask                    !INTERNAL (for effective_bath)
+  public :: hreplica_site                    !INTERNAL (for effective_bath)
 
 
   integer :: ibath,ilat,iorb
@@ -142,42 +148,46 @@ contains
     complex(8),optional,intent(in) :: Hloc_nn(:,:,:,:)
     integer                        :: bath_size,ndx,ispin,iorb,jspin,jorb,io,jo,Maxspin
     complex(8),allocatable         :: Hloc(:,:,:,:)
-
+    !
     select case(bath_type)
        !
     case default
-       !
        select case(ed_mode)
        case default
-          bath_size = Norb*Nbath + Norb*Nbath              !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
+          bath_size = Norb*Nbath + Norb*Nbath
+          !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
        case ("superc")
-          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath !( e [Nspin][Norb][Nbath] + d [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
+          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath
+          !( e [Nspin][Norb][Nbath] + d [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] )
        case ("nonsu2")
-          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
+          bath_size = Norb*Nbath + Norb*Nbath + Norb*Nbath
+          !( e [Nspin][Norb][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
        end select
        bath_size=Nspin*bath_size
        !
     case('hybrid')
-       !
        select case(ed_mode)
        case default          
-          bath_size = Nbath + Norb*Nbath         !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
+          bath_size = Nbath + Norb*Nbath
+          !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
        case ("superc")
-          bath_size = Nbath + Nbath + Norb*Nbath !(e [Nspin][1][Nbath] + d [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
+          bath_size = Nbath + Nbath + Norb*Nbath
+          !(e [Nspin][1][Nbath] + d [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] )
        case ("nonsu2")
-          bath_size = Nbath + Norb*Nbath + Norb*Nbath !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
+          bath_size = Nbath + Norb*Nbath + Norb*Nbath
+          !(e [Nspin][1][Nbath] + v [Nspin][Norb][Nbath] + u [Nspin][Norb][Nbath] )
        end select
        bath_size=Nspin*bath_size
        !
     case('replica')
-       !
-       !Re/Im off-diagonal non-vanishing elements
-       if(present(Hloc_nn))then
-          allocate(Hloc(Nspin,Nspin,Norb,Norb));Hloc=Hloc_nn
-       elseif(allocated(impHloc))then
-          allocate(Hloc(Nspin,Nspin,Norb,Norb));Hloc=impHloc
-       else
-          stop "ERROR: check_bath_dimension: ed_mode=replica neither Hloc_nn present nor impHloc allocated"
+       allocate(Hloc(Nspin,Nspin,Norb,Norb))
+       if(present(Hloc_nn))then              !User defined Hloc_nn 
+          Hloc=Hloc_nn
+       elseif(Hreplica_status)then !User defined Hreplica_basis
+          Hloc=Hreplica_build(Hreplica_lambda)
+       else                                  !Error:
+          deallocate(Hloc)
+          stop "ERROR get_bath_dimension_direct: ed_mode=replica neither Hloc_nn present nor Hreplica_basis defined"
        endif
        !
        !Check Hermiticity:
@@ -187,6 +197,7 @@ contains
           enddo
        enddo
        !
+       !Re/Im off-diagonal non-vanishing elements
        ndx=0
        do ispin=1,Nspin
           do jspin=1,Nspin
@@ -195,8 +206,8 @@ contains
                    io = iorb + (ispin-1)*Norb
                    jo = jorb + (jspin-1)*Norb
                    if(io > jo)cycle
-                   if(DREAL(Hloc(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
-                   if(DIMAG(Hloc(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
+                   if(dreal(Hloc(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
+                   if(dimag(Hloc(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
                 enddo
              enddo
           enddo
@@ -215,6 +226,7 @@ contains
     !
     !number of symmetries
     Nsym=size(Hloc_nn,5)
+    if(Nsym/=size(Hreplica_lambda))stop "ERROR get_bath_dimension_symmetries:  neither Hloc_nn present nor Hreplica_basis defined"
     !
     ndx=Nsym
     !
@@ -231,6 +243,7 @@ contains
   end function get_bath_dimension_symmetries
 
 
+
   !+-------------------------------------------------------------------+
   !PURPOSE  : Check if the dimension of the bath array are consistent
   !+-------------------------------------------------------------------+
@@ -238,17 +251,17 @@ contains
     real(8),dimension(:)           :: bath_
     integer                        :: Ntrue,i
     logical                        :: bool
-    complex(8),allocatable         :: Hbasis_rebuild(:,:,:,:,:)![Nspin][:][Norb][:][Nsym]
+    complex(8),allocatable         :: Hreplica(:,:,:,:,:)![Nspin][:][Norb][:][Nsym]
     select case (bath_type)
     case default
        Ntrue = get_bath_dimension()
     case ('replica')
-       if(.not.allocated(H_basis))STOP "check_bath_dimension: Hbasis not allocated"
-       if(.not.allocated(Hbasis_rebuild))allocate(Hbasis_rebuild(Nspin,Nspin,Norb,Norb,size(H_basis)))
-       do i=1,size(H_basis)
-          Hbasis_rebuild(:,:,:,:,i)=H_basis(i)%O
+       if(.not.Hreplica_status)STOP "check_bath_dimension: Hreplica_basis not allocated"
+       if(.not.allocated(Hreplica))allocate(Hreplica(Nspin,Nspin,Norb,Norb,size(Hreplica_basis)))
+       do i=1,size(Hreplica_basis)
+          Hreplica(:,:,:,:,i)=Hreplica_basis(i)%O
        enddo
-       Ntrue   = get_bath_dimension_symmetries(Hbasis_rebuild)
+       Ntrue   = get_bath_dimension_symmetries(Hreplica)
     end select
     bool  = ( size(bath_) == Ntrue )
   end function check_bath_dimension
@@ -274,6 +287,12 @@ contains
   include 'dmft_aux.f90'
 
 
+  !##################################################################
+  !
+  !     H_REPLICA ROUTINES:
+  !
+  !##################################################################
+  include 'hreplica_setup.f90'
 
 
 
@@ -283,6 +302,75 @@ contains
   !     AUX FUNCTIONS:
   !
   !##################################################################
+  subroutine Hreplica_site(site)
+    integer :: site
+    if(site<1.OR.site>size(Hreplica_lambda_ineq,1))stop "ERROR Hreplica_site: site not in [1,Nlat]"
+    if(.not.allocated(Hreplica_lambda_ineq))stop "ERROR Hreplica_site: Hreplica_lambda_ineq not allocated"
+    Hreplica_lambda(:)  = Hreplica_lambda_ineq(site,:)
+  end subroutine Hreplica_site
+
+
+  !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
+  function Hreplica_build(lambdavec) result(H)
+    real(8),dimension(:)                        :: lambdavec
+    integer                                     :: isym
+    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: H
+    !
+    if(.not.Hreplica_status)STOP "ERROR Hreplica_build: Hreplica_basis is not setup"
+    if(size(lambdavec)/=size(Hreplica_basis)) STOP "ERROR Hreplica_build: Wrong coefficient vector size"
+    H=zero
+    do isym=1,size(lambdavec)
+       H=H+lambdavec(isym)*Hreplica_basis(isym)%O
+    enddo
+  end function Hreplica_build
+
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : Create bath mask
+  !+-------------------------------------------------------------------+
+  function Hreplica_mask(wdiag,uplo) result(Hmask)
+    logical,optional                            :: wdiag,uplo
+    logical                                     :: wdiag_,uplo_
+    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: Hloc
+    logical,dimension(Nspin,Nspin,Norb,Norb)    :: Hmask
+    integer                                     :: iorb,jorb,ispin,jspin,io,jo
+    !
+    wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
+    uplo_ =.false.;if(present(uplo))  uplo_=uplo
+    !
+    Hloc = Hreplica_build(Hreplica_lambda)
+    Hmask=.false.
+    where(abs(Hloc)>1d-6)Hmask=.true.
+    !
+    !
+    if(wdiag_)then
+       do ispin=1,Nspin
+          do iorb=1,Norb
+             Hmask(ispin,ispin,iorb,iorb)=.true.
+          enddo
+       enddo
+    endif
+    !
+    if(uplo_)then
+       do ispin=1,Nspin
+          do jspin=1,Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   io = index_stride_so(ispin,iorb)
+                   jo = index_stride_so(jspin,jorb)
+                   if(io>jo)Hmask(ispin,jspin,iorb,jorb)=.false.
+                enddo
+             enddo
+          enddo
+       enddo
+    endif
+    !
+  end function Hreplica_mask
+
+
+
+
   !+-------------------------------------------------------------------+
   !PURPOSE  : Check if a matrix is the identity
   !+-------------------------------------------------------------------+
@@ -373,46 +461,7 @@ contains
 
 
 
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : Create bath mask
-  !+-------------------------------------------------------------------+
-  function mask_hloc(hloc,wdiag,uplo) result(Hmask)
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: Hloc
-    logical,optional                            :: wdiag,uplo
-    logical                                     :: wdiag_,uplo_
-    logical,dimension(Nspin,Nspin,Norb,Norb)    :: Hmask
-    integer                                  :: iorb,jorb,ispin,jspin,io,jo
-    !
-    wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
-    uplo_ =.false.;if(present(uplo))  uplo_=uplo
-    !
-    Hmask=.false.
-    where(abs(Hloc)>1d-6)Hmask=.true.
-    !
-    !
-    if(wdiag_)then
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             Hmask(ispin,ispin,iorb,iorb)=.true.
-          enddo
-       enddo
-    endif
-    !
-    if(uplo_)then
-       do ispin=1,Nspin
-          do jspin=1,Nspin
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   io = index_stride_so(ispin,iorb)
-                   jo = index_stride_so(jspin,jorb)
-                   if(io>jo)Hmask(ispin,jspin,iorb,jorb)=.false.
-                enddo
-             enddo
-          enddo
-       enddo
-    endif
-    !
-  end function mask_hloc
+
 
 
 

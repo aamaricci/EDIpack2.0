@@ -41,9 +41,9 @@ subroutine allocate_dmft_bath(dmft_bath_)
      !
   case('replica')
      !
-     if(.not.allocated(lambda_impHloc))stop "lambda_impHloc not allocated in allocate_dmft_bath"
+     if(.not.Hreplica_status)stop "ERROR allocate_dmft_bath: Hreplica_basis not allocated"
      call deallocate_dmft_bath(dmft_bath_)     !
-     Nsym=size(lambda_impHloc)
+     Nsym=size(Hreplica_basis)
      !     
      allocate(dmft_bath_%item(Nbath))
      dmft_Bath_%Nbasis=Nsym
@@ -84,27 +84,6 @@ end subroutine deallocate_dmft_bath
 
 
 
-
-!+-------------------------------------------------------------------+
-!PURPOSE  : Reconstruct bath matrix from lambda vector
-!+-------------------------------------------------------------------+
-function bath_from_sym(lambdavec) result (Hbath)
-  integer                                     :: Nsym,isym
-  real(8),dimension(:)                        :: lambdavec
-  complex(8),dimension(Nspin,Nspin,Norb,Norb) :: Hbath
-  !
-  Nsym=size(lambdavec)
-  !
-  Hbath=zero
-  do isym=1,Nsym
-     Hbath=Hbath+lambdavec(isym)*H_Basis(isym)%O
-  enddo
-  !
-end function bath_from_sym
-
-
-
-
 !+------------------------------------------------------------------+
 !PURPOSE  : Initialize the DMFT loop, builindg H parameters and/or 
 !reading previous (converged) solution
@@ -118,7 +97,7 @@ subroutine init_dmft_bath(dmft_bath_)
   real(8)              :: de
   real(8)              :: offset(Nbath)
   !
-  if(.not.dmft_bath_%status)stop "init_dmft_bath error: bath not allocated"
+  if(.not.dmft_bath_%status)stop "ERROR init_dmft_bath error: bath not allocated"
   !
   select case(bath_type)
   case default
@@ -155,7 +134,7 @@ subroutine init_dmft_bath(dmft_bath_)
         enddo
      endif
      !
-  case('replica')
+  case('replica')     
      offset=0.d0
      if(Nbath>1) offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
      !     
@@ -165,15 +144,16 @@ subroutine init_dmft_bath(dmft_bath_)
      enddo
      !
      !BATH LAMBDAS INITIALIZATION
+     !Do not need to check for Hreplica_basis: this is done at allocation time of the dmft_bath.
      Nsym = dmft_bath%Nbasis
      do isym=1,Nsym
         do ibath=1,Nbath
-           dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym)
+           dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(isym)
         enddo
-        if(is_diagonal(H_basis(isym)%O))then
+        if(is_diagonal(Hreplica_basis(isym)%O))then
            offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
            do ibath=1,Nbath
-              dmft_bath%item(ibath)%lambda(isym) =  lambda_impHloc(isym) + offset(ibath)
+              dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(isym) + offset(ibath)
            enddo
         endif
      enddo
@@ -391,8 +371,8 @@ subroutine write_dmft_bath(dmft_bath_,unit)
      !
      if(unit_/=LOGfile)then
         write(unit_,*)""
-        do isym=1,size(H_basis)
-           Ho = nn2so_reshape(H_basis(isym)%O,nspin,norb)
+        do isym=1,size(Hreplica_basis)
+           Ho = nn2so_reshape(Hreplica_basis(isym)%O,nspin,norb)
            do io=1,Nspin*Norb
               write(unit,string_fmt)&
                    ('(',dreal(Ho(io,jo)),',',dimag(Ho(io,jo)),')',jo =1,Nspin*Norb)
