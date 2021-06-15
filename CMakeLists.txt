@@ -3,7 +3,7 @@
 ##################################################
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 PROJECT(dmft_ed Fortran)
-SET(VERSION 0.0.1)
+SET(VERSION 0.1.1)
 
 # Define the library name
 SET(DMFTEDLIB dmft_ed)

@@ -184,19 +184,20 @@ contains
     !
     allocate(imp_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
     !
-    allocate(neigen_sector_ineq(Nineq,Nsectors))
-    allocate(neigen_total_ineq(Nineq))
-    !
-    !
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
        if(bath_type=='replica')call Hreplica_site(ilat)
        !set the ilat-th lambda vector basis for the replica bath
        call ed_init_solver_single(bath(ilat,:))
+    enddo
+    call ed_reset_suffix
+    !
+    allocate(neigen_sector_ineq(Nineq,Nsectors))
+    allocate(neigen_total_ineq(Nineq))
+    do ilat=1,Nineq
        neigen_sector_ineq(ilat,:) = neigen_sector(:)
        neigen_total_ineq(ilat)    = lanc_nstates_total
     end do
-    call ed_reset_suffix
     !
   end subroutine ed_init_solver_lattice
 
@@ -255,19 +256,21 @@ contains
     !
     allocate(imp_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
     !
-    allocate(neigen_sector_ineq(Nineq,Nsectors))
-    allocate(neigen_total_ineq(Nineq))
-    !
-    !
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
        if(bath_type=='replica')call Hreplica_site(ilat)
        call ed_init_solver_single(bath(ilat,:))
+    enddo
+    call MPI_Barrier(MpiComm,MPI_ERR)
+    call ed_reset_suffix
+    !
+    !This follows because Nsectors is defined after ED is initialized
+    allocate(neigen_sector_ineq(Nineq,Nsectors))
+    allocate(neigen_total_ineq(Nineq))
+    do ilat=1,Nineq       
        neigen_sector_ineq(ilat,:) = neigen_sector(:)
        neigen_total_ineq(ilat)    = lanc_nstates_total
     end do
-    call MPI_Barrier(MpiComm,MPI_ERR)
-    call ed_reset_suffix
     !
   end subroutine ed_init_solver_lattice_mpi
 #endif
