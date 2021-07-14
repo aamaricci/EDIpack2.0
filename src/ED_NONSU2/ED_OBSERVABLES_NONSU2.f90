@@ -201,8 +201,8 @@ contains
           !
           !GET <(CDG_UP + CDG_DW)(C_UP + C_DW)> = 
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> + <CDG_UP*C_DW + CDG_DW*C_UP> = 
-          !<N_UP> + <N_DW> + 2*<Sx>
-          !<Sx> = <CDG_UP*C_DW + CDG_DW*C_UP>
+          !<N_UP> + <N_DW> + <Sx> 
+          !since <Sx> = <CDG_UP*C_DW + CDG_DW*C_UP> 
           jsector = getCsector(1,1,isector)
           if(jsector/=0)then
              if(Mpimaster)then
@@ -228,8 +228,8 @@ contains
           !
           !GET <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> = 
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> - i<CDG_UP*C_DW - CDG_DW*C_UP> = 
-          !<N_UP> + <N_DW> + 2*<Sy>
-          !<Sy> = -i/2<CDG_UP*C_DW - CDG_DW*C_UP>         
+          !<N_UP> + <N_DW> + <Sy>
+          !since <Sy> = -i<CDG_UP*C_DW - CDG_DW*C_UP>         
           jsector = getCsector(1,1,isector)
           if(jsector/=0)then
              if(Mpimaster)then
@@ -262,8 +262,11 @@ contains
           if(associated(state_cvec))nullify(state_cvec)
 #endif
        enddo
-       magx(iorb) = 0.5d0*(magx(iorb) - dens_up(iorb) - dens_dw(iorb))
-       magy(iorb) = 0.5d0*(magy(iorb) - dens_up(iorb) - dens_dw(iorb))
+       !So we have:
+       !<Sx> = <(CDG_UP + CDG_DW)(C_UP + C_DW)> - <N_UP> - <N_DW>
+       magx(iorb) = magx(iorb) - dens_up(iorb) - dens_dw(iorb)
+       !<Sy> = <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> - <N_UP> - <N_DW 
+       magy(iorb) = magy(iorb) - dens_up(iorb) - dens_dw(iorb)
     enddo
 
 
