@@ -52,11 +52,13 @@ contains
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
-
+    call GFmatrix_deallocate(impGmatrix)
+    !
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_s"//str(ispin)
           if(MPIMASTER)call start_timer
+          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_normal_diag(iorb,ispin)
           if(MPIMASTER)call stop_timer(unit=LOGfile)
        enddo
@@ -81,6 +83,7 @@ contains
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
                 if(MPIMASTER)call start_timer
+                call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_normal_mix(iorb,jorb,ispin)
                 if(MPIMASTER)call stop_timer(unit=LOGfile)
              enddo
@@ -119,6 +122,7 @@ contains
     if(DimPh>1)then
        write(LOGfile,"(A)")"Get phonon Green function:"
        if(MPIMASTER)call start_timer()
+       call GFmatrix_allocate(impDmatrix,Nstate=state_list%size)
        call lanc_build_gf_phonon_main()
        if(MPIMASTER)call stop_timer(unit=LOGfile)
     endif
@@ -152,6 +156,9 @@ contains
     !
     !
     do istate=1,state_list%size
+       !
+       call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),istate,Nchan=2)
+       !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
@@ -189,9 +196,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,iorb,ispin)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,iorb,ispin,ichan=1,istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
+       else
+          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),istate,1,Nexc=0)
        endif
        !
        !REMOVE ONE PARTICLE:
@@ -213,9 +222,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,iorb,ispin)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,iorb,ispin,ichan=2,istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
+       else
+          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),istate,2,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -258,6 +269,9 @@ contains
     endif
     !
     do istate=1,state_list%size
+       !
+       call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,Nchan=2)
+       !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
@@ -302,9 +316,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,jorb,ispin)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,jorb,ispin,ichan=1,istate)
           deallocate(alfa_,beta_)
-          if(allocated(vvinit))deallocate(vvinit)          
+          if(allocated(vvinit))deallocate(vvinit)
+       else
+          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,1,Nexc=0)
        endif
        !
        !EVALUATE (c_iorb + c_jorb)|gs>
@@ -333,9 +349,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,jorb,ispin)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,jorb,ispin,ichan=2,istate)
           deallocate(alfa_,beta_)
-          if(allocated(vvinit))deallocate(vvinit)          
+          if(allocated(vvinit))deallocate(vvinit)
+       else
+          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,2,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -363,13 +381,13 @@ contains
 
 
 
-  subroutine add_to_lanczos_gf_normal(vnorm2,Ei,alanc,blanc,isign,iorb,jorb,ispin)
+  subroutine add_to_lanczos_gf_normal(vnorm2,Ei,alanc,blanc,isign,iorb,jorb,ispin,ichan,istate)
     complex(8)                                 :: vnorm2,pesoBZ,peso
     real(8)                                    :: Ei,Egs,de
     integer                                    :: nlanc,itype
     real(8),dimension(:)                       :: alanc
     real(8),dimension(size(alanc))             :: blanc 
-    integer                                    :: isign,iorb,jorb,ispin
+    integer                                    :: isign,iorb,jorb,ispin,ichan,istate
     real(8),dimension(size(alanc),size(alanc)) :: Z
     real(8),dimension(size(alanc))             :: diag,subdiag
     integer                                    :: i,j,ierr
@@ -378,6 +396,7 @@ contains
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
+    !
     !
     if((finiteT).and.(beta*(Ei-Egs).lt.200))then
        pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
@@ -406,9 +425,15 @@ contains
     subdiag(2:Nlanc) = blanc(2:Nlanc)
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
+    call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,ichan,Nlanc)
+    !
     do j=1,nlanc
        de = diag(j)-Ei
        peso = pesoBZ*Z(1,j)*Z(1,j)
+       !
+       impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(j) = peso
+       impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(j)  = isign*de
+       !
        do i=1,Lmats
           iw=xi*wm(i)
           impGmats(ispin,ispin,iorb,jorb,i)=impGmats(ispin,ispin,iorb,jorb,i) + peso/(iw-isign*de)
@@ -440,6 +465,9 @@ contains
     integer                     :: Ndws(Ns_Ud)
     !
     do istate=1,state_list%size
+       !
+       call GFmatrix_allocate(impDmatrix,istate=istate,Nchan=1)
+       !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
@@ -488,7 +516,7 @@ contains
        endif
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_phonon(norm2,state_e,alfa_,beta_)
+       call add_to_lanczos_phonon(norm2,state_e,alfa_,beta_,istate)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
 #ifdef _MPI
@@ -508,14 +536,14 @@ contains
   !################################################################
 
 
-  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc)
+  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
     real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
     integer                                    :: nlanc
     real(8),dimension(:)                       :: alanc
     real(8),dimension(size(alanc))             :: blanc 
     real(8),dimension(size(alanc),size(alanc)) :: Z
     real(8),dimension(size(alanc))             :: diag,subdiag
-    integer                                    :: i,j
+    integer                                    :: i,j,istate
     complex(8)                                 :: iw
     !
     Egs = state_list%emin       !get the gs energy
@@ -536,11 +564,17 @@ contains
     subdiag(2:Nlanc) = blanc(2:Nlanc)
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
+    call GFmatrix_allocate(impDmatrx,istate,1,Nexc=Nlanc)
+    !
     do j=1,nlanc
        Ej     = diag(j)
        dE     = Ej-Ei
        pesoAB = Z(1,j)*Z(1,j)
        peso   = pesoF*pesoAB*pesoBZ
+       !
+       impDmatrix%state(istate)%channel(ichan)%weight(j) = peso
+       impDmatrix%state(istate)%channel(ichan)%poles(j)  = de
+       !
        ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
        ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
        ! This ensures that the correct null contribution is obtained.

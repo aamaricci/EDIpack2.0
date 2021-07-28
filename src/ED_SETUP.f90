@@ -337,6 +337,11 @@ contains
     impDmats_ph=zero
     impDreal_ph=zero
     !
+    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    allocate(impFmatrix(Nspin,Nspin,Norb,Norb))
+    !impDmatrix is a scalar
+    
+    
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_phisc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
     allocate(ed_mag(3,Norb))
@@ -350,18 +355,22 @@ contains
     allocate(spinChi_tau(Norb,Norb,0:Ltau))
     allocate(spinChi_w(Norb,Norb,Lreal))
     allocate(spinChi_iv(Norb,Norb,0:Lmats))
+    allocate(spinChiMatrix(Norb,Norb))
     !
     allocate(densChi_tau(Norb,Norb,0:Ltau))
     allocate(densChi_w(Norb,Norb,Lreal))
     allocate(densChi_iv(Norb,Norb,0:Lmats))
+    allocate(densChiMatrix(Norb,Norb))
     !
     allocate(pairChi_tau(Norb,Norb,0:Ltau))
     allocate(pairChi_w(Norb,Norb,Lreal))
     allocate(pairChi_iv(Norb,Norb,0:Lmats))
+    allocate(pairChiMatrix(Norb,Norb))
     !
     allocate(exctChi_tau(0:2,Norb,Norb,0:Ltau))
     allocate(exctChi_w(0:2,Norb,Norb,Lreal))
     allocate(exctChi_iv(0:2,Norb,Norb,0:Lmats))
+    allocate(exctChiMatrix(0:2,Norb,Norb))
     !
   end subroutine init_ed_structure
 

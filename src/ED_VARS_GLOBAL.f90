@@ -10,22 +10,22 @@ MODULE ED_VARS_GLOBAL
 
   !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type H_operator
-     complex(8),dimension(:,:,:,:),allocatable               :: O      !Replica hamilt
+     complex(8),dimension(:,:,:,:),allocatable :: O      !Replica hamilt
   end type H_operator
 
   type effective_bath_component
-     real(8)                                                 :: v
-     real(8),dimension(:),allocatable                        :: lambda ![Nsym]
+     real(8)                                   :: v
+     real(8),dimension(:),allocatable          :: lambda ![Nsym]
   end type effective_bath_component
 
   type effective_bath
      !normal
-     real(8),dimension(:,:,:),allocatable                    :: e     !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
-     real(8),dimension(:,:,:),allocatable                    :: v     !spin-keep hyb. [Nspin][Norb][Nbath]
+     real(8),dimension(:,:,:),allocatable      :: e !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
+     real(8),dimension(:,:,:),allocatable      :: v !spin-keep hyb. [Nspin][Norb][Nbath]
      !superc
-     real(8),dimension(:,:,:),allocatable                    :: d     !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
+     real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
      !nonsu2
-     real(8),dimension(:,:,:),allocatable                    :: u     !spin-flip hyb. [Nspin][Norb][Nbath]
+     real(8),dimension(:,:,:),allocatable      :: u !spin-flip hyb. [Nspin][Norb][Nbath]
      !replica
      integer                                                 :: Nbasis  !H Basis dimension     
      type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica bath components, V included
@@ -37,17 +37,17 @@ MODULE ED_VARS_GLOBAL
 
   !-------------------- CUSTOM OBSERVABLE STRUCTURE ----------------------!
   type observable
-     complex(8),dimension(:,:,:),allocatable                 :: sij ![Nlso][Nlso][Nk]
-     character(len=32)                                       :: o_name
-     real(8)                                                 :: o_value
+     complex(8),dimension(:,:,:),allocatable   :: sij ![Nlso][Nlso][Nk]
+     character(len=32)                         :: o_name
+     real(8)                                   :: o_value
   end type observable
 
   type custom_observables
-     type(observable),dimension(:),allocatable               :: item     ![:]
-     complex(8),dimension(:,:,:),allocatable                 :: Hk       ![Nlso][Nlso][Nk]
-     integer                                                 :: N_asked
-     integer                                                 :: N_filled
-     logical                                                 :: init=.false.
+     type(observable),dimension(:),allocatable :: item     ![:]
+     complex(8),dimension(:,:,:),allocatable   :: Hk       ![Nlso][Nlso][Nk]
+     integer                                   :: N_asked
+     integer                                   :: N_filled
+     logical                                   :: init=.false.
   end type custom_observables
 
 
@@ -55,29 +55,68 @@ MODULE ED_VARS_GLOBAL
 
   !---------------- SECTOR-TO-FOCK SPACE STRUCTURE -------------------!
   type sector_map
-     integer,dimension(:),allocatable :: map
-     logical                          :: status=.false.
+     integer,dimension(:),allocatable          :: map
+     logical                                   :: status=.false.
   end type sector_map
 
   type sector
-     integer                                     :: index       !
-     type(sector_map),dimension(:),allocatable   :: H
-     integer,dimension(:),allocatable            :: DimUps
-     integer,dimension(:),allocatable            :: DimDws
-     integer                                     :: DimUp
-     integer                                     :: DimDw
-     integer                                     :: DimEl
-     integer                                     :: DimPh
-     integer                                     :: Dim
-     integer,dimension(:),allocatable            :: Nups
-     integer,dimension(:),allocatable            :: Ndws
-     integer                                     :: Nup
-     integer                                     :: Ndw
-     integer                                     :: Sz
-     integer                                     :: Ntot,twoJz
-     integer                                     :: Nlanc
-     logical                                     :: status=.false.
+     integer                                   :: index       !
+     type(sector_map),dimension(:),allocatable :: H
+     integer,dimension(:),allocatable          :: DimUps
+     integer,dimension(:),allocatable          :: DimDws
+     integer                                   :: DimUp
+     integer                                   :: DimDw
+     integer                                   :: DimEl
+     integer                                   :: DimPh
+     integer                                   :: Dim
+     integer,dimension(:),allocatable          :: Nups
+     integer,dimension(:),allocatable          :: Ndws
+     integer                                   :: Nup
+     integer                                   :: Ndw
+     integer                                   :: Sz
+     integer                                   :: Ntot,twoJz
+     integer                                   :: Nlanc
+     logical                                   :: status=.false.
   end type sector
+
+
+
+  !-------------- GMATRIX FOR FAST EVALUATION OF GF ------------------!
+  !The contributions to the GF Kallen-Lehmann sum are stored as
+  !GF_{ab,sr}%state%channel%{w,e}.
+  !A couple of weight,poles {w,e} is stored for each *channel, corresponding to c,cdg or any
+  !their combination thereof as well as for any state |n> of the spectrum such that
+  !GF(z) = sum w/z-e
+  type GFspectrum
+     complex(8),dimension(:),allocatable       :: weight
+     complex(8),dimension(:),allocatable       :: poles
+  end type GFspectrum
+
+  !N_channel = c,cdag,c \pm cdag, c \pm i*cdag, ...
+  type GFchannel
+     type(GFspectrum),dimension(:),allocatable :: channel 
+  end type GFchannel
+
+  !state_list%size = # of state in the spectrum 
+  type GFmatrix
+     type(GFchannel),dimension(:),allocatable  :: state 
+  end type GFmatrix
+
+
+  interface GFmatrix_allocate
+     module procedure :: allocate_GFmatrix_Nstate
+     module procedure :: allocate_GFmatrix_Nchan
+     module procedure :: allocate_GFmatrix_Nexc
+  end interface GFmatrix_allocate
+
+
+  interface GFmatrix_deallocate
+     module procedure :: deallocate_GFmatrix_single
+     module procedure :: deallocate_GFmatrix_all1
+     module procedure :: deallocate_GFmatrix_all2
+     module procedure :: deallocate_GFmatrix_all3
+     module procedure :: deallocate_GFmatrix_all4
+  end interface GFmatrix_deallocate
 
 
 
@@ -151,7 +190,7 @@ MODULE ED_VARS_GLOBAL
   complex(8),dimension(:,:,:,:),allocatable          :: impHloc           !local hamiltonian
 
 
-  
+
   !Variables for DIAGONALIZATION
   !PRIVATE
   !=========================================================  
@@ -185,15 +224,30 @@ MODULE ED_VARS_GLOBAL
   !Impurity Green's function for phonons
   !PRIVATE (now public but accessible thru routine)
   !=========================================================
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSmats, impSAmats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSreal, impSAreal
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impGmats, impFmats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impGreal, impFreal
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0mats,impF0mats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0real,impF0real
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSmats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSreal
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impGmats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impGreal
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0mats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0real
+  !
+  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impGmatrix
+  !
+  !
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAmats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAreal
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impFmats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impFreal
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0mats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0real
+  !
+  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impFmatrix
+  !
+  !
   complex(8),allocatable,dimension(:)                :: impDmats_ph
   complex(8),allocatable,dimension(:)                :: impDreal_ph
-
+  !
+  type(GFmatrix)                                     :: impDmatrix
 
 
 
@@ -202,25 +256,36 @@ MODULE ED_VARS_GLOBAL
   real(8),allocatable,dimension(:,:,:)               :: spinChi_tau
   complex(8),allocatable,dimension(:,:,:)            :: spinChi_w
   complex(8),allocatable,dimension(:,:,:)            :: spinChi_iv
-
+  !
+  type(GFmatrix),allocatable,dimension(:,:)          :: spinChimatrix
 
   !Diagonal/Off-diagonal charge-charge Susceptibilities
   !=========================================================  
   real(8),allocatable,dimension(:,:,:)               :: densChi_tau
   complex(8),allocatable,dimension(:,:,:)            :: densChi_w
   complex(8),allocatable,dimension(:,:,:)            :: densChi_iv
+  !
+  type(GFmatrix),allocatable,dimension(:,:)          :: densChimatrix
+
 
   !Pair-Pair Susceptibilities
   !=========================================================
   real(8),allocatable,dimension(:,:,:)               :: pairChi_tau
   complex(8),allocatable,dimension(:,:,:)            :: pairChi_w
   complex(8),allocatable,dimension(:,:,:)            :: pairChi_iv
+  !
+  type(GFmatrix),allocatable,dimension(:,:)          :: pairChimatrix
+
+
 
   !Exciton Susceptibilities
   !=========================================================
   real(8),allocatable,dimension(:,:,:,:)             :: exctChi_tau ![0:4,:]
   complex(8),allocatable,dimension(:,:,:,:)          :: exctChi_w
   complex(8),allocatable,dimension(:,:,:,:)          :: exctChi_iv
+  !
+  type(GFmatrix),allocatable,dimension(:,:,:)        :: exctChimatrix
+
 
 
   !Density and double occupancy
@@ -271,7 +336,7 @@ MODULE ED_VARS_GLOBAL
   integer,allocatable,dimension(:,:)                 :: neigen_sector_ineq
   integer,allocatable,dimension(:)                   :: neigen_total_ineq
   real(8),dimension(:,:),allocatable                 :: Hreplica_lambda_ineq
-  
+
   !File suffixes for printing fine tuning.
   !=========================================================
   character(len=32)                                  :: ed_file_suffix=""       !suffix string attached to the output files.
@@ -343,7 +408,108 @@ contains
     MpiMaster      = .true.
 #endif
   end subroutine ed_del_MpiComm
+  !=========================================================
 
+
+
+
+  !=========================================================
+  !Allocate the channels in GFmatrix structure
+  subroutine allocate_gfmatrix_Nstate(self,Nstate)
+    type(GFmatrix) :: self
+    integer        :: Nstate
+    if(allocated(self%state))deallocate(self%state)
+    allocate(self%state(Nstate))
+  end subroutine allocate_gfmatrix_Nstate
+
+  subroutine allocate_gfmatrix_Nchan(self,istate,Nchan)
+    type(GFmatrix) :: self
+    integer        :: istate,Nchan
+    if(allocated(self%state(istate)%channel))deallocate(self%state(istate)%channel)
+    allocate(self%state(istate)%channel(Nchan))
+  end subroutine allocate_gfmatrix_Nchan
+
+  !Allocate the Excitations spectrum at a given channel
+  subroutine allocate_gfmatrix_Nexc(self,istate,ichan,Nexc)
+    type(GFmatrix) :: self
+    integer        :: istate,ichan
+    integer        :: Nexc
+    if(allocated(self%state(istate)%channel(ichan)%weight))&
+         deallocate(self%state(istate)%channel(ichan)%weight)
+    if(allocated(self%state(istate)%channel(ichan)%poles))&
+         deallocate(self%state(istate)%channel(ichan)%poles)
+    !
+    allocate(self%state(istate)%channel(ichan)%weight(Nexc))
+    allocate(self%state(istate)%channel(ichan)%poles(Nexc))
+  end subroutine allocate_gfmatrix_Nexc
+
+
+
+
+
+  subroutine deallocate_gfmatrix_single(self)
+    type(GFmatrix) :: self
+    integer        :: istate,ichan
+    if(allocated(self%state))then
+       do istate=1,size(self%state)
+          if(allocated(self%state(istate)%channel))then
+             do ichan=1,size(self%state(istate)%channel)
+                if(allocated(self%state(istate)%channel(ichan)%weight))&
+                     deallocate(self%state(istate)%channel(ichan)%weight)
+                !
+                if(allocated(self%state(istate)%channel(ichan)%poles))&
+                     deallocate(self%state(istate)%channel(ichan)%poles)
+             enddo
+             deallocate(self%state(istate)%channel)
+          endif
+       enddo
+       deallocate(self%state)
+    endif
+  end subroutine deallocate_gfmatrix_single
+
+  subroutine deallocate_gfmatrix_all1(self)
+    type(GFmatrix),dimension(:) :: self
+    integer                     :: i1
+    do i1=1,dim(self)
+       call deallocate_gfmatrix_single(self(i1))
+    enddo
+  end subroutine deallocate_gfmatrix_all1
+
+  subroutine deallocate_gfmatrix_all2(self)
+    type(GFmatrix),dimension(:,:) :: self
+    integer                       :: i1,i2
+    do i1=1,dim(self,1)
+       do i2=1,dim(self,2)
+          call deallocate_gfmatrix_single(self(i1,i2))
+       enddo
+    enddo
+  end subroutine deallocate_gfmatrix_all2
+
+  subroutine deallocate_gfmatrix_all3(self)
+    type(GFmatrix),dimension(:,:,:) :: self
+    integer                         :: i1,i2,i3
+    do i1=1,dim(self,1)
+       do i2=1,dim(self,2)
+          do i3=1,dim(self,3)
+             call deallocate_gfmatrix_single(self(i1,i2,i3))
+          enddo
+       enddo
+    enddo
+  end subroutine deallocate_gfmatrix_all3
+
+  subroutine deallocate_gfmatrix_all4(self)
+    type(GFmatrix),dimension(:,:,:,:) :: self
+    integer                           :: i1,i2,i3,i4,
+    do i1=1,dim(self,1)
+       do i2=1,dim(self,2)
+          do i3=1,dim(self,3)
+             do i4=1,dim(self,4)
+                call deallocate_gfmatrix_single(self(i1,i2,i3,i4))
+             enddo
+          enddo
+       enddo
+    enddo
+  end subroutine deallocate_gfmatrix_all4
 
 
 
