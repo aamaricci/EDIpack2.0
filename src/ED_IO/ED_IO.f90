@@ -2,6 +2,7 @@ MODULE ED_IO
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_AUX_FUNX
+  USE ED_SETUP
   USE ED_BATH
   USE ED_BATH_FUNCTIONS
   !
@@ -79,6 +80,18 @@ MODULE ED_IO
   interface ed_get_f0imp_realaxis
      module procedure ed_get_f0imp_realaxis_main
   end interface ed_get_f0imp_realaxis
+
+
+
+  interface ed_get_gimp
+     module procedure rebuild_gimp_single
+     module procedure rebuild_gimp_ineq
+  end interface ed_get_gimp
+
+  interface ed_get_sigma
+     module procedure rebuild_sigma_single
+     module procedure rebuild_sigma_ineq
+  end interface ed_get_sigma
 
 
 
@@ -192,6 +205,9 @@ MODULE ED_IO
   public :: ed_get_delta_function
   public :: ed_get_fdelta_function
 
+  public :: ed_get_gimp
+  public :: ed_get_sigma
+
   public :: ed_get_dens
   public :: ed_get_mag
   public :: ed_get_docc
@@ -261,6 +277,13 @@ contains
   ! PURPOSE: Retrieve Anderson non-interacting green's functions 
   !+--------------------------------------------------------------------------+!
   include "get_gand_bath.f90"
+
+  !+--------------------------------------------------------------------------+!
+  ! PURPOSE: Re-build the Impurity green's functions and self-energy at
+  !          arbitrary complex zeta
+  !+--------------------------------------------------------------------------+!
+  include "rebuild_gimp.f90"
+  include "rebuild_sigma.f90"
 
   !+-----------------------------------------------------------------------------+!
   ! PURPOSE: Retrieve measured values of the local observables

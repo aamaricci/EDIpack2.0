@@ -99,24 +99,25 @@ MODULE ED_VARS_GLOBAL
 
   !state_list%size = # of state in the spectrum 
   type GFmatrix
-     type(GFchannel),dimension(:),allocatable  :: state 
+     type(GFchannel),dimension(:),allocatable  :: state
+     logical                                   :: status=.false.
   end type GFmatrix
 
 
-  interface GFmatrix_allocate
+  interface allocate_GFmatrix
      module procedure :: allocate_GFmatrix_Nstate
      module procedure :: allocate_GFmatrix_Nchan
      module procedure :: allocate_GFmatrix_Nexc
-  end interface GFmatrix_allocate
+  end interface allocate_GFmatrix
 
 
-  interface GFmatrix_deallocate
+  interface deallocate_GFmatrix
      module procedure :: deallocate_GFmatrix_single
      module procedure :: deallocate_GFmatrix_all1
      module procedure :: deallocate_GFmatrix_all2
      module procedure :: deallocate_GFmatrix_all3
      module procedure :: deallocate_GFmatrix_all4
-  end interface GFmatrix_deallocate
+  end interface deallocate_GFmatrix
 
 
 
@@ -231,9 +232,6 @@ MODULE ED_VARS_GLOBAL
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0mats
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0real
   !
-  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impGmatrix
-  !
-  !
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAmats
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAreal
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impFmats
@@ -241,12 +239,10 @@ MODULE ED_VARS_GLOBAL
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0mats
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0real
   !
-  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impFmatrix
-  !
-  !
   complex(8),allocatable,dimension(:)                :: impDmats_ph
   complex(8),allocatable,dimension(:)                :: impDreal_ph
   !
+  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impGmatrix    
   type(GFmatrix)                                     :: impDmatrix
 
 
@@ -420,6 +416,7 @@ contains
     integer        :: Nstate
     if(allocated(self%state))deallocate(self%state)
     allocate(self%state(Nstate))
+    self%status=.true.
   end subroutine allocate_gfmatrix_Nstate
 
   subroutine allocate_gfmatrix_Nchan(self,istate,Nchan)
@@ -450,7 +447,7 @@ contains
   subroutine deallocate_gfmatrix_single(self)
     type(GFmatrix) :: self
     integer        :: istate,ichan
-    if(allocated(self%state))then
+    if(self%status)then
        do istate=1,size(self%state)
           if(allocated(self%state(istate)%channel))then
              do ichan=1,size(self%state(istate)%channel)
@@ -463,14 +460,15 @@ contains
              deallocate(self%state(istate)%channel)
           endif
        enddo
-       deallocate(self%state)
+       deallocate(self%state)       
     endif
+    self%status=.false.
   end subroutine deallocate_gfmatrix_single
 
   subroutine deallocate_gfmatrix_all1(self)
     type(GFmatrix),dimension(:) :: self
     integer                     :: i1
-    do i1=1,dim(self)
+    do i1=1,size(self)
        call deallocate_gfmatrix_single(self(i1))
     enddo
   end subroutine deallocate_gfmatrix_all1
@@ -478,8 +476,8 @@ contains
   subroutine deallocate_gfmatrix_all2(self)
     type(GFmatrix),dimension(:,:) :: self
     integer                       :: i1,i2
-    do i1=1,dim(self,1)
-       do i2=1,dim(self,2)
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
           call deallocate_gfmatrix_single(self(i1,i2))
        enddo
     enddo
@@ -488,9 +486,9 @@ contains
   subroutine deallocate_gfmatrix_all3(self)
     type(GFmatrix),dimension(:,:,:) :: self
     integer                         :: i1,i2,i3
-    do i1=1,dim(self,1)
-       do i2=1,dim(self,2)
-          do i3=1,dim(self,3)
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          do i3=1,size(self,3)
              call deallocate_gfmatrix_single(self(i1,i2,i3))
           enddo
        enddo
@@ -499,11 +497,11 @@ contains
 
   subroutine deallocate_gfmatrix_all4(self)
     type(GFmatrix),dimension(:,:,:,:) :: self
-    integer                           :: i1,i2,i3,i4,
-    do i1=1,dim(self,1)
-       do i2=1,dim(self,2)
-          do i3=1,dim(self,3)
-             do i4=1,dim(self,4)
+    integer                           :: i1,i2,i3,i4
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          do i3=1,size(self,3)
+             do i4=1,size(self,4)
                 call deallocate_gfmatrix_single(self(i1,i2,i3,i4))
              enddo
           enddo

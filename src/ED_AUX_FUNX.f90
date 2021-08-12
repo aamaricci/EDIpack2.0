@@ -50,6 +50,17 @@ MODULE ED_AUX_FUNX
      module procedure :: ed_set_suffix_c
   end interface ed_set_suffix
 
+  !This is to overload read/write procedure to GFmatrix derived types
+#if __GNUC__ > 6
+  interface read(formatted)
+     procedure read_formatted
+  end interface read(formatted)
+
+  interface write(formatted)
+     procedure write_formatted
+  end interface write(formatted)
+#endif
+
 
   !FERMIONIC OPERATORS IN BITWISE OPERATIONS
   public :: c,cdg
@@ -59,6 +70,37 @@ MODULE ED_AUX_FUNX
   public :: bjoin
   !BINARY SEARCH
   public :: binary_search
+  !AUX RESHAPE FUNCTIONS (internal use)
+  public :: index_stride_so
+  public :: lso2nnn_reshape
+  public :: so2nn_reshape
+  public :: nnn2lso_reshape
+  public :: nn2so_reshape
+  public :: so2os_reshape
+  public :: os2so_reshape
+  !GFmatrix IO operations
+  public :: write_gfmatrix
+  public :: read_gfmatrix
+  !SEARCH CHEMICAL POTENTIAL, this should go into DMFT_TOOLS I GUESS
+  public :: ed_search_variable
+  public :: search_chemical_potential
+  !SOC RELATED STUFF
+  public :: SOC_jz_symmetrize
+  public :: atomic_SOC
+  public :: atomic_SOC_rotation
+  public :: orbital_Lz_rotation_NorbNspin
+  public :: orbital_Lz_rotation_Norb
+  public :: atomic_j
+  !ALLOCATE/DEALLOCATE GRIDS
+  public :: allocate_grids
+  public :: deallocate_grids
+  !PRINT STATE VECTORS
+  public :: print_state_vector
+  !PRINT LOCAL HAMILTONIAN
+  public :: print_hloc
+  !SET/RESET GLOBAL FILE SUFFIX
+  public :: ed_set_suffix
+  public :: ed_reset_suffix
   !MPI PROCEDURES
 #ifdef _MPI
   interface scatter_vector_MPI
@@ -80,41 +122,11 @@ MODULE ED_AUX_FUNX
      module procedure :: d_allgather_vector_MPI
      module procedure :: c_allgather_vector_MPI
   end interface allgather_vector_MPI
-
   public :: scatter_vector_MPI
   public :: scatter_basis_MPI
   public :: gather_vector_MPI
   public :: allgather_vector_MPI
 #endif
-  !AUX RESHAPE FUNCTIONS (internal use)
-  public :: index_stride_so
-  public :: lso2nnn_reshape
-  public :: so2nn_reshape
-  public :: nnn2lso_reshape
-  public :: nn2so_reshape
-  public :: so2os_reshape
-  public :: os2so_reshape
-  !
-  !SEARCH CHEMICAL POTENTIAL, this should go into DMFT_TOOLS I GUESS
-  public :: ed_search_variable
-  public :: search_chemical_potential
-  !SOC RELATED STUFF
-  public :: SOC_jz_symmetrize
-  public :: atomic_SOC
-  public :: atomic_SOC_rotation
-  public :: orbital_Lz_rotation_NorbNspin
-  public :: orbital_Lz_rotation_Norb
-  public :: atomic_j
-  !ALLOCATE/DEALLOCATE GRIDS
-  public :: allocate_grids
-  public :: deallocate_grids
-  !PRINT STATE VECTORS
-  public :: print_state_vector
-  !PRINT LOCAL HAMILTONIAN
-  public :: print_hloc
-  !SET/RESET GLOBAL FILE SUFFIX
-  public :: ed_set_suffix
-  public :: ed_reset_suffix
 
 
 contains
@@ -140,7 +152,7 @@ contains
 
 
 
-  
+
 
   !##################################################################
   !##################################################################
@@ -287,11 +299,148 @@ contains
 
 
 
+
+
+
+
+
+
   !##################################################################
   !##################################################################
   !AUXILIARY COMPUTATIONAL ROUTINES ARE HERE BELOW:
   !##################################################################
   !##################################################################
+
+#if __GNUC__ > 6
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : write overload for GFmatrix type (formatted)
+  !+-------------------------------------------------------------------+
+  subroutine write_formatted(dtv, unit, iotype, v_list, iostat, iomsg)
+    class(GFmatrix), intent(in)         :: dtv
+    integer, intent(in)                 :: unit
+    integer, intent(out)                :: iostat
+    character(*), intent(in)            :: iotype
+    integer, intent(in)                 :: v_list(:)
+    integer                             :: Nexc,iexc,Ichan,ilat,jlat,iorb,ispin,istate
+    integer                             :: Nchan,Nstates
+    character(*), intent(inout)         :: iomsg
+    !
+    !
+    Nstates = size(dtv%state)
+    write (unit, *,IOSTAT=iostat, IOMSG=iomsg) Nstates
+    do istate=1,Nstates
+       Nchan = size(dtv%state(istate)%channel)
+       write (unit, *,IOSTAT=iostat, IOMSG=iomsg) Nchan
+       do ichan=1,Nchan
+          write (unit, *,IOSTAT=iostat, IOMSG=iomsg) size(dtv%state(istate)%channel(ichan)%poles)
+          write (unit, *,IOSTAT=iostat, IOMSG=iomsg) dtv%state(istate)%channel(ichan)%poles
+          write (unit, *,IOSTAT=iostat, IOMSG=iomsg) dtv%state(istate)%channel(ichan)%weight
+       enddo
+       write (unit, *,IOSTAT=iostat, IOMSG=iomsg) "\n"
+    enddo
+    !
+  end subroutine write_formatted
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : read overload for GFmatrix type (formatted)
+  !+-------------------------------------------------------------------+
+  subroutine read_formatted(dtv, unit,iotype, v_list, iostat, iomsg)
+    class(GFmatrix), intent(inout)                :: dtv
+    integer, intent(in)                           :: unit
+    integer, intent(out)                          :: iostat
+    character(*), intent(in)                      :: iotype
+    integer, intent(in)                           :: v_list(:)
+    character(*), intent(inout)                   :: iomsg
+    logical                                       :: alloc
+    integer                                       :: ichan,Nchan,Nlanc,istate,Nstates
+    !
+    read (unit,*,IOSTAT=iostat, IOMSG=iomsg) Nstates
+    call allocate_GFmatrix(dtv,Nstate=Nstates)
+    do istate=1,Nstates
+       read (unit,*,IOSTAT=iostat, IOMSG=iomsg) Nchan
+       call allocate_GFmatrix(dtv,istate=istate,Nchan=Nchan)
+       do ichan=1,Nchan
+          read (unit,*, IOSTAT=iostat, IOMSG=iomsg) Nlanc
+          call allocate_GFmatrix(dtv,istate=istate,ichan=ichan,Nexc=Nlanc)
+          read (unit, *, IOSTAT=iostat, IOMSG=iomsg) dtv%state(istate)%channel(ichan)%poles
+          read (unit, *, IOSTAT=iostat, IOMSG=iomsg) dtv%state(istate)%channel(ichan)%weight
+       enddo
+    enddo
+    !
+  end subroutine read_formatted
+#endif
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : Save cluster GF to file
+  !+-------------------------------------------------------------------+
+  subroutine write_gfmatrix(file)
+    character(len=*),optional :: file
+    character(len=256)        :: file_,file__
+    integer                   :: unit_,Nchannel,Nexc,ichan,iexc
+    integer                   :: ispin,jspin,iorb,jorb
+    !
+#if __GNUC__ > 6
+    if(.not.allocated(impGmatrix))stop "ED_AUX_FUNX ERROR: write_gfmatrix impGmatrix not allocated!"
+    file_="gfmatrix";if(present(file))file_=str(file)
+    file__=str(file_)//str(ed_file_suffix)//".restart"
+    unit_=free_unit()
+    !
+    open(unit_,file=str(file__),access='sequential')
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          do iorb=1,Norb
+             do jorb=1,Norb
+                write(unit_,*)impGmatrix(ispin,jspin,iorb,jorb)
+             enddo
+          enddo
+       enddo
+    enddo
+    close(unit_)
+#else
+    print*,"User-defined Derived-Type IO requires Gfortran > 6.0.0"
+#endif
+  end subroutine write_gfmatrix
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : Read cluster GF from file
+  !+-------------------------------------------------------------------+
+  subroutine read_gfmatrix(file)
+    character(len=*),optional :: file
+    character(len=256)        :: file_,file__
+    integer                   :: unit_,Nchannel,Nexc,ichan,iexc
+    integer                   :: ispin,jspin,iorb,jorb
+    !
+#if __GNUC__ > 6
+    if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
+    if(allocated(impGmatrix))deallocate(impGmatrix)
+    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    file_="gfmatrix";if(present(file))file_=str(file)
+    file__=str(file_)//str(ed_file_suffix)//".restart"
+    unit_=free_unit()
+    !
+    open(unit_,file=str(file__),access='sequential')
+    rewind(unit_)
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          do iorb=1,Norb
+             do jorb=1,Norb
+                read(unit_,*)impGmatrix(ispin,jspin,iorb,jorb)
+             enddo
+          enddo
+       enddo
+    enddo
+    close(unit_)
+#else
+    print*,"User-defined Derived-Type IO requires Gfortran > 6.0.0"
+#endif
+  end subroutine read_gfmatrix
+
+
+
+
+
 
 #ifdef _MPI
   !! Scatter V into the arrays Vloc on each thread: sum_threads(size(Vloc)) must be equal to size(v)

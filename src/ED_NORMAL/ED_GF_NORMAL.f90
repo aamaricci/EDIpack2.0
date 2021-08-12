@@ -17,6 +17,7 @@ MODULE ED_GF_NORMAL
 
 
   public :: build_gf_normal
+  public :: rebuild_gf_normal
   public :: build_sigma_normal
 
 
@@ -52,13 +53,12 @@ contains
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
-    call GFmatrix_deallocate(impGmatrix)
     !
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_s"//str(ispin)
           if(MPIMASTER)call start_timer
-          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
+          call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_normal_diag(iorb,ispin)
           if(MPIMASTER)call stop_timer(unit=LOGfile)
        enddo
@@ -83,7 +83,7 @@ contains
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
                 if(MPIMASTER)call start_timer
-                call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
+                call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_normal_mix(iorb,jorb,ispin)
                 if(MPIMASTER)call stop_timer(unit=LOGfile)
              enddo
@@ -119,10 +119,11 @@ contains
        end select
     end if
     !
+    !
+    !> PHONONS
     if(DimPh>1)then
        write(LOGfile,"(A)")"Get phonon Green function:"
        if(MPIMASTER)call start_timer()
-       call GFmatrix_allocate(impDmatrix,Nstate=state_list%size)
        call lanc_build_gf_phonon_main()
        if(MPIMASTER)call stop_timer(unit=LOGfile)
     endif
@@ -130,6 +131,63 @@ contains
 
 
 
+
+  
+
+  subroutine rebuild_gf_normal()
+    integer                                     :: iorb,jorb,ispin,jspin,i
+    logical                                     :: MaskBool
+    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+    !
+    do ispin=1,Nspin
+       do iorb=1,Norb
+          write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_s"//str(ispin)
+          call rebuild_gf_normal_all(iorb,iorb,ispin)
+       enddo
+    enddo
+    !
+    if(offdiag_gf_flag)then
+       Hmask= .true.
+       if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       do ispin=1,Nspin
+          do iorb=1,Norb
+             write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
+          enddo
+       enddo
+       do ispin=1,Nspin
+          do iorb=1,Norb
+             do jorb=iorb+1,Norb
+                MaskBool=.true.   
+                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(.not.MaskBool)cycle
+                !
+                write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
+                call rebuild_gf_normal_all(iorb,jorb,ispin)
+             enddo
+          enddo
+       enddo
+       !
+       !
+       do ispin=1,Nspin
+          do iorb=1,Norb
+             do jorb=iorb+1,Norb
+                !if(hybrid)always T; if(replica)T iff following condition is T
+                MaskBool=.true.   
+                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                !
+                if(.not.MaskBool)cycle
+                impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
+                     - impGmats(ispin,ispin,iorb,iorb,:) - impGmats(ispin,ispin,jorb,jorb,:))
+                impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,ispin,iorb,jorb,:) &
+                     - impGreal(ispin,ispin,iorb,iorb,:) - impGreal(ispin,ispin,jorb,jorb,:))
+                impGmats(ispin,ispin,jorb,iorb,:) = impGmats(ispin,ispin,iorb,jorb,:)
+                impGreal(ispin,ispin,jorb,iorb,:) = impGreal(ispin,ispin,iorb,jorb,:)
+             enddo
+          enddo
+       enddo
+    end if
+    !
+  end subroutine rebuild_gf_normal
 
 
 
@@ -157,7 +215,7 @@ contains
     !
     do istate=1,state_list%size
        !
-       call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),istate,Nchan=2)
+       call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,Nchan=2)
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -196,11 +254,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,iorb,ispin,ichan=1,istate)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,iorb,ispin,ichan=1,istate=istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),istate,1,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,1,Nexc=0)
        endif
        !
        !REMOVE ONE PARTICLE:
@@ -222,11 +280,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,iorb,ispin,ichan=2,istate)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,iorb,ispin,ichan=2,istate=istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,iorb),istate,2,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,2,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -246,14 +304,6 @@ contains
 
 
 
-
-  !################################################################
-
-
-
-
-
-
   subroutine lanc_build_gf_normal_mix(iorb,jorb,ispin)
     integer                     :: iorb,jorb,ispin
     type(sector)                :: sectorI,sectorJ
@@ -270,7 +320,7 @@ contains
     !
     do istate=1,state_list%size
        !
-       call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,Nchan=2)
+       call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,Nchan=2)
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -316,11 +366,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,jorb,ispin,ichan=1,istate)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,jorb,ispin,ichan=1,istate=istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,1,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,1,Nexc=0)
        endif
        !
        !EVALUATE (c_iorb + c_jorb)|gs>
@@ -349,11 +399,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,jorb,ispin,ichan=2,istate)
+          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,jorb,ispin,2,istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,2,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,2,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -370,13 +420,6 @@ contains
     enddo
     return
   end subroutine lanc_build_gf_normal_mix
-
-
-
-
-
-  !################################################################
-
 
 
 
@@ -425,7 +468,7 @@ contains
     subdiag(2:Nlanc) = blanc(2:Nlanc)
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
-    call GFmatrix_allocate(impGmatrix(ispin,ispin,iorb,jorb),istate,ichan,Nlanc)
+    call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,ichan,Nlanc)
     !
     do j=1,nlanc
        de = diag(j)-Ei
@@ -450,12 +493,12 @@ contains
 
 
 
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
 
 
 
@@ -466,7 +509,7 @@ contains
     !
     do istate=1,state_list%size
        !
-       call GFmatrix_allocate(impDmatrix,istate=istate,Nchan=1)
+       ! call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -533,8 +576,6 @@ contains
   end subroutine lanc_build_gf_phonon_main
 
 
-  !################################################################
-
 
   subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
     real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
@@ -564,7 +605,7 @@ contains
     subdiag(2:Nlanc) = blanc(2:Nlanc)
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
-    call GFmatrix_allocate(impDmatrx,istate,1,Nexc=Nlanc)
+    ! call allocate_GFmatrix(impDmatrx,istate,1,Nexc=Nlanc)
     !
     do j=1,nlanc
        Ej     = diag(j)
@@ -572,8 +613,8 @@ contains
        pesoAB = Z(1,j)*Z(1,j)
        peso   = pesoF*pesoAB*pesoBZ
        !
-       impDmatrix%state(istate)%channel(ichan)%weight(j) = peso
-       impDmatrix%state(istate)%channel(ichan)%poles(j)  = de
+       ! impDmatrix%state(istate)%channel(ichan)%weight(j) = peso
+       ! impDmatrix%state(istate)%channel(ichan)%poles(j)  = de
        !
        ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
        ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
@@ -594,14 +635,82 @@ contains
 
 
 
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
-  !############################################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
 
 
+
+
+  subroutine rebuild_gf_normal_all(iorb,jorb,ispin)
+    integer,intent(in) :: iorb,jorb,ispin
+    integer            :: Nstates,istate
+    integer            :: Nchannels,ichan
+    integer            :: Nexcs,iexc
+    real(8)            :: peso,de
+    !
+    if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) then
+       print*, "ED_GF_NORMAL WARNING: impGmatrix%state not allocated. Nothing to do"
+       return
+    endif
+    !
+    Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
+    do istate=1,Nstates
+       if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel))cycle
+       Nchannels = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel)
+       do ichan=1,Nchannels
+          Nexcs  = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles)
+          if(Nexcs==0)cycle
+          do iexc=1,Nexcs
+             peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
+             de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
+             impGmats(ispin,ispin,iorb,jorb,:)=impGmats(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(0d0,wm(i))-de)
+             impGreal(ispin,ispin,iorb,jorb,:)=impGreal(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(wr(i),eps)-de)
+          enddo
+       enddo
+    enddo
+    return
+  end subroutine rebuild_gf_normal_all
+
+
+  
+  ! subroutine rebuild_gf_phonon()
+  !   integer            :: Nstates,istate
+  !   integer            :: Nchannels,ichan
+  !   integer            :: Nexcs,iexc
+  !   real(8)            :: peso,de
+  !   !
+  !   !
+  !   Nstates = size(impDmatrix%state)
+  !   do istate=1,Nstates
+  !      Nchannels = size(impDmatrix%state(istate)%channel)
+  !      do ichan=1,Nchannels
+  !         Nexcs  = size(impDmatrix%state(istate)%channel(ichan)%poles)
+  !         if(Nexcs==0)cycle
+  !         do iexc=1,Nexcs
+  !            peso = impDmatrix%state(istate)%channel(ichan)%weight(iexc)
+  !            de   = impDmatrix%state(istate)%channel(ichan)%poles(iexc)
+  !            if(beta*de > 1d-3)impDmats_ph(0)=impDmats_ph(0) - peso*2*(1d0-exp(-beta*de))/de 
+  !            do i=1,Lmats
+  !               impDmats_ph(i)=impDmats_ph(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
+  !            enddo
+  !            do i=1,Lreal
+  !               impDreal_ph(i)=impDreal_ph(i) + peso*(1d0-exp(-beta*dE))*&
+  !                    ( one/(dcmplx(vr(i),eps)-dE) - one/(dcmplx(vr(i),eps)+dE) )
+  !            enddo
+  !         enddo
+  !      enddo
+  !   enddo
+  !   return
+  ! end subroutine rebuild_gf_phonon
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
 
 
 
@@ -616,24 +725,25 @@ contains
     invGmats  = zero
     invG0real = zero
     invGreal  = zero
+    impSmats  = zero
+    impSreal  = zero
+    !
     !
     !Get G0^-1
     invG0mats(:,:,:,:,:) = invg0_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
     invG0real(:,:,:,:,:) = invg0_bath_function(dcmplx(wr(:),eps),dmft_bath)
     !
+    !Get Gimp^-1
     select case(bath_type)
-    case default                !Diagonal in both spin and orbital
        !
-       !Get Gimp^-1
+       !
+    case default
        do ispin=1,Nspin
           do iorb=1,Norb
              invGmats(ispin,ispin,iorb,iorb,:) = one/impGmats(ispin,ispin,iorb,iorb,:)
              invGreal(ispin,ispin,iorb,iorb,:) = one/impGreal(ispin,ispin,iorb,iorb,:)
           enddo
        enddo
-       !Get Sigma functions: Sigma= G0^-1 - G^-1
-       impSmats=zero
-       impSreal=zero
        do ispin=1,Nspin
           do iorb=1,Norb
              impSmats(ispin,ispin,iorb,iorb,:) = invG0mats(ispin,ispin,iorb,iorb,:) - invGmats(ispin,ispin,iorb,iorb,:)
@@ -641,9 +751,8 @@ contains
           enddo
        enddo
        !
-    case ("hybrid","replica")   !Diagonal in spin only. Full Orbital structure
        !
-       !Get Gimp^-1
+    case ("hybrid","replica")   !Diagonal in spin
        do ispin=1,Nspin
           do i=1,Lmats
              invGimp = impGmats(ispin,ispin,:,:,i)
@@ -657,21 +766,17 @@ contains
              invGreal(ispin,ispin,:,:,i)=invGimp
           enddo
        enddo
-       !Get Sigma functions: Sigma= G0^-1 - G^-1
-       impSmats=zero
-       impSreal=zero
        do ispin=1,Nspin
           impSmats(ispin,ispin,:,:,:) = invG0mats(ispin,ispin,:,:,:) - invGmats(ispin,ispin,:,:,:)
-          !
           impSreal(ispin,ispin,:,:,:) = invG0real(ispin,ispin,:,:,:) - invGreal(ispin,ispin,:,:,:)
        enddo
+       !
        !
     end select
     !
     !Get G0and:
     impG0mats(:,:,:,:,:) = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
     impG0real(:,:,:,:,:) = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !!
     !
   end subroutine build_sigma_normal
 

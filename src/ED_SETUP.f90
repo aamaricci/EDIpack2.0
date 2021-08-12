@@ -34,11 +34,12 @@ contains
     !
     if(.not.ed_total_ud)then
        if(bath_type=="hybrid")stop "ED ERROR: ed_total_ud=F can not be used with bath_type=hybrid"
+       if(bath_type=="replica")print*,"ED WARNING: ed_total_ud=F with bath_type=replica requires some care with H_bath"
        if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))stop "ED ERROR: ed_total_ud=F can not be used with Jx!=0 OR Jp!=0"
     endif
     !
     if(ed_mode=="superc")then
-       if(Nspin>1)stop "ED ERROR: SC + AFM is currently not supported ."
+       if(Nspin>1)stop "ED ERROR: SC + Magnetism is currently not supported."
        if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
     endif
     if(ed_mode=="nonsu2")then
@@ -338,10 +339,7 @@ contains
     impDreal_ph=zero
     !
     allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
-    allocate(impFmatrix(Nspin,Nspin,Norb,Norb))
-    !impDmatrix is a scalar
-    
-    
+    !
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_phisc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
     allocate(ed_mag(3,Norb))
