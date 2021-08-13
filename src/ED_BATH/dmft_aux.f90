@@ -88,15 +88,19 @@ end subroutine deallocate_dmft_bath
 !PURPOSE  : Initialize the DMFT loop, builindg H parameters and/or 
 !reading previous (converged) solution
 !+------------------------------------------------------------------+
-subroutine init_dmft_bath(dmft_bath_)
+subroutine init_dmft_bath(dmft_bath_,used)
   type(effective_bath) :: dmft_bath_
+  logical,optional     :: used
   integer              :: Nbasis
   integer              :: i,unit,flen,Nh,isym,Nsym
   integer              :: io,jo,iorb,ispin,jorb,jspin,ibath
-  logical              :: IOfile
+  logical              :: IOfile,used_
   real(8)              :: de
   real(8)              :: offset(Nbath)
+  character(len=20)    :: hsuffix
   !
+  used_   = .false.   ;if(present(used))used_=used
+  hsuffix = ".restart";if(used_)hsuffix=reg(".used")
   if(.not.dmft_bath_%status)stop "ERROR init_dmft_bath error: bath not allocated"
   !
   select case(bath_type)
@@ -163,13 +167,13 @@ subroutine init_dmft_bath(dmft_bath_)
   !
   !
   !Read from file if exist:
-  inquire(file=trim(Hfile)//trim(ed_file_suffix)//".restart",exist=IOfile)
+  inquire(file=trim(Hfile)//trim(ed_file_suffix)//trim(hsuffix),exist=IOfile)
   if(IOfile)then
-     write(LOGfile,"(A)")'Reading bath from file'//trim(Hfile)//trim(ed_file_suffix)//".restart"
+     write(LOGfile,"(A)")'Reading bath from file'//trim(Hfile)//trim(ed_file_suffix)//trim(hsuffix)
      unit = free_unit()
-     flen = file_length(trim(Hfile)//trim(ed_file_suffix)//".restart")
+     flen = file_length(trim(Hfile)//trim(ed_file_suffix)//trim(hsuffix))
      !
-     open(unit,file=trim(Hfile)//trim(ed_file_suffix)//".restart")
+     open(unit,file=trim(Hfile)//trim(ed_file_suffix)//trim(hsuffix))
      !
      select case(bath_type)
      case default

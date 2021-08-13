@@ -665,8 +665,8 @@ contains
           do iexc=1,Nexcs
              peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
              de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-             impGmats(ispin,ispin,iorb,jorb,:)=impGmats(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(0d0,wm(i))-de)
-             impGreal(ispin,ispin,iorb,jorb,:)=impGreal(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(wr(i),eps)-de)
+             impGmats(ispin,ispin,iorb,jorb,:)=impGmats(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(0d0,wm(:))-de)
+             impGreal(ispin,ispin,iorb,jorb,:)=impGreal(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(wr(:),eps)-de)
           enddo
        enddo
     enddo

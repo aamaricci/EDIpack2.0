@@ -7,8 +7,9 @@ MODULE ED_IO
   USE ED_BATH_FUNCTIONS
   !
   USE SF_LINALG
-  USE SF_ARRAYS, only: linspace,arange
+  USE SF_ARRAYS,  only: linspace,arange
   USE SF_IOTOOLS, only: str,reg,free_unit,splot,sread
+  USE SF_MISC,    only: assert_shape
   implicit none
   private
 
@@ -232,7 +233,7 @@ MODULE ED_IO
   public :: ed_get_neigen_total
 
   public :: ed_read_impSigma
-
+  public :: ed_read_impGmatrix
 
   !****************************************************************************************!
   !****************************************************************************************!
@@ -242,6 +243,7 @@ MODULE ED_IO
   public :: ed_print_impG0
   public :: ed_print_impD
   public :: ed_print_impChi
+  public :: ed_print_impGmatrix
 
 
   !****************************************************************************************!
@@ -366,6 +368,13 @@ contains
   end subroutine ed_print_impChi
 
 
+  subroutine ed_print_impGmatrix(file)
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    if(.not.allocated(impGmatrix))stop "ED_PRINT_IMPGFMATRIX ERROR: impGmatrix not allocated!"
+    file_="gfmatrix";if(present(file))file_=str(file)
+    call write_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine ed_print_impGmatrix
 
 
 
@@ -373,6 +382,7 @@ contains
 
   ! PURPOSE: Read self-energy function(s) - also for inequivalent sites.
   !+-----------------------------------------------------------------------------+!
+
   include "read_impSigma.f90"
   subroutine ed_read_impSigma_single
     !
@@ -424,6 +434,21 @@ contains
     enddo
     ed_file_suffix=""
   end subroutine ed_read_impSigma_lattice
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : Read cluster GF from file
+  !+-------------------------------------------------------------------+
+  subroutine ed_read_impGmatrix(file)
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
+    if(allocated(impGmatrix))deallocate(impGmatrix)
+    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    file_="gfmatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine ed_read_impGmatrix
 
 
 END MODULE ED_IO

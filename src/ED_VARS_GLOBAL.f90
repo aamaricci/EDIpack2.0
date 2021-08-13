@@ -1,5 +1,6 @@
 MODULE ED_VARS_GLOBAL
   USE SF_CONSTANTS
+  USE SF_IOTOOLS, only:free_unit,reg,str
   USE ED_SPARSE_MATRIX
 #ifdef _MPI
   USE MPI
@@ -88,8 +89,8 @@ MODULE ED_VARS_GLOBAL
   !their combination thereof as well as for any state |n> of the spectrum such that
   !GF(z) = sum w/z-e
   type GFspectrum
-     complex(8),dimension(:),allocatable       :: weight
-     complex(8),dimension(:),allocatable       :: poles
+     real(8),dimension(:),allocatable       :: weight
+     real(8),dimension(:),allocatable       :: poles
   end type GFspectrum
 
   !N_channel = c,cdag,c \pm cdag, c \pm i*cdag, ...
@@ -119,6 +120,21 @@ MODULE ED_VARS_GLOBAL
      module procedure :: deallocate_GFmatrix_all4
   end interface deallocate_GFmatrix
 
+  interface write_GFmatrix
+     module procedure :: write_GFmatrix_single
+     module procedure :: write_GFmatrix_all1
+     module procedure :: write_GFmatrix_all2
+     module procedure :: write_GFmatrix_all3
+     module procedure :: write_GFmatrix_all4
+  end interface write_GFmatrix
+
+  interface read_GFmatrix
+     module procedure :: read_GFmatrix_single
+     module procedure :: read_GFmatrix_all1
+     module procedure :: read_GFmatrix_all2
+     module procedure :: read_GFmatrix_all3
+     module procedure :: read_GFmatrix_all4
+  end interface read_GFmatrix
 
 
   !------------------ ABTRACT INTERFACES PROCEDURES ------------------!
@@ -509,6 +525,227 @@ contains
     enddo
   end subroutine deallocate_gfmatrix_all4
 
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : WRITE GFmatrix to file
+  !+-------------------------------------------------------------------+
+  subroutine write_gfmatrix_single(self,file)
+    class(GFmatrix)    :: self
+    character(len=*)   :: file
+    integer            :: unit_
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    call write_formatted_gfmatrix(self,unit_)
+    close(unit_)
+  end subroutine write_gfmatrix_single
+
+  subroutine write_gfmatrix_all1(self,file)
+    class(GFmatrix)  :: self(:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    do i1=1,size(self)
+       call write_formatted_gfmatrix(self(i1),unit_)
+    enddo
+    close(unit_)
+  end subroutine write_gfmatrix_all1
+
+  subroutine write_gfmatrix_all2(self,file)
+    class(GFmatrix)  :: self(:,:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          call write_formatted_gfmatrix(self(i1,i2),unit_)
+       enddo
+    enddo
+    close(unit_)
+  end subroutine write_gfmatrix_all2
+
+  subroutine write_gfmatrix_all3(self,file)
+    class(GFmatrix)  :: self(:,:,:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2,i3
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          do i3=1,size(self,3)
+             call write_formatted_gfmatrix(self(i1,i2,i3),unit_)
+          enddo
+       enddo
+    enddo
+    close(unit_)
+  end subroutine write_gfmatrix_all3
+
+  subroutine write_gfmatrix_all4(self,file)
+    class(GFmatrix)  :: self(:,:,:,:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2,i3,i4
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          do i3=1,size(self,3)
+             do i4=1,size(self,4)
+                call write_formatted_gfmatrix(self(i1,i2,i3,i4),unit_)
+             enddo
+          enddo
+       enddo
+    enddo
+    close(unit_)
+  end subroutine write_gfmatrix_all4
+
+
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : Read cluster GF from file
+  !+-------------------------------------------------------------------+
+  subroutine read_gfmatrix_single(self,file)
+    class(GFmatrix)  :: self
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2,i3,i4
+    call deallocate_GFmatrix(self)
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    rewind(unit_)
+    call read_formatted_gfmatrix(self,unit_)
+    close(unit_)
+  end subroutine read_gfmatrix_single
+
+  subroutine read_gfmatrix_all1(self,file)
+    class(GFmatrix)  :: self(:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1
+    call deallocate_GFmatrix(self)
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    rewind(unit_)
+    do i1=1,size(self)
+       call read_formatted_gfmatrix(self(i1),unit_)
+    enddo
+    close(unit_)
+  end subroutine read_gfmatrix_all1
+
+  subroutine read_gfmatrix_all2(self,file)
+    class(GFmatrix)  :: self(:,:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2
+    call deallocate_GFmatrix(self)
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    rewind(unit_)
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          call read_formatted_gfmatrix(self(i1,i2),unit_)
+       enddo
+    enddo
+    close(unit_)
+  end subroutine read_gfmatrix_all2
+
+  subroutine read_gfmatrix_all3(self,file)
+    class(GFmatrix)  :: self(:,:,:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2,i3
+    call deallocate_GFmatrix(self)
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    rewind(unit_)
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          do i3=1,size(self,3)
+             call read_formatted_gfmatrix(self(i1,i2,i3),unit_)
+          enddo
+       enddo
+    enddo
+    close(unit_)
+  end subroutine read_gfmatrix_all3
+
+  subroutine read_gfmatrix_all4(self,file)
+    class(GFmatrix)  :: self(:,:,:,:)
+    character(len=*) :: file
+    integer          :: unit_
+    integer          :: i1,i2,i3,i4
+    call deallocate_GFmatrix(self)
+    unit_=free_unit()
+    open(unit_,file=str(file))
+    rewind(unit_)
+    do i1=1,size(self,1)
+       do i2=1,size(self,2)
+          do i3=1,size(self,3)
+             do i4=1,size(self,4)
+                call read_formatted_gfmatrix(self(i1,i2,i3,i4),unit_)
+             enddo
+          enddo
+       enddo
+    enddo
+    close(unit_)
+  end subroutine read_gfmatrix_all4
+
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : write overload for GFmatrix type (formatted)
+  !+-------------------------------------------------------------------+
+  subroutine write_formatted_gfmatrix(dtv, unit)
+    class(GFmatrix), intent(in)         :: dtv
+    integer, intent(in)                 :: unit
+    integer                             :: iexc,Ichan,istate
+    integer                             :: Nexc,Nchan,Nstates
+    write(unit,*) dtv%status
+    if(.not.dtv%status)return
+    Nstates = size(dtv%state)
+    write(unit,*) Nstates
+    do istate=1,Nstates
+       Nchan = size(dtv%state(istate)%channel)
+       write(unit,*)Nchan
+       do ichan=1,Nchan
+          write(unit,*) size(dtv%state(istate)%channel(ichan)%poles)
+          write(unit,*) dtv%state(istate)%channel(ichan)%poles
+          write(unit,*) dtv%state(istate)%channel(ichan)%weight
+       enddo
+    enddo
+    write(unit,*)""
+  end subroutine write_formatted_gfmatrix
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : read overload for GFmatrix type (formatted)
+  !+-------------------------------------------------------------------+
+  subroutine read_formatted_gfmatrix(dtv, unit)
+    class(GFmatrix), intent(inout)                :: dtv
+    integer, intent(in)                           :: unit
+    logical                                       :: alloc
+    integer                                       :: ichan,Nchan,Nlanc,istate,Nstates
+    !
+    read(unit,*) alloc
+    if(.not.alloc)return
+    read(unit,*)Nstates
+    call allocate_GFmatrix(dtv,Nstate=Nstates)
+    do istate=1,Nstates
+       read(unit,*)Nchan
+       call allocate_GFmatrix(dtv,istate=istate,Nchan=Nchan)
+       do ichan=1,Nchan
+          read(unit,*)Nlanc
+          call allocate_GFmatrix(dtv,istate=istate,ichan=ichan,Nexc=Nlanc)
+          read(unit,*) dtv%state(istate)%channel(ichan)%poles
+          read(unit,*) dtv%state(istate)%channel(ichan)%weight
+       enddo
+    enddo
+    !
+  end subroutine read_formatted_gfmatrix
 
 
 END MODULE ED_VARS_GLOBAL

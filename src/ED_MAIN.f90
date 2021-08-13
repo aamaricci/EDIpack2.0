@@ -1,6 +1,7 @@
 module ED_MAIN
   USE SF_IOTOOLS, only: str,reg
   USE SF_TIMER,only: start_timer,stop_timer
+  USE SF_MISC,only: assert_shape
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_EIGENSPACE, only: state_list,es_delete_espace
@@ -74,7 +75,7 @@ contains
   !+-----------------------------------------------------------------------------+!
   subroutine ed_init_solver_single(bath)
     real(8),dimension(:),intent(inout) :: bath
-    logical                            :: check 
+    logical                            :: check
     logical,save                       :: isetup=.true.
     integer                            :: i
     logical                            :: MPI_MASTER=.true.
@@ -109,7 +110,6 @@ contains
     logical                            :: check 
     logical,save                       :: isetup=.true.
     integer                            :: i
-    !
     !
     !SET THE LOCAL MPI COMMUNICATOR :
     call ed_set_MpiComm(MpiComm)
@@ -720,8 +720,7 @@ contains
   !+-----------------------------------------------------------------------------+!
   !                              SINGLE SITE                                      !
   !+-----------------------------------------------------------------------------+!
-  subroutine ed_rebuild_gf_single(bath,Hloc)
-    real(8),dimension(:),intent(in) :: bath
+  subroutine ed_rebuild_gf_single(Hloc)
     complex(8),intent(in)           :: Hloc(Nspin,Nspin,Norb,Norb)
     logical                         :: check
     !
@@ -730,13 +729,9 @@ contains
     !
     call set_Himpurity(Hloc)
     !
-    check = check_bath_dimension(bath)
-    if(.not.check)stop "ED_SOLVE_SINGLE Error: wrong bath dimensions"
-    !
     call allocate_dmft_bath(dmft_bath)
-    call set_dmft_bath(bath,dmft_bath)
-    call write_dmft_bath(dmft_bath,LOGfile)
-    if(MpiMaster)call save_dmft_bath(dmft_bath,used=.true.)
+    call init_dmft_bath(dmft_bath,used=.true.)
+    if(MpiMaster)call write_dmft_bath(dmft_bath,LOGfile)
     !
     !
     call rebuildGF_impurity()
@@ -751,9 +746,8 @@ contains
 
 
 #ifdef _MPI
-  subroutine ed_rebuild_gf_single_mpi(MpiComm,bath,Hloc)
+  subroutine ed_rebuild_gf_single_mpi(MpiComm,Hloc)
     integer                         :: MpiComm
-    real(8),dimension(:),intent(in) :: bath
     complex(8),intent(in)           :: Hloc(Nspin,Nspin,Norb,Norb)
     logical                         :: check
     !
@@ -765,13 +759,9 @@ contains
     !
     call set_Himpurity(Hloc)
     !
-    check   = check_bath_dimension(bath)
-    if(.not.check)stop "ED_SOLVE_SINGLE Error: wrong bath dimensions"
-    !
     call allocate_dmft_bath(dmft_bath)
-    call set_dmft_bath(bath,dmft_bath)
-    call write_dmft_bath(dmft_bath,LOGfile)
-    if(MpiMaster)call save_dmft_bath(dmft_bath,used=.true.)
+    call init_dmft_bath(dmft_bath,used=.true.)
+    if(MpiMaster)call write_dmft_bath(dmft_bath,LOGfile)
     !
     !
     call rebuildGF_impurity()
@@ -793,9 +783,8 @@ contains
   !+-----------------------------------------------------------------------------+!
   !                          INEQUIVALENT SITES                                   !
   !+-----------------------------------------------------------------------------+!
-  subroutine ed_rebuild_gf_lattice(bath,Hloc)
-    real(8)                 :: bath(:,:) ![Nlat][Nb]
-    complex(8)              :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
+  subroutine ed_rebuild_gf_lattice(Hloc)
+    complex(8)              :: Hloc(:,:,:,:,:) ![Nineq,Nspin,Nspin,Norb,Norb]
     ! 
     integer                 :: i,j,ilat,iorb,jorb,ispin,jspin
     integer                 :: Nineq
@@ -806,14 +795,10 @@ contains
     !
     !
     ! Check dimensions !
-    Nineq=size(bath,1)
+    Nineq=size(Hloc,1)
+    call assert_shape(Hloc,[Nineq,Nspin,Nspin,Norb,Norb],"ed_rebuild_gf_lattice","hloc")
     !
     !Check the dimensions of the bath are ok:
-    do ilat=1,Nineq
-       check_dim = check_bath_dimension(bath(ilat,:))
-       if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
-    end do
-    !
     if(allocated(Smats_ineq))deallocate(Smats_ineq)
     if(allocated(SAmats_ineq))deallocate(SAmats_ineq)
     if(allocated(Gmats_ineq))deallocate(Gmats_ineq)
@@ -837,14 +822,11 @@ contains
     Greal_ineq    = zero ; Freal_ineq    = zero
     !
     call start_timer
-    !
     do ilat = 1, Nineq
        write(LOGfile,*)" SOLVING INEQ SITE: "//str(ilat,Npad=4)
        !
-       ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
-       !
-       !
-       call ed_rebuild_gf_single(bath(ilat,:),Hloc(ilat,:,:,:,:)) !Hloc(ilat,...)-->impHloc
+       call ed_set_suffix(ilat)
+       call ed_rebuild_gf_single(Hloc(ilat,:,:,:,:))
        !
        Smats_ineq(ilat,:,:,:,:,:)  = impSmats
        SAmats_ineq(ilat,:,:,:,:,:) = impSAmats
@@ -856,7 +838,6 @@ contains
        Freal_ineq(ilat,:,:,:,:,:)  = impFreal
        !
     enddo
-    !
     call stop_timer(unit=LOGfile)
     !
     call ed_reset_suffix
@@ -866,11 +847,10 @@ contains
 
   !FALL BACK: DO A VERSION THAT DOES THE SITES IN PARALLEL USING SERIAL ED CODE
 #ifdef _MPI
-  subroutine ed_rebuild_gf_lattice_mpi(MpiComm,bath,Hloc)
+  subroutine ed_rebuild_gf_lattice_mpi(MpiComm,Hloc)
     integer                                       :: MpiComm
     !inputs
-    real(8)                                       :: bath(:,:) ![Nlat][Nb]
-    complex(8)                                    :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8)                                    :: Hloc(:,:,:,:,:) ![Nineq,Nspin,Nspin,Norb,Norb]
     !MPI  auxiliary vars
     complex(8),dimension(:,:,:,:,:,:),allocatable :: Smats_tmp,Sreal_tmp
     complex(8),dimension(:,:,:,:,:,:),allocatable :: SAmats_tmp,SAreal_tmp
@@ -894,14 +874,8 @@ contains
     !
     !
     ! Check dimensions !
-    Nineq=size(bath,1)
-    !
-    !Check the dimensions of the bath are ok.
-    !This can always be done in parallel no issues with mpi_lanc
-    do ilat=1+MPI_ID,Nineq,MPI_SIZE
-       check_dim = check_bath_dimension(bath(ilat,:))
-       if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
-    end do
+    Nineq=size(hloc,1)
+    call assert_shape(Hloc,[Nineq,Nspin,Nspin,Norb,Norb],"ed_rebuild_gf_lattice_mpi","hloc")
     !
     if(allocated(Smats_ineq))deallocate(Smats_ineq)
     if(allocated(SAmats_ineq))deallocate(SAmats_ineq)
@@ -939,11 +913,8 @@ contains
     do ilat = 1 + MPI_ID, Nineq, MPI_SIZE
        write(LOGfile,*)str(MPI_ID)//" SOLVES INEQ SITE: "//str(ilat,Npad=4)
        !
-       ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
-       !
-       !
-       call ed_rebuild_gf_single(bath(ilat,:),Hloc(ilat,:,:,:,:))
-       !
+       call ed_set_suffix(ilat)
+       call ed_rebuild_gf_single(Hloc(ilat,:,:,:,:))
        !
        Smats_tmp(ilat,:,:,:,:,:)  = impSmats
        SAmats_tmp(ilat,:,:,:,:,:) = impSAmats

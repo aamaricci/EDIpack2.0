@@ -65,7 +65,7 @@ contains
        if(ed_print_G.AND.DimPh>1)call ed_print_impD()
        if(ed_print_G0)           call ed_print_impG0()
     endif
-    if(MPIMASTER)                call write_gfmatrix()
+    if(MPIMASTER)                call ed_print_impGmatrix()
     !
     call deallocate_GFmatrix(impGmatrix)
     call deallocate_grids
@@ -81,7 +81,7 @@ contains
 
   subroutine rebuildGF_impurity()
     !
-    call read_gfmatrix()
+    call ed_read_impGmatrix()
     !
     if(allocated(impSmats))deallocate(impSmats)
     if(allocated(impSAmats))deallocate(impSAmats)
