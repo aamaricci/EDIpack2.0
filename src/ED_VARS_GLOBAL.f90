@@ -2,6 +2,7 @@ MODULE ED_VARS_GLOBAL
   USE SF_CONSTANTS
   USE SF_IOTOOLS, only:free_unit,reg,str
   USE ED_SPARSE_MATRIX
+  USE ED_INPUT_VARS, only:ed_verbose,logfile
 #ifdef _MPI
   USE MPI
   USE SF_MPI
@@ -404,12 +405,16 @@ contains
     MpiSize        = get_Size_MPI(MpiComm_Global)
     MpiRank        = get_Rank_MPI(MpiComm_Global)
     MpiMaster      = get_Master_MPI(MpiComm_Global)
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_set_MpiComm: setting MPI comm"
+#endif
 #else
     integer,optional :: comm
 #endif
   end subroutine ed_set_MpiComm
 
   subroutine ed_del_MpiComm()
+
 #ifdef _MPI    
     MpiComm_Global = MPI_UNDEFINED
     MpiComm        = MPI_UNDEFINED
@@ -418,6 +423,9 @@ contains
     MpiSize        = 1
     MpiRank        = 0
     MpiMaster      = .true.
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_del_MpiComm: deleting MPI comm"
+#endif
 #endif
   end subroutine ed_del_MpiComm
   !=========================================================
@@ -430,6 +438,9 @@ contains
   subroutine allocate_gfmatrix_Nstate(self,Nstate)
     type(GFmatrix) :: self
     integer        :: Nstate
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG allocate_gfmatrix_Nstate: allocate self"
+#endif
     if(allocated(self%state))deallocate(self%state)
     allocate(self%state(Nstate))
     self%status=.true.
@@ -438,8 +449,12 @@ contains
   subroutine allocate_gfmatrix_Nchan(self,istate,Nchan)
     type(GFmatrix) :: self
     integer        :: istate,Nchan
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG allocate_gfmatrix_Nchan: allocate self, istate:"//str(istate)
+#endif
     if(allocated(self%state(istate)%channel))deallocate(self%state(istate)%channel)
     allocate(self%state(istate)%channel(Nchan))
+
   end subroutine allocate_gfmatrix_Nchan
 
   !Allocate the Excitations spectrum at a given channel
@@ -447,6 +462,9 @@ contains
     type(GFmatrix) :: self
     integer        :: istate,ichan
     integer        :: Nexc
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A,2I8)")"DEBUG allocate_gfmatrix_Nchan: allocate self, istate:"//str(istate)//", ichan:"//str(ichan)
+#endif
     if(allocated(self%state(istate)%channel(ichan)%weight))&
          deallocate(self%state(istate)%channel(ichan)%weight)
     if(allocated(self%state(istate)%channel(ichan)%poles))&
@@ -463,6 +481,9 @@ contains
   subroutine deallocate_gfmatrix_single(self)
     type(GFmatrix) :: self
     integer        :: istate,ichan
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG deallocate_gfmatrix_single: deallocate self"
+#endif
     if(self%status)then
        do istate=1,size(self%state)
           if(allocated(self%state(istate)%channel))then
@@ -534,6 +555,9 @@ contains
     class(GFmatrix)    :: self
     character(len=*)   :: file
     integer            :: unit_
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG write_gfmatrix_single: write self"
+#endif
     unit_=free_unit()
     open(unit_,file=str(file))
     call write_formatted_gfmatrix(self,unit_)
@@ -615,6 +639,9 @@ contains
     character(len=*) :: file
     integer          :: unit_
     integer          :: i1,i2,i3,i4
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG reading_gfmatrix_single: reading self"
+#endif
     call deallocate_GFmatrix(self)
     unit_=free_unit()
     open(unit_,file=str(file))

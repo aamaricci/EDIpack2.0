@@ -28,6 +28,10 @@ contains
 
   subroutine ed_checks_global
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_checks_global: Checking input inconsistencies"
+#endif
+    !
     if(Lfit>Lmats)Lfit=Lmats
     if(Nspin>2)stop "ED ERROR: Nspin > 2 is currently not supported"
     if(Norb>5)stop "ED ERROR: Norb > 5 is currently not supported"
@@ -100,6 +104,9 @@ contains
   subroutine ed_setup_dimensions()
     integer :: maxtwoJz,inJz,dimJz
     integer :: isector,in,shift
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_setup_dimensions: Setting up system dimensions"
+#endif
     select case(bath_type)
     case default
        Ns = (Nbath+1)*Norb
@@ -170,6 +177,9 @@ contains
     integer                          :: dim_sector_max,iorb,jorb,ispin,jspin
     integer,dimension(:),allocatable :: DimUps,DimDws
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG init_ed_structure: Massive allocation of internal memory"
+#endif
     call ed_checks_global
     !
     call ed_setup_dimensions
@@ -381,6 +391,9 @@ contains
   !+------------------------------------------------------------------+
   subroutine set_Himpurity_nn_c(hloc)
     complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
+#endif
     if(allocated(impHloc))deallocate(impHloc)
     allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
     impHloc = Hloc
@@ -389,6 +402,9 @@ contains
 
   subroutine set_Himpurity_so_c(hloc)
     complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
+#endif
     if(allocated(impHloc))deallocate(impHloc)
     allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
     impHloc = so2nn_reshape(Hloc,Nspin,Norb)
@@ -429,6 +445,10 @@ contains
     integer                          :: list_len
     integer,dimension(:),allocatable :: list_sector
     type(sector) :: sectorI,sectorJ,sectorK,sectorG,sectorL
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG setup_global_normal"
+#endif
     !
     !Store full dimension of the sectors:
     do isector=1,Nsectors
@@ -555,6 +575,9 @@ contains
     real(8)                                           :: adouble
     integer                                           :: list_len
     integer,dimension(:),allocatable                  :: list_sector
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG setup_global_superc"
+#endif
     isector=0
     do isz=-Ns,Ns
        sz=abs(isz)
@@ -673,6 +696,9 @@ contains
     integer                                           :: maxtwoJz,twoJz
     integer                                           :: dimJz,inJz,shift
     integer                                           :: twoJz_add,twoJz_del,twoJz_trgt
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG setup_global_nonsu2"
+#endif
     isector=0
     if(Jz_basis)then
        !pointers definition

@@ -14,6 +14,10 @@ contains
 
   subroutine  diagonalize_impurity()
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG diagonalize_impurity: Start digonalization"
+#endif
+    !
     write(LOGfile,"(A)")"Diagonalize impurity problem:"
     select case(ed_mode)
     case default  ;call diagonalize_impurity_normal()

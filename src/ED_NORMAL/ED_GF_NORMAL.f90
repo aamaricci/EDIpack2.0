@@ -53,6 +53,9 @@ contains
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG build_gf NORMAL: build GFs"
+#endif
     !
     do ispin=1,Nspin
        do iorb=1,Norb
@@ -139,6 +142,10 @@ contains
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG rebuild_gf NORMAL: rebuild GFs"
+#endif
+    !
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_s"//str(ispin)
@@ -204,6 +211,11 @@ contains
     integer,intent(in)          :: iorb,ispin
     type(sector)                :: sectorI,sectorJ
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf NORMAL DIAG: build diagonal GF l"//str(iorb)//", s"//str(ispin)
+#endif
+    !
     if(ed_total_ud)then
        ialfa = 1
        ipos  = iorb
@@ -231,8 +243,8 @@ contains
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'From sector  :',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'From sector',isector,sectorI%Nups,sectorI%Ndws
        endif
        !
        !ADD ONE PARTICLE:
@@ -240,8 +252,8 @@ contains
        if(jsector/=0)then 
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  ' apply c^+_a,s:',jsector,sectorJ%Nups,sectorJ%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+                  'apply c^+_a,s',jsector,sectorJ%Nups,sectorJ%Ndws
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ)
@@ -266,8 +278,8 @@ contains
        if(jsector/=0)then
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  ' apply c_a,s:',jsector,sectorJ%Nups,sectorJ%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+                  'apply c_a,s',jsector,sectorJ%Nups,sectorJ%Ndws
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ)
@@ -308,6 +320,11 @@ contains
     integer                     :: iorb,jorb,ispin
     type(sector)                :: sectorI,sectorJ
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf NORMAL DIAG: build mixed GF l"//str(iorb)//",m"//str(jorb)//", s"//str(ispin)
+#endif
+    !
     if(ed_total_ud)then
        ialfa = 1
        jalfa = ialfa               !this is the condition to evaluate G_ab: ialfa=jalfa
@@ -336,8 +353,8 @@ contains
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'From sector  :',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'From sector',isector,sectorI%Nups,sectorI%Ndws
        endif
        !
        !EVALUATE (c^+_iorb + c^+_jorb)|gs>
@@ -345,8 +362,8 @@ contains
        if(jsector/=0)then
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  ' apply c^+_a,s + c^+_b,s:',jsector,sectorJ%Nups,sectorJ%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+                  'apply c^+_a,s + c^+_b,s',jsector,sectorJ%Nups,sectorJ%Ndws
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              !c^+_iorb|gs>
              do i=1,sectorI%Dim
@@ -378,8 +395,8 @@ contains
        if(jsector/=0)then
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  '  apply c_a,s + c_b,s:',jsector,sectorJ%Nups,sectorJ%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+                  'apply c_a,s + c_b,s',jsector,sectorJ%Nups,sectorJ%Ndws
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              !c_iorb|gs>
              do i=1,sectorI%Dim
@@ -436,6 +453,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_GF NORMAL: add-up to GF. istate:"//str(istate)
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -466,6 +488,10 @@ contains
     !
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_GF NORMAL: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,ichan,Nlanc)
@@ -507,6 +533,10 @@ contains
     integer                     :: Nups(Ns_Ud)
     integer                     :: Ndws(Ns_Ud)
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf_phonon: build phonon GF"
+#endif
     do istate=1,state_list%size
        !
        ! call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
@@ -525,7 +555,8 @@ contains
        !
        call get_Nup(isector,Nups)
        call get_Ndw(isector,Ndws)
-       if(MpiMaster.AND.ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")'From sector:',isector,Nups,Ndws
+       if(MpiMaster.AND.ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+            'From sector',isector,Nups,Ndws
        !
        idim = getdim(isector)
        call get_DimUp(isector,iDimUps)
@@ -534,7 +565,7 @@ contains
        iDimDw = product(iDimDws)
        !
        if(MpiMaster)then
-          if(ed_verbose==3)write(LOGfile,"(A,I12)")'Apply x:',isector
+          if(ed_verbose==3)write(LOGfile,"(A20,I12)")'Apply x',isector
           !
           allocate(vvinit(idim));vvinit=0d0
           !
@@ -721,6 +752,11 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: invG0real,invGreal
     complex(8),dimension(Norb,Norb)                   :: invGimp
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_sigma NORMAL: get Self-energy"
+#endif
+    
     invG0mats = zero
     invGmats  = zero
     invG0real = zero

@@ -32,6 +32,12 @@ contains
     integer                         :: i,iup,idw
     integer                         :: j,jup,jdw
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG build_Hv_sector_NORMAL: build H*v info. present(Hmat):"//str(present(Hmat))//&
+         ", total Nup,Ndw:"//str(ed_total_ud)//", using sparse H:"//str(ed_sparse_H)
+#endif
+    !
     call build_sector(isector,Hsector)
     !
     !This is not really needed but it eases the writing:
@@ -114,6 +120,7 @@ contains
     !#################################
     !          HxV SETUP
     !#################################
+
     if(present(Hmat))then
        if(ed_total_ud)then
           spHtimesV_p => null()
@@ -141,6 +148,9 @@ contains
           call ed_buildh_normal_orbs()
        endif
     case (.false.)
+#ifdef _DEBUG
+       if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_build_Hv_sector NORMAL: direct H*v product, no further debug info..."
+#endif
        if(ed_total_ud)then
           spHtimesV_p => directMatVec_normal_main
 #ifdef _MPI
@@ -162,6 +172,9 @@ contains
 
   subroutine delete_Hv_sector_normal()
     integer :: iud,ierr,i
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG delete_Hv_sector_NORMAL: delete H*v info"
+#endif
     call delete_sector(Hsector)
     deallocate(DimUps)
     deallocate(DimDws)
@@ -263,6 +276,11 @@ contains
     !
     real(8),dimension(:),allocatable   :: vvloc
     integer                            :: vecDim
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG tridiag_Hv_sector NORMAL: start tridiag of H sector:"//str(isector)
+#endif
     !
     if(MpiMaster)then
        norm2=dot_product(vvinit,vvinit)

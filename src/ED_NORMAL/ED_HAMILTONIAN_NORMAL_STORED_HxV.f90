@@ -31,6 +31,10 @@ contains
     integer,dimension(Ns)                          :: Nup,Ndw    ![Ns]
     real(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_buildH_main NORMAL: build H"
+#endif
+    !
 #ifdef _MPI
     if(Mpistatus .AND. MpiComm == MPI_COMM_NULL)return
 #endif
@@ -106,24 +110,42 @@ contains
     !
     !-----------------------------------------------!
     !LOCAL HAMILTONIAN TERMS
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_NORMAL: stored/H_local"
+#endif
     include "stored/H_local.f90"
     !
     !NON-LOCAL HAMILTONIAN TERMS
     if(jhflag)then
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_NORMAL: stored/H_non_local"
+#endif
        include "stored/H_non_local.f90"
     endif
     !
     !UP TERMS
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_NORMAL: stored/H_up"
+#endif
     include "stored/H_up.f90"
     !
     !DW TERMS
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_NORMAL: stored/H_dw"
+#endif
     include "stored/H_dw.f90"
     !
     if(DimPh>1) then
        !PHONON TERMS
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_NORMAL: stored/H_ph"
+#endif
        include "stored/H_ph.f90"
        !
        !ELECTRON-PHONON TERMS
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_NORMAL: stored/H_e_ph"
+#endif
        include "stored/H_e_ph.f90"
     endif
     !-----------------------------------------------!
@@ -214,6 +236,10 @@ contains
     integer                                        :: iup,idw,jup,jdw
     real(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_buildH_orbs NORMAL: build H"
+#endif
+    !
 #ifdef _MPI
     if(Mpistatus .AND. MpiComm == MPI_COMM_NULL)return
 #endif
@@ -284,19 +310,34 @@ contains
     !
     !-----------------------------------------------!
     !LOCAL HAMILTONIAN TERMS
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_orbs NORMAL: stored/Orbs/H_local"
+#endif
     include "stored/Orbs/H_local.f90"
     !
     !UP TERMS
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_orbs NORMAL: stored/Orbs/H_up"
+#endif
     include "stored/Orbs/H_up.f90"
     !
     !DW TERMS
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_orbs NORMAL: stored/Orbs/H_dw"
+#endif
     include "stored/Orbs/H_dw.f90"
     !
     if(DimPh>1)then
        !PHONON TERMS
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_orbs NORMAL: stored/Orbs/H_ph"
+#endif
        include "stored/Orbs/H_ph.f90"
        !
        !ELECTRON-PHONON TERMS
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_orbs NORMAL: stored/Orbs/H_e_ph"
+#endif
        include "stored/Orbs/H_e_ph.f90"
     endif
     !-----------------------------------------------!

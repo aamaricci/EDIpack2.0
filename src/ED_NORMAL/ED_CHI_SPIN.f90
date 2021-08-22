@@ -45,6 +45,10 @@ contains
   ! reduction for both values of isign in the same call.
   !+------------------------------------------------------------------+
   subroutine build_chi_spin_normal()
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_Chi_spin_normal: build spin-Chi"
+#endif
     write(LOGfile,"(A)")"Get impurity spin Chi:"
     do iorb=1,Norb
        write(LOGfile,"(A)")"Get Chi_spin_l"//reg(txtfy(iorb))
@@ -103,6 +107,11 @@ contains
   subroutine lanc_ed_build_spinChi_diag(iorb)
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_spinChi diag: Lanczos build spin Chi l"//str(iorb)
+#endif
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -170,6 +179,12 @@ contains
     type(sector)                :: sectorI,sectorJ
     real(8)                     :: Siorb,Sjorb
     !
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_spinChi mix: Lanczos build spin Chi l"//str(iorb)//",m"//str(jorb)
+#endif
+    !    
     if(ed_total_ud)then
        ialfa = 1
        jalfa = 1
@@ -249,6 +264,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw,chisp
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_spinChi: add-up to GF"
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -265,6 +285,10 @@ contains
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_spinChi: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     do j=1,nlanc

@@ -40,6 +40,10 @@ contains
   ! \chi_ab = <Delta*_a(\tau)Delta_b(0)>
   !+------------------------------------------------------------------+
   subroutine build_chi_pair_normal()
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_Chi_spin_normal: build pair-Chi"
+#endif
     write(LOGfile,"(A)")"Get impurity pair Chi:"
     do iorb=1,Norb
        write(LOGfile,"(A)")"Get Chi_pair_l"//reg(txtfy(iorb))
@@ -89,6 +93,11 @@ contains
   subroutine lanc_ed_build_pairChi_diag(iorb)
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ,sectorK
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_pairChi diag: Lanczos build pair Chi l"//str(iorb)
+#endif
     !
     if(ed_total_ud)then
        ialfa = 1

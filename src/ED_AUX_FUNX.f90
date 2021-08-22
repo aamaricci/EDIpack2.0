@@ -319,6 +319,10 @@ contains
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_scatter_vector_MPI: scatter v into vloc"
+#endif
+    !
     if( MpiComm == MPI_UNDEFINED .OR. MpiComm == Mpi_Comm_Null )return
     ! stop "scatter_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
@@ -369,6 +373,10 @@ contains
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_scatter_vector_MPI: scatter v into vloc"
+#endif
+    !
     if( MpiComm == MPI_UNDEFINED ) stop "scatter_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
     MpiSize   = get_size_MPI(MpiComm)
@@ -403,6 +411,10 @@ contains
     real(8),dimension(:,:) :: v    !size[N,N]
     real(8),dimension(:,:) :: vloc !size[Nloc,Neigen]
     integer                :: N,Nloc,Neigen,i
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_scatter_basis_MPI: scatter many v"
+#endif
     N      = size(v,1)
     Nloc   = size(vloc,1)
     Neigen = size(vloc,2)
@@ -420,6 +432,11 @@ contains
     complex(8),dimension(:,:) :: v    !size[N,N]
     complex(8),dimension(:,:) :: vloc !size[Nloc,Neigen]
     integer                   :: N,Nloc,Neigen,i
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_scatter_basis_MPI: scatter many v"
+#endif
+    !
     N      = size(v,1)
     Nloc   = size(vloc,1)
     Neigen = size(vloc,2)
@@ -445,6 +462,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_gather_basis_MPI: gather  v"
+#endif
     !
     if(  MpiComm == MPI_UNDEFINED .OR. MpiComm == Mpi_Comm_Null ) return
     !stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
@@ -496,6 +517,10 @@ contains
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_gather_basis_MPI: gather  v"
+#endif
+    !
     if( MpiComm == MPI_UNDEFINED ) stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
     MpiSize   = get_size_MPI(MpiComm)
@@ -535,6 +560,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_allgather_basis_MPI: allgather v"
+#endif
     !
     if(  MpiComm == MPI_UNDEFINED .OR. MpiComm == Mpi_Comm_Null ) return
     ! stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
@@ -580,6 +609,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_allgather_basis_MPI: allgather v"
+#endif
     !
     if( MpiComm == MPI_UNDEFINED ) stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
@@ -939,6 +972,10 @@ contains
     integer               :: unit
     logical :: master
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_search_variable: adjust var"
+#endif
+    !
     if(nread==0d0)return
     master=.true.
 #ifdef _MPI    
@@ -1049,6 +1086,10 @@ contains
     logical,save          :: ireduce=.true.
     integer               :: unit
     logical :: master
+    !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG search_chemical_potential: adjust mu"
+#endif
     !
     if(nread==0d0)return
     master=.true.

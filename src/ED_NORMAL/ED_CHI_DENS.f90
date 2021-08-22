@@ -42,6 +42,10 @@ contains
   ! \chi_ab = <n_a(\tau)n_b(0)>
   !+------------------------------------------------------------------+
   subroutine build_chi_dens_normal()
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_Chi_dens_normal: build dens-Chi"
+#endif
     write(LOGfile,"(A)")"Get impurity dens Chi:"
     do iorb=1,Norb
        write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))
@@ -100,6 +104,11 @@ contains
   subroutine lanc_ed_build_densChi_diag(iorb)
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_densChi diag: Lanczos build dens Chi l"//str(iorb)
+#endif
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -165,6 +174,11 @@ contains
     integer                     :: iorb,jorb
     type(sector)                :: sectorI,sectorJ
     real(8)                     :: Niorb,Njorb
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_densChi mix: Lanczos build dens Chi l"//str(iorb)//",m"//str(jorb)
+#endif
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -247,6 +261,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw,chisp
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_densChi: add-up to GF"
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -263,6 +282,10 @@ contains
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_densChi: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     do j=1,nlanc

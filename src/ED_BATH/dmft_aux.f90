@@ -4,6 +4,9 @@
 subroutine allocate_dmft_bath(dmft_bath_)
   type(effective_bath) :: dmft_bath_
   integer              :: Nsym,ibath
+#ifdef _DEBUG
+  write(Logfile,"(A)")"DEBUG allocate_dmft_bath"
+#endif
   if(dmft_bath_%status)call deallocate_dmft_bath(dmft_bath_)
   !
   select case(bath_type)
@@ -64,6 +67,9 @@ end subroutine allocate_dmft_bath
 subroutine deallocate_dmft_bath(dmft_bath_)
   type(effective_bath) :: dmft_bath_
   integer              :: ibath,isym
+#ifdef _DEBUG
+  write(Logfile,"(A)")"DEBUG deallocate_dmft_bath"
+#endif
   if(.not.dmft_bath_%status)return
   if(allocated(dmft_bath_%e))   deallocate(dmft_bath_%e)
   if(allocated(dmft_bath_%d))   deallocate(dmft_bath_%d)
@@ -99,6 +105,9 @@ subroutine init_dmft_bath(dmft_bath_,used)
   real(8)              :: offset(Nbath)
   character(len=20)    :: hsuffix
   !
+#ifdef _DEBUG
+  write(Logfile,"(A)")"DEBUG init_dmft_bath"
+#endif
   used_   = .false.   ;if(present(used))used_=used
   hsuffix = ".restart";if(used_)hsuffix=reg(".used")
   if(.not.dmft_bath_%status)stop "ERROR init_dmft_bath error: bath not allocated"
@@ -271,6 +280,9 @@ subroutine write_dmft_bath(dmft_bath_,unit)
   complex(8)           :: ho(Nspin*Norb,Nspin*Norb)
   character(len=64)    :: string_fmt,string_fmt_first
   !
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG write_dmft_bath"
+#endif
   unit_=LOGfile;if(present(unit))unit_=unit
   if(.not.dmft_bath_%status)stop "write_dmft_bath error: bath not allocated"
   select case(bath_type)
@@ -404,6 +416,9 @@ subroutine save_dmft_bath(dmft_bath_,file,used)
   logical                   :: used_
   character(len=16)         :: extension
   integer                   :: unit_
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG save_dmft_bath"
+#endif
   if(.not.dmft_bath_%status)stop "save_dmft_bath error: bath is not allocated"
   used_=.false.;if(present(used))used_=used
   extension=".restart";if(used_)extension=".used"
@@ -429,6 +444,9 @@ subroutine set_dmft_bath(bath_,dmft_bath_)
   integer                :: iorb,ispin,jorb,jspin,ibath
   logical                :: check
   !
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG set_dmft_bath: dmft_bath <- user_bath"
+#endif
   if(.not.dmft_bath_%status)stop "set_dmft_bath error: bath not allocated"
   check = check_bath_dimension(bath_)
   if(.not.check)stop "set_dmft_bath error: wrong bath dimensions"
@@ -620,6 +638,9 @@ subroutine get_dmft_bath(dmft_bath_,bath_)
   integer                :: stride,io,jo,i
   integer                :: iorb,ispin,jorb,jspin,ibath,maxspin
   logical                :: check
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_dmft_bath: dmft_bath -> user_bath"
+#endif
   if(.not.dmft_bath_%status)stop "get_dmft_bath error: bath not allocated"
   check=check_bath_dimension(bath_)
   if(.not.check)stop "get_dmft_bath error: wrong bath dimensions"

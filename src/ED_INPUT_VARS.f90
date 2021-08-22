@@ -125,6 +125,9 @@ contains
     integer,optional :: comm
     logical          :: master=.true.
     integer          :: i,rank=0
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A,A)")"DEBUG ed_read_input: read input from",trim(INPUTunit)
+#endif
 #ifdef _MPI
     if(present(comm))then
        master=get_Master_MPI(comm)

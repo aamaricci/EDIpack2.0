@@ -31,6 +31,9 @@ contains
   !+------------------------------------------------------------------+
   subroutine buildGF_impurity()
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG build_GF: build GFs"
+#endif
     call allocate_grids
     !
     call deallocate_GFmatrix(impGmatrix)
@@ -59,6 +62,9 @@ contains
     case("nonsu2");call build_sigma_nonsu2()
     end select
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG build_GF: writing results"
+#endif
     if(MPIMASTER)then
        if(ed_print_Sigma)        call ed_print_impSigma()
        if(ed_print_G)            call ed_print_impG()
@@ -80,6 +86,10 @@ contains
 
 
   subroutine rebuildGF_impurity()
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG rebuild_GF: re-building GF"
+#endif
     !
     call ed_read_impGmatrix()
     !
@@ -139,6 +149,9 @@ contains
     case("nonsu2");call build_sigma_nonsu2()
     end select
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG rebuild_GF: writing results"
+#endif
     if(MPIMASTER)then
        if(ed_print_Sigma)  call ed_print_impSigma()
        if(ed_print_G)      call ed_print_impG()

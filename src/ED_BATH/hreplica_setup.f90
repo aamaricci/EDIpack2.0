@@ -7,6 +7,9 @@ subroutine allocate_hreplica(N)
   integer          :: N
   integer          :: isym
   !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")"DEBUG allocate_Hreplica"
+#endif
   if(allocated(Hreplica_basis))deallocate(Hreplica_basis)
   if(allocated(Hreplica_lambda))deallocate(Hreplica_lambda)
   !
@@ -25,6 +28,9 @@ end subroutine allocate_hreplica
 subroutine deallocate_hreplica()
   integer              :: isym
   !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")"DEBUG deallocate_Hreplica"
+#endif
   do isym=1,size(Hreplica_basis)
      deallocate(Hreplica_basis(isym)%O)
   enddo
@@ -43,6 +49,10 @@ subroutine init_Hreplica_direct_nn(Hloc)
   integer                                     :: ispin,jspin,iorb,jorb,counter,io,jo,Nsym
   complex(8),dimension(Nspin,Nspin,Norb,Norb) :: Hloc
   logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+  !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_nn: from Hloc[:,:,:,:]"
+#endif
   !
   Hmask=.false.
   !
@@ -85,6 +95,9 @@ end subroutine init_Hreplica_direct_nn
 
 subroutine init_Hreplica_direct_so(Hloc)
   complex(8),dimension(Nspin*Norb,Nspin*Norb) :: Hloc
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_so: from Hloc[:,:]"
+#endif
   call init_Hreplica_direct_nn(so2nn_reshape(Hloc,Nspin,Norb))
 end subroutine init_Hreplica_direct_so
 
@@ -93,6 +106,10 @@ subroutine init_Hreplica_symmetries_site(Hvec,lambdavec)
   complex(8),dimension(:,:,:,:,:) :: Hvec
   real(8),dimension(:)            :: lambdavec
   integer                         :: isym,N
+  !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_nn: from {[Hs,Lam]}_b"
+#endif
   !
   N=size(lambdavec)
   call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,N],"init_Hreplica_symmetries","Hvec")
@@ -113,6 +130,10 @@ subroutine init_Hreplica_symmetries_lattice(Hvec,lambdavec)
   complex(8),dimension(:,:,:,:,:) :: Hvec
   real(8),dimension(:,:)          :: lambdavec ![Nlat,Nsym]
   integer                         :: isym,ilat,N,Nlat
+  !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_nn: from ({[Hs,Lam]}_b)_site"
+#endif
   !
   Nlat=size(lambdavec,1)
   N   =size(lambdavec,2)
