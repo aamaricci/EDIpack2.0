@@ -346,6 +346,7 @@ contains
     !
     nullify(spHtimesV_p)
     nullify(spHtimesV_cc)
+    write(Logfile,"(A)")""
   end subroutine ed_solve_single
 
 
@@ -396,6 +397,7 @@ contains
     !
     nullify(spHtimesV_cc)
     nullify(spHtimesV_p)
+    write(Logfile,"(A)")""
   end subroutine ed_solve_single_mpi
 #endif
 

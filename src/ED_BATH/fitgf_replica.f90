@@ -29,6 +29,10 @@ subroutine chi2_fitgf_replica(fg,bath_)
   integer                                     :: unit
   complex(8),dimension(:,:,:,:,:),allocatable :: fgand ![Nspin][][Norb][][Ldelta]  
   !
+#ifdef _DEBUG
+  if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_replica: Fit"
+#endif
+  !
   if(size(fg,1)/=Nspin)stop "chi2_fitgf_replica error: size[fg,1]!=Nspin"
   if(size(fg,2)/=Nspin)stop "chi2_fitgf_replica error: size[fg,2]!=Nspin"
   if(size(fg,3)/=Norb)stop "chi2_fitgf_replica error: size[fg,3]!=Norb"
@@ -86,6 +90,13 @@ subroutine chi2_fitgf_replica(fg,bath_)
   do i=1,totNso
      Gdelta(i,1:Ldelta) = fg(getIspin(i),getJspin(i),getIorb(i),getJorb(i),1:Ldelta)
   enddo
+  !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")&
+       "DEBUG chi2_fitgf_replica: cg_method:"//str(cg_method)//&
+       ", cg_grad:"//str(cg_grad)//&
+       ", cg_scheme:"//str(cg_scheme)
+#endif
   !
   select case(cg_method)     !0=NR-CG[default]; 1=CG-MINIMIZE
   case default

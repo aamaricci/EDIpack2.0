@@ -29,6 +29,10 @@ subroutine chi2_fitgf_hybrid_normal(fg,bath_,ispin)
   integer                                     :: unit
   complex(8),dimension(:,:,:,:,:),allocatable :: fgand ![Nspin][][Norb][][Ldelta]
   !
+#ifdef _DEBUG
+  if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_hybrid_normal: Fit"
+#endif
+  !
   if(size(fg,1)/=Norb)stop "chi2_fitgf_hybrid_normal error: size[fg,1]!=Norb"
   if(size(fg,2)/=Norb)stop "chi2_fitgf_hybrid_normal error: size[fg,2]!=Norb"
   !
@@ -92,6 +96,12 @@ subroutine chi2_fitgf_hybrid_normal(fg,bath_,ispin)
      enddo
   enddo
   !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")&
+       "DEBUG chi2_fitgf_normal_normal: cg_method:"//str(cg_method)//&
+       ", cg_grad:"//str(cg_grad)//&
+       ", cg_scheme:"//str(cg_scheme)
+#endif
   select case(cg_method)     !0=NR-CG[default]; 1=CG-MINIMIZE; 2=CG+
   case default
      if(cg_grad==0)then

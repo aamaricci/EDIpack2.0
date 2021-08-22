@@ -73,6 +73,9 @@ contains
     real(8),dimension(Norb)         :: nup,ndw,Sz,nt
     real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG observables_normal"
+#endif
     allocate(dens(Norb),dens_up(Norb),dens_dw(Norb))
     allocate(docc(Norb))
     allocate(magz(Norb),sz2(Norb,Norb),n2(Norb,Norb))
@@ -103,10 +106,18 @@ contains
     pdf_part= 0.d0
     w_ph    = w0_ph
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_normal: get local observables"
+#endif
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
        !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_normal: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_dvec => es_return_dvector(MpiComm,state_list,istate)
@@ -125,9 +136,10 @@ contains
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
              gs_weight=peso*abs(state_dvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             nup = IbUp(1:Norb)!Nud(1,1:Norb)
+             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -185,14 +197,24 @@ contains
 #endif
        !
     enddo
-
-
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
+    !
     !EVALUATE EXCITON OP <S_ab> AND <T^z_ab>
     !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
     !<T^z_ab>:=   <C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}>
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_normal: eval exciton OP Singlet, Triplet_Z"
+#endif
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_normal: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_dvec => es_return_dvector(MpiComm,state_list,istate)
@@ -278,14 +300,25 @@ contains
           exct_tz(iorb,jorb) = 0.5d0*(theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb))
        enddo
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
     !
     !
     !IMPURITY DENSITY MATRIX
     if(allocated(imp_density_matrix)) deallocate(imp_density_matrix)
     allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb));imp_density_matrix=zero
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_normal: eval impurity density matrix <C^+_a C_b>"
+#endif
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_normal: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_dvec => es_return_dvector(MpiComm,state_list,istate)
@@ -306,7 +339,10 @@ contains
              i_el = mod(i-1,sectorI%DimEl) + 1
              call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
              !
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             Nud(1,:)=IbUp
+             Nud(2,:)=IbDw
              !
              !Diagonal densities
              do ispin=1,Nspin
@@ -360,6 +396,9 @@ contains
 #endif
        !
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
     !
     !
     !
@@ -402,6 +441,9 @@ contains
     deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2,Prob)
     deallocate(exct_S0,exct_Tz)
     deallocate(simp,zimp,prob_ph,pdf_ph,pdf_part)
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
   end subroutine observables_normal
 
 
@@ -417,6 +459,9 @@ contains
     integer,dimension(Ns_Ud,Ns_Orb)     :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
     real(8),dimension(Ns)               :: Nup,Ndw
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG local_energy_normal"
+#endif
     Egs     = state_list%emin
     ed_Ehartree= 0.d0
     ed_Eknot   = 0.d0
@@ -430,6 +475,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG local_energy_normal: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_dvec => es_return_dvector(MpiComm,state_list,istate)
@@ -621,6 +670,9 @@ contains
        !
     enddo
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     !
 #ifdef _MPI
     if(MpiStatus)then

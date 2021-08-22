@@ -55,7 +55,7 @@ contains
     case("superc");call build_gf_superc()
     case("nonsu2");call build_gf_nonsu2()
     end select
-
+    !
     select case(ed_mode)
     case default  ;call build_sigma_normal()
     case("superc");call build_sigma_superc()
@@ -64,6 +64,7 @@ contains
     !
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG build_GF: writing results"
+    write(Logfile,"(A)")""
 #endif
     if(MPIMASTER)then
        if(ed_print_Sigma)        call ed_print_impSigma()
@@ -142,7 +143,7 @@ contains
     case("superc");call rebuild_gf_superc()
     case("nonsu2");call rebuild_gf_nonsu2()
     end select
-
+    !
     select case(ed_mode)
     case default  ;call build_sigma_normal()
     case("superc");call build_sigma_superc()
@@ -151,6 +152,7 @@ contains
     !
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG rebuild_GF: writing results"
+    write(Logfile,"(A)")""
 #endif
     if(MPIMASTER)then
        if(ed_print_Sigma)  call ed_print_impSigma()

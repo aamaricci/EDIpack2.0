@@ -29,6 +29,9 @@ subroutine chi2_fitgf_normal_superc(fg,bath_,ispin,iorb)
   integer                            :: unit
   complex(8),dimension(:,:,:,:,:),allocatable :: fgand,ffand ![Nspin][][Norb][][Ldelta]
   !
+#ifdef _DEBUG
+  if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_normal_superc: Fit"
+#endif
   if(size(fg,1)/=2)stop "chi2_fitgf_normal_superc error: size[fg,1]!=2"
   if(size(fg,2)/=Norb)stop "chi2_fitgf_normal_superc error: size[fg,2]!=Norb"
   if(size(fg,3)/=Norb)stop "chi2_fitgf_normal_superc error: size[fg,3]!=Norb"
@@ -71,6 +74,13 @@ subroutine chi2_fitgf_normal_superc(fg,bath_,ispin,iorb)
      Orb_indx=jorb
      Spin_indx=ispin
      !
+#ifdef _DEBUG
+     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG chi2_fitgf_normal_superc: Fit orb"//str(Orb_indx)//", spin"//str(Spin_indx)
+     if(ed_verbose>3)write(Logfile,"(A)")&
+          "DEBUG chi2_fitgf_normal_superc: cg_method:"//str(cg_method)//&
+          ", cg_grad:"//str(cg_grad)//&
+          ", cg_scheme:"//str(cg_scheme)
+#endif
      Gdelta(1,1:Ldelta) = fg(1,jorb,jorb,1:Ldelta)
      Fdelta(1,1:Ldelta) = fg(2,jorb,jorb,1:Ldelta)
      !

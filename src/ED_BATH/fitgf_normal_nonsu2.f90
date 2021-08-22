@@ -27,6 +27,9 @@ subroutine chi2_fitgf_normal_nonsu2(fg,bath_)
   integer                                     :: unit
   complex(8),dimension(:,:,:,:,:),allocatable :: fgand ![Nspin][][Norb][][Ldelta]
   !
+#ifdef _DEBUG
+  if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_normal_nonsu2: Fit"
+#endif
   if(size(fg,1)/=Nspin)stop "chi2_fitgf_normal_nonsu2 error: size[fg,1]!=Nspin"
   if(size(fg,2)/=Nspin)stop "chi2_fitgf_normal_nonsu2 error: size[fg,2]!=Nspin"
   if(size(fg,3)/=Norb)stop "chi2_fitgf_normal_nonsu2 error: size[fg,3]!=Norb"
@@ -75,6 +78,14 @@ subroutine chi2_fitgf_normal_nonsu2(fg,bath_)
 
   do iorb=1,Norb
      Orb_indx=iorb
+     !
+#ifdef _DEBUG
+     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG chi2_fitgf_normal_nonsu2: Fit orb"//str(Orb_indx)
+     if(ed_verbose>3)write(Logfile,"(A)")&
+          "DEBUG chi2_fitgf_normal_nonsu2: cg_method:"//str(cg_method)//&
+          ", cg_grad:"//str(cg_grad)//&
+          ", cg_scheme:"//str(cg_scheme)
+#endif
      !
      do i=1,totNspin
         Gdelta(i,1:Ldelta) = fg(getIspin(i),getJspin(i),iorb,iorb,1:Ldelta)

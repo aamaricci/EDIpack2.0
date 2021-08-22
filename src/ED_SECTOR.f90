@@ -107,7 +107,7 @@ contains
        call get_Nup(isector,self%Nups);self%Nup=sum(self%Nups)
        call get_Ndw(isector,self%Ndws);self%Ndw=sum(self%Ndws)
 #ifdef _DEBUG
-       if(ed_verbose>4)write(Logfile,"(A,2"//str(Ns_Ud)//"I3)")&
+       if(ed_verbose>3)write(Logfile,"(A,2"//str(Ns_Ud)//"I3)")&
             "DEBUG build_sector: sector:"//str(isector)//"- Nups,Ndws",self%Nups,self%Ndws
 #endif
        call get_DimUp(isector,self%DimUps);self%DimUp=product(self%DimUps)
@@ -140,7 +140,7 @@ contains
        allocate(self%H(1))
        self%Sz    = getSz(isector)
 #ifdef _DEBUG
-       if(ed_verbose>4)write(Logfile,"(A,I4)")&
+       if(ed_verbose>3)write(Logfile,"(A,I4)")&
             "DEBUG build_sector: sector:"//str(isector)//"- Sz",self%Sz
 #endif
        self%DimEl = getDim(isector)
@@ -165,7 +165,7 @@ contains
        if(Jz_basis)then
           self%Ntot  = getN(isector)
 #ifdef _DEBUG
-          if(ed_verbose>4)write(Logfile,"(A,I4)")&
+          if(ed_verbose>3)write(Logfile,"(A,I4)")&
                "DEBUG build_sector: sector:"//str(isector)//"- N",self%Ntot
 #endif
           self%DimEl = getDim(isector)

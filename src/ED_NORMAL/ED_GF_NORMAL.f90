@@ -64,6 +64,9 @@ contains
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_normal_diag(iorb,ispin)
           if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+          if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
        enddo
     enddo
     !
@@ -89,6 +92,9 @@ contains
                 call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_normal_mix(iorb,jorb,ispin)
                 if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+                if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
              enddo
           enddo
        enddo
@@ -129,6 +135,9 @@ contains
        if(MPIMASTER)call start_timer()
        call lanc_build_gf_phonon_main()
        if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
     endif
   end subroutine build_gf_normal
 
@@ -212,7 +221,7 @@ contains
     type(sector)                :: sectorI,sectorJ
     !
 #ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
+    if(ed_verbose>1)write(Logfile,"(A)")&
          "DEBUG lanc_build_gf NORMAL DIAG: build diagonal GF l"//str(iorb)//", s"//str(ispin)
 #endif
     !
@@ -321,7 +330,7 @@ contains
     type(sector)                :: sectorI,sectorJ
     !
 #ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
+    if(ed_verbose>1)write(Logfile,"(A)")&
          "DEBUG lanc_build_gf NORMAL DIAG: build mixed GF l"//str(iorb)//",m"//str(jorb)//", s"//str(ispin)
 #endif
     !

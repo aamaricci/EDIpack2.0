@@ -50,6 +50,9 @@ contains
        if(MPIMASTER)call start_timer()
        call lanc_ed_build_pairChi_diag(iorb)
        if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
     enddo
 
     if(Norb>1)then
@@ -59,6 +62,9 @@ contains
              if(MPIMASTER)call start_timer()
              call lanc_ed_build_pairChi_mix(iorb,jorb)
              if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+             if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
           end do
        end do
        !
@@ -128,8 +134,8 @@ contains
              call build_sector(isector,sectorI)
              call build_sector(ksector,sectorK)
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  'Apply Cup*Cdw  :',isector,sectorI%Nups,sectorI%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
+                  'Apply Cup*Cdw',isector,sectorI%Nups,sectorI%Ndws
 
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
@@ -186,6 +192,11 @@ contains
     integer                     :: iorb,jorb
     type(sector)                :: sectorI,sectorJ,sectorK
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_pairChi mix: Lanczos build pair Chi l"//str(iorb)//",m"//str(jorb)
+#endif
+    !    
     if(ed_total_ud)then
        ialfa = 1
        jalfa = 1
@@ -218,8 +229,8 @@ contains
              call build_sector(isector,sectorI)
              call build_sector(ksector,sectorK)
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  'Apply C_bup*C_bdw + C_aup*C_adw  :',isector,sectorI%Nups,sectorI%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
+                  'Apply C_bu*C_bd+C_au*C_ad',isector,sectorI%Nups,sectorI%Ndws
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
              !
@@ -293,6 +304,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw,chisp
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_pairChi: add-up to GF"
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -309,6 +325,10 @@ contains
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_pairChi: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     do j=1,nlanc

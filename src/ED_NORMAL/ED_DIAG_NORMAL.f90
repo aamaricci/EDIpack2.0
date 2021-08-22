@@ -225,12 +225,9 @@ contains
        endif
        !
        if(ed_verbose>=3.AND.MPIMASTER)call stop_timer(unit=LOGfile)
-       !
-       if(ed_verbose>=4)then
-          write(LOGfile,*)"EigValues: ",eig_values(:Neigen)
-          write(LOGfile,*)""
-          write(LOGfile,*)""
-       endif
+       if(ed_verbose>=4)write(LOGfile,*)"EigValues: ",eig_values(:Neigen)
+       if(ed_verbose>2)write(LOGfile,*)""
+       if(ed_verbose>2)write(LOGfile,*)""
        !
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: building states list"

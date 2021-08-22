@@ -30,6 +30,10 @@ subroutine chi2_fitgf_hybrid_superc(fg,bath_,ispin)
   integer                                     :: unit
   complex(8),dimension(:,:,:,:,:),allocatable :: fgand,ffand ![Nspin][][Norb][][Ldelta]
   !
+#ifdef _DEBUG
+  if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_hybrid_superc: Fit"
+#endif
+  !
   if(size(fg,1)/=2)stop "chi2_fitgf_normal_superc error: size[fg,1]!=2"
   if(size(fg,2)/=Norb)stop "chi2_fitgf_normal_superc error: size[fg,2]!=Norb"
   if(size(fg,3)/=Norb)stop "chi2_fitgf_normal_superc error: size[fg,3]!=Norb"
@@ -101,6 +105,13 @@ subroutine chi2_fitgf_hybrid_superc(fg,bath_,ispin)
         array_bath(io) = dmft_bath%v(ispin,iorb,i)
      enddo
   enddo
+  !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")&
+       "DEBUG chi2_fitgf_normal_superc: cg_method:"//str(cg_method)//&
+       ", cg_grad:"//str(cg_grad)//&
+       ", cg_scheme:"//str(cg_scheme)
+#endif
   !
   select case(cg_method)     !0=NR-CG[default]; 1=CG-MINIMIZE
   case default

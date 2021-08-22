@@ -28,6 +28,10 @@ subroutine chi2_fitgf_hybrid_nonsu2(fg,bath_)
   integer                            :: unit
   complex(8),dimension(:,:,:,:,:),allocatable :: fgand ![Nspin][][Norb][][Ldelta]
   !
+#ifdef _DEBUG
+  if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_hybrid_nonsu2: Fit"
+#endif
+  !
   if(size(fg,1)/=Nspin)stop "chi2_fitgf_hybrid_nonsu2 error: size[fg,1]!=Nspin"
   if(size(fg,2)/=Nspin)stop "chi2_fitgf_hybrid_nonsu2 error: size[fg,2]!=Nspin"
   if(size(fg,3)/=Norb)stop "chi2_fitgf_hybrid_nonsu2 error: size[fg,3]!=Norb"
@@ -110,6 +114,13 @@ subroutine chi2_fitgf_hybrid_nonsu2(fg,bath_)
         enddo
      enddo
   enddo
+  !
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A)")&
+       "DEBUG chi2_fitgf_normal_nonsu2: cg_method:"//str(cg_method)//&
+       ", cg_grad:"//str(cg_grad)//&
+       ", cg_scheme:"//str(cg_scheme)
+#endif
   !
   select case(cg_method)     !0=NR-CG[default]; 1=CG-MINIMIZE; 2=CG+
   case default

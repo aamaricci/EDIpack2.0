@@ -24,6 +24,9 @@ contains
     case("superc");call diagonalize_impurity_superc()
     case("nonsu2");call diagonalize_impurity_nonsu2()
     end select
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine diagonalize_impurity
 
 end MODULE ED_DIAG

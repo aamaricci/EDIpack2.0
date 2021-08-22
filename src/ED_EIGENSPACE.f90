@@ -90,6 +90,9 @@ contains        !some routine to perform simple operation on the lists
   !+------------------------------------------------------------------+
   subroutine setup_eigenspace
     integer :: isector,dim,jsector
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG setup_eigenspace"
+#endif
     if(allocated(espace)) deallocate(espace)
     allocate(espace(1:Nsectors))
     do isector=1,Nsectors
@@ -108,6 +111,9 @@ contains        !some routine to perform simple operation on the lists
   !+------------------------------------------------------------------+
   subroutine delete_eigenspace
     integer :: isector
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG delete_eigenspace"
+#endif
     if(allocated(espace))then
        do isector=1,size(espace)
           deallocate(espace(isector)%e)
@@ -133,6 +139,9 @@ contains        !some routine to perform simple operation on the lists
   !+------------------------------------------------------------------+
   function es_init_espace() result(space)
     type(sparse_espace) :: space
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG es_init_espace"
+#endif
     allocate(space%root)
     space%status=.true.
     space%root%next => null()
@@ -149,6 +158,9 @@ contains        !some routine to perform simple operation on the lists
   subroutine es_delete_espace(space)
     type(sparse_espace),intent(inout) :: space
     type(sparse_estate),pointer       :: p,c
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG es_delete_espace"
+#endif
     if(.not.space%status)return
     do
        p => space%root
@@ -176,6 +188,9 @@ contains        !some routine to perform simple operation on the lists
   subroutine es_free_espace(space)
     type(sparse_espace),intent(inout) :: space
     type(sparse_estate),pointer       :: p,c
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG es_free_espace"
+#endif
     do
        p => space%root
        c => p%next
@@ -212,6 +227,9 @@ contains        !some routine to perform simple operation on the lists
     logical,intent(in),optional       :: verbose
     logical,intent(in),optional       :: twin
     logical                           :: twin_
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG es_add_state_d"
+#endif
     twin_=.false.;if(present(twin))twin_=twin
     if(present(size))then !if present size add respecting the size constraint.
        if(espace%size<size)then
@@ -237,6 +255,9 @@ contains        !some routine to perform simple operation on the lists
     logical,intent(in),optional       :: verbose
     logical,intent(in),optional       :: twin
     logical                           :: twin_
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG es_add_state_c"
+#endif
     twin_=.false.;if(present(twin))twin_=twin
     if(present(size))then !if present size add respecting the size constraint.
        if(espace%size<size)then
@@ -381,6 +402,9 @@ contains        !some routine to perform simple operation on the lists
     integer                           :: i,pos
     type(sparse_estate),pointer       :: pp,p,c
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG es_pop_state"
+#endif
     pos= space%size ; if(present(n))pos=n
     !
     if(pos>space%size)stop "es_pop_state: pos > espace.size"

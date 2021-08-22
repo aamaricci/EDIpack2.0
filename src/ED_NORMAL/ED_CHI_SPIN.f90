@@ -55,6 +55,9 @@ contains
        if(MPIMASTER)call start_timer()
        call lanc_ed_build_spinChi_diag(iorb)
        if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
     enddo
     !
     if(Norb>1)then
@@ -64,6 +67,9 @@ contains
              if(MPIMASTER)call start_timer()
              call lanc_ed_build_spinChi_mix(iorb,jorb)
              if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+             if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
           end do
        end do
        !
@@ -136,8 +142,8 @@ contains
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'Apply Sz  :',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'Apply Sz',isector,sectorI%Nups,sectorI%Ndws
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
           do i=1,sectorI%Dim
              call apply_op_Sz(i,sgn,ipos,ialfa,sectorI)            
@@ -213,9 +219,9 @@ contains
        !EVALUATE (Sz_jorb + Sz_iorb)|gs> = Sz_jorb|gs> + Sz_iorb|gs>
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'From sector  :',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose==3)write(LOGfile,"(A,I15)")'Apply (Sz_jorb + Sz_iorb):',isector
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'From sector',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I15)")'Apply (Sz_a + Sz_b)',isector
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
           do i=1,sectorI%Dim
              call apply_op_Sz(i,Siorb,ipos,ialfa,sectorI)
