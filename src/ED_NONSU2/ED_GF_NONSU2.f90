@@ -58,6 +58,10 @@ contains
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG build_gf NONSU2: build GFs"
+#endif
+    !    
     if(.not.allocated(impGmats))stop "build_gf_nonsu2: Gmats not allocated"
     if(.not.allocated(impGreal))stop "build_gf_nonsu2: Greal not allocated"
     impGmats=zero
@@ -82,6 +86,9 @@ contains
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_nonsu2_diagOrb_diagSpin(iorb,ispin)
           if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+          write(Logfile,"(A)")""
+#endif
        enddo
     enddo
     !
@@ -101,6 +108,9 @@ contains
              call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,iorb),Nstate=state_list%size)
              call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,iorb,ispin,jspin)
              if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+             write(Logfile,"(A)")""
+#endif
           enddo
        enddo
     enddo
@@ -141,6 +151,9 @@ contains
                 call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,ispin)
                 if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+                write(Logfile,"(A)")""
+#endif
              enddo
           enddo
        enddo
@@ -179,6 +192,9 @@ contains
                    call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,jorb),Nstate=state_list%size)
                    call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
                    if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+                   write(Logfile,"(A)")""
+#endif
                 enddo
              enddo
           enddo
@@ -220,6 +236,10 @@ contains
     integer                                     :: iorb,jorb,ispin,jspin,i,io,jo
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG rebuild_gf NONSU2: rebuild GFs"
+#endif
     !
     Hmask= .true.
     if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
@@ -362,6 +382,11 @@ contains
     type(sector) :: sectorI,sectorJ
     integer :: ib(2*Ns)
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf NONSU2: lanc build diag Orb,Spin GF l"//str(iorb)//", s"//str(ispin)
+#endif
+    !
     isite = iorb+(ispin-1)*Ns
     !
     do istate=1,state_list%size
@@ -483,6 +508,12 @@ contains
   subroutine lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
     integer      :: iorb,jorb,ispin,jspin
     type(sector) :: sectorI,sectorJ
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf NONSU2: lanc build mix Orb, mix Spin GF l"//&
+         str(iorb)//",m"//str(jorb)//", s"//str(ispin)//",r"//str(jspin)
+#endif
     !
     do istate=1,state_list%size
        !
@@ -710,6 +741,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_GF NONSU2: add-up to GF. istate:"//str(istate)
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -733,6 +769,10 @@ contains
     !
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_GF NONSU2: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,jorb),istate,ichan,Nlanc)
@@ -778,6 +818,15 @@ contains
     integer            :: Nexcs,iexc
     real(8)            :: peso,de
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG rebuild_gf NONSU2: reconstruct impurity GFs"
+#endif
+    !
+    if(.not.allocated(impGmatrix(ispin,jspin,iorb,jorb)%state)) then
+       print*, "ED_GF_NONSU2 WARNING: impGmatrix%state not allocated. Nothing to do"
+       return
+    endif
     !
     Nstates = size(impGmatrix(ispin,jspin,iorb,jorb)%state)
     do istate=1,Nstates
@@ -823,6 +872,10 @@ contains
     complex(8),dimension(Nspin*Norb,Nspin*Norb)       :: invGimp,invG0imp
     character(len=20)                                 :: suffix
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_sigma NONSU2: get Self-energy"
+#endif
     !
     impG0mats = zero
     impG0real = zero

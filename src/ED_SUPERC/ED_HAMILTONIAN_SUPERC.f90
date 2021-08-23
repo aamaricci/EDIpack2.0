@@ -35,11 +35,20 @@ contains
     integer                            :: irank
     integer                            :: i,j,Dim
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG build_Hv_sector_SUPERC: build H*v info. present(Hmat):"//str(present(Hmat))//&
+         ", total Nup,Ndw:"//str(ed_total_ud)//", using sparse H:"//str(ed_sparse_H)
+#endif
+    !
     call build_sector(isector,Hsector)
     !
     Dim    = Hsector%Dim
     !
-    !Total Split:
+    !#################################
+    !          MPI SETUP
+    !#################################
+    mpiAllThreads=.true.
     MpiQ = Dim/MpiSize
     MpiR = 0
     if(MpiRank==(MpiSize-1))MpiR=mod(Dim,MpiSize)
@@ -49,6 +58,7 @@ contains
     MpiIend   = (MpiRank+1)*mpiQ + mpiR
     !
 #ifdef _MPI
+#ifdef _DEBU
     if(MpiStatus.AND.ed_verbose>4)then
        write(LOGfile,*)&
             "         mpiRank,   mpi_Q,   mpi_R,   mpi_Istart,   mpi_Iend,   mpi_Iend-mpi_Istart"
@@ -61,8 +71,12 @@ contains
        call Barrier_MPI(MpiComm)
     endif
 #endif
+#endif
     !
     !
+    !#################################
+    !          HxV SETUP
+    !#################################
     if(present(Hmat))then
        spHtimesV_cc => null()
        call ed_buildh_superc_main(isector,Hmat)
@@ -79,6 +93,9 @@ contains
        !
        !
     case (.false.)
+#ifdef _DEBUG
+       if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_build_Hv_sector SUPERC: direct H*v product, no further debug info..."
+#endif
        spHtimesV_cc => directMatVec_superc_main
 #ifdef _MPI
        if(MpiStatus)spHtimesV_cc => directMatVec_MPI_superc_main
@@ -88,11 +105,19 @@ contains
   end subroutine build_Hv_sector_superc
 
 
+
+
+
+  
   subroutine delete_Hv_sector_superc()
     integer :: iud
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG delete_Hv_sector_SUPERC: delete H*v info"
+#endif
+    !
     call delete_sector(Hsector)
     Dim    = 0
-    !
 #ifdef _MPI
     if(MpiStatus)then
        call sp_delete_matrix(MpiComm,spH0)
@@ -105,8 +130,27 @@ contains
     !
     spHtimesV_cc => null()
     !
+#ifdef _MPI
+    if(MpiStatus)then
+       MpiComm = MpiComm_Global
+       MpiSize = get_Size_MPI(MpiComm_Global)
+       MpiRank = get_Rank_MPI(MpiComm_Global)
+       mpiQ=0
+       mpiR=0
+       mpiIstart=0
+       mpiIend=0
+       mpiIshift=0
+    endif
+#endif
+    !
   end subroutine delete_Hv_sector_superc
 
+
+
+
+
+
+  
 
   function vecDim_Hv_sector_superc(isector) result(vecDim)
     integer :: isector
@@ -136,6 +180,9 @@ contains
 
 
 
+
+
+  
   subroutine tridiag_Hv_sector_superc(isector,vvinit,alanc,blanc,norm2)
     integer                             :: isector
     complex(8),dimension(:)             :: vvinit
@@ -143,6 +190,11 @@ contains
     real(8)                             :: norm2
     complex(8),dimension(:),allocatable :: vvloc
     integer                             :: vecDim
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG tridiag_Hv_sector SUPERC: start tridiag of H sector:"//str(isector)
+#endif
     !
     if(MpiMaster)then
        norm2=dot_product(vvinit,vvinit)

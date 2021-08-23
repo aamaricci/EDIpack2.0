@@ -51,6 +51,9 @@ contains
     integer    :: iorb,jorb,ispin,i,isign
     complex(8) :: barGmats(Norb,Lmats),barGreal(Norb,Lreal)
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG build_gf SUPERC: build GFs"
+#endif
     !
     if(.not.allocated(auxGmats))allocate(auxGmats(4,Lmats))
     if(.not.allocated(auxGreal))allocate(auxGreal(4,Lreal))
@@ -69,6 +72,9 @@ contains
        call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
        call lanc_build_gf_superc_c(iorb)
        if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+       write(Logfile,"(A)")""
+#endif
        !
        impGmats(ispin,ispin,iorb,iorb,:) = auxGmats(1,:) !this is G_{up,up;iorb,iorb}
        impGreal(ispin,ispin,iorb,iorb,:) = auxGreal(1,:)  
@@ -96,7 +102,11 @@ contains
              call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
              call lanc_build_gf_superc_mix_c(iorb,jorb)
              if(MPIMASTER)call stop_timer()
-             impGmats(ispin,ispin,iorb,jorb,:) = auxGmats(4,:) !This is G_oo -xi*G_pp = A_ab -xi*B_ab
+#ifdef _DEBUG
+             write(Logfile,"(A)")""
+#endif
+             !
+             impGmats(ispin,ispin,iorb,jorb,:) = auxGmats(4,:) !G_oo -xi*G_pp=A_ab-xi*B_ab
              impGreal(ispin,ispin,iorb,jorb,:) = auxGreal(4,:)
           enddo
        enddo
@@ -119,6 +129,9 @@ contains
     integer    :: iorb,jorb,ispin,i,isign
     complex(8) :: barGmats(Norb,Lmats),barGreal(Norb,Lreal)
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG rebuild_gf SUPERC: rebuild GFs"
+#endif
     !
     if(.not.allocated(auxGmats))allocate(auxGmats(4,Lmats))
     if(.not.allocated(auxGreal))allocate(auxGreal(4,Lreal))
@@ -192,6 +205,11 @@ contains
   subroutine lanc_build_gf_superc_c(iorb)
     integer      :: iorb
     type(sector) :: sectorI,sectorJ
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf SUPERC DIAG: build diagonal GF l"//str(iorb)
+#endif
     !
     ialfa = 1
     !
@@ -388,7 +406,6 @@ contains
        !
        !
        !
-
        ! !<ANOMAL
        ! !EVALUATE [c^+_{up,iorb} + xi*c_{dw,iorb}]|gs> --> -xi*B^>_{iorb,iorb}
        ! isz = getsz(isector)
@@ -452,7 +469,6 @@ contains
        !  call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,8,Nexc=0)
        ! endif
        ! !>ANOMAL
-
        !
        if(MpiMaster)call delete_sector(sectorI)
 #ifdef _MPI
@@ -478,6 +494,10 @@ contains
     integer                :: iorb,jorb
     type(sector)           :: sectorI,sectorJ
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf SUPERC DIAG: build mixed GF l"//str(iorb)//",m"//str(jorb)
+#endif
     !
     ialfa = 1
     !
@@ -666,6 +686,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_GF SUPERC: add-up to GF. istate:"//str(istate)
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -690,6 +715,10 @@ contains
     !
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_GF SUPERC: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,ic,Nlanc)
@@ -731,7 +760,17 @@ contains
     integer            :: Nchannels,ic,ichan
     integer            :: Nexcs,iexc
     real(8)            :: peso,de
-    !    
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG rebuild_gf SUPERC: reconstruct diagonal impurity GFs"
+#endif
+    !
+    if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state)) then
+       print*, "ED_GF_SUPERC WARNING: impGmatrix%state not allocated. Nothing to do"
+       return
+    endif
+    !
     Nstates = size(impGmatrix(1,1,iorb,iorb)%state)
     do istate=1,Nstates
        Nchannels = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel)     
@@ -760,6 +799,17 @@ contains
     integer            :: Nchannels,ic,ichan
     integer            :: Nexcs,iexc
     real(8)            :: peso,de
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG rebuild_gf SUPERC: reconstruct mixed impurity GFs"
+#endif
+    !
+    !
+    if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state)) then
+       print*, "ED_GF_SUPERC WARNING: impGmatrix%state not allocated. Nothing to do"
+       return
+    endif
     !
     ichan = 4
     !
@@ -803,6 +853,10 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal)     :: invG0real,invF0real,invGreal,invFreal
     complex(8),dimension(2*Nspin*Norb,2*Nspin*Norb)       :: invGimp
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_sigma SUPERC: get Self-energy"
+#endif
     !
     invG0mats = zero
     invF0mats = zero

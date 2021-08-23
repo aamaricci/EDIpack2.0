@@ -120,7 +120,6 @@ contains
     !#################################
     !          HxV SETUP
     !#################################
-
     if(present(Hmat))then
        if(ed_total_ud)then
           spHtimesV_p => null()

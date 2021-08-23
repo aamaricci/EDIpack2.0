@@ -63,8 +63,14 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_superc()
-    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
-    real(8),dimension(Norb)         :: nup,ndw,Sz,nt
+    integer,dimension(2*Ns) :: ib
+    integer,dimension(2,Ns) :: Nud
+    integer,dimension(Ns)   :: IbUp,IbDw
+    real(8),dimension(Norb) :: nup,ndw,Sz,nt
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG observables_superc"
+#endif
     !
     allocate(dens(Norb),dens_up(Norb),dens_dw(Norb))
     allocate(docc(Norb))
@@ -83,10 +89,18 @@ contains
     n2      = 0.d0
     s2tot   = 0.d0
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_superc: get local observables"
+#endif
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
        !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_superc: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -116,9 +130,10 @@ contains
              !    nt(iorb) =  nup(iorb) + ndw(iorb)
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             nup = IbUp(1:Norb)!Nud(1,1:Norb)
+             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -143,6 +158,9 @@ contains
           !
           !
           !SUPERCONDUCTING ORDER PARAMETER
+#ifdef _DEBUG
+          if(ed_verbose>2)write(Logfile,"(A)")"DEBUG observables_superc: get OP"
+#endif
           do ispin=1,Nspin
              do iorb=1,Norb
                 !GET <(C_UP + CDG_DW)(CDG_UP + C_DW)> = 
@@ -165,7 +183,7 @@ contains
                    enddo
                    call delete_sector(sectorJ)
                    phisc(iorb) = phisc(iorb) + dot_product(vvinit,vvinit)*peso
-                endif             
+                endif
                 if(allocated(vvinit))deallocate(vvinit)
              enddo
           enddo
@@ -185,6 +203,9 @@ contains
 #endif
        !
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
     !
     do iorb=1,Norb
        phisc(iorb) = 0.5d0*(phisc(iorb) - dens_up(iorb) - (1.d0-dens_dw(iorb)))
@@ -225,6 +246,9 @@ contains
     !
     deallocate(dens,docc,phisc,dens_up,dens_dw,magz,sz2,n2)
     deallocate(simp,zimp)
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
   end subroutine observables_superc
 
 
@@ -237,10 +261,15 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_superc()
-    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
+    integer,dimension(2*Ns) :: ib
+    integer,dimension(2,Ns) :: Nud
+    integer,dimension(Ns)   :: IbUp,IbDw
     real(8),dimension(Norb)         :: nup,ndw
     real(8),dimension(Nspin,Norb)   :: eloc
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG local_energy_superc"
+#endif
     Egs     = state_list%emin
     ed_Ehartree= 0.d0
     ed_Eknot   = 0.d0
@@ -260,6 +289,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG local_energy_superc: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -286,9 +319,10 @@ contains
              !    ndw(iorb)= dble(ib(iorb+Ns))
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             Nud(1,:)=IbUp
+             Nud(2,:)=IbDw
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY
@@ -453,6 +487,10 @@ contains
 #endif
        !
     enddo
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     !
 #ifdef _MPI
     if(MpiStatus)then

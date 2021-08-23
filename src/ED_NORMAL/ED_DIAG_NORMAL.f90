@@ -23,8 +23,6 @@ module ED_DIAG_NORMAL
 
   public :: diagonalize_impurity_normal
 
-  real(8),dimension(:),pointer       :: state_cvec
-
 
 contains
 
@@ -155,20 +153,20 @@ contains
                      Nblock,&
                      Nitermax,&
                      tol=lanc_tolerance,&
-                     iverbose=(ed_verbose>3))
+                     iverbose=(ed_verbose>4))
              else
                 call sp_eigh(spHtimesV_p,eig_values,eig_basis,&
                      Nblock,&
                      Nitermax,&
                      tol=lanc_tolerance,&
-                     iverbose=(ed_verbose>3))
+                     iverbose=(ed_verbose>4))
              endif
 #else
              call sp_eigh(spHtimesV_p,eig_values,eig_basis,&
                   Nblock,&
                   Nitermax,&
                   tol=lanc_tolerance,&
-                  iverbose=(ed_verbose>3))
+                  iverbose=(ed_verbose>4))
 #endif             
              !
              !
@@ -197,7 +195,6 @@ contains
        else                     !else LAPACK_SOLVE
           allocate(eig_values(Dim)) ; eig_values=0d0
           allocate(eig_basis_tmp(Dim,Dim)) ; eig_basis_tmp=0d0
-          !!
           call build_Hv_sector_normal(isector,eig_basis_tmp)
           !
 #ifdef _DEBUG
@@ -239,7 +236,7 @@ contains
        else
           do i=1,Neigen
              enemin = eig_values(i)
-             if (enemin < oldzero-10.d0*gs_threshold)then
+             if (enemin < oldzero-10d0*gs_threshold)then
                 oldzero=enemin
                 call es_free_espace(state_list)
                 call es_add_state(state_list,enemin,eig_basis(:,i),isector,twin=Tflag)
@@ -263,6 +260,9 @@ contains
        !
     enddo sector
     if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine ed_diag_d
 
 
@@ -290,7 +290,7 @@ contains
     integer,dimension(:),allocatable :: list_sector
     !
 #ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_pre_diag_d NORMAL: pre diagonalization analysis"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_pre_diag NORMAL: pre diagonalization analysis"
 #endif
     sectors_mask=.true.
     !
@@ -362,7 +362,7 @@ contains
     integer             :: hist_n
     integer,allocatable :: list_sector(:),count_sector(:)
 #ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_post_diag_d NORMAL: post diagonalization analysis"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_post_diag NORMAL: post diagonalization analysis"
 #endif
     !POST PROCESSING:
     if(MPIMASTER)then

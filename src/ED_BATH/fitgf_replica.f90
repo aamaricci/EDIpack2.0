@@ -220,6 +220,10 @@ contains
 end subroutine chi2_fitgf_replica
 
 
+
+
+
+
 !##################################################################
 ! THESE PROCEDURES EVALUATES THE \chi^2 FUNCTIONS TO MINIMIZE. 
 !##################################################################
@@ -233,6 +237,10 @@ function chi2_delta_replica(a) result(chi2)
   complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta) :: Delta
   real(8),dimension(Ldelta)                          :: Ctmp
   integer                                            :: i,l,iorb,jorb,ispin,jspin
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_replica. a:",a
+#endif
   !
   Delta = delta_replica(a)
   !
@@ -248,6 +256,9 @@ function chi2_delta_replica(a) result(chi2)
   !
   chi2=sum(chi2_so)
   chi2=chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_replica. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_replica
 
@@ -265,6 +276,10 @@ function grad_chi2_delta_replica(a) result(dchi2)
   complex(8),dimension(Ldelta)                               :: Ftmp
   real(8),dimension(Ldelta)                                  :: Ctmp
   integer                                                    :: i,j,l,iorb,jorb,ispin,jspin
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_replica. a:",a
+#endif
   !
   Delta  = delta_replica(a)
   dDelta = grad_delta_replica(a)
@@ -284,7 +299,10 @@ function grad_chi2_delta_replica(a) result(dchi2)
      enddo
   enddo
   !
-  dchi2 = -cg_pow*sum(df,1)/Ldelta     !sum over all orbital indices
+  dchi2 = -cg_pow*sum(df,1)/Ldelta/totNso     !sum over all orbital indices
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_replica. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_delta_replica
 
@@ -303,6 +321,10 @@ function chi2_weiss_replica(a) result(chi2)
   real(8),dimension(Ldelta)                          :: Ctmp
   integer                                            :: i,l,iorb,jorb,ispin,jspin
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_replica. a:",a
+#endif
+  !
   g0and = g0and_replica(a)
   !
   do l=1,totNso
@@ -316,7 +338,10 @@ function chi2_weiss_replica(a) result(chi2)
   enddo
   !
   chi2=sum(chi2_so)
-  chi2=chi2/Ldelta
+  chi2=chi2/Ldelta/totNso
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_replica. Chi**2:",chi2
+#endif
   !
 end function chi2_weiss_replica
 
@@ -333,6 +358,10 @@ function grad_chi2_weiss_replica(a) result(dchi2)
   complex(8),dimension(Ldelta)                               :: Ftmp
   real(8),dimension(Ldelta)                                  :: Ctmp
   integer                                                    :: i,j,l,iorb,jorb,ispin,jspin
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_replica. a:",a
+#endif
   !
   g0and  = g0and_replica(a)
   dg0and = grad_g0and_replica(a)
@@ -352,7 +381,10 @@ function grad_chi2_weiss_replica(a) result(dchi2)
      enddo
   enddo
   !
-  dchi2 = -cg_pow*sum(df,1)/Ldelta     !sum over all orbital indices
+  dchi2 = -cg_pow*sum(df,1)/Ldelta/totNso     !sum over all orbital indices
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_replica. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_weiss_replica
 

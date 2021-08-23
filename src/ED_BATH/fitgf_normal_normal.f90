@@ -243,11 +243,17 @@ function chi2_delta_normal_normal(a) result(chi2)
   complex(8),dimension(Ldelta) ::  Delta
   real(8),dimension(Ldelta)    ::  Ctmp
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_normal. a:",a
+#endif
   Delta = delta_normal_normal(a)
   !
   Ctmp = abs(Gdelta(1,:)-Delta(:))
   chi2=sum( Ctmp**cg_pow/Wdelta )
   chi2=chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_normal_normal. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_normal_normal
 
@@ -265,6 +271,9 @@ function grad_chi2_delta_normal_normal(a) result(dchi2)
   complex(8),dimension(Ldelta,size(a)) :: dDelta
   integer                              :: j
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_normal. a:",a
+#endif
   Delta   = delta_normal_normal(a)
   dDelta  = grad_delta_normal_normal(a)
   !
@@ -276,6 +285,9 @@ function grad_chi2_delta_normal_normal(a) result(dchi2)
   enddo
   !
   dchi2 = -cg_pow*df/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_normal. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_delta_normal_normal
 
@@ -290,11 +302,18 @@ function chi2_weiss_normal_normal(a) result(chi2)
   real(8),dimension(Ldelta)    ::  Ctmp
   real(8)                      ::  chi2,w
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_normal_normal. a:",a
+#endif
+  !
   g0and  = g0and_normal_normal(a)
   !
   Ctmp = abs(Gdelta(1,:)-g0and(:))
   chi2 = sum( Ctmp**cg_pow/Wdelta )
   chi2 = chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_normal_normal. Chi**2:",chi2
+#endif
   !
 end function chi2_weiss_normal_normal
 
@@ -311,6 +330,10 @@ function grad_chi2_weiss_normal_normal(a) result(dchi2)
   complex(8),dimension(Ldelta,size(a)) :: dg0and
   integer                              :: j
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_normal_normal. a:",a
+#endif
+  !
   g0and  = g0and_normal_normal(a)
   dg0and = grad_g0and_normal_normal(a)
   !
@@ -322,6 +345,9 @@ function grad_chi2_weiss_normal_normal(a) result(dchi2)
   enddo
   !
   dchi2 = -cg_pow*df/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_normal_normal. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_weiss_normal_normal
 

@@ -252,6 +252,10 @@ function chi2_delta_hybrid_normal(a) result(chi2)
   real(8),dimension(Ldelta)              :: Ctmp
   integer                                :: i,l,iorb,jorb
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_normal. a:",a
+#endif
+  !
   Delta = delta_hybrid_normal(a)
   !
   do l=1,totNorb
@@ -263,6 +267,9 @@ function chi2_delta_hybrid_normal(a) result(chi2)
   !
   chi2=sum(chi2_orb)
   chi2=chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_hybrid_normal. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_hybrid_normal
 
@@ -279,6 +286,10 @@ function grad_chi2_delta_hybrid_normal(a) result(dchi2)
   complex(8),dimension(Ldelta)                   :: Ftmp
   real(8),dimension(Ldelta)                      :: Ctmp
   integer                                        :: i,j,l,iorb,jorb
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_normal. a:",a
+#endif
   !
   Delta  = delta_hybrid_normal(a)
   dDelta = grad_delta_hybrid_normal(a)
@@ -297,6 +308,9 @@ function grad_chi2_delta_hybrid_normal(a) result(dchi2)
   enddo
   !
   dchi2 = -cg_pow*sum(df,1)/Ldelta     !sum over all orbital indices
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_normal. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_delta_hybrid_normal
 
@@ -316,6 +330,10 @@ function chi2_weiss_hybrid_normal(a) result(chi2)
   real(8)                                :: chi2
   integer                                :: i,l,iorb,jorb
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_hybrid_normal. a:",a
+#endif
+  !
   g0and(:,:,:) = g0and_hybrid_normal(a)
   !
 
@@ -328,6 +346,10 @@ function chi2_weiss_hybrid_normal(a) result(chi2)
   !
   chi2=sum(chi2_orb)/Norb
   chi2=chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_hybrid_normal. Chi**2:",chi2
+#endif
+  !
   !
 end function chi2_weiss_hybrid_normal
 
@@ -344,6 +366,10 @@ function grad_chi2_weiss_hybrid_normal(a) result(dchi2)
   complex(8),dimension(Ldelta)                   :: Ftmp
   real(8),dimension(Ldelta)                      :: Ctmp
   integer                                        :: i,j,l,iorb,jorb
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_hybrid_normal. a:",a
+#endif
   !
   g0and  = g0and_hybrid_normal(a)
   dg0and = grad_g0and_hybrid_normal(a)
@@ -362,6 +388,9 @@ function grad_chi2_weiss_hybrid_normal(a) result(dchi2)
   enddo
   !
   dchi2 = -cg_pow*sum(df,1)/Ldelta     !sum over all orbital indices
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_hybrid_normal. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_weiss_hybrid_normal
 

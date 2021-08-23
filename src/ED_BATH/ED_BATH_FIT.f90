@@ -82,6 +82,7 @@ contains
     integer,optional                :: ispin,iorb
     integer                         :: ispin_
 #ifdef _DEBUG
+    write(Logfile,"(A)")""
     write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_normal: Start Chi**2 fit"
 #endif
     ispin_=1;if(present(ispin))ispin_=ispin
@@ -141,6 +142,7 @@ contains
     integer,optional                :: ispin,iorb
     integer                         :: ispin_
 #ifdef _DEBUG
+    write(Logfile,"(A)")""
     write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_superc: Start Chi**2 fit"
 #endif
     ispin_=1;if(present(ispin))ispin_=ispin
@@ -200,6 +202,7 @@ contains
     integer                         :: ispin_
     !
 #ifdef _DEBUG
+    write(Logfile,"(A)")""
     write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_normal_mpi: Start Chi**2 fit"
 #endif
     MPI_MASTER=get_Master_MPI(comm)
@@ -265,6 +268,7 @@ contains
     integer,optional                  :: ispin,iorb
     integer                           :: ispin_
 #ifdef _DEBUG
+    write(Logfile,"(A)")""
     write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_superc_mpi: Start Chi**2 fit"
 #endif
     !
@@ -370,6 +374,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     ! Check dimensions !
     Nsites=size(bath,1)
     !
@@ -414,6 +421,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     Nsites=size(bath,1)
     !
     do ilat = 1,Nsites
@@ -464,6 +474,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     MPI_RANK = get_Rank_MPI(comm)
     MPI_SIZE = get_Size_MPI(comm)
     MPI_MASTER=get_Master_MPI(comm)
@@ -513,6 +526,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     MPI_RANK = get_Rank_MPI(comm)
     MPI_SIZE = get_Size_MPI(comm)
     MPI_MASTER=get_Master_MPI(comm)

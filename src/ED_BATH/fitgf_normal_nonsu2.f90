@@ -256,6 +256,9 @@ function chi2_delta_normal_nonsu2(a) result(chi2)
   real(8),dimension(Ldelta)                ::  Ctmp
   integer                                  ::  s,ispin,jspin
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_nonsu2. a:",a
+#endif
   Delta = delta_normal_nonsu2(a)
   !
   do s=1,totNspin
@@ -266,6 +269,9 @@ function chi2_delta_normal_nonsu2(a) result(chi2)
   enddo
   !
   chi2=sum(chi2_spin)/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_normal_nonsu2. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_normal_nonsu2
 
@@ -284,6 +290,10 @@ function chi2_weiss_normal_nonsu2(a) result(chi2)
   real(8)                                  :: w
   integer                                  :: i,s,ispin,jspin
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_normal_nonsu2. a:",a
+#endif
+  !
   g0and(:,:,:) = g0and_normal_nonsu2(a)
   !
   do s=1,totNspin
@@ -294,6 +304,9 @@ function chi2_weiss_normal_nonsu2(a) result(chi2)
   enddo
   !
   chi2=sum(chi2_spin)/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_normal_nonsu2. chi**2:",chi2
+#endif
   !
 end function chi2_weiss_normal_nonsu2
 

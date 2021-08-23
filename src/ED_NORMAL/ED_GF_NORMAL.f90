@@ -54,7 +54,7 @@ contains
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
 #ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG build_gf NORMAL: build GFs"
+    write(Logfile,"(A)")"DEBUG build_gf NORMAL: build GFs"
 #endif
     !
     do ispin=1,Nspin
@@ -65,7 +65,7 @@ contains
           call lanc_build_gf_normal_diag(iorb,ispin)
           if(MPIMASTER)call stop_timer(unit=LOGfile)
 #ifdef _DEBUG
-          if(ed_verbose>1)write(Logfile,"(A)")""
+          write(Logfile,"(A)")""
 #endif
        enddo
     enddo
@@ -93,7 +93,7 @@ contains
                 call lanc_build_gf_normal_mix(iorb,jorb,ispin)
                 if(MPIMASTER)call stop_timer(unit=LOGfile)
 #ifdef _DEBUG
-                if(ed_verbose>1)write(Logfile,"(A)")""
+                write(Logfile,"(A)")""
 #endif
              enddo
           enddo
@@ -136,7 +136,7 @@ contains
        call lanc_build_gf_phonon_main()
        if(MPIMASTER)call stop_timer(unit=LOGfile)
 #ifdef _DEBUG
-       if(ed_verbose>1)write(Logfile,"(A)")""
+       write(Logfile,"(A)")""
 #endif
     endif
   end subroutine build_gf_normal
@@ -152,7 +152,7 @@ contains
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
 #ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG rebuild_gf NORMAL: rebuild GFs"
+    write(Logfile,"(A)")"DEBUG rebuild_gf NORMAL: rebuild GFs"
 #endif
     !
     do ispin=1,Nspin
@@ -222,7 +222,7 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG lanc_build_gf NORMAL DIAG: build diagonal GF l"//str(iorb)//", s"//str(ispin)
+         "DEBUG lanc_build_gf NORMAL: lanc build diagonal GF l"//str(iorb)//", s"//str(ispin)
 #endif
     !
     if(ed_total_ud)then
@@ -331,7 +331,8 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG lanc_build_gf NORMAL DIAG: build mixed GF l"//str(iorb)//",m"//str(jorb)//", s"//str(ispin)
+         "DEBUG lanc_build_gf NORMAL: build mixed GF l"//&
+         str(iorb)//",m"//str(jorb)//", s"//str(ispin)
 #endif
     !
     if(ed_total_ud)then
@@ -690,6 +691,10 @@ contains
     integer            :: Nexcs,iexc
     real(8)            :: peso,de
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG rebuild_gf NORMAL: reconstruct impurity GFs"
+#endif
     if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) then
        print*, "ED_GF_NORMAL WARNING: impGmatrix%state not allocated. Nothing to do"
        return
@@ -765,7 +770,7 @@ contains
     if(ed_verbose>1)write(Logfile,"(A)")&
          "DEBUG build_sigma NORMAL: get Self-energy"
 #endif
-    
+    !
     invG0mats = zero
     invGmats  = zero
     invG0real = zero

@@ -174,8 +174,6 @@ subroutine chi2_fitgf_hybrid_nonsu2(fg,bath_)
   write(unit,"(ES18.9,1x,I5)") chi,iter
   close(unit)
   !
-
-
   ! size = Nspin*Nbath + Nspin*Norb*Nbath + Nspin*Norb*Nbath
   stride = 0
   do ispin=1,Nspin
@@ -252,8 +250,11 @@ contains
        close(unit)
     enddo
   end subroutine write_fit_result
-
+  !
 end subroutine chi2_fitgf_hybrid_nonsu2
+
+
+
 
 
 
@@ -274,6 +275,10 @@ function chi2_delta_hybrid_nonsu2(a) result(chi2)
   real(8),dimension(Ldelta)                          ::  Ctmp
   integer                                            ::  i,l,iorb,jorb,ispin,jspin
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_nonsu2. a:",a
+#endif
+  !
   Delta = delta_hybrid_nonsu2(a)
   !
   do l=1,totNso
@@ -286,6 +291,9 @@ function chi2_delta_hybrid_nonsu2(a) result(chi2)
   enddo
   !
   chi2=sum(chi2_so)/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_hybrid_nonsu2. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_hybrid_nonsu2
 
@@ -303,6 +311,10 @@ function chi2_weiss_hybrid_nonsu2(a) result(chi2)
   real(8),dimension(Ldelta)                          ::  Ctmp
   integer                                            :: i,l,iorb,jorb,ispin,jspin
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_hybrid_nonsu2. a:",a
+#endif
+  !
   g0and = g0and_hybrid_nonsu2(a)
   !
   do l=1,totNso
@@ -315,6 +327,10 @@ function chi2_weiss_hybrid_nonsu2(a) result(chi2)
   enddo
   !
   chi2=sum(chi2_so)/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_hybrid_nonsu2. Chi**2:",chi2
+#endif
+  !
   !
 end function chi2_weiss_hybrid_nonsu2
 

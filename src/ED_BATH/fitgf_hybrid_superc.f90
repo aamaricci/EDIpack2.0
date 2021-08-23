@@ -260,6 +260,9 @@ end subroutine chi2_fitgf_hybrid_superc
 
 
 
+
+
+
 !##################################################################
 ! THESE PROCEDURES EVALUATES THE \chi^2 FUNCTIONS TO MINIMIZE. 
 !##################################################################
@@ -274,7 +277,11 @@ function chi2_delta_hybrid_superc(a) result(chi2)
   complex(8),dimension(2,Norb,Norb,Ldelta) :: Delta
   real(8),dimension(Ldelta)                ::  Ctmp,Ftmp
   integer                                  ::  i,l,iorb,jorb
-  !  
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_superc. a:",a
+#endif
+  !
   Delta = delta_hybrid_superc(a)
   !
   do l=1,totNorb
@@ -284,8 +291,10 @@ function chi2_delta_hybrid_superc(a) result(chi2)
      Ftmp = abs(Fdelta(l,:)-Delta(2,iorb,jorb,:))
      chi_orb(l) = sum( Ctmp**cg_pow/Wdelta ) + sum( Ftmp**cg_pow/Wdelta )
   enddo
-  !
-  chi2=sum(chi_orb)/Ldelta
+  chi2=sum(chi_orb)/Ldelta/totNorb
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_hybrid_superc. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_hybrid_superc
 
@@ -302,6 +311,10 @@ function grad_chi2_delta_hybrid_superc(a) result(dchi2)
   real(8),dimension(Ldelta)                        :: Ctmp,Btmp
   complex(8),dimension(2,Norb,Norb,Ldelta,size(a)) ::  dDelta
   integer                                          ::  i,j,l,iorb,jorb
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_superc. a:",a
+#endif
   !
   Delta  = delta_hybrid_superc(a)
   dDelta = grad_delta_hybrid_superc(a)
@@ -326,7 +339,10 @@ function grad_chi2_delta_hybrid_superc(a) result(dchi2)
      !
   enddo
   !
-  dchi2=-cg_pow*sum(df,dim=1)/Ldelta
+  dchi2=-cg_pow*sum(df,dim=1)/Ldelta/totNorb
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_hybrid_superc. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_delta_hybrid_superc
 
@@ -344,6 +360,10 @@ function chi2_weiss_hybrid_superc(a) result(chi2)
   real(8),dimension(Ldelta)                ::  Gtmp,Ftmp
   integer                                  ::  i,l,iorb,jorb
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_hybrid_superc. a:",a
+#endif
+  !
   g0and = g0and_hybrid_superc(a)
   !
   do l=1,totNorb
@@ -354,7 +374,10 @@ function chi2_weiss_hybrid_superc(a) result(chi2)
      chi2_orb(l) = sum( Gtmp**cg_pow/Wdelta )  + sum( Ftmp**cg_pow/Wdelta )
   enddo
   !
-  chi2=sum(chi2_orb)/Ldelta
+  chi2=sum(chi2_orb)/Ldelta/totNorb
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_hybrid_superc. Chi**2:",chi2
+#endif
   !
 end function chi2_weiss_hybrid_superc
 
@@ -369,9 +392,13 @@ end function chi2_weiss_hybrid_superc
 !   real(8),dimension(size(a))             :: df
 !   complex(8),dimension(2,Ldelta)         :: g0and
 !   complex(8),dimension(2,Ldelta,size(a)) :: dg0and
-!   complex(8),dimension(Ldelta)           :: Gtmp,Gtmp
+!   complex(8),dimension(Ldelta)           :: Gtmp,Ctmp
 !   real(8),dimension(Ldelta)              :: Ctmp,Btmp
 !   integer                                ::  i,j,l,iorb,jorb
+!   !
+! #ifdef _DEBUG
+!   if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_hybrid_superc. a:",a
+! #endif
 !   !
 !   g0and  = g0and_normal_normal(a)
 !   dg0and = grad_g0and_normal_normal(a)
@@ -396,7 +423,10 @@ end function chi2_weiss_hybrid_superc
 !      !
 !   enddo
 !   !
-!   dchi2=-cg_pow*sum(df,dim=1)/Ldelta
+!   dchi2=-cg_pow*sum(df,dim=1)/Ldelta/totNorb
+! #ifdef _DEBUG
+!   if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_hybrid_superc. dChi**2:",dchi2
+! #endif
 !   !
 ! end function grad_chi2_weiss_hybrid_superc
 

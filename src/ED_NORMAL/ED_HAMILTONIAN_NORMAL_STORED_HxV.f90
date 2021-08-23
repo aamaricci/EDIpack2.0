@@ -605,8 +605,6 @@ contains
 
 
 #ifdef _MPI
-
-
   subroutine spMatVec_mpi_normal_main(Nloc,v,Hv)
     integer                          :: Nloc
     real(8),dimension(Nloc)          :: v

@@ -197,7 +197,7 @@ subroutine chi2_fitgf_normal_superc(fg,bath_,ispin,iorb)
   call write_dmft_bath(dmft_bath,LOGfile)
   !
   call save_dmft_bath(dmft_bath)
-
+  !
   allocate(fgand(Nspin,Nspin,Norb,Norb,Ldelta))
   allocate(ffand(Nspin,Nspin,Norb,Norb,Ldelta))
   if(cg_scheme=='weiss')then
@@ -263,12 +263,19 @@ function chi2_delta_normal_superc(a) result(chi2)
   complex(8),dimension(2,Ldelta) ::  Delta
   real(8),dimension(Ldelta)      ::  Ctmp,Ftmp
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_superc. a:",a
+#endif
+  !
   Delta(:,:) = delta_normal_superc(a)
   !
   Ctmp = abs(Gdelta(1,:)-Delta(1,:))
   Ftmp = abs(Fdelta(1,:)-Delta(2,:))
   chi2 = sum( Ctmp**cg_pow/Wdelta ) + sum( Ftmp**cg_pow/Wdelta )
   chi2 = chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_normal_superc. Chi**2:",chi2
+#endif
   !
 end function chi2_delta_normal_superc
 
@@ -285,6 +292,10 @@ function grad_chi2_delta_normal_superc(a) result(dchi2)
   real(8),dimension(Ldelta)              ::  Ctmp,Btmp
   complex(8),dimension(2,Ldelta,size(a)) ::  dDelta
   integer                                ::  j
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_superc. a:",a
+#endif
   !
   Delta(:,:)    = delta_normal_superc(a)
   dDelta(:,:,:) = grad_delta_normal_superc(a)
@@ -304,6 +315,9 @@ function grad_chi2_delta_normal_superc(a) result(dchi2)
   enddo
   !
   dchi2 = -cg_pow*df/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_normal_superc. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_delta_normal_superc
 
@@ -316,7 +330,10 @@ function chi2_weiss_normal_superc(a) result(chi2)
   complex(8),dimension(2,Ldelta) ::  g0and
   real(8),dimension(Ldelta)    ::  Gtmp,Ftmp
   real(8)                        ::  chi2
-  chi2=0d0
+  !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_normal_superc. a:",a
+#endif
   !
   g0and(:,:)  = g0and_normal_superc(a)
   !
@@ -325,6 +342,9 @@ function chi2_weiss_normal_superc(a) result(chi2)
   chi2 =        sum( Gtmp**cg_pow/Wdelta )
   chi2 = chi2 + sum( Ftmp**cg_pow/Wdelta )
   chi2 = chi2/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_normal_superc. chi**2:",chi2
+#endif
   !
 end function chi2_weiss_normal_superc
 
@@ -342,11 +362,15 @@ function grad_chi2_weiss_normal_superc(a) result(dchi2)
   real(8),dimension(Ldelta)              :: Ctmp,Btmp
   integer                                :: j
   !
+#ifdef _DEBUG
+  if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_normal_superc. a:",a
+#endif
+  !
   g0and  = g0and_normal_superc(a)
   dg0and = grad_g0and_normal_superc(a)
   !
-  Gtmp = abs(Gdelta(1,:)-g0and(1,:))
-  Ftmp = abs(Fdelta(1,:)-g0and(2,:))
+  Gtmp = (Gdelta(1,:)-g0and(1,:))
+  Ftmp = (Fdelta(1,:)-g0and(2,:))
   !
   Ctmp = abs(Gtmp)**(cg_pow-2)
   Btmp = abs(Ftmp)**(cg_pow-2)
@@ -360,6 +384,9 @@ function grad_chi2_weiss_normal_superc(a) result(dchi2)
   enddo
   !
   dchi2 = -cg_pow*df/Ldelta
+#ifdef _DEBUG
+  if(ed_verbose>4)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_weiss_normal_superc. dChi**2:",dchi2
+#endif
   !
 end function grad_chi2_weiss_normal_superc
 

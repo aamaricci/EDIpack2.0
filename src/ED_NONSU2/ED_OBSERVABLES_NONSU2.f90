@@ -68,11 +68,17 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_nonsu2()
-    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
-    real(8),dimension(Norb)         :: nup,ndw,Sz,nt
-    real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw
-    real(8),dimension(Norb,Norb)    :: theta_updw,theta_dwup
-    real(8),dimension(Norb,Norb)    :: omega_updw,omega_dwup
+    integer,dimension(2*Ns)      :: ib
+    integer,dimension(2,Ns)      :: Nud
+    integer,dimension(Ns)        :: IbUp,IbDw
+    real(8),dimension(Norb)      :: nup,ndw,Sz,nt
+    real(8),dimension(Norb,Norb) :: theta_upup,theta_dwdw
+    real(8),dimension(Norb,Norb) :: theta_updw,theta_dwup
+    real(8),dimension(Norb,Norb) :: omega_updw,omega_dwup
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG observables_nonsu2"
+#endif
     !
     !LOCAL OBSERVABLES:
     ! density, 
@@ -110,10 +116,18 @@ contains
     omega_updw = 0d0
     omega_dwup = 0d0
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_nonsu2: get local observables"
+#endif    
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
        !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -143,9 +157,10 @@ contains
              !    nt(iorb) =  nup(iorb) + ndw(iorb)
              ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             nup = IbUp(1:Norb)!Nud(1,1:Norb)
+             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -179,13 +194,28 @@ contains
 #endif
        !
     enddo
-    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
+
+
+
+
     !EVALUATE <SX> AND <SY>
     do iorb=1,Norb
        !
+#ifdef _DEBUG
+       if(ed_verbose>2)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: eval in-plane magnetization <Sx>, <Sy>, a:"//str(iorb)
+#endif
        do istate=1,state_list%size
           isector = es_return_sector(state_list,istate)
           Ei      = es_return_energy(state_list,istate)
+          !
+#ifdef _DEBUG
+          if(ed_verbose>3)write(Logfile,"(A)")&
+               "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
           if(MpiStatus)then
              state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -268,14 +298,25 @@ contains
        !<Sy> = <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> - <N_UP> - <N_DW 
        magy(iorb) = magy(iorb) - dens_up(iorb) - dens_dw(iorb)
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
 
 
-    !
+
     !EVALUATE EXCITON OP <S_ab> AND <T^x,y,z_ab>
-
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_nonsu2: eval excitoninc OP <S_av>, <T^{x,y,z}_ab>"
+#endif
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -489,14 +530,25 @@ contains
           exct_ty(iorb,jorb) = omega_updw(iorb,jorb) - omega_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb)
        enddo
     enddo
-    !
+
+
+
     !IMPURITY DENSITY MATRIX
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_nonsu2: eval impurity density matrix <C^+_a C_b>"
+#endif
     if(allocated(imp_density_matrix))deallocate(imp_density_matrix)
     allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb))
     imp_density_matrix=zero
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -565,6 +617,10 @@ contains
        if(associated(state_cvec))nullify(state_cvec)
 #endif
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
+
     !
     !
     if(MPIMASTER)then
@@ -640,9 +696,15 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_nonsu2()
-    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
+    integer,dimension(2*Ns) :: ib
+    integer,dimension(2,Ns) :: Nud
+    integer,dimension(Ns)   :: IbUp,IbDw
     real(8),dimension(Norb)         :: nup,ndw
     real(8),dimension(Nspin,Norb)   :: eloc
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG local_energy_nonsu2"
+#endif
     !
     Egs     = state_list%emin
     ed_Ehartree= 0.d0
@@ -663,6 +725,11 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG local_energy_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
           state_cvec => es_return_cvector(MpiComm,state_list,istate)
@@ -683,9 +750,10 @@ contains
              m  = sectorI%H(1)%map(i)
              ib = bdecomp(m,2*Ns)
              gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             nup = IbUp(1:Norb)!Nud(1,1:Norb)
+             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY
@@ -851,6 +919,9 @@ contains
        !
     enddo
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
 #ifdef _MPI
     if(MpiStatus)then
        call Bcast_MPI(MpiComm,ed_Epot)

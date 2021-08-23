@@ -200,7 +200,7 @@ contains
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
-    !
+
     !EVALUATE EXCITON OP <S_ab> AND <T^z_ab>
     !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
     !<T^z_ab>:=   <C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}>
@@ -303,15 +303,15 @@ contains
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
-    !
+
     !
     !IMPURITY DENSITY MATRIX
-    if(allocated(imp_density_matrix)) deallocate(imp_density_matrix)
-    allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb));imp_density_matrix=zero
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
          "DEBUG observables_normal: eval impurity density matrix <C^+_a C_b>"
 #endif
+    if(allocated(imp_density_matrix)) deallocate(imp_density_matrix)
+    allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb));imp_density_matrix=zero
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
@@ -673,7 +673,6 @@ contains
 #ifdef _DEBUG
     write(Logfile,"(A)")""
 #endif
-    !
 #ifdef _MPI
     if(MpiStatus)then
        call Bcast_MPI(MpiComm,ed_Epot)
