@@ -782,28 +782,26 @@ contains
                 enddo
              enddo
              !==> HYBRIDIZATION TERMS II: same or different orbitals, opposite spins.
-             if(ed_mode=="nonsu2")then
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      !UP-DW
-                      if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
-                         call c(jorb+Ns,m,k1,sg1)
-                         call cdg(iorb,k1,k2,sg2)
-                         j=binary_search(sectorI%H(1)%map,k2)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
-                      endif
-                      !DW-UP
-                      if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
-                         call c(jorb,m,k1,sg1)
-                         call cdg(iorb+Ns,k1,k2,sg2)
-                         j=binary_search(sectorI%H(1)%map,k2)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
-                      endif
-                   enddo
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   !UP-DW
+                   if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
+                      call c(jorb+Ns,m,k1,sg1)
+                      call cdg(iorb,k1,k2,sg2)
+                      j=binary_search(sectorI%H(1)%map,k2)
+                      if(Jz_basis.and.j==0)cycle
+                      ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                   endif
+                   !DW-UP
+                   if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
+                      call c(jorb,m,k1,sg1)
+                      call cdg(iorb+Ns,k1,k2,sg2)
+                      j=binary_search(sectorI%H(1)%map,k2)
+                      if(Jz_basis.and.j==0)cycle
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                   endif
                 enddo
-             endif
+             enddo
              !
              !DENSITY-DENSITY INTERACTION: SAME ORBITAL, OPPOSITE SPINS
              !Euloc=\sum=i U_i*(n_u*n_d)_i
