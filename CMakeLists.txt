@@ -233,6 +233,7 @@ SET(LIB_TMP_VER ${CMAKE_BINARY_DIR}/version)
 SET(LIB_TARGET_LIB ${CMAKE_INSTALL_PREFIX}/lib)
 SET(LIB_TARGET_INC ${CMAKE_INSTALL_PREFIX}/include)
 SET(LIB_TARGET_ETC ${CMAKE_INSTALL_PREFIX}/etc)
+SET(LIB_TARGET_BIN ${CMAKE_INSTALL_PREFIX}/bin)
 SET(LIB_TARGET_DIR ${CMAKE_INSTALL_PREFIX})
 
 # Have the .mod files placed in the INC folder
@@ -299,7 +300,7 @@ IF( (GIT_BRANCH MATCHES "master")
   CONFIGURE_FILE(${LIB_ENV}/version.in ${TMP_VER_MODULE_FILE}  @ONLY)
 ENDIF()
 
-#Build the DMFT_TOOLS module for environment modules
+#Build the library module for environment modules
 SET(TMP_MODULE_NAME "${MODULE_NAME}" CACHE PATH "Prefix prepended to install directories")
 SET(TMP_ENV_MODULE_FILE ${LIB_TMP_ETC}/modules/${TMP_MODULE_NAME})
 CONFIGURE_FILE(${LIB_ENV}/module.in ${TMP_ENV_MODULE_FILE} @ONLY)
@@ -309,10 +310,13 @@ SET(TMP_PKCONFIG_FILE ${LIB_TMP_ETC}/${PROJECT_NAME}.pc)
 CONFIGURE_FILE( ${LIB_ETC}/${PROJECT_NAME}.pc.in ${TMP_PKCONFIG_FILE} @ONLY)
 
 
-SET(CONFIG_SCRIPT dmft_ed_config.sh)
-SET(TMP_CONFIGVARS_FILE ${LIB_TMP_ETC}/${CONFIG_SCRIPT})
-CONFIGURE_FILE(${LIB_ETC}/config_dmft_ed.sh.in ${TMP_CONFIGVARS_FILE} @ONLY)
+SET(USER_CONFIG_SCRIPT dmft_ed_config_user.sh)
+SET(TMP_CONFIGVARS_USER_FILE ${LIB_TMP_ETC}/${USER_CONFIG_SCRIPT})
+CONFIGURE_FILE(${LIB_ETC}/dmft_ed_config_user.sh.in ${TMP_CONFIGVARS_USER_FILE} @ONLY)
 
+SET(GLOBAL_CONFIG_SCRIPT dmft_ed_config_global.sh)
+SET(TMP_CONFIGVARS_GLOBAL_FILE ${LIB_TMP_ETC}/${GLOBAL_CONFIG_SCRIPT})
+CONFIGURE_FILE(${LIB_ETC}/dmft_ed_config_global.sh.in ${TMP_CONFIGVARS_GLOBAL_FILE} @ONLY)
 
 FILE(WRITE  ${LIB_TMP_VER}  "${VERSION}\n")
 
@@ -322,12 +326,19 @@ INSTALL(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E rm -fv ${LIB_VERSI
 
 INSTALL(TARGETS dmft_ed DESTINATION ${LIB_TARGET_LIB})
 INSTALL(DIRECTORY ${LIB_TMP_ETC}/ DESTINATION ${LIB_TARGET_ETC})
-INSTALL(FILES ${TMP_CONFIGVARS_FILE} DESTINATION ${LIB_TARGET_ETC}/
+
+INSTALL(FILES ${TMP_CONFIGVARS_USER_FILE} DESTINATION ${LIB_TARGET_BIN}/
   PERMISSIONS ${PERMISSION_777} SETUID)
+
+INSTALL(FILES ${TMP_CONFIGVARS_GLOBAL_FILE} DESTINATION ${LIB_TARGET_BIN}/
+  PERMISSIONS ${PERMISSION_777} SETUID)
+
 INSTALL(FILES ${TMP_VER_FILE} DESTINATION ${LIB_TARGET_DIR} 
   PERMISSIONS ${PERMISSION_777} SETUID)
+
 INSTALL(FILES ${LIB_TARGET_ETC}/${PROJECT_NAME}.pc DESTINATION $ENV{HOME}/.pkgconfig.d/
   PERMISSIONS ${PERMISSION_777} SETUID)
+
 INSTALL(DIRECTORY ${LIB_TARGET_ETC}/modules/ DESTINATION $ENV{HOME}/.modules.d)
 
 
@@ -341,15 +352,25 @@ $ make install
 Uninstall:
 $ make uninstall")
 		 
-MESSAGE( STATUS "
-${Red}Load library in your OS:${ColourReset} 
+INSTALL(CODE "MESSAGE(
+\"
+ADD LIBRARY TO YOUR SYSTEM: 
+Pick ONE method below [or add it in your bash profile, e.g. ~/.bashrc]:
+${Yellow}Method 1: use the provided ${PROJECT_NAME} environment module${ColourReset}:
    $ module use $HOME/.modules.d
-   $ module load ${PROJECT_NAME}
-OR
-   $ source ${LIB_TARGET_ETC}/${CONFIG_SCRIPT}
-OR
+   $ module load ${PROJECT_NAME}/${FC_PLAT}
+
+${Yellow}Method 2: source the config script${ColourReset}:
+   $ source ${LIB_TARGET_BIN}/${USER_CONFIG_SCRIPT}
+
+${Yellow}Method 3: use pkg-config with the provided ${PROJECT_NAME}.pc${ColourReset}:
    $ export PKG_CONFIG_PATH=${LIB_TARGET_ETC}/:$PKG_CONFIG_PATH
-   $ pkg-config --cflags --libs ${PROJECT_NAME} (to get lib info)")
+   $ pkg-config --cflags --libs ${PROJECT_NAME}
+
+${Yellow}Method ADMIN: [add it to the system shell profile, e.g. /etc/bash.bashrc]${ColourReset}
+   $ source ${LIB_TARGET_BIN}/${GLOBAL_CONFIG_SCRIPT}
+\")
+")
 
 
 # Add a distclean target to the Makefile
