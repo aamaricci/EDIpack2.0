@@ -8,3 +8,4 @@ Makefile
 *.o
 build*
 .archive/
+src/ED_VERSION.f90

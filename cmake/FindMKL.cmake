@@ -107,23 +107,23 @@ IF(EXISTS "${MKL_LINK_TOOL}")
   
   IF(APPLE)			#do something specific for Apple
     IF(${CMAKE_Fortran_COMPILER_ID} MATCHES GNU)
-      set(MKL_LINK_TOOL_LIBS "${MKL_LINK_TOOL} -check_mkl_presence -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK}")
-      set(MKL_LINK_TOOL_INCS "${MKL_LINK_TOOL} -check_mkl_presence -opts")
+      set(MKL_LINK_TOOL_LIBS ${MKL_LINK_TOOL} -check_mkl_presence -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK})
+      set(MKL_LINK_TOOL_INCS ${MKL_LINK_TOOL} -check_mkl_presence -opts)
     ELSE()
-      set(MKL_LINK_TOOL_LIBS "${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK}")
-      set(MKL_LINK_TOOL_INCS "${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -opts")
+      set(MKL_LINK_TOOL_LIBS ${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK})
+      set(MKL_LINK_TOOL_INCS ${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -opts)
     ENDIF()    
   ELSE()			#Linux only system    
     IF(${CMAKE_Fortran_COMPILER_ID} MATCHES GNU)
-      set(MKL_LINK_TOOL_LIBS "${MKL_LINK_TOOL} -check_mkl_presence -c gnu_f -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK}")
-      set(MKL_LINK_TOOL_INCS "${MKL_LINK_TOOL} -check_mkl_presence -c gnu_f -opts")
+      set(MKL_LINK_TOOL_LIBS ${MKL_LINK_TOOL} -check_mkl_presence -c gnu_f -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK})
+      set(MKL_LINK_TOOL_INCS ${MKL_LINK_TOOL} -check_mkl_presence -c gnu_f -opts)
     ELSE()
-      set(MKL_LINK_TOOL_LIBS "${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK}")
-      set(MKL_LINK_TOOL_INCS "${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -opts")
+      set(MKL_LINK_TOOL_LIBS ${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -libs ${MKL_PARALLEL} ${MKL_LINKING} ${MKL_SCALAPACK})
+      set(MKL_LINK_TOOL_INCS ${MKL_LINK_TOOL} -check_mkl_presence -c intel_f -opts)
     ENDIF()    
   ENDIF()
 
-
+  
   EXECUTE_PROCESS(COMMAND  ${MKL_LINK_TOOL_LIBS}
     OUTPUT_VARIABLE MKL_LIBRARIES
     RESULT_VARIABLE COMMAND_WORKED
