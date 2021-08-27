@@ -391,7 +391,7 @@ contains
     !
     do istate=1,state_list%size
        !
-       call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,Nchan=2) !2*[c,cdg]
+       call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,Nchan=2) !2*[c,cdg]
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
