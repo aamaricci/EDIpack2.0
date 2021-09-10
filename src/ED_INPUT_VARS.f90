@@ -35,7 +35,12 @@ MODULE ED_INPUT_VARS
   real(8)              :: gs_threshold        !Energy threshold for ground state degeneracy loop up
   real(8)              :: deltasc             !breaking symmetry field
   real(8)              :: sb_field            !symmetry breaking field
-
+  !
+  real(8),dimension(5) :: spin_field_x        !magnetic field per orbital coupling to X-spin component
+  real(8),dimension(5) :: spin_field_y        !magnetic field per orbital coupling to Y-spin component
+  real(8),dimension(5) :: spin_field_z        !magnetic field per orbital coupling to Z-spin component
+  real(8),dimension(4) :: exc_field           !external field coupling to exciton order parameter
+  real(8),dimension(5) :: pair_field          !pair field per orbital coupling to s-wave order parameter component
   !
   logical              :: chispin_flag        !evaluate spin susceptibility
   logical              :: chidens_flag        !evaluate dens susceptibility
@@ -161,7 +166,14 @@ contains
     call parse_input_variable(xmu,"XMU",INPUTunit,default=0.d0,comment="Chemical potential. If HFMODE=T, xmu=0 indicates half-filling condition.")
     call parse_input_variable(g_ph,"G_PH",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="Electron-phonon coupling constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
-    !
+
+    call parse_input_variable(spin_field_x,"SPIN_FIELD_X",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to X-spin component")
+    call parse_input_variable(spin_field_y,"SPIN_FIELD_Y",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Y-spin component")
+    call parse_input_variable(spin_field_z,"SPIN_FIELD_Z",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Z-spin component")
+    call parse_input_variable(exc_field,"EXC_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0],comment="external field coupling to exciton order parameters")
+    call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="pair field per orbital coupling to s-wave order parameter component")
+
+
     call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !
     call parse_input_variable(ed_diag_type,"ED_DIAG_TYPE",INPUTunit,default="lanc",comment="flag to select the diagonalization type: 'lanc' for Lanczos/Davidson, 'full' for Full diagonalization method")
     call parse_input_variable(ed_finite_temp,"ED_FINITE_TEMP",INPUTunit,default=.false.,comment="flag to select finite temperature method. note that if T then lanc_nstates_total must be > 1")

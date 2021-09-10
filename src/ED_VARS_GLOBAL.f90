@@ -329,7 +329,7 @@ MODULE ED_VARS_GLOBAL
   complex(8),allocatable,dimension(:,:,:,:)          :: imp_density_matrix
   integer,parameter,dimension(3)                     :: Lzdiag = [-1,+1,0]
   integer,parameter,dimension(2)                     :: Szdiag = [1,-1]
-
+  real(8),dimension(:,:),allocatable                 :: spin_field ![Norb,3=x,y,z]
 
 
   !--------------- LATTICE WRAP VARIABLES -----------------!

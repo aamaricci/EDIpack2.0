@@ -380,6 +380,11 @@ contains
     allocate(exctChi_iv(0:2,Norb,Norb,0:Lmats))
     allocate(exctChiMatrix(0:2,Norb,Norb))
     !
+    allocate(spin_field(Norb,3))
+    spin_field(:,1) = spin_field_x(1:Norb)
+    spin_field(:,2) = spin_field_y(1:Norb)
+    spin_field(:,3) = spin_field_z(1:Norb)
+    !
   end subroutine init_ed_structure
 
 
