@@ -91,6 +91,29 @@
            enddo
            !
            !
+           !F_0. T^0_ab :=   F_0 . C^+_{a,up}C_{b,up}
+           !F_z. T^z_ab :=   F_z . C^+_{a,up}C_{b,up}
+           if(any(exc_field/=0d0))then
+              do iorb=1,Norb
+                 do jorb=iorb+1,Norb
+                    Jcondition = (Nup(jorb)==1) .AND. (Nup(iorb)==0)
+                    if (Jcondition) then
+                       call c(jorb,mup,k1,sg1)
+                       call cdg(iorb,k1,k2,sg2)
+                       iup = binary_search(Hsector%H(1)%map,k2)
+                       idw = jdw 
+                       i    = iup + (idw-1)*dimUp + (iph-1)*DimUp*MpiQdw
+                       !
+                       htmp = exc_field(1)*sg1*sg2
+                       hv(i) = hv(i) + htmp*vin(j)
+                       !
+                       htmp = exc_field(4)*sg1*sg2
+                       hv(i) = hv(i) + htmp*vin(j)
+                    endif
+                 enddo
+              enddo
+           endif
+
         enddo
      enddo
   enddo

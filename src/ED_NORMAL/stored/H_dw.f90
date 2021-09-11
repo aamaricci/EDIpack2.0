@@ -79,5 +79,30 @@
         enddo
      enddo
      !
+
+
+     !F_0. T^0_ab :=   F_0 . (+ C^+_{a,dw}C_{b,dw})
+     !F_z. T^z_ab :=   F_z . (- C^+_{a,dw}C_{b,dw})
+     if(any(exc_field/=0d0))then
+        do iorb=1,Norb
+           do jorb=iorb+1,Norb
+              Jcondition = (Ndw(jorb)==1) .AND. (Ndw(iorb)==0)
+              if (Jcondition) then
+                 call c(jorb,mdw,k1,sg1)
+                 call cdg(iorb,k1,k2,sg2)
+                 iup = binary_search(Hsector%H(2)%map,k2)
+                 !
+                 htmp = exc_field(1)*sg1*sg2                 
+                 call sp_insert_element(spH0dws(1),htmp,idw,jdw)
+                 !
+                 htmp = -exc_field(4)*sg1*sg2
+                 call sp_insert_element(spH0dws(1),htmp,idw,jdw)
+              endif
+           enddo
+        enddo
+     endif
+
+
+
   enddo
 

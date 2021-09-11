@@ -1,3 +1,4 @@
+  !ph-loop outside: this is a for a given ph-index
   do jjdw=1,MpiQup
      do jjup=1,DimDw
         j = jjup + (jjdw-1)*DimDw
