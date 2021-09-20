@@ -141,7 +141,12 @@ INCLUDE_DIRECTORIES(BEFORE ${SCIFOR_INCLUDE_DIRS})
 ############################################################
 if(CMAKE_Fortran_COMPILER_ID MATCHES GNU) # this is gfortran
   SET(CMAKE_Fortran_MODDIR_FLAG   "-J")
-  SET(CMAKE_Fortran_FLAGS         "-cpp -ffree-line-length-none -w ") #  -fallow-argument-mismatch -mcmodel=large  this is to remove the 2Gb limit of virtual memory allocation
+  SET(CMAKE_Fortran_FLAGS         "-cpp -ffree-line-length-none -fPIC -w ")  #-mcmodel=large  this is to remove the 2Gb limit of virtual memory allocation
+  IF(CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 10.0.0)
+    SET(CMAKE_Fortran_FLAGS         "${CMAKE_Fortran_FLAGS} -Wno-argument-mismatch")
+  ELSE()
+    SET(CMAKE_Fortran_FLAGS         "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+  ENDIF()
   SET(CMAKE_Fortran_FLAGS_TESTING "-O2 -funroll-loops")
   SET(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -p -g -Wsurprising -Waliasing -fwhole-file -fcheck=all -pedantic -fbacktrace -fbounds-check")
   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3  -funroll-loops")  ##-fno-protect-parens -flto -ffast-math -march=native
@@ -150,21 +155,22 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
   SET(CMAKE_Fortran_MODDIR_FLAG   "-module ") #remember the ending white space here 
   SET(CMAKE_Fortran_FLAGS         "-fpp")
   SET(CMAKE_Fortran_FLAGS_TESTING "-O2 -ftz")
-  SET(CMAKE_Fortran_FLAGS_DEBUG   "-p -O0 -g -fpe1 -warn -debug extended -traceback -nocheck")# all,noarg_temp_created") these options break the parallel vector transposition because some node has no columns of data to send but still need to participate into the communication. we support democratic inclusion of everyone. no one is left behind even if it is just a bunch of data!  
+  SET(CMAKE_Fortran_FLAGS_DEBUG   "-p -O0 -g -fpe1 -warn -debug extended -traceback -nocheck")
+  # all,noarg_temp_created") these options break the parallel vector transposition because some node has no columns of data to send but still need to participate into the communication. we support democratic inclusion of everyone. no one is left behind even if it is just a bunch of data!  
   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ftz")
-# elseif(CMAKE_Fortran_COMPILER_ID MATCHES G95)
-#   SET(CMAKE_Fortran_MODDIR_FLAG   "-fmod=")
-#   SET(CMAKE_Fortran_FLAGS         "-cpp")
-#   SET(CMAKE_Fortran_FLAGS_TESTING "-O1  -fsloppy-char")
-#   SET(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -ftrace=full")
-#   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3")
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES G95)
+  SET(CMAKE_Fortran_MODDIR_FLAG   "-fmod=")
+  SET(CMAKE_Fortran_FLAGS         "-cpp")
+  SET(CMAKE_Fortran_FLAGS_TESTING "-O1  -fsloppy-char")
+  SET(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -ftrace=full")
+  SET(CMAKE_Fortran_FLAGS_RELEASE "-O3")
   
-# elseif(CMAKE_Fortran_COMPILER_ID MATCHES PGI)
-#   SET(CMAKE_Fortran_MODDIR_FLAG   "-module ")
-#   SET(CMAKE_Fortran_FLAGS         "-")
-#   SET(CMAKE_Fortran_FLAGS         "")
-#   SET(CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -Mframe")
-#   SET(CMAKE_Fortran_FLAGS_RELEASE "-O3 -mcmodel=medium -fast -Munroll")
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES PGI)
+  SET(CMAKE_Fortran_MODDIR_FLAG   "-module ")
+  SET(CMAKE_Fortran_FLAGS         "-")
+  SET(CMAKE_Fortran_FLAGS         "")
+  SET(CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -Mframe")
+  SET(CMAKE_Fortran_FLAGS_RELEASE "-O3 -mcmodel=medium -fast -Munroll")
 endif()
 
 
@@ -191,10 +197,19 @@ SET(USER $ENV{USER})
 STRING(TOLOWER "${CMAKE_Fortran_COMPILER_ID}" FC_ID)
 STRING(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
 
-#default prefix is $HOME/opt/<dmft_tools>/<fc_id>/[<git_branch>[/<debug>]]/<version>
+#default prefix is $HOME/opt/<dmft_ed>/<fc_id>/[<git_branch>[/<debug>]]/<version>
 SET(PREFIX_DEF_LOC "$ENV{HOME}/opt")
 SET(PREFIX_PROJ "${PROJECT_NAME}")
 SET(PREFIX_PATH "${FC_ID}")
+
+#user can change the default location of the library but not the remaining naming conventions 
+SET(PREFIX  "${PREFIX_DEF_LOC}" CACHE PATH "Prefix prepended to install directories")
+
+#if prefix has not be changed use default module name conventions
+IF(PREFIX STREQUAL "${PREFIX_DEF_LOC}")
+  SET(USE_DEFAULT_MODULE_NAME TRUE)
+ENDIF()
+
 #if not master branch, include simplified branch name
 IF( (NOT GIT_BRANCH MATCHES "master") )
     SET(PREFIX_PATH  "${PREFIX_PATH}/${GIT_BRANCH}")
@@ -208,14 +223,13 @@ ENDIF()
 #set default prefix:
 SET(FULL_VER "${PREFIX_PATH}/${VERSION}")
 SET(VERSION_PATH "${PREFIX_PROJ}/${PREFIX_PATH}")
-SET(DEFAULT_PREFIX "${PREFIX_DEF_LOC}/${PREFIX_PROJ}/${PREFIX_PATH}/${VERSION}")
-SET(PREFIX  "${DEFAULT_PREFIX}" CACHE PATH "Prefix prepended to install directories")
-SET(CMAKE_INSTALL_PREFIX "${PREFIX}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
+SET(DEFAULT_PREFIX "${PREFIX}/${PREFIX_PROJ}/${PREFIX_PATH}/${VERSION}")
+SET(CMAKE_INSTALL_PREFIX "${DEFAULT_PREFIX}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
 
 #Now set module name corresponding to given prefix:
 #if prefix is default nothing to be done.
 #if user defined prefix prepend
-IF(PREFIX STREQUAL "${DEFAULT_PREFIX}")
+IF(USE_DEFAULT_MODULE_NAME)
   SET(MODULE_NAME "${PREFIX_PROJ}/${PREFIX_PATH}/${VERSION}")
 ELSE()
   SET(MODULE_NAME "${PREFIX_PROJ}/user_prefix/${PREFIX_PATH}/${VERSION}")
