@@ -310,19 +310,10 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
-             ! m  = sectorI%H(1)%map(i)
-             ! ib = bdecomp(m,2*Ns)
-             ! gs_weight=peso*abs(state_cvec(i))**2
-             ! !Get occupations:
-             ! do iorb=1,Norb
-             !    nup(iorb)= dble(ib(iorb))
-             !    ndw(iorb)= dble(ib(iorb+Ns))
-             ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              call build_op_Ns(i,IbUp,IbDw,sectorI)
-             Nud(1,:)=IbUp
-             Nud(2,:)=IbDw
+             nup=dble(IbUp(1:Norb))
+             ndw=dble(IbDw(1:Norb))
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY
