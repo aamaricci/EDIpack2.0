@@ -64,7 +64,6 @@ ENDIF()
 INCLUDE_DIRECTORIES(BEFORE ${SCIFOR_INCLUDE_DIRS})
 
 
-
 ############################################################
 # Configure Fortran Compiler Main options
 ############################################################
