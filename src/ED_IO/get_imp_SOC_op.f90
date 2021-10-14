@@ -45,7 +45,7 @@
     endif
     !
     rho_so=zero;rho_nn=zero
-    rho_so=nn2so_reshape(imp_density_matrix,Nspin,Norb)
+    rho_so=nn2so_reshape(single_particle_density_matrix,Nspin,Norb)
     rho_so=matmul(Udag,matmul(rho_so,U))
     rho_nn=so2nn_reshape(rho_so,Nspin,Norb)
     !
@@ -131,7 +131,7 @@
     if(Norb/=3)  stop "SOC_operators implemented only for 3 orbitals"
     if(Nspin/=2) stop "SOC_operators implemented only for 2 spins"
     !
-    Nlat=size(imp_density_matrix_ineq,1)
+    Nlat=size(single_particle_density_matrix_ineq,1)
     !
     if(allocated(Simp))       deallocate(Simp)       ;allocate(Simp(Nlat,3,Norb,Norb))            ;Simp=zero
     if(allocated(Limp))       deallocate(Limp)       ;allocate(Limp(Nlat,3,Nspin,Nspin))          ;Limp=zero
@@ -172,7 +172,7 @@
     !
     do ilat=1,Nlat
        !
-       rho_so(ilat,:,:)=nn2so_reshape(imp_density_matrix_ineq(ilat,:,:,:,:),Nspin,Norb)
+       rho_so(ilat,:,:)=nn2so_reshape(single_particle_density_matrix_ineq(ilat,:,:,:,:),Nspin,Norb)
        rho_so(ilat,:,:)=matmul(Udag,matmul(rho_so(ilat,:,:),U))
        rho_nn(ilat,:,:,:,:)=so2nn_reshape(rho_so(ilat,:,:),Nspin,Norb)
        !

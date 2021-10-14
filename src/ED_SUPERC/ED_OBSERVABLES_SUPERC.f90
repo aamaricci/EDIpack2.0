@@ -240,7 +240,6 @@ contains
        call Bcast_MPI(MpiComm,ed_docc)
        call Bcast_MPI(MpiComm,ed_phisc)
        call Bcast_MPI(MpiComm,ed_mag)
-       if(allocated(imp_density_matrix))call Bcast_MPI(MpiComm,imp_density_matrix)
     endif
 #endif
     !

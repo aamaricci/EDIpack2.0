@@ -38,12 +38,13 @@ MODULE ED_OBSERVABLES_NORMAL
   integer                            :: iorb,jorb,iorb1,jorb1
   integer                            :: ispin,jspin
   integer                            :: isite,jsite
-  integer                            :: ibath
+  integer                            :: ibath,jbath
   integer                            :: r,m,k,k1,k2,k3,k4
   integer                            :: iup,idw
   integer                            :: jup,jdw
   integer                            :: mup,mdw
-  integer                            :: iph,i_el,isectorDim
+  integer                            :: iph,i_el
+  integer                            :: jph,j_el
   real(8)                            :: sgn,sgn1,sgn2,sg1,sg2,sg3,sg4
   real(8)                            :: gs_weight
   !
@@ -51,6 +52,7 @@ MODULE ED_OBSERVABLES_NORMAL
   real(8)                            :: norm
   !
   integer                            :: i,j,ii
+  integer                            :: Iimp,Jimp
   integer                            :: isector,jsector
   !
   real(8),dimension(:),allocatable   :: vvinit
@@ -70,6 +72,7 @@ contains
     integer,dimension(2*Ns_Ud)      :: Indices,Jndices
     integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
     integer,dimension(Ns)           :: IbUp,IbDw  ![Ns]
+    integer,dimension(Ns)           :: JbUp,JbDw  ![Ns]
     real(8),dimension(Norb)         :: nup,ndw,Sz,nt
     real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw
     !
@@ -304,14 +307,15 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
 
+
+
     !
-    !IMPURITY DENSITY MATRIX
+    !SINGLE PARTICLE IMPURITY DENSITY MATRIX
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG observables_normal: eval impurity density matrix <C^+_a C_b>"
+         "DEBUG observables_normal: eval single particle density matrix <C^+_a C_b>"
 #endif
-    if(allocated(imp_density_matrix)) deallocate(imp_density_matrix)
-    allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb));imp_density_matrix=zero
+    single_particle_density_matrix=zero
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
@@ -347,8 +351,8 @@ contains
              !Diagonal densities
              do ispin=1,Nspin
                 do iorb=1,Norb
-                   imp_density_matrix(ispin,ispin,iorb,iorb) = &
-                        imp_density_matrix(ispin,ispin,iorb,iorb) + &
+                   single_particle_density_matrix(ispin,ispin,iorb,iorb) = &
+                        single_particle_density_matrix(ispin,ispin,iorb,iorb) + &
                         peso*nud(ispin,iorb)*(state_dvec(i))*state_dvec(i)
                 enddo
              enddo
@@ -371,8 +375,8 @@ contains
                             !
                             j = j + (iph-1)*sectorI%DimEl
                             !
-                            imp_density_matrix(ispin,ispin,iorb,jorb) = &
-                                 imp_density_matrix(ispin,ispin,iorb,jorb) + &
+                            single_particle_density_matrix(ispin,ispin,iorb,jorb) = &
+                                 single_particle_density_matrix(ispin,ispin,iorb,jorb) + &
                                  peso*sgn1*state_dvec(i)*sgn2*(state_dvec(j))
                          endif
                       enddo
@@ -399,6 +403,87 @@ contains
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
+
+
+
+
+
+
+    !
+    !REDUCED IMPURITY DENSITY MATRIX
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_normal: eval impurity density matrix \rho_IMP = Tr_bath(\rho)"
+#endif
+    impurity_density_matrix=zero    
+    do istate=1,state_list%size
+       isector = es_return_sector(state_list,istate)
+       Ei      = es_return_energy(state_list,istate)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_normal: get contribution from state:"//str(istate)
+#endif
+#ifdef _MPI
+       if(MpiStatus)then
+          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+       else
+          state_dvec => es_return_dvector(state_list,istate)
+       endif
+#else
+       state_dvec => es_return_dvector(state_list,istate)
+#endif
+       !
+       peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
+       peso = peso/zeta_function
+       !
+       if(MpiMaster)then
+          call build_sector(isector,sectorI)
+          !
+          do i=1,sectorI%Dim
+             iph = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+             call build_op_Ns(i,IbUp,IbDw,sectorI)
+             Iimp = bjoin( [IbUp(1:Norb),IbDw(1:Norb)], 2*Norb)+1
+             ! Ibath= bjoin( [IbUp(Norb+1:),IbDw(Norb+1:)], 2*(Ns-Norb))+1
+             ! do j=1,sectorI%Dim
+             !    jph = (j-1)/(sectorI%DimEl) + 1
+             !    j_el = mod(j-1,sectorI%DimEl) + 1
+             !    call state2indices(j_el,[sectorI%DimUps,sectorI%DimDws],Jndices)
+             !    call build_op_Ns(j,JbUp,JbDw,sectorI)
+             !    Jimp = bjoin( [JbUp(1:Norb),JbDw(1:Norb)], 2*Norb)+1
+             !    Jbath= bjoin( [JbUp(Norb+1:),JbDw(Norb+1:)], 2*(Ns-Norb))+1
+             !    if(Jbath/=Ibath)cycle
+             j=i
+             Jimp=Iimp
+             impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
+                  state_dvec(i)*state_dvec(j)*peso
+             ! enddo
+          enddo
+          call delete_sector(sectorI)         
+       endif
+       !
+#ifdef _MPI
+       if(MpiStatus)then
+          if(associated(state_dvec))deallocate(state_dvec)
+       else
+          if(associated(state_dvec))nullify(state_dvec)
+       endif
+#else
+       if(associated(state_dvec))nullify(state_dvec)
+#endif
+       !
+    enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
+    do i=1,4**Norb
+       write(*,*)(dreal(impurity_density_matrix(i,j)),j=1,4**Norb)
+    enddo
+    print*,1-dens_up(1)-dens_dw(1)+docc(1),abs(1-dens_up(1)-dens_dw(1)+docc(1)-impurity_density_matrix(1,1))
+    print*,dens_up(1)-docc(1),abs(dens_up(1)-docc(1)-impurity_density_matrix(2,2))
+    print*,dens_dw(1)-docc(1),abs(dens_dw(1)-docc(1)-impurity_density_matrix(3,3))
+    print*,docc(1),abs(docc(1)-impurity_density_matrix(4,4))
     !
     !
     !
@@ -435,6 +520,7 @@ contains
        call Bcast_MPI(MpiComm,ed_dens_dw)
        call Bcast_MPI(MpiComm,ed_dens)
        call Bcast_MPI(MpiComm,ed_docc)
+       call Bcast_MPI(MpiComm,single_particle_density_matrix)
     endif
 #endif
     !

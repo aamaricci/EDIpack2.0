@@ -9,3 +9,4 @@ Makefile
 build*
 .archive/
 src/ED_VERSION.f90
+.DS_Store

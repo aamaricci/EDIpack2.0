@@ -538,9 +538,7 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")&
          "DEBUG observables_nonsu2: eval impurity density matrix <C^+_a C_b>"
 #endif
-    if(allocated(imp_density_matrix))deallocate(imp_density_matrix)
-    allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb))
-    imp_density_matrix=zero
+    single_particle_density_matrix=zero
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
@@ -571,8 +569,8 @@ contains
                 do m=1,sectorI%Dim
                    i  = sectorI%H(1)%map(m)
                    ib = bdecomp(i,2*Ns)
-                   imp_density_matrix(ispin,ispin,iorb,iorb) = &
-                        imp_density_matrix(ispin,ispin,iorb,iorb) + &
+                   single_particle_density_matrix(ispin,ispin,iorb,iorb) = &
+                        single_particle_density_matrix(ispin,ispin,iorb,iorb) + &
                         peso*ib(isite)*conjg(state_cvec(m))*state_cvec(m)
                 enddo
              enddo
@@ -596,8 +594,8 @@ contains
                             call c(jsite,i,r,sgn1)
                             call cdg(isite,r,k,sgn2)
                             j=binary_search(sectorI%H(1)%map,k)
-                            imp_density_matrix(ispin,jspin,iorb,jorb) = &
-                                 imp_density_matrix(ispin,jspin,iorb,jorb) + &
+                            single_particle_density_matrix(ispin,jspin,iorb,jorb) = &
+                                 single_particle_density_matrix(ispin,jspin,iorb,jorb) + &
                                  peso*sgn1*state_cvec(m)*sgn2*conjg(state_cvec(j))
                          endif
                       enddo
@@ -675,7 +673,7 @@ contains
        call Bcast_MPI(MpiComm,ed_dens)
        call Bcast_MPI(MpiComm,ed_docc)
        call Bcast_MPI(MpiComm,ed_mag)
-       if(allocated(imp_density_matrix))call Bcast_MPI(MpiComm,imp_density_matrix)
+       call Bcast_MPI(MpiComm,single_particle_density_matrix)
     endif
 #endif
     !

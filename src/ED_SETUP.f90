@@ -122,7 +122,7 @@ contains
        Ns_Orb = Ns
        Ns_Ud  = 1
     case (.false.)
-       Ns_Orb = Ns/Norb
+       Ns_Orb = Ns/Norb!==1+Nbath
        Ns_Ud  = Norb
     end select
     !
@@ -384,6 +384,12 @@ contains
     spin_field(:,1) = spin_field_x(1:Norb)
     spin_field(:,2) = spin_field_y(1:Norb)
     spin_field(:,3) = spin_field_z(1:Norb)
+    !
+    allocate(single_particle_density_matrix(Nspin,Nspin,Norb,Norb))
+    single_particle_density_matrix=zero
+    !
+    allocate(impurity_density_matrix(4**Norb,4**Norb))
+    impurity_density_matrix=zero
     !
   end subroutine init_ed_structure
 

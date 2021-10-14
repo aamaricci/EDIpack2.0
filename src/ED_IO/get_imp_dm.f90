@@ -12,8 +12,8 @@ subroutine ed_get_density_matrix_single(dm_)!,custom_rot,dm_eig_,dm_rot_)
   complex(8),allocatable                       :: dm_custom_rot(:,:)
   real(8)                                      :: soc
   !
-  if (.not.allocated(imp_density_matrix)) then
-     write(LOGfile,"(A)") "imp_density_matrix is not allocated"
+  if (.not.allocated(single_particle_density_matrix)) then
+     write(LOGfile,"(A)") "single_particle_density_matrix is not allocated"
      stop
   endif
   !
@@ -23,7 +23,7 @@ subroutine ed_get_density_matrix_single(dm_)!,custom_rot,dm_eig_,dm_rot_)
   ! if(present(dm_rot_).and.allocated(dm_rot_))deallocate(dm_rot_)      ;allocate(dm_rot_(Nspin*Norb,Nspin*Norb))      ;dm_rot_ = zero
   !
   ! dm in the impurity problem basis
-  dm_ = nn2so_reshape(imp_density_matrix,Nspin,Norb)
+  dm_ = nn2so_reshape(single_particle_density_matrix,Nspin,Norb)
   !
   ! if(bath_type=="replica")then
   !    !
@@ -41,7 +41,7 @@ subroutine ed_get_density_matrix_single(dm_)!,custom_rot,dm_eig_,dm_rot_)
   ! elseif(bath_type=="normal")then !.and.SOC/=0.d0
   !    !
   !    ! here I assume that custom_rot is: {J,jz}-->{t2g,Sz} / {Lz,Sz}
-  !    dm_custom_rot = nn2so_reshape(imp_density_matrix,Nspin,Norb)
+  !    dm_custom_rot = nn2so_reshape(single_particle_density_matrix,Nspin,Norb)
   !    dm_=matmul(custom_rot,matmul(dm_custom_rot,transpose(conjg(custom_rot))))
   !    !
   !    ! dm in her diagonal basis
@@ -76,10 +76,10 @@ subroutine ed_get_density_matrix_lattice(dm_)!,custom_rot,dm_eig_,dm_rot_)
   complex(8),allocatable                       :: dm_rot_tmp(:,:)
   complex(8),allocatable                       :: dm_custom_rot_tmp(:,:)
   !
-  Nlat=size(imp_density_matrix_ineq,1)
+  Nlat=size(single_particle_density_matrix_ineq,1)
   !
-  if (.not.allocated(imp_density_matrix)) then
-     write(LOGfile,"(A)") "imp_density_matrix is not allocated"
+  if (.not.allocated(single_particle_density_matrix)) then
+     write(LOGfile,"(A)") "single_particle_density_matrix is not allocated"
      stop
   endif
   !
@@ -96,7 +96,7 @@ subroutine ed_get_density_matrix_lattice(dm_)!,custom_rot,dm_eig_,dm_rot_)
   do ilat=1,Nlat
      !
      ! dm in the impurity problem basis
-     dm_(ilat,:,:) = nn2so_reshape(imp_density_matrix_ineq(ilat,:,:,:,:),Nspin,Norb)
+     dm_(ilat,:,:) = nn2so_reshape(single_particle_density_matrix_ineq(ilat,:,:,:,:),Nspin,Norb)
      ! !
      ! if(bath_type=="replica")then
      !    !
@@ -112,7 +112,7 @@ subroutine ed_get_density_matrix_lattice(dm_)!,custom_rot,dm_eig_,dm_rot_)
      ! elseif(bath_type=="normal")then !.and.SOC/=0.d0
      !    !
      !    ! here I assume that custom_rot is: {J,jz}-->{t2g,Sz} / {Lz,Sz}
-     !    dm_custom_rot(ilat,:,:)=nn2so_reshape(imp_density_matrix_ineq(ilat,:,:,:,:),Nspin,Norb)
+     !    dm_custom_rot(ilat,:,:)=nn2so_reshape(single_particle_density_matrix_ineq(ilat,:,:,:,:),Nspin,Norb)
      !    dm_(ilat,:,:)=matmul(custom_rot,matmul(dm_custom_rot(ilat,:,:),transpose(conjg(custom_rot))))
      !    !
      !    ! dm in her diagonal basis
@@ -145,7 +145,7 @@ subroutine print_dm(dm_,ndx)!,dm_rot_,dm_eig_,dm_custom_rot,ndx)
   character(len=24)                            :: suffix
   integer                                      :: iorb,jorb,ispin,jspin,io,jo
   !
-  suffix="imp_density_matrix_"//reg(str(ndx))//".dat"
+  suffix="single_particle_density_matrix_"//reg(str(ndx))//".dat"
   !
   unit = free_unit()
   open(unit,file=suffix,action="write",position="rewind",status='unknown')

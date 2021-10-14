@@ -63,6 +63,7 @@ MODULE ED_INPUT_VARS
   integer              :: ed_verbose          !
   real(8)              :: ed_offset_bath      !half-bandwidth for the bath initialization: flat in -hwband:hwband
   real(8)              :: ed_hw_bath          !half-bandwidth for the bath initialization: flat in -hwband:hwband
+  logical              :: ed_get_dm           !flag to evaluate the impurity density matrix \rho_A = Tr_B(\rho)
   !
   character(len=12)    :: lanc_method         !select the lanczos method to be used in the determination of the spectrum. ARPACK (default), LANCZOS (T=0 only) 
   real(8)              :: lanc_tolerance      !Tolerance for the Lanczos iterations as used in Arpack and plain lanczos. 
@@ -190,7 +191,8 @@ contains
     call parse_input_variable(ed_verbose,"ED_VERBOSE",INPUTunit,default=3,comment="Verbosity level: 0=almost nothing --> 5:all. Really: all")
     call parse_input_variable(ed_hw_bath,"ed_hw_bath",INPUTunit,default=2d0,comment="half-bandwidth for the bath initialization: flat in -hwband:hwband")
     call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica bath: -offset:offset")
-
+    call parse_input_variable(ed_get_dm,"ED_GET_DM",INPUTunit,default=.false.,comment="flag to evaluate the impurity density matrix \rho_A = Tr_B(\rho)")
+      
     !
     call parse_input_variable(Lmats,"LMATS",INPUTunit,default=4096,comment="Number of Matsubara frequencies.")
     call parse_input_variable(Lreal,"LREAL",INPUTunit,default=5000,comment="Number of real-axis frequencies.")

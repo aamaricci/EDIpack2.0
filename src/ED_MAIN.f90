@@ -165,7 +165,8 @@ contains
     if(allocated(Freal_ineq))deallocate(Freal_ineq)
     if(allocated(Dmats_ph_ineq))deallocate(Dmats_ph_ineq)
     if(allocated(Dreal_ph_ineq))deallocate(Dreal_ph_ineq)
-    if(allocated(imp_density_matrix_ineq))deallocate(imp_density_matrix_ineq)
+    if(allocated(single_particle_density_matrix_ineq))deallocate(single_particle_density_matrix_ineq)
+    if(allocated(impurity_density_matrix_ineq))deallocate(impurity_density_matrix_ineq)
     if(allocated(neigen_sector_ineq))deallocate(neigen_sector_ineq)
     if(allocated(neigen_total_ineq))deallocate(neigen_total_ineq)
     !
@@ -193,7 +194,8 @@ contains
     allocate(Dmats_ph_ineq(Nineq,Lmats))
     allocate(Dreal_ph_ineq(Nineq,Lreal))    
     !
-    allocate(imp_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
+    allocate(single_particle_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
+    allocate(impurity_density_matrix_ineq(Nineq,4**Norb,4**Norb))
     !
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
@@ -237,7 +239,8 @@ contains
     if(allocated(Freal_ineq))deallocate(Freal_ineq)
     if(allocated(Dmats_ph_ineq))deallocate(Dmats_ph_ineq)
     if(allocated(Dreal_ph_ineq))deallocate(Dreal_ph_ineq)
-    if(allocated(imp_density_matrix_ineq))deallocate(imp_density_matrix_ineq)
+    if(allocated(single_particle_density_matrix_ineq))deallocate(single_particle_density_matrix_ineq)
+    if(allocated(impurity_density_matrix_ineq))deallocate(impurity_density_matrix_ineq)
     if(allocated(neigen_sector_ineq))deallocate(neigen_sector_ineq)
     if(allocated(neigen_total_ineq))deallocate(neigen_total_ineq)
     !
@@ -265,7 +268,8 @@ contains
     allocate(Dmats_ph_ineq(Nineq,Lmats))
     allocate(Dreal_ph_ineq(Nineq,Lreal))
     !
-    allocate(imp_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
+    allocate(single_particle_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
+    allocate(impurity_density_matrix_ineq(Nineq,4**Norb,4**Norb))
     !
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
@@ -451,7 +455,8 @@ contains
     dens_ineq     = 0d0  ; docc_ineq     = 0d0  
     mag_ineq      = 0d0  ; phisc_ineq    = 0d0  
     e_ineq        = 0d0  ; dd_ineq       = 0d0 
-    imp_density_matrix_ineq = zero
+    single_particle_density_matrix_ineq = zero
+    impurity_density_matrix_ineq = zero
     !
     call start_timer
     !
@@ -491,7 +496,8 @@ contains
        phisc_ineq(ilat,1:Norb)     = ed_phisc(1:Norb)
        e_ineq(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
        dd_ineq(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-       imp_density_matrix_ineq(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+       single_particle_density_matrix_ineq(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)
+       impurity_density_matrix_ineq(ilat,:,:) = impurity_density_matrix(:,:)
        !
     enddo
     !
@@ -533,7 +539,8 @@ contains
     real(8)          :: e_tmp(size(bath,1),4)
     real(8)          :: dd_tmp(size(bath,1),4)
     !    
-    complex(8)       :: imp_density_matrix_tmp(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8)       :: single_particle_density_matrix_tmp(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8)       :: impurity_density_matrix_tmp(size(bath,1),4**Norb,4**Norb)
     !
     integer          :: neigen_sectortmp(size(bath,1),Nsectors)
     integer          :: neigen_totaltmp(size(bath,1))
@@ -574,7 +581,8 @@ contains
     dens_ineq     = 0d0  ; docc_ineq     = 0d0
     mag_ineq      = 0d0  ; phisc_ineq    = 0d0  
     e_ineq        = 0d0  ; dd_ineq       = 0d0 
-    imp_density_matrix_ineq = zero
+    single_particle_density_matrix_ineq = zero
+    impurity_density_matrix_ineq = zero
     !
     Smats_tmp  = zero ; Sreal_tmp  = zero ; SAmats_tmp = zero ; SAreal_tmp = zero
     Gmats_tmp  = zero ; Greal_tmp  = zero ; Fmats_tmp  = zero ; Freal_tmp  = zero
@@ -584,7 +592,8 @@ contains
     e_tmp      = 0d0  ; dd_tmp     = 0d0
     neigen_sectortmp = 0
     neigen_totaltmp  = 0
-    imp_density_matrix_tmp = zero
+    single_particle_density_matrix_tmp = zero
+    impurity_density_matrix_tmp = zero
     !
     select case(mpi_lanc_)
     case default              !mpi_lanc=False => solve sites with MPI
@@ -625,7 +634,8 @@ contains
           phisc_tmp(ilat,1:Norb)     = ed_phisc(1:Norb)
           e_tmp(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
           dd_tmp(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-          imp_density_matrix_tmp(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+          single_particle_density_matrix_tmp(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)
+          impurity_density_matrix_tmp(ilat,:,:) = impurity_density_matrix(:,:)
        enddo
        call MPI_Barrier(MpiComm,MPI_ERR)
        if(MPI_MASTER)call stop_timer(unit=LOGfile)
@@ -647,7 +657,8 @@ contains
        call AllReduce_MPI(MpiComm,phisc_tmp,phisc_ineq)
        call AllReduce_MPI(MpiComm,e_tmp,e_ineq)
        call AllReduce_MPI(MpiComm,dd_tmp,dd_ineq)
-       call AllReduce_MPI(MpiComm,imp_density_matrix_tmp,imp_density_matrix_ineq)
+       call AllReduce_MPI(MpiComm,single_particle_density_matrix_tmp,single_particle_density_matrix_ineq)
+       call AllReduce_MPI(MpiComm,impurity_density_matrix_tmp,impurity_density_matrix_ineq)
        neigen_sector_ineq=0
        neigen_total_ineq=0
        call AllReduce_MPI(MpiComm,neigen_sectortmp,neigen_sector_ineq)
@@ -691,7 +702,8 @@ contains
           phisc_ineq(ilat,1:Norb)     = ed_phisc(1:Norb)
           e_ineq(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
           dd_ineq(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-          imp_density_matrix_ineq(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+          single_particle_density_matrix_ineq(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)
+          impurity_density_matrix_ineq(ilat,:,:) = impurity_density_matrix(:,:)
        enddo
        if(MPI_MASTER)call stop_timer(unit=LOGfile)
        call ed_reset_suffix

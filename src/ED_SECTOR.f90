@@ -453,9 +453,9 @@ contains
     integer, intent(in)             :: i
     type(sector),intent(in)         :: sectorI
     integer,dimension(Ns)           :: Nup,Ndw  ![Ns]
-    integer                         :: iph,i_el,ii,iorb
+    integer                         :: iph,i_el,ii,is
     integer,dimension(2*Ns_Ud)      :: Indices
-    integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
+    integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Norb][Ns,1+Nbath]
     integer,dimension(2*Ns)         :: Ib
     integer,dimension(2)            :: Iud
     !
@@ -468,7 +468,7 @@ contains
        do ii=1,Ns_Ud
           iud(1) = sectorI%H(ii)%map(Indices(ii))
           iud(2) = sectorI%H(ii+Ns_Ud)%map(Indices(ii+Ns_ud))
-          Nups(ii,:) = Bdecomp(iud(1),Ns_Orb) ![Norb,1+Nbath]
+          Nups(ii,:) = Bdecomp(iud(1),Ns_Orb) ![Ns,1+Nbath]
           Ndws(ii,:) = Bdecomp(iud(2),Ns_Orb)
        enddo
        Nup = Breorder(Nups)
@@ -477,9 +477,9 @@ contains
     case("superc","nonsu2")
        ii = sectorI%H(1)%map(i)
        Ib = bdecomp(ii,2*Ns)
-       do iorb=1,Norb
-          Nup(iorb)= dble(ib(iorb))
-          Ndw(iorb)= dble(ib(iorb+Ns))
+       do is=1,Ns
+          Nup(is)= dble(ib(is))
+          Ndw(is)= dble(ib(is+Ns))
        enddo
     end select
     !
