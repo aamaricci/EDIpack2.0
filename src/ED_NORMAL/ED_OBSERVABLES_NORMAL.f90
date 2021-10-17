@@ -440,17 +440,11 @@ contains
           call build_sector(isector,sectorI)
           !
           do i=1,sectorI%Dim
-             iph = (i-1)/(sectorI%DimEl) + 1
-             i_el = mod(i-1,sectorI%DimEl) + 1
-             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
              call build_op_Ns(i,IbUp,IbDw,sectorI)
              Iimp = bjoin([IbUp(1:Norb),IbDw(1:Norb)],2*Norb) + 1
              ! >> Full calculation: WAY TOO SLOW <<
              ! Ibath= bjoin([IbUp(Norb+1:),IbDw(Norb+1:)],2*(Ns-Norb)) + 1
              ! do j=1,sectorI%Dim
-             !    jph = (j-1)/(sectorI%DimEl) + 1
-             !    j_el = mod(j-1,sectorI%DimEl) + 1
-             !    call state2indices(j_el,[sectorI%DimUps,sectorI%DimDws],Jndices)
              !    call build_op_Ns(j,JbUp,JbDw,sectorI)
              !    Jimp = bjoin([JbUp(1:Norb),JbDw(1:Norb)],2*Norb) + 1
              !    Jbath= bjoin([JbUp(Norb+1:),JbDw(Norb+1:)],2*(Ns-Norb)) + 1
@@ -472,8 +466,6 @@ contains
              Jimp=Iimp
              impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
                   state_dvec(i)*state_dvec(j)*peso
-              !write(*,*) i,j,Iimp,Jimp
-              !write(*,*) state_dvec(i)*state_dvec(j)*peso
           enddo
           call delete_sector(sectorI)         
        endif

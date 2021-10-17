@@ -476,7 +476,7 @@ contains
        !
     case("superc","nonsu2")
        ii = sectorI%H(1)%map(i)
-       Ib = bdecomp(ii,2*Ns)
+       Ib = Bdecomp(ii,2*Ns)
        do is=1,Ns
           Nup(is)= dble(ib(is))
           Ndw(is)= dble(ib(is+Ns))
