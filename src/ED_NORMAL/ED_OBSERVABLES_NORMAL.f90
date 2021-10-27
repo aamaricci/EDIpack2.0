@@ -442,16 +442,20 @@ contains
           do i=1,sectorI%Dim
              call build_op_Ns(i,IbUp,IbDw,sectorI)
              Iimp = bjoin([IbUp(1:Norb),IbDw(1:Norb)],2*Norb) + 1
+#ifdef _DEBUG
+             if(ed_verbose>4)write(Logfile,"(A)")&
+             "DEBUG observables_normal: get imp_DM j-contribution "//str(i)//" of "//str(sectorI%Dim)
+#endif
              ! >> Full calculation: WAY TOO SLOW <<
-             ! Ibath= bjoin([IbUp(Norb+1:),IbDw(Norb+1:)],2*(Ns-Norb)) + 1
-             ! do j=1,sectorI%Dim
-             !    call build_op_Ns(j,JbUp,JbDw,sectorI)
-             !    Jimp = bjoin([JbUp(1:Norb),JbDw(1:Norb)],2*Norb) + 1
-             !    Jbath= bjoin([JbUp(Norb+1:),JbDw(Norb+1:)],2*(Ns-Norb)) + 1
-             !    if(Jbath/=Ibath)cycle
-             !    impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
-             !    state_dvec(i)*state_dvec(j)*peso
-             ! enddo
+             Ibath= bjoin([IbUp(Norb+1:),IbDw(Norb+1:)],2*(Ns-Norb)) + 1
+             do j=1,sectorI%Dim
+                call build_op_Ns(j,JbUp,JbDw,sectorI)
+                Jimp = bjoin([JbUp(1:Norb),JbDw(1:Norb)],2*Norb) + 1
+                Jbath= bjoin([JbUp(Norb+1:),JbDw(Norb+1:)],2*(Ns-Norb)) + 1
+                if(Jbath/=Ibath)cycle
+                impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
+                   state_dvec(i)*state_dvec(j)*peso
+             enddo
              !
              !    > To speed up things we may want to avoid the whole (i,j)=1,sectorI%DIM spanning,
              !      generating instead the impurity and bath bit configurations separately.
@@ -462,10 +466,10 @@ contains
              !      in order to select the appropriate state_dvec elements.
              !
              ! >> Diagonal by construction: NOT GENERAL <<
-             j=i
-             Jimp=Iimp
-             impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
-                  state_dvec(i)*state_dvec(j)*peso
+             !j=i
+             !Jimp=Iimp
+             !impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
+             !     state_dvec(i)*state_dvec(j)*peso
           enddo
           call delete_sector(sectorI)         
        endif
@@ -486,19 +490,23 @@ contains
 #endif
    !Useful prints to test:
    if(MPIMASTER)then
-      if(Norb==1)then
+      if(Norb<=2)then
+         write(*,*)"Impurity Density Matrix [or its diagonal]:"
          do i=1,4**Norb
-            !PRINT FULL MATRIX (Norb=1)
+            !PRINT FULL MATRIX (Norb=1,2)
             write(*,*)(dreal(impurity_density_matrix(i,j)),j=1,4**Norb)
          enddo
+         if(Norb==1)then
          ! Cfr Eq. 4 in Mod Phys Lett B 2013 27:05
-         print*,1-dens_up(1)-dens_dw(1)+docc(1),abs(1-dens_up(1)-dens_dw(1)+docc(1)-impurity_density_matrix(1,1))
-         print*,dens_up(1)-docc(1),abs(dens_up(1)-docc(1)-impurity_density_matrix(2,2))
-         print*,dens_dw(1)-docc(1),abs(dens_dw(1)-docc(1)-impurity_density_matrix(3,3))
-         print*,docc(1),abs(docc(1)-impurity_density_matrix(4,4))
+            print*,"Check with Mod Phys Lett B 2013 2705:"
+            print*,1-dens_up(1)-dens_dw(1)+docc(1),abs(1-dens_up(1)-dens_dw(1)+docc(1)-impurity_density_matrix(1,1))
+            print*,dens_up(1)-docc(1),abs(dens_up(1)-docc(1)-impurity_density_matrix(2,2))
+            print*,dens_dw(1)-docc(1),abs(dens_dw(1)-docc(1)-impurity_density_matrix(3,3))
+            print*,docc(1),abs(docc(1)-impurity_density_matrix(4,4))
+         endif
       else
          do i=1,4**Norb
-            !PRINT JUST THE DIAGONAL (Norb>1)
+            !PRINT JUST THE DIAGONAL (Norb>2)
             write(*,*) i, dreal(impurity_density_matrix(i,i))
           enddo
       endif
