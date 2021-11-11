@@ -165,7 +165,6 @@ contains
     if(allocated(Freal_ineq))deallocate(Freal_ineq)
     if(allocated(Dmats_ph_ineq))deallocate(Dmats_ph_ineq)
     if(allocated(Dreal_ph_ineq))deallocate(Dreal_ph_ineq)
-    if(allocated(imp_density_matrix_ineq))deallocate(imp_density_matrix_ineq)
     if(allocated(neigen_sector_ineq))deallocate(neigen_sector_ineq)
     if(allocated(neigen_total_ineq))deallocate(neigen_total_ineq)
     !

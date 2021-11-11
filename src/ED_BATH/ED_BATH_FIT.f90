@@ -44,33 +44,6 @@ MODULE ED_BATH_FIT
   public :: ed_chi2_fitgf
 
 
-  ! integer                               :: Ldelta
-  ! complex(8),dimension(:,:),allocatable :: Gdelta
-  ! complex(8),dimension(:,:),allocatable :: Fdelta
-  ! real(8),dimension(:),allocatable      :: Xdelta,Wdelta
-  ! integer                               :: totNorb,totNspin,totNso
-  ! integer,dimension(:),allocatable      :: getIorb,getJorb,getIspin,getJspin
-  ! integer                               :: Orb_indx,Spin_indx,Spin_mask
-  ! type(effective_bath)                  :: chi2_bath
-  ! integer                               :: cg_iter_count=0
-  ! logical                               :: para_
-
-  ! integer                               :: MPI_RANK=0
-  ! integer                               :: MPI_SIZE=1
-  ! logical                               :: MPI_MASTER=.true.
-  ! integer                               :: MPI_IERR
-
-  ! !This contains the number of the lambda expansion
-  ! !for each replica of the impurity
-  ! integer                              :: Nlambdas
-  ! !
-  ! !This is a dummy object which is used here to point
-  ! !to the replica bath lambdas, i.e. the coefficients
-  ! !of the bath item-th Hamiltonian expansion 
-  ! type nsymm_vector
-  !    real(8),dimension(:),allocatable   :: element          
-  ! end type nsymm_vector
-
 contains
 
 
@@ -330,27 +303,6 @@ contains
 
 
 
-
-  ! !*****************************************************************************
-  ! !*****************************************************************************
-  ! !*****************************************************************************
-  ! !*****************************************************************************
-  ! !NORMAL bath
-  ! include "fitgf_normal_normal.f90"
-  ! include "fitgf_normal_superc.f90"
-  ! include "fitgf_normal_nonsu2.f90"
-
-  ! !HYBRID bath
-  ! include "fitgf_hybrid_normal.f90"  
-  ! include "fitgf_hybrid_superc.f90"  
-  ! include "fitgf_hybrid_nonsu2.f90"
-
-  ! !REPLICA bath
-  ! include "fitgf_replica.f90"
-  ! !*****************************************************************************
-  ! !*****************************************************************************
-  ! !*****************************************************************************
-  ! !*****************************************************************************
 
 
 

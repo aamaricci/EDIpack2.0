@@ -136,10 +136,9 @@ contains
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
              gs_weight=peso*abs(state_dvec(i))**2
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              call build_op_Ns(i,IbUp,IbDw,sectorI)
-             nup = IbUp(1:Norb)!Nud(1,1:Norb)
-             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
+             nup = IbUp(1:Norb)
+             ndw = IbDw(1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -339,7 +338,6 @@ contains
              i_el = mod(i-1,sectorI%DimEl) + 1
              call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
              !
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              call build_op_Ns(i,IbUp,IbDw,sectorI)
              Nud(1,:)=IbUp
              Nud(2,:)=IbDw

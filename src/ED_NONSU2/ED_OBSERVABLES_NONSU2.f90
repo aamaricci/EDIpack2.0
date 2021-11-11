@@ -144,23 +144,14 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             ! m  = sectorI%H(1)%map(i)
-             ! ib = bdecomp(m,2*Ns)
-             ! !
-             ! gs_weight=peso*abs(state_cvec(i))**2
-             ! !
-             ! !Get operators:
-             ! do iorb=1,Norb
-             !    nup(iorb)= dble(ib(iorb))
-             !    ndw(iorb)= dble(ib(iorb+Ns))
-             !    sz(iorb) = (nup(iorb) - ndw(iorb))/2.d0
-             !    nt(iorb) =  nup(iorb) + ndw(iorb)
-             ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             call build_op_Ns(i,IbUp,IbDw,sectorI)
-             nup = IbUp(1:Norb)!Nud(1,1:Norb)
-             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
+             !
+             m  = sectorI%H(1)%map(i)
+             ib = bdecomp(m,2*Ns)
+             do iorb=1,Norb
+                nup(iorb)= dble(ib(iorb))
+                ndw(iorb)= dble(ib(iorb+Ns))
+             enddo
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -747,13 +738,13 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
+             gs_weight=peso*abs(state_cvec(i))**2
              m  = sectorI%H(1)%map(i)
              ib = bdecomp(m,2*Ns)
-             gs_weight=peso*abs(state_cvec(i))**2
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             call build_op_Ns(i,IbUp,IbDw,sectorI)
-             nup = IbUp(1:Norb)!Nud(1,1:Norb)
-             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
+             do iorb=1,Norb
+                nup(iorb)= dble(ib(iorb))
+                ndw(iorb)= dble(ib(iorb+Ns))
+             enddo
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY
@@ -767,9 +758,7 @@ contains
                       call cdg(iorb,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
                       if(Jz_basis.and.j==0)cycle
-                      !WARNING: note that the previous line, and all the other hereafter, are equivalent to:
-                      !if(Jz_basis.and.(.not.dmft_bath%mask(1,1,iorb,jorb,1)).and.(.not.dmft_bath%mask(1,1,iorb,jorb,2)))cycle
-                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                    !SPIN DW
                    if((ib(iorb+Ns)==0).AND.(ib(jorb+Ns)==1))then
@@ -777,7 +766,7 @@ contains
                       call cdg(iorb+Ns,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
                       if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                 enddo
              enddo
@@ -790,7 +779,7 @@ contains
                       call cdg(iorb,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
                       if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                    !DW-UP
                    if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
@@ -798,7 +787,7 @@ contains
                       call cdg(iorb+Ns,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
                       if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                 enddo
              enddo
@@ -852,8 +841,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j=binary_search(sectorI%H(1)%map,k4)
                          if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
-                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
+                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
                    enddo
                 enddo
@@ -878,8 +867,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j=binary_search(sectorI%H(1)%map,k4)
                          if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
-                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
+                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
                    enddo
                 enddo
