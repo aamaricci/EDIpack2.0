@@ -45,8 +45,15 @@ contains
     allocate(array_bath(size(bath_)-1))
     Nlambdas  =bath_(1)
     array_bath=bath_(2:)
-    !  
-    Hmask =Hreplica_mask(wdiag=.false.,uplo=.true.)
+    !
+    if(ed_all_g)then
+      Hmask=.true.
+      ! Aren't we sure about hermiticity?
+      ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
+    else
+      Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+    endif 
+    !
     totNso=count(Hmask)
     !
     allocate(getIspin(totNso),getJspin(totNso))

@@ -69,8 +69,13 @@ contains
     !
     write(LOGfile,"(A)")""
     write(LOGfile,"(A)")"Get mask(G):"
-    Hmask= .true.
-    if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+    if(ed_all_g)then
+      Hmask=.true.
+      ! Aren't we sure about hermiticity?
+      ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
+    else
+      Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+    endif 
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
