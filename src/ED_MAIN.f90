@@ -310,15 +310,16 @@ contains
   !+-----------------------------------------------------------------------------+!
   !                              SINGLE SITE                                      !
   !+-----------------------------------------------------------------------------+!
-  subroutine ed_solve_single(bath,Hloc,sflag)
+  subroutine ed_solve_single(bath,Hloc,sflag,printflag)
     real(8),dimension(:),intent(in) :: bath
     complex(8),intent(in)           :: Hloc(Nspin,Nspin,Norb,Norb)
-    logical,optional                :: sflag
-    logical                         :: check,iflag
+    logical,optional                :: sflag,printflag
+    logical                         :: check,iflag,pflag
     !
     iflag=.true. ;if(present(sflag))iflag=sflag
+    pflag=.true. ;if(present(printflag))pflag=printflag
     !
-    if(MpiMaster)call save_input_file(str(ed_input_file))
+    if(pflag) call save_input_file(str(ed_input_file))
     !
     call set_Himpurity(Hloc)
     !
@@ -345,7 +346,7 @@ contains
     !
     nullify(spHtimesV_p)
     nullify(spHtimesV_cc)
-    write(Logfile,"(A)")""
+    if(pflag) write(Logfile,"(A)")""
   end subroutine ed_solve_single
 
 
@@ -604,7 +605,7 @@ contains
           neigen_sector(:)   = neigen_sector_ineq(ilat,:)
           lanc_nstates_total = neigen_total_ineq(ilat)
           !
-          call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:))
+          call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:),printflag=MPI_MASTER)
           !
           neigen_sectortmp(ilat,:)   = neigen_sector(:)
           neigen_totaltmp(ilat)      = lanc_nstates_total
