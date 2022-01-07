@@ -681,14 +681,14 @@ contains
     case default
        select case(ed_mode)
        case default
-          if(type/="e".OR.type/='v')stop "check_bath_component error: type!=e,v"
+          if(type/="e".AND.type/='v')stop "check_bath_component error: type!=e,v"
        case ("superc")
-          if(type/="e".OR.type/='v'.OR.type/='d')stop "check_bath_component error: type!=e,v,d"
+          if(type/="e".AND.type/='v'.AND.type/='d')stop "check_bath_component error: type!=e,v,d"
        case ("nonsu2")
-          if(type/="e".OR.type/='v'.OR.type/='u')stop "check_bath_component error: type!=e,v,u"
+          if(type/="e".AND.type/='v'.AND.type/='u')stop "check_bath_component error: type!=e,v,u"
        end select
     case ("replica")
-       if(type/="v".OR.type/="l")stop "check_bath_component error: type!=v,l"
+       if(type/="v".AND.type/="l")stop "check_bath_component error: type!=v,l"
     end select
     return
   end subroutine check_bath_component

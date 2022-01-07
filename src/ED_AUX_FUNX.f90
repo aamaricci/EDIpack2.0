@@ -1011,8 +1011,15 @@ contains
        delta_v = var-var_old
        if(count>1)chich = delta_v/(delta_n+1d-10) !1d-4*nerr)  !((ntmp-nold)/(var-var_old))**-1
        !
-       !Add here controls on chich: not to be too small....
-       if(chich>10d0)chich=2d0*chich/abs(chich) !do nothing?
+       !Add here controls on chich: not to be too large nor too small....
+       if(abs(chich)>10d0) chich=2d0*chich/abs(chich) !do nothing?
+       if(abs(chich)<1d-8.AND.abs(ndiff)>nerr) then
+          if(chich<0.d0) then
+             chich=-1d-1
+          else
+             chich=1.d-1
+          endif
+       endif
        !
        chi_shift = ndiff*chich
        !
