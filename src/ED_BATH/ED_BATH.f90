@@ -503,8 +503,8 @@ contains
     if(allocated(lvl))deallocate(lvl);allocate(lvl(Nspin,Nbath));lvl=0d0
     if(allocated(hyb))deallocate(hyb);allocate(hyb(Nspin,Nbath));hyb=0d0
     !
-    lvl=sum(dmft_bath_%e(:,orb1,:)+dmft_bath_%e(:,orb2,:))/2d0
-    hyb=sum(dmft_bath_%v(:,orb1,:)+dmft_bath_%v(:,orb2,:))/2d0
+    lvl=(dmft_bath_%e(:,orb1,:)+dmft_bath_%e(:,orb2,:))/2d0
+    hyb=(dmft_bath_%v(:,orb1,:)+dmft_bath_%v(:,orb2,:))/2d0
     !
     dmft_bath_%e(:,orb1,:)=lvl
     dmft_bath_%v(:,orb1,:)=hyb
