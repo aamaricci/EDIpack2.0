@@ -683,7 +683,7 @@ contains
     !
     ed_Epot = ed_Epot + ed_Ehartree
     !
-    if(ed_verbose==3)then
+    if(ed_verbose>=3)then
        write(LOGfile,"(A,10f18.12)")"<Hint>  =",ed_Epot
        write(LOGfile,"(A,10f18.12)")"<V>     =",ed_Epot-ed_Ehartree
        write(LOGfile,"(A,10f18.12)")"<E0>    =",ed_Eknot
