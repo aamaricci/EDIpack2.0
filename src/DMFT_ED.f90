@@ -31,6 +31,7 @@ MODULE DMFT_ED
        HLOCfile      , &
        LOGfile       , &
        ed_mode       , &
+       ed_verbose    , &
        bath_type 
 
   USE ED_BATH, only:                                                    &
