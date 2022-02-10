@@ -54,7 +54,7 @@ MODULE ED_OBSERVABLES_NORMAL
   integer                            :: isector,jsector
   !
   real(8),dimension(:),allocatable   :: vvinit
-  real(8),dimension(:),pointer       :: state_dvec
+  real(8),dimension(:),allocatable   :: state_dvec
   logical                            :: Jcondition
   !
   type(sector)                       :: sectorI,sectorJ
@@ -120,12 +120,12 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        !
@@ -185,15 +185,7 @@ contains
           call delete_sector(sectorI)
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
 #ifdef _DEBUG
@@ -216,13 +208,14 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
+
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
        peso = peso/zeta_function
@@ -281,15 +274,7 @@ contains
           enddo
        enddo
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     !
@@ -320,13 +305,14 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
+
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
        peso = peso/zeta_function
@@ -383,15 +369,7 @@ contains
           call delete_sector(sectorI)         
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
 #ifdef _DEBUG
@@ -479,12 +457,12 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -656,15 +634,7 @@ contains
           call delete_sector(sectorI)         
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     !
@@ -889,11 +859,11 @@ contains
   !Compute the local lattice probability distribution function (PDF), i.e. the local probability of displacement
   !as a function of the displacement itself
   subroutine prob_distr_ph(vec,val)
-    real(8),dimension(:),pointer          :: vec
-    real(8)                               :: psi(0:DimPh-1)
-    real(8)                               :: x,dx
-    integer                               :: i,j,i_ph,j_ph,val
-    integer                               :: istart,jstart,iend,jend
+    real(8),dimension(:) :: vec
+    real(8)              :: psi(0:DimPh-1)
+    real(8)              :: x,dx
+    integer              :: i,j,i_ph,j_ph,val
+    integer              :: istart,jstart,iend,jend
     !
     dx = (xmax-xmin)/dble(Lpos)
     !
