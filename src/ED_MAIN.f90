@@ -319,7 +319,7 @@ contains
     iflag=.true. ;if(present(sflag))iflag=sflag
     pflag=.true. ;if(present(printflag))pflag=printflag
     !
-    if(pflag) call save_input_file(str(ed_input_file))
+    if(pflag.and.MpiMaster) call save_input_file(str(ed_input_file))
     !
     call set_Himpurity(Hloc)
     !
