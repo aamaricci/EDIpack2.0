@@ -1011,8 +1011,15 @@ contains
        delta_v = var-var_old
        if(count>1)chich = delta_v/(delta_n+1d-10) !1d-4*nerr)  !((ntmp-nold)/(var-var_old))**-1
        !
-       !Add here controls on chich: not to be too small....
-       if(chich>10d0)chich=2d0*chich/abs(chich) !do nothing?
+       !Add here controls on chich: not to be too large nor too small....
+       if(abs(chich)>10d0) chich=2d0*chich/abs(chich) !do nothing?
+       if(abs(chich)<1d-8.AND.abs(ndiff)>nerr) then
+          if(chich<0.d0) then
+             chich=-1d-1
+          else
+             chich=1.d-1
+          endif
+       endif
        !
        chi_shift = ndiff*chich
        !
@@ -1099,15 +1106,15 @@ contains
     !
     if(master)then
        !
-       if(count==0)then
-          inquire(file="var.restart",EXIST=bool)
-          if(bool)then
-             open(free_unit(unit),file="var.restart")
-             read(unit,*)var,ndelta
-             ndelta=abs(ndelta)*ncoeff
-             close(unit)
-          endif
-       endif
+       !if(count==0)then
+       !   inquire(file="var.restart",EXIST=bool)
+       !   if(bool)then
+       !      open(free_unit(unit),file="var.restart")
+       !      read(unit,*)var,ndelta
+       !      ndelta=abs(ndelta)*ncoeff
+       !      close(unit)
+       !   endif
+       !endif
        !
        ndiff=ntmp-nread
        nratio = 0.5d0;!nratio = 1.d0/(6.d0/11.d0*pi)
@@ -1201,9 +1208,8 @@ contains
        !
        write(LOGfile,"(A,I5)")"count= ",count
        write(LOGfile,"(A,L2)")"Converged=",converged
-       print*,""
        !
-       open(free_unit(unit),file="var.restart")
+       open(free_unit(unit),file="xmu.restart")
        write(unit,*)var,ndelta
        close(unit)
        !

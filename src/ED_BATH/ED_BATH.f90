@@ -43,6 +43,8 @@ MODULE ED_BATH
   interface orb_symmetrize_bath
      module procedure orb_symmetrize_bath_site
      module procedure orb_symmetrize_bath_lattice
+     module procedure orb_symmetrize_bath_site_o1o2
+     module procedure orb_symmetrize_bath_lattice_o1o2
   end interface orb_symmetrize_bath
 
   interface orb_equality_bath
@@ -478,6 +480,55 @@ contains
     enddo
     ed_file_suffix=""
   end subroutine orb_symmetrize_bath_lattice
+  
+  
+  subroutine orb_symmetrize_bath_site_o1o2(bath_,orb1,orb2,save)
+    real(8),dimension(:)   :: bath_
+    type(effective_bath)   :: dmft_bath_
+    logical,optional       :: save
+    logical                :: save_
+    integer                :: iorb,orb1,orb2
+    real(8),allocatable    :: lvl(:,:),hyb(:,:)
+    if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    save_=.true.;if(present(save))save_=save
+    if(Norb==1)then
+       write(LOGfile,"(A)")"orb_symmetrize_bath: Norb=1 nothing to symmetrize"
+       return
+    endif
+    !
+    call allocate_dmft_bath(dmft_bath_)
+    ! if (bath_type=="replica")call init_dmft_bath_mask(dmft_bath_)
+    call set_dmft_bath(bath_,dmft_bath_)
+    !
+    if(allocated(lvl))deallocate(lvl);allocate(lvl(Nspin,Nbath));lvl=0d0
+    if(allocated(hyb))deallocate(hyb);allocate(hyb(Nspin,Nbath));hyb=0d0
+    !
+    lvl=(dmft_bath_%e(:,orb1,:)+dmft_bath_%e(:,orb2,:))/2d0
+    hyb=(dmft_bath_%v(:,orb1,:)+dmft_bath_%v(:,orb2,:))/2d0
+    !
+    dmft_bath_%e(:,orb1,:)=lvl
+    dmft_bath_%v(:,orb1,:)=hyb
+    dmft_bath_%e(:,orb2,:)=lvl
+    dmft_bath_%v(:,orb2,:)=hyb
+    !
+    if(save_)call save_dmft_bath(dmft_bath_)
+    call get_dmft_bath(dmft_bath_,bath_)
+    call deallocate_dmft_bath(dmft_bath_)
+  end subroutine orb_symmetrize_bath_site_o1o2
+  subroutine orb_symmetrize_bath_lattice_o1o2(bath_,orb1,orb2,save)
+    real(8),dimension(:,:) :: bath_
+    logical,optional       :: save
+    logical                :: save_
+    integer                :: Nsites,ilat,orb1,orb2
+    if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    save_=.true.;if(present(save))save_=save
+    Nsites=size(bath_,1)
+    do ilat=1,Nsites
+       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       call orb_symmetrize_bath_site_o1o2(bath_(ilat,:),orb1,orb2,save_)
+    enddo
+    ed_file_suffix=""
+  end subroutine orb_symmetrize_bath_lattice_o1o2
 
   !---------------------------------------------------------!
 
@@ -681,14 +732,14 @@ contains
     case default
        select case(ed_mode)
        case default
-          if(type/="e".OR.type/='v')stop "check_bath_component error: type!=e,v"
+          if(type/="e".AND.type/='v')stop "check_bath_component error: type!=e,v"
        case ("superc")
-          if(type/="e".OR.type/='v'.OR.type/='d')stop "check_bath_component error: type!=e,v,d"
+          if(type/="e".AND.type/='v'.AND.type/='d')stop "check_bath_component error: type!=e,v,d"
        case ("nonsu2")
-          if(type/="e".OR.type/='v'.OR.type/='u')stop "check_bath_component error: type!=e,v,u"
+          if(type/="e".AND.type/='v'.AND.type/='u')stop "check_bath_component error: type!=e,v,u"
        end select
     case ("replica")
-       if(type/="v".OR.type/="l")stop "check_bath_component error: type!=v,l"
+       if(type/="v".AND.type/="l")stop "check_bath_component error: type!=v,l"
     end select
     return
   end subroutine check_bath_component

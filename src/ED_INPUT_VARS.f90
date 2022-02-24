@@ -1,7 +1,7 @@
 MODULE ED_INPUT_VARS
   USE SF_VERSION
   USE SF_PARSE_INPUT
-  USE SF_IOTOOLS, only:str
+  USE SF_IOTOOLS, only:str,free_unit
   USE ED_VERSION
   implicit none
 
@@ -128,8 +128,9 @@ contains
 #endif
     character(len=*) :: INPUTunit
     integer,optional :: comm
-    logical          :: master=.true.
+    logical          :: master=.true.,bool
     integer          :: i,rank=0
+    integer          :: unit_xmu
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A,A)")"DEBUG ed_read_input: read input from",trim(INPUTunit)
 #endif
@@ -269,6 +270,17 @@ contains
        call save_input(INPUTunit)
        call scifor_version()
        call code_version(version)
+    endif
+    !
+    if(nread .ne. 0d0) then
+      inquire(file="xmu.restart",EXIST=bool)
+      if(bool)then
+        open(free_unit(unit_xmu),file="xmu.restart")
+        read(unit_xmu,*)xmu,ndelta
+        ndelta=abs(ndelta)*ncoeff
+        close(unit_xmu)
+        write(*,"(A,F9.7,A)")"Adjusting XMU to ",xmu," as per provided xmu.restart "
+      endif
     endif
     !Act on the input variable only after printing.
     !In the new parser variables are hard-linked into the list:

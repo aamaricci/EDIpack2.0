@@ -477,10 +477,12 @@ contains
     case("superc","nonsu2")
        ii = sectorI%H(1)%map(i)
        Ib = bdecomp(ii,2*Ns)
-       do iorb=1,Norb
-          Nup(iorb)= dble(ib(iorb))
-          Ndw(iorb)= dble(ib(iorb+Ns))
-       enddo
+       Nup = Ib(1:Ns)
+       Ndw = Ib(Ns+1:)
+       ! do ii=1,Ns
+       !    Nup(ii)= ib(ii)
+       !    Ndw(ii)= ib(ii+Ns)
+       ! enddo
     end select
     !
   end subroutine build_op_Ns

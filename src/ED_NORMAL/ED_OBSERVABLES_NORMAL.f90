@@ -54,7 +54,7 @@ MODULE ED_OBSERVABLES_NORMAL
   integer                            :: isector,jsector
   !
   real(8),dimension(:),allocatable   :: vvinit
-  real(8),dimension(:),pointer       :: state_dvec
+  real(8),dimension(:),allocatable   :: state_dvec
   logical                            :: Jcondition
   !
   type(sector)                       :: sectorI,sectorJ
@@ -120,12 +120,12 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        !
@@ -136,10 +136,9 @@ contains
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
              gs_weight=peso*abs(state_dvec(i))**2
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              call build_op_Ns(i,IbUp,IbDw,sectorI)
-             nup = IbUp(1:Norb)!Nud(1,1:Norb)
-             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
+             nup = IbUp(1:Norb)
+             ndw = IbDw(1:Norb)
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -186,15 +185,7 @@ contains
           call delete_sector(sectorI)
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
 #ifdef _DEBUG
@@ -217,13 +208,14 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
+
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
        peso = peso/zeta_function
@@ -282,15 +274,7 @@ contains
           enddo
        enddo
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     !
@@ -321,13 +305,14 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
+
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
        peso = peso/zeta_function
@@ -339,7 +324,6 @@ contains
              i_el = mod(i-1,sectorI%DimEl) + 1
              call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
              !
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
              call build_op_Ns(i,IbUp,IbDw,sectorI)
              Nud(1,:)=IbUp
              Nud(2,:)=IbDw
@@ -385,15 +369,7 @@ contains
           call delete_sector(sectorI)         
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
 #ifdef _DEBUG
@@ -481,12 +457,12 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -658,15 +634,7 @@ contains
           call delete_sector(sectorI)         
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     !
@@ -685,7 +653,7 @@ contains
     !
     ed_Epot = ed_Epot + ed_Ehartree
     !
-    if(ed_verbose==3)then
+    if(ed_verbose>=3)then
        write(LOGfile,"(A,10f18.12)")"<Hint>  =",ed_Epot
        write(LOGfile,"(A,10f18.12)")"<V>     =",ed_Epot-ed_Ehartree
        write(LOGfile,"(A,10f18.12)")"<E0>    =",ed_Eknot
@@ -891,11 +859,11 @@ contains
   !Compute the local lattice probability distribution function (PDF), i.e. the local probability of displacement
   !as a function of the displacement itself
   subroutine prob_distr_ph(vec,val)
-    real(8),dimension(:),pointer          :: vec
-    real(8)                               :: psi(0:DimPh-1)
-    real(8)                               :: x,dx
-    integer                               :: i,j,i_ph,j_ph,val
-    integer                               :: istart,jstart,iend,jend
+    real(8),dimension(:) :: vec
+    real(8)              :: psi(0:DimPh-1)
+    real(8)              :: x,dx
+    integer              :: i,j,i_ph,j_ph,val
+    integer              :: istart,jstart,iend,jend
     !
     dx = (xmax-xmin)/dble(Lpos)
     !

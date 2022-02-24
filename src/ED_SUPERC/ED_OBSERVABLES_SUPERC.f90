@@ -49,7 +49,7 @@ MODULE ED_OBSERVABLES_SUPERC
   integer                             :: isector,jsector
   !
   complex(8),dimension(:),allocatable :: vvinit
-  complex(8),dimension(:),pointer     :: state_cvec
+  complex(8),dimension(:),allocatable :: state_cvec
   logical                             :: Jcondition
   !
   type(sector)                        :: sectorI,sectorJ
@@ -103,12 +103,12 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -117,23 +117,13 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             ! m  = sectorI%H(1)%map(i)
-             ! ib = bdecomp(m,2*Ns)
-             !
-             !gs_weight=peso*abs(state_cvec(i))**2
-             !
-             ! !Get operators:
-             ! do iorb=1,Norb
-             !    nup(iorb)= dble(ib(iorb))
-             !    ndw(iorb)= dble(ib(iorb+Ns))
-             !    sz(iorb) = (nup(iorb) - ndw(iorb))/2.d0
-             !    nt(iorb) =  nup(iorb) + ndw(iorb)
-             ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             ! call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             call build_op_Ns(i,IbUp,IbDw,sectorI)
-             nup = IbUp(1:Norb)!Nud(1,1:Norb)
-             ndw = IbDw(1:Norb)!Nud(2,1:Norb)
+             m  = sectorI%H(1)%map(i)
+             ib = bdecomp(m,2*Ns)
+             do iorb=1,Norb
+                nup(iorb)= dble(ib(iorb))
+                ndw(iorb)= dble(ib(iorb+Ns))
+             enddo
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -192,15 +182,7 @@ contains
           !
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
 #ifdef _DEBUG
@@ -295,12 +277,12 @@ contains
 #endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -310,60 +292,48 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
+             m  = sectorI%H(1)%map(i)
+             ib = bdecomp(m,2*Ns)
+             do iorb=1,Norb
+                nup(iorb)=dble(ib(iorb))
+                ndw(iorb)=dble(ib(iorb+Ns))
+             enddo
+             !
              gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,IbUp,IbDw,sectorI)
-             nup=dble(IbUp(1:Norb))
-             ndw=dble(IbDw(1:Norb))
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
-             !LOCAL ENERGY
-             ed_Eknot = ed_Eknot + dot_product(eloc(1,:),nup)*gs_weight + dot_product(eloc(Nspin,:),ndw)*gs_weight
-             !==> HYBRIDIZATION TERMS I: same or different orbitals, same spins.
+             !> H_Imp: Diagonal Elements, i.e. local part
+             do iorb=1,Norb
+                ed_Eknot = ed_Eknot + impHloc(1,1,iorb,iorb)*Nup(iorb)*gs_weight
+                ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,iorb)*Ndw(iorb)*gs_weight
+             enddo
+             ! !> H_imp: Off-diagonal elements, i.e. non-local part. 
              do iorb=1,Norb
                 do jorb=1,Norb
                    !SPIN UP
-                   if((ib(iorb)==0).AND.(ib(jorb)==1))then
+                   Jcondition = &
+                        (impHloc(1,1,iorb,jorb)/=zero) .AND. &
+                        (ib(jorb)==1)                  .AND. &
+                        (ib(iorb)==0)
+                   if (Jcondition) then
                       call c(jorb,m,k1,sg1)
                       call cdg(iorb,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
-                      if(Jz_basis.and.j==0)cycle
-                      !WARNING: note that the previous line, and all the other hereafter, are equivalent to:
-                      !if(Jz_basis.and.(.not.dmft_bath%mask(1,1,iorb,jorb,1)).and.(.not.dmft_bath%mask(1,1,iorb,jorb,2)))cycle
-                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                    !SPIN DW
-                   if((ib(iorb+Ns)==0).AND.(ib(jorb+Ns)==1))then
+                   Jcondition = &
+                        (impHloc(Nspin,Nspin,iorb,jorb)/=zero) .AND. &
+                        (ib(jorb+Ns)==1)                       .AND. &
+                        (ib(iorb+Ns)==0)
+                   if (Jcondition) then
                       call c(jorb+Ns,m,k1,sg1)
                       call cdg(iorb+Ns,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
-                      if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                 enddo
              enddo
-             !==> HYBRIDIZATION TERMS II: same or different orbitals, opposite spins.
-             if(ed_mode=="nonsu2")then
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      !UP-DW
-                      if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
-                         call c(jorb+Ns,m,k1,sg1)
-                         call cdg(iorb,k1,k2,sg2)
-                         j=binary_search(sectorI%H(1)%map,k2)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
-                      endif
-                      !DW-UP
-                      if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
-                         call c(jorb,m,k1,sg1)
-                         call cdg(iorb+Ns,k1,k2,sg2)
-                         j=binary_search(sectorI%H(1)%map,k2)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
-                      endif
-                   enddo
-                enddo
-             endif
              !
              !DENSITY-DENSITY INTERACTION: SAME ORBITAL, OPPOSITE SPINS
              !Euloc=\sum=i U_i*(n_u*n_d)_i
@@ -413,9 +383,8 @@ contains
                          call cdg(jorb+Ns,k2,k3,sg3)
                          call cdg(iorb,k3,k4,sg4)
                          j=binary_search(sectorI%H(1)%map,k4)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
-                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
+                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
                    enddo
                 enddo
@@ -439,9 +408,8 @@ contains
                          call cdg(iorb+Ns,k2,k3,sg3)
                          call cdg(iorb,k3,k4,sg4)
                          j=binary_search(sectorI%H(1)%map,k4)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
-                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
+                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
                    enddo
                 enddo
@@ -449,8 +417,7 @@ contains
              !
              !
              !HARTREE-TERMS CONTRIBUTION:
-             if(hfmode)then
-                !ed_Ehartree=ed_Ehartree - 0.5d0*dot_product(uloc,nup+ndw)*gs_weight + 0.25d0*sum(uloc)*gs_weight
+             if(hfmode)then               
                 do iorb=1,Norb
                    ed_Ehartree=ed_Ehartree - 0.5d0*uloc(iorb)*(nup(iorb)+ndw(iorb))*gs_weight + 0.25d0*uloc(iorb)*gs_weight
                 enddo
@@ -467,15 +434,7 @@ contains
           call delete_sector(sectorI)
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
     !
@@ -497,7 +456,7 @@ contains
     !
     ed_Epot = ed_Epot + ed_Ehartree
     !
-    if(ed_verbose==3)then
+    if(ed_verbose>=3)then
        write(LOGfile,"(A,10f18.12)")"<Hint>  =",ed_Epot
        write(LOGfile,"(A,10f18.12)")"<V>     =",ed_Epot-ed_Ehartree
        write(LOGfile,"(A,10f18.12)")"<E0>    =",ed_Eknot

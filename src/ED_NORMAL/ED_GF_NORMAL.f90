@@ -21,20 +21,20 @@ MODULE ED_GF_NORMAL
   public :: build_sigma_normal
 
 
-  integer                               :: istate
-  integer                               :: isector,jsector
-  integer                               :: idim,idimUP,idimDW
+  integer                          :: istate
+  integer                          :: isector,jsector
+  integer                          :: idim,idimUP,idimDW
   !
-  integer                               :: ialfa,jalfa
-  integer                               :: ipos,jpos
-  integer                               :: i,j,m
-  integer                               :: iph,i_el
-  real(8)                               :: sgn,norm2
+  integer                          :: ialfa,jalfa
+  integer                          :: ipos,jpos
+  integer                          :: i,j,m
+  integer                          :: iph,i_el
+  real(8)                          :: sgn,norm2
   !
-  real(8),allocatable                   :: vvinit(:)
-  real(8),allocatable                   :: alfa_(:),beta_(:)
-  real(8),dimension(:),pointer          :: state_dvec
-  real(8)                               :: state_e
+  real(8),allocatable              :: vvinit(:)
+  real(8),allocatable              :: alfa_(:),beta_(:)
+  real(8),dimension(:),allocatable :: state_dvec
+  real(8)                          :: state_e
 
 
 
@@ -242,12 +242,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate) 
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        if(MpiMaster)then
@@ -309,15 +309,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -353,13 +345,14 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
+
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
@@ -434,15 +427,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -555,12 +540,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        call get_Nup(isector,Nups)
@@ -603,15 +588,7 @@ contains
        call add_to_lanczos_phonon(norm2,state_e,alfa_,beta_,istate)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
     enddo
     return
   end subroutine lanc_build_gf_phonon_main
