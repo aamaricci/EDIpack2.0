@@ -1160,6 +1160,10 @@ contains
           enddo
           if(is_diagonal(Hreplica_basis(isym)%O))then
              offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
+             if(is_identity(Hreplica_basis(isym)%O).AND.mod(Nbath,2)==0)then
+                offset(Nbath/2) = max(-1.d-1,offset(Nbath/2))
+                offset(Nbath/2 + 1) = min(1.d-1,offset(Nbath/2 + 1))
+             endif
              do ibath=1,Nbath
                 dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(isym) + offset(ibath)
              enddo
