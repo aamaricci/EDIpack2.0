@@ -319,7 +319,7 @@ contains
     iflag=.true. ;if(present(sflag))iflag=sflag
     pflag=.true. ;if(present(printflag))pflag=printflag
     !
-    if(pflag) call save_input_file(str(ed_input_file))
+    if(pflag.and.MpiMaster) call save_input_file(str(ed_input_file))
     !
     call set_Himpurity(Hloc)
     !
@@ -416,7 +416,7 @@ contains
   !+-----------------------------------------------------------------------------+!
   !                          INEQUIVALENT SITES                                   !
   !+-----------------------------------------------------------------------------+!
-  subroutine ed_solve_lattice(bath,Hloc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii)
+  subroutine ed_solve_lattice(bath,Hloc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,iflag)
     !inputs
     real(8)          :: bath(:,:) ![Nlat][Nb]
     complex(8)       :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
@@ -425,14 +425,19 @@ contains
     real(8),optional :: Jh_ii(size(bath,1))
     real(8),optional :: Jp_ii(size(bath,1))
     real(8),optional :: Jx_ii(size(bath,1))
+    logical,optional :: iflag
     ! 
     integer          :: i,j,ilat,iorb,jorb,ispin,jspin
     integer          :: Nineq
-    logical          :: check_dim
-    character(len=5) :: tmp_suffix
+    logical          :: check_dim,iflag_
+    character(len=5) :: tmp_suffix    
     !
     logical          :: MPI_MASTER=.true.
     !
+    !flag GF
+    iflag_=.true.
+    if(present(iflag)) iflag_=iflag
+
     ! Check dimensions !
     Nineq=size(bath,1)
     !
@@ -471,7 +476,7 @@ contains
        neigen_sector(:)   = neigen_sector_ineq(ilat,:)
        lanc_nstates_total = neigen_total_ineq(ilat)
        !
-       call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:)) !Hloc(ilat,...)-->impHloc
+       call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:),sflag=iflag_) !Hloc(ilat,...)-->impHloc
        !
        neigen_sector_ineq(ilat,:)  = neigen_sector
        neigen_total_ineq(ilat)     = lanc_nstates_total
@@ -504,7 +509,7 @@ contains
 
   !FALL BACK: DO A VERSION THAT DOES THE SITES IN PARALLEL USING SERIAL ED CODE
 #ifdef _MPI
-  subroutine ed_solve_lattice_mpi(MpiComm,bath,Hloc,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii)
+  subroutine ed_solve_lattice_mpi(MpiComm,bath,Hloc,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,iflag)
     integer          :: MpiComm
     !inputs
     real(8)          :: bath(:,:) ![Nlat][Nb]
@@ -515,6 +520,8 @@ contains
     real(8),optional :: Jh_ii(size(bath,1))
     real(8),optional :: Jp_ii(size(bath,1))
     real(8),optional :: Jx_ii(size(bath,1))
+    logical,optional :: iflag
+
     !MPI  auxiliary vars
     complex(8)       :: Smats_tmp(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
     complex(8)       :: Sreal_tmp(size(bath,1),Nspin,Nspin,Norb,Norb,Lreal)
@@ -540,7 +547,7 @@ contains
     ! 
     integer          :: i,j,ilat,iorb,jorb,ispin,jspin
     integer          :: Nineq
-    logical          :: check_dim,mpi_lanc_
+    logical          :: check_dim,mpi_lanc_,iflag_
     character(len=5) :: tmp_suffix
     !
     integer          :: MPI_ID=0
@@ -555,6 +562,10 @@ contains
     !
     mpi_lanc_=.false.;if(present(mpi_lanc))mpi_lanc_=mpi_lanc
     !
+
+    iflag_=.true.
+    if(present(iflag)) iflag_=iflag
+
     ! Check dimensions !
     Nineq=size(bath,1)
     !
@@ -605,7 +616,7 @@ contains
           neigen_sector(:)   = neigen_sector_ineq(ilat,:)
           lanc_nstates_total = neigen_total_ineq(ilat)
           !
-          call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:),printflag=MPI_MASTER)
+          call ed_solve_single(bath(ilat,:),Hloc(ilat,:,:,:,:),sflag=iflag_,printflag=MPI_MASTER)
           !
           neigen_sectortmp(ilat,:)   = neigen_sector(:)
           neigen_totaltmp(ilat)      = lanc_nstates_total
