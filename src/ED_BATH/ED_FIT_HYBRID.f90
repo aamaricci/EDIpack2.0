@@ -146,6 +146,12 @@ contains
        !
        !
     case (1)
+       if(cg_grad==0)then
+          write(*,*) "                                                                                "
+          write(*,*) "WARNING: analytic gradient not available with cg-method=1 (minimize f77 routine)"
+          write(*,*) "         > we will force cg_grad=1 (so let the routine estimate the gradient)   "
+          write(*,*) "                                                                                "
+       endif
        select case (cg_scheme)
        case ("weiss")
           call fmin_cgminimize(array_bath,chi2_weiss_hybrid_normal,&

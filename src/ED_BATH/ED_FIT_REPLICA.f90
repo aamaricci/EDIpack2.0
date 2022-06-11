@@ -12,7 +12,7 @@ contains
 
 
   !+-------------------------------------------------------------+
-  !PURPOSE  : Chi^2 interface for
+  !PURPOSE  : Chi^2 interface for REPLICA BATH
   !+-------------------------------------------------------------+
   subroutine chi2_fitgf_replica(fg,bath_)
     complex(8),dimension(:,:,:,:,:)             :: fg ![Nspin][Nspin][Norb][Norb][Lmats]
@@ -148,6 +148,12 @@ contains
        !
        !
     case (1)
+       if(cg_grad==0)then
+          write(*,*) "                                                                                "
+          write(*,*) "WARNING: analytic gradient not available with cg-method=1 (minimize f77 routine)"
+          write(*,*) "         > we will force cg_grad=1 (so let the routine estimate the gradient)   "
+          write(*,*) "                                                                                "
+       endif
        select case (cg_scheme)
        case ("weiss")
           call fmin_cgminimize(array_bath,chi2_weiss_replica,&
@@ -230,12 +236,18 @@ contains
 
 
 
+
+
+
+
   !##################################################################
-  ! THESE PROCEDURES EVALUATES THE \chi^2 FUNCTIONS TO MINIMIZE. 
+  ! THESE PROCEDURES EVALUATE THE \chi^2 FUNCTIONS TO MINIMIZE. 
   !##################################################################
-  !+-------------------------------------------------------------+
+  !
+  !
+  !+-----------------------------------------------------------------+
   !PURPOSE: Evaluate the \chi^2 distance of \Delta_Anderson function.
-  !+-------------------------------------------------------------+
+  !+-----------------------------------------------------------------+
   function chi2_delta_replica(a) result(chi2)
     real(8),dimension(:)                               :: a
     real(8)                                            :: chi2
@@ -261,18 +273,61 @@ contains
     enddo
     !
     chi2=sum(chi2_so)
-    chi2=chi2/Ldelta
+    chi2=chi2/Ldelta/totNso
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_replica. Chi**2:",chi2
 #endif
     !
   end function chi2_delta_replica
+  !
+  !
+  !+--------------------------------------------------------------+
+  !PURPOSE: Evaluate the \chi^2 distance of G_0_Anderson function.
+  !+--------------------------------------------------------------+
+  function chi2_weiss_replica(a) result(chi2)
+   real(8),dimension(:)                               :: a
+   real(8)                                            :: chi2
+   real(8),dimension(totNso)                          :: chi2_so
+   complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta) :: g0and
+   real(8),dimension(Ldelta)                          :: Ctmp
+   integer                                            :: i,l,iorb,jorb,ispin,jspin
+   !
+#ifdef _DEBUG
+   if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_replica. a:",a
+#endif
+   !
+   g0and = g0and_replica(a)
+   !
+   do l=1,totNso
+      iorb = getIorb(l)
+      jorb = getJorb(l)
+      ispin = getIspin(l)
+      jspin = getJspin(l)
+      !
+      Ctmp = abs(Gdelta(l,:)-g0and(ispin,jspin,iorb,jorb,:))
+      chi2_so(l) = sum( Ctmp**cg_pow/Wdelta )
+   enddo
+   !
+   chi2=sum(chi2_so)
+   chi2=chi2/Ldelta/totNso
+#ifdef _DEBUG
+   if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_replica. Chi**2:",chi2
+#endif
+  !
+  end function chi2_weiss_replica
 
 
-  !+-------------------------------------------------------------+
-  !PURPOSE: Evaluate the gradient \Grad\chi^2 of 
-  ! \Delta_Anderson function.
-  !+-------------------------------------------------------------+
+
+
+
+  !######################################################################
+  ! THESE PROCEDURES EVALUATE THE >GRADIENTS< OF THE \chi^2 TO MINIMIZE. 
+  !######################################################################
+  !
+  !
+  !+---------------------------------------------------------------------+
+  !PURPOSE: Evaluate the gradient \Grad\chi^2 of \Delta_Anderson function.
+  !+---------------------------------------------------------------------+
   function grad_chi2_delta_replica(a) result(dchi2)
     real(8),dimension(:)                                       :: a
     real(8),dimension(size(a))                                 :: dchi2
@@ -311,50 +366,12 @@ contains
 #endif
     !
   end function grad_chi2_delta_replica
-
-
-
-  !+-------------------------------------------------------------+
-  !PURPOSE: Evaluate the \chi^2 distance of G_0_Anderson function 
-  ! The Gradient is not evaluated, so the minimization requires 
-  ! a numerical estimate of the gradient. 
-  !+-------------------------------------------------------------+
-  function chi2_weiss_replica(a) result(chi2)
-    real(8),dimension(:)                               :: a
-    real(8)                                            :: chi2
-    real(8),dimension(totNso)                          :: chi2_so
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta) :: g0and
-    real(8),dimension(Ldelta)                          :: Ctmp
-    integer                                            :: i,l,iorb,jorb,ispin,jspin
-    !
-#ifdef _DEBUG
-    if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_replica. a:",a
-#endif
-    !
-    g0and = g0and_replica(a)
-    !
-    do l=1,totNso
-       iorb = getIorb(l)
-       jorb = getJorb(l)
-       ispin = getIspin(l)
-       jspin = getJspin(l)
-       !
-       Ctmp = abs(Gdelta(l,:)-g0and(ispin,jspin,iorb,jorb,:))
-       chi2_so(l) = sum( Ctmp**cg_pow/Wdelta )
-    enddo
-    !
-    chi2=sum(chi2_so)
-    chi2=chi2/Ldelta/totNso
-#ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_replica. Chi**2:",chi2
-#endif
-    !
-  end function chi2_weiss_replica
-
-  !+-------------------------------------------------------------+
-  !PURPOSE: Evaluate the gradient \Grad\chi^2 of 
-  ! \Delta_Anderson function.
-  !+-------------------------------------------------------------+
+  !
+  !
+  !
+  !+------------------------------------------------------------------+
+  !PURPOSE: Evaluate the gradient \Grad\chi^2 of G0_Anderson function.
+  !+------------------------------------------------------------------+
   function grad_chi2_weiss_replica(a) result(dchi2)
     real(8),dimension(:)                                       :: a
     real(8),dimension(size(a))                                 :: dchi2
@@ -398,11 +415,14 @@ contains
 
 
 
+
+
+
+
   !##################################################################
-  ! THESE PROCEDURES EVALUATES THE 
-  ! - \delta
-  ! - g0
-  ! FUNCTIONS. 
+  ! THESE PROCEDURES EVALUATE THE ANDERSON FUNCTIONS:
+  ! - \Delta (hybridization)
+  ! - g0     (weiss field)
   !##################################################################
   !ACHTUNG! We use a direct dump of the array into the necessary element of the bath.
   ! rather than using aux functions in ED_BATH. This improves execution speed. 
@@ -443,7 +463,7 @@ contains
     enddo
     !
   end function delta_replica
-
+  !
   function g0and_replica(a) result(G0and)
     real(8),dimension(:)                               :: a
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta) :: G0and,Delta
@@ -458,9 +478,9 @@ contains
        G0and(:,:,:,:,i) = so2nn_reshape(FGorb,Nspin,Norb)
     enddo
   end function g0and_replica
-
-
-
+  !
+  !
+  !
   function grad_delta_replica(a) result(dDelta)
     real(8),dimension(:)                                      :: a
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta,size(a)) :: dDelta
@@ -509,8 +529,8 @@ contains
        !
     enddo
   end function grad_delta_replica
-
-
+  !
+  !
   function grad_g0and_replica(a) result(dG0and)
     real(8),dimension(:)                                       :: a
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta,size(a)) :: dG0and
