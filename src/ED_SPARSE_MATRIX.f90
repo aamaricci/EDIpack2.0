@@ -1,4 +1,5 @@
 MODULE ED_SPARSE_MATRIX
+  USE ED_INPUT_VARS
 #ifdef _MPI
   USE SF_MPI
   USE MPI
@@ -118,6 +119,9 @@ contains
     integer,optional                      :: N1
     integer                               :: i
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG sp_init_matrix_csr: allocate sparse"
+#endif
     !put here a delete statement to avoid problems
     if(sparse%status)stop "sp_init_matrix: already allocated can not init"
     !
@@ -147,6 +151,9 @@ contains
     integer,optional                      :: N1
     integer                               :: i,Ncol,Nloc
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG MPI_sp_init_matrix_csr: allocate sparse"
+#endif
     if(MpiComm==Mpi_Comm_Null)return
     !
     call sp_test_matrix_mpi(MpiComm,sparse,"mpi_sp_init_matrix_csr")
@@ -183,6 +190,9 @@ contains
     integer                           :: i
     type(sparse_row_csr),pointer          :: row
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG sp_delete_matrix_csr: delete sparse"
+#endif
     if(.not.sparse%status)return !stop "Error SPARSE/sp_delete_matrix: sparse is not allocated."
     !
     do i=1,sparse%Nrow
@@ -207,6 +217,9 @@ contains
     integer                              :: i
     type(sparse_row_csr),pointer          :: row
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG MPI_sp_delete_matrix_csr: delete sparse"
+#endif
     if(.not.sparse%status)return !stop "Error SPARSE/mpi_sp_delete_matrix: sparse is not allocated."
     !
     do i=1,sparse%Nrow
@@ -258,6 +271,10 @@ contains
     integer                               :: column,pos
     logical                               :: iadd
     !
+#ifdef _DEBUG
+    if(ed_verbose>5)write(Logfile,"(A,2I8)")"DEBUG sp_insert_element_csr_d: insert element in sparse @",i,j
+#endif
+    !
     column = j
     !
     row => sparse%row(i)
@@ -288,6 +305,10 @@ contains
     type(sparse_row_csr),pointer          :: row
     integer                               :: column,pos
     logical                               :: iadd
+    !
+#ifdef _DEBUG
+    if(ed_verbose>5)write(Logfile,"(A,2I8)")"DEBUG sp_insert_element_csr_c: insert element in sparse @",i,j
+#endif
     !
     column = j
     !
@@ -320,6 +341,10 @@ contains
     type(sparse_row_csr),pointer          :: row
     integer                               :: column,pos
     logical                               :: iadd
+    !
+#ifdef _DEBUG
+    if(ed_verbose>5)write(Logfile,"(A,2I8)")"DEBUG MPI_sp_insert_element_csr_d: insert element in sparse @",i,j
+#endif
     !
     if(MpiComm==Mpi_Comm_Null)return
     !
@@ -355,6 +380,10 @@ contains
     type(sparse_row_csr),pointer          :: row
     integer                               :: column,pos
     logical                               :: iadd
+    !
+#ifdef _DEBUG
+    if(ed_verbose>5)write(Logfile,"(A,2I8)")"DEBUG MPI_sp_insert_element_csr_c: insert element in sparse @",i,j
+#endif
     !
     call sp_test_matrix_mpi(MpiComm,sparse," mpi_sp_insert_element_csr")
     !
@@ -398,6 +427,10 @@ contains
     real(8),dimension(:,:),intent(inout) :: matrix
     integer                              :: i,j,Ndim1,Ndim2
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG sp_dump_matrix_csr_d: dump sparse"
+#endif
+    !
     Ndim1=size(matrix,1)
     Ndim2=size(matrix,2)
     !
@@ -414,6 +447,10 @@ contains
     type(sparse_matrix_csr),intent(in)      :: sparse
     complex(8),dimension(:,:),intent(inout) :: matrix
     integer                                 :: i,j,Ndim1,Ndim2
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG sp_dump_matrix_csr_c: dump sparse"
+#endif
     !
     Ndim1=size(matrix,1)
     Ndim2=size(matrix,2)
@@ -435,6 +472,10 @@ contains
     real(8),dimension(:,:),intent(inout) :: matrix
     real(8),dimension(:,:),allocatable   :: matrix_tmp
     integer                              :: i,impi,j,N1_,N2_,Ndim1,Ndim2,Nrow,Ncol
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG MPI_sp_dump_matrix_csr_d: dump sparse"
+#endif
     !
     call sp_test_matrix_mpi(MpiComm,sparse," mpi_sp_dump_matrix_csr")
     !
@@ -468,6 +509,10 @@ contains
     complex(8),dimension(:,:),intent(inout) :: matrix
     complex(8),dimension(:,:),allocatable   :: matrix_tmp
     integer                                 :: i,impi,j,N1_,N2_,Ndim1,Ndim2,Nrow,Ncol
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG MPI_sp_dump_matrix_csr_c: dump sparse"
+#endif
     !
     call sp_test_matrix_mpi(MpiComm,sparse," mpi_sp_dump_matrix_csr")
     !

@@ -12,8 +12,8 @@ module ED_DIAG_SUPERC
   !
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
-  USE ED_AUX_FUNX
   USE ED_EIGENSPACE
+  USE ED_AUX_FUNX
   USE ED_SETUP
   USE ED_SECTOR
   USE ED_HAMILTONIAN_SUPERC
@@ -58,6 +58,9 @@ contains
     complex(8),allocatable :: eig_basis(:,:),eig_basis_tmp(:,:)
     logical                :: lanc_solve,Tflag,lanc_verbose
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_diag_d SUPERC: digonalization"
+#endif
     if(state_list%status)call es_delete_espace(state_list)
     state_list=es_init_espace()
     oldzero=1000.d0
@@ -111,13 +114,13 @@ contains
           endif
        endif
        !
+       !
        if(allocated(eig_values))deallocate(eig_values)
        if(allocated(eig_basis))deallocate(eig_basis)
        !
        if(ed_verbose>=3.AND.MPIMASTER)call start_timer()
        if(lanc_solve)then
-          allocate(eig_values(Neigen))
-          eig_values=0d0
+          allocate(eig_values(Neigen)) ; eig_values=0d0 
           !
           call build_Hv_sector_superc(isector)
           !
@@ -127,41 +130,47 @@ contains
           !
           select case (lanc_method)
           case default       !use P-ARPACK
+#ifdef _DEBUG
+             if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_diag_d SUPERC: calling P-Arpack"
+#endif
 #ifdef _MPI
              if(MpiStatus)then
                 call sp_eigh(MpiComm,spHtimesV_cc,eig_values,eig_basis,&
                      Nblock,&
                      Nitermax,&
                      tol=lanc_tolerance,&
-                     iverbose=(ed_verbose>3))
+                     iverbose=(ed_verbose>4))
              else
                 call sp_eigh(spHtimesV_cc,eig_values,eig_basis,&
                      Nblock,&
                      Nitermax,&
                      tol=lanc_tolerance,&
-                     iverbose=(ed_verbose>3))
+                     iverbose=(ed_verbose>4))
              endif
 #else
              call sp_eigh(spHtimesV_cc,eig_values,eig_basis,&
                   Nblock,&
                   Nitermax,&
                   tol=lanc_tolerance,&
-                  iverbose=(ed_verbose>3))
+                  iverbose=(ed_verbose>4))
 #endif
              !
              !
           case ("lanczos")   !use Simple Lanczos
+#ifdef _DEBUG
+             if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_diag_d SUPERC: calling Lanczos"
+#endif
 #ifdef _MPI
              if(MpiStatus)then
                 call sp_lanc_eigh(MpiComm,spHtimesV_cc,eig_values(1),eig_basis(:,1),Nitermax,&
-                     iverbose=(ed_verbose>3),threshold=lanc_tolerance)
+                     iverbose=(ed_verbose>4),threshold=lanc_tolerance)
              else
                 call sp_lanc_eigh(spHtimesV_cc,eig_values(1),eig_basis(:,1),Nitermax,&
-                     iverbose=(ed_verbose>3),threshold=lanc_tolerance)
+                     iverbose=(ed_verbose>4),threshold=lanc_tolerance)
              endif
 #else
              call sp_lanc_eigh(spHtimesV_cc,eig_values(1),eig_basis(:,1),Nitermax,&
-                  iverbose=(ed_verbose>3),threshold=lanc_tolerance)
+                  iverbose=(ed_verbose>4),threshold=lanc_tolerance)
 #endif
           end select
           !
@@ -172,9 +181,11 @@ contains
        else
           allocate(eig_values(Dim)) ; eig_values=0d0
           allocate(eig_basis_tmp(Dim,Dim)) ; eig_basis_tmp=zero
-          !
           call build_Hv_sector_superc(isector,eig_basis_tmp)
           !
+#ifdef _DEBUG
+          if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_diag_d SUPERC: calling LApack"
+#endif
           if(MpiMaster)call eigh(eig_basis_tmp,eig_values)
           if(dim==1)eig_basis_tmp(dim,dim)=one
           !
@@ -196,13 +207,14 @@ contains
        endif
        !
        if(ed_verbose>=3.AND.MPIMASTER)call stop_timer(unit=LOGfile)
+       if(ed_verbose>=4)write(LOGfile,*)"EigValues: ",eig_values(:Neigen)
+       if(ed_verbose>2)write(LOGfile,*)""
+       if(ed_verbose>2)write(LOGfile,*)""
        !
-       if(ed_verbose>=4)then
-          write(LOGfile,*)"EigValues: ",eig_values(:Neigen)
-          write(LOGfile,*)""
-          write(LOGfile,*)""
-       endif
-       !
+
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_diag_d SUPERC: building states list"
+#endif
        if(finiteT)then
           do i=1,Neigen
              call es_add_state(state_list,eig_values(i),eig_basis(:,i),isector,twin=Tflag,size=lanc_nstates_total)
@@ -224,7 +236,7 @@ contains
        if(MPIMASTER)then
           unit=free_unit()
           open(unit,file="eigenvalues_list"//reg(ed_file_suffix)//".ed",position='append',action='write')
-          call print_eigenvalues_list(isector,eig_values(1:Neigen),unit)
+          call print_eigenvalues_list(isector,eig_values(1:Neigen),unit,lanc_solve,mpiAllThreads)
           close(unit)
        endif
        !
@@ -234,6 +246,9 @@ contains
        !
     enddo sector
     if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine ed_diag_c
 
 
@@ -256,6 +271,9 @@ contains
     integer                          :: list_len
     integer,dimension(:),allocatable :: list_sector
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_pre_diag SUPERC: pre diagonalization analysis"
+#endif
     sectors_mask=.true.
     !
     if(ed_sectors)then
@@ -268,80 +286,19 @@ contains
           open(free_unit(unit),file=reg(SectorFile)//reg(ed_file_suffix)//".restart",status="old")
           open(free_unit(unit2),file="list_of_sectors"//reg(ed_file_suffix)//".ed")
           do istate=1,list_len
-             select case(ed_mode)
-             case default
-                read(unit,*,iostat=status)Nup,Ndw
-                isector = getSector(Nup,Ndw)
-                sectors_mask(isector)=.true.
-                write(unit2,*)isector,sectors_mask(isector),nup,ndw
-                do ishift=1,ed_sectors_shift
-                   Mdw = Ndw
-                   do isign=-1,1,2
-                      Mup = Nup + isign*ishift
-                      jsector = getSector(Mup,Mdw)
-                      sectors_mask(jsector)=.true.
-                      write(unit2,*)jsector,sectors_mask(jsector),Mup,Mdw
-                   enddo
-                   Mup = Nup
-                   do isign=-1,1,2
-                      Mdw = Ndw + isign*ishift
-                      jsector = getSector(Mup,Mdw)
-                      sectors_mask(jsector)=.true.
-                      write(unit2,*)jsector,sectors_mask(jsector),Mup,Mdw
-                   enddo
-                enddo
-             case("superc")
-                read(unit,*,iostat=status)sz
-                isector = getSector(Sz,1)
-                sectors_mask(isector)=.true.
-                write(unit2,*)isector,sectors_mask(isector),sz
-                do ishift=1,ed_sectors_shift
-                   do isign=-1,1,2
-                      Rz = Sz + isign*ishift
-                      jsector = getSector(Rz,1)
-                      sectors_mask(jsector)=.true.
-                      write(unit2,*)jsector,sectors_mask(jsector),Rz
-                   enddo
-                enddo
-             case("nonsu2")
-                if(Jz_basis)then
-                   read(unit,*,iostat=status)n,twoJz
-                   isector = getSector(n,twoJz)
-                   sectors_mask(isector)=.true.
-                   write(unit2,*)isector,sectors_mask(isector),n,twoJz
-                   do ishift=1,ed_sectors_shift
-                      M = n
-                      do isign=-1,1,2
-                         twoIz = twoJz + isign*ishift
-                         jsector = getSector(M,twoIz)
-                         sectors_mask(jsector)=.true.
-                         write(unit2,*)jsector,sectors_mask(jsector),M,twoIz
-                      enddo
-                      !
-                      twoIz = twoJz
-                      do isign=-1,1,2
-                         M = M + isign*ishift
-                         jsector = getSector(M,twoIz)
-                         sectors_mask(jsector)=.true.
-                         write(unit2,*)jsector,sectors_mask(jsector),M,twoIz
-                      enddo
-                   enddo
-                else
-                   read(unit,*,iostat=status)n
-                   isector = getSector(n,1)
-                   sectors_mask(isector)=.true.
-                   write(unit2,*)isector,sectors_mask(isector),n
-                   do ishift=1,ed_sectors_shift
-                      do isign=-1,1,2
-                         M = n + isign*ishift
-                         jsector = getSector(M,1)
-                         sectors_mask(jsector)=.true.
-                         write(unit2,*)jsector,sectors_mask(jsector),M
-                      enddo
-                   enddo
-                endif
-             end select
+             read(unit,*,iostat=status)sz
+             isector = getSector(Sz,1)
+             sectors_mask(isector)=.true.
+             write(unit2,*)isector,sectors_mask(isector),sz
              !
+             do ishift=1,ed_sectors_shift
+                do isign=-1,1,2
+                   Rz = Sz + isign*ishift
+                   jsector = getSector(Rz,1)
+                   sectors_mask(jsector)=.true.
+                   write(unit2,*)jsector,sectors_mask(jsector),Rz
+                enddo
+             enddo
           enddo
           close(unit)
           close(unit2)
@@ -376,12 +333,14 @@ contains
     type(histogram)     :: hist
     real(8)             :: hist_a,hist_b,hist_w
     integer             :: hist_n
-    integer,allocatable :: list_sector(:),count_sector(:)    
+    integer,allocatable :: list_sector(:),count_sector(:)
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_post_diag SUPERC: post diagonalization analysis"
+#endif
     !POST PROCESSING:
     if(MPIMASTER)then
-       unit=free_unit()
-       open(unit,file="state_list"//reg(ed_file_suffix)//".ed")
-       call print_state_list(unit)
+       open(free_unit(unit),file="state_list"//reg(ed_file_suffix)//".ed")
+       call save_state_list(unit)
        close(unit)
     endif
     if(ed_verbose>=2)call print_state_list(LOGfile)
@@ -399,7 +358,7 @@ contains
     !
     !
     numgs=es_return_gs_degeneracy(state_list,gs_threshold)
-    if(numgs>Nsectors)stop "ed_diag: too many gs"
+    if(numgs>Nsectors)stop "ED_POST_DIAG SUPERC: Deg(GS) > Nsectors!"
     if(MPIMASTER.AND.ed_verbose>=2)then
        do istate=1,numgs
           isector = es_return_sector(state_list,istate)
@@ -523,13 +482,41 @@ contains
     endif
   end subroutine print_state_list
 
-  subroutine print_eigenvalues_list(isector,eig_values,unit)
+  subroutine save_state_list(unit)
+    integer :: nup,ndw,sz,n,isector
+    integer :: istate
+    integer :: unit
+    real(8) :: Estate,Jz
+    if(MPIMASTER)then
+       do istate=1,state_list%size
+          isector = es_return_sector(state_list,istate)
+          sz   = getsz(isector)
+          write(unit,"(i8,i12,i8)")istate,isector,sz
+       enddo
+    endif
+  end subroutine save_state_list
+
+
+  subroutine print_eigenvalues_list(isector,eig_values,unit,lanc,allt)    
     integer              :: isector
     real(8),dimension(:) :: eig_values
     integer              :: unit,i
+    logical              :: lanc,allt
     if(MPIMASTER)then
-       write(unit,"(A7,A4)")" # Sector","Sz"
-       write(unit,"(I4,2x,I4)")isector,getsz(isector)
+       if(lanc)then
+          if(allt)then
+             write(unit,"(A9,A4)")" # Sector","Sz"
+          else
+             write(unit,"(A10,A4)")" #T Sector","Sz"
+          endif
+       else
+          write(unit,"(A10,A4)")" #X Sector","Sz"
+       endif
+       write(unit,"(I9,I4)")isector,getsz(isector)
+       do i=1,size(eig_values)
+          write(unit,*)eig_values(i)
+       enddo
+       write(unit,*)""
     endif
   end subroutine print_eigenvalues_list
 

@@ -50,6 +50,17 @@ MODULE ED_AUX_FUNX
      module procedure :: ed_set_suffix_c
   end interface ed_set_suffix
 
+  !   !This is to overload read/write procedure to GFmatrix derived types
+  ! #if __GNUC__ > 6
+  !   interface read(formatted)
+  !      procedure read_formatted
+  !   end interface read(formatted)
+
+  !   interface write(formatted)
+  !      procedure write_formatted
+  !   end interface write(formatted)
+  ! #endif
+
 
   !FERMIONIC OPERATORS IN BITWISE OPERATIONS
   public :: c,cdg
@@ -59,6 +70,34 @@ MODULE ED_AUX_FUNX
   public :: bjoin
   !BINARY SEARCH
   public :: binary_search
+  !AUX RESHAPE FUNCTIONS (internal use)
+  public :: index_stride_so
+  public :: lso2nnn_reshape
+  public :: so2nn_reshape
+  public :: nnn2lso_reshape
+  public :: nn2so_reshape
+  public :: so2os_reshape
+  public :: os2so_reshape
+  !SEARCH CHEMICAL POTENTIAL, this should go into DMFT_TOOLS I GUESS
+  public :: ed_search_variable
+  public :: search_chemical_potential
+  !SOC RELATED STUFF
+  public :: SOC_jz_symmetrize
+  public :: atomic_SOC
+  public :: atomic_SOC_rotation
+  public :: orbital_Lz_rotation_NorbNspin
+  public :: orbital_Lz_rotation_Norb
+  public :: atomic_j
+  !ALLOCATE/DEALLOCATE GRIDS
+  public :: allocate_grids
+  public :: deallocate_grids
+  !PRINT STATE VECTORS
+  public :: print_state_vector
+  !PRINT LOCAL HAMILTONIAN
+  public :: print_hloc
+  !SET/RESET GLOBAL FILE SUFFIX
+  public :: ed_set_suffix
+  public :: ed_reset_suffix
   !MPI PROCEDURES
 #ifdef _MPI
   interface scatter_vector_MPI
@@ -80,41 +119,11 @@ MODULE ED_AUX_FUNX
      module procedure :: d_allgather_vector_MPI
      module procedure :: c_allgather_vector_MPI
   end interface allgather_vector_MPI
-
   public :: scatter_vector_MPI
   public :: scatter_basis_MPI
   public :: gather_vector_MPI
   public :: allgather_vector_MPI
 #endif
-  !AUX RESHAPE FUNCTIONS (internal use)
-  public :: index_stride_so
-  public :: lso2nnn_reshape
-  public :: so2nn_reshape
-  public :: nnn2lso_reshape
-  public :: nn2so_reshape
-  public :: so2os_reshape
-  public :: os2so_reshape
-  !
-  !SEARCH CHEMICAL POTENTIAL, this should go into DMFT_TOOLS I GUESS
-  public :: ed_search_variable
-  public :: search_chemical_potential
-  !SOC RELATED STUFF
-  public :: SOC_jz_symmetrize
-  public :: atomic_SOC
-  public :: atomic_SOC_rotation
-  public :: orbital_Lz_rotation_NorbNspin
-  public :: orbital_Lz_rotation_Norb
-  public :: atomic_j
-  !ALLOCATE/DEALLOCATE GRIDS
-  public :: allocate_grids
-  public :: deallocate_grids
-  !PRINT STATE VECTORS
-  public :: print_state_vector
-  !PRINT LOCAL HAMILTONIAN
-  public :: print_hloc
-  !SET/RESET GLOBAL FILE SUFFIX
-  public :: ed_set_suffix
-  public :: ed_reset_suffix
 
 
 contains
@@ -140,7 +149,7 @@ contains
 
 
 
-  
+
 
   !##################################################################
   !##################################################################
@@ -287,12 +296,17 @@ contains
 
 
 
+
+
+
+
+
+
   !##################################################################
   !##################################################################
   !AUXILIARY COMPUTATIONAL ROUTINES ARE HERE BELOW:
   !##################################################################
   !##################################################################
-
 #ifdef _MPI
   !! Scatter V into the arrays Vloc on each thread: sum_threads(size(Vloc)) must be equal to size(v)
   subroutine d_scatter_vector_MPI(MpiComm,v,vloc)
@@ -304,6 +318,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_scatter_vector_MPI: scatter v into vloc"
+#endif
     !
     if( MpiComm == MPI_UNDEFINED .OR. MpiComm == Mpi_Comm_Null )return
     ! stop "scatter_vector_MPI error: MpiComm == MPI_UNDEFINED"
@@ -355,6 +373,10 @@ contains
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_scatter_vector_MPI: scatter v into vloc"
+#endif
+    !
     if( MpiComm == MPI_UNDEFINED ) stop "scatter_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
     MpiSize   = get_size_MPI(MpiComm)
@@ -389,6 +411,10 @@ contains
     real(8),dimension(:,:) :: v    !size[N,N]
     real(8),dimension(:,:) :: vloc !size[Nloc,Neigen]
     integer                :: N,Nloc,Neigen,i
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_scatter_basis_MPI: scatter many v"
+#endif
     N      = size(v,1)
     Nloc   = size(vloc,1)
     Neigen = size(vloc,2)
@@ -406,6 +432,11 @@ contains
     complex(8),dimension(:,:) :: v    !size[N,N]
     complex(8),dimension(:,:) :: vloc !size[Nloc,Neigen]
     integer                   :: N,Nloc,Neigen,i
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_scatter_basis_MPI: scatter many v"
+#endif
+    !
     N      = size(v,1)
     Nloc   = size(vloc,1)
     Neigen = size(vloc,2)
@@ -431,6 +462,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_gather_basis_MPI: gather  v"
+#endif
     !
     if(  MpiComm == MPI_UNDEFINED .OR. MpiComm == Mpi_Comm_Null ) return
     !stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
@@ -482,6 +517,10 @@ contains
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
     !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_gather_basis_MPI: gather  v"
+#endif
+    !
     if( MpiComm == MPI_UNDEFINED ) stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
     MpiSize   = get_size_MPI(MpiComm)
@@ -521,6 +560,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG d_allgather_basis_MPI: allgather v"
+#endif
     !
     if(  MpiComm == MPI_UNDEFINED .OR. MpiComm == Mpi_Comm_Null ) return
     ! stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
@@ -566,6 +609,10 @@ contains
     integer,dimension(:),allocatable :: Counts,Offset
     integer                          :: MpiSize,MpiIerr
     logical                          :: MpiMaster
+    !
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG c_allgather_basis_MPI: allgather v"
+#endif
     !
     if( MpiComm == MPI_UNDEFINED ) stop "gather_vector_MPI error: MpiComm == MPI_UNDEFINED"
     !
@@ -925,6 +972,10 @@ contains
     integer               :: unit
     logical :: master
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_search_variable: adjust var"
+#endif
+    !
     if(nread==0d0)return
     master=.true.
 #ifdef _MPI    
@@ -960,8 +1011,15 @@ contains
        delta_v = var-var_old
        if(count>1)chich = delta_v/(delta_n+1d-10) !1d-4*nerr)  !((ntmp-nold)/(var-var_old))**-1
        !
-       !Add here controls on chich: not to be too small....
-       if(chich>10d0)chich=2d0*chich/abs(chich) !do nothing?
+       !Add here controls on chich: not to be too large nor too small....
+       if(abs(chich)>10d0) chich=2d0*chich/abs(chich) !do nothing?
+       if(abs(chich)<1d-8.AND.abs(ndiff)>nerr) then
+          if(chich<0.d0) then
+             chich=-1d-1
+          else
+             chich=1.d-1
+          endif
+       endif
        !
        chi_shift = ndiff*chich
        !
@@ -1036,6 +1094,10 @@ contains
     integer               :: unit
     logical :: master
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG search_chemical_potential: adjust mu"
+#endif
+    !
     if(nread==0d0)return
     master=.true.
 #ifdef _MPI    
@@ -1044,15 +1106,15 @@ contains
     !
     if(master)then
        !
-       if(count==0)then
-          inquire(file="var.restart",EXIST=bool)
-          if(bool)then
-             open(free_unit(unit),file="var.restart")
-             read(unit,*)var,ndelta
-             ndelta=abs(ndelta)*ncoeff
-             close(unit)
-          endif
-       endif
+       !if(count==0)then
+       !   inquire(file="var.restart",EXIST=bool)
+       !   if(bool)then
+       !      open(free_unit(unit),file="var.restart")
+       !      read(unit,*)var,ndelta
+       !      ndelta=abs(ndelta)*ncoeff
+       !      close(unit)
+       !   endif
+       !endif
        !
        ndiff=ntmp-nread
        nratio = 0.5d0;!nratio = 1.d0/(6.d0/11.d0*pi)
@@ -1146,9 +1208,8 @@ contains
        !
        write(LOGfile,"(A,I5)")"count= ",count
        write(LOGfile,"(A,L2)")"Converged=",converged
-       print*,""
        !
-       open(free_unit(unit),file="var.restart")
+       open(free_unit(unit),file="xmu.restart")
        write(unit,*)var,ndelta
        close(unit)
        !

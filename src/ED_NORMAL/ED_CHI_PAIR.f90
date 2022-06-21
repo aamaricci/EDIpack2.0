@@ -19,17 +19,17 @@ MODULE ED_CHI_PAIR
 
   public :: build_chi_pair_normal
 
-  integer                      :: istate,iorb,jorb,ispin,jspin
-  integer                      :: isector,jsector,ksector
-  real(8),allocatable          :: vvinit(:),vvinit_tmp(:)
-  real(8),allocatable          :: alfa_(:),beta_(:)
-  integer                      :: ialfa
-  integer                      :: jalfa
-  integer                      :: ipos,jpos
-  integer                      :: i,j,k
-  real(8)                      :: sgn,norm2
-  real(8),dimension(:),pointer :: state_dvec
-  real(8)                      :: state_e
+  integer                          :: istate,iorb,jorb,ispin,jspin
+  integer                          :: isector,jsector,ksector
+  real(8),allocatable              :: vvinit(:),vvinit_tmp(:)
+  real(8),allocatable              :: alfa_(:),beta_(:)
+  integer                          :: ialfa
+  integer                          :: jalfa
+  integer                          :: ipos,jpos
+  integer                          :: i,j,k
+  real(8)                          :: sgn,norm2
+  real(8),dimension(:),allocatable :: state_dvec
+  real(8)                          :: state_e
 
 contains
 
@@ -40,12 +40,19 @@ contains
   ! \chi_ab = <Delta*_a(\tau)Delta_b(0)>
   !+------------------------------------------------------------------+
   subroutine build_chi_pair_normal()
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_Chi_spin_normal: build pair-Chi"
+#endif
     write(LOGfile,"(A)")"Get impurity pair Chi:"
     do iorb=1,Norb
        write(LOGfile,"(A)")"Get Chi_pair_l"//reg(txtfy(iorb))
        if(MPIMASTER)call start_timer()
        call lanc_ed_build_pairChi_diag(iorb)
        if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
     enddo
 
     if(Norb>1)then
@@ -55,6 +62,9 @@ contains
              if(MPIMASTER)call start_timer()
              call lanc_ed_build_pairChi_mix(iorb,jorb)
              if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+             if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
           end do
        end do
        !
@@ -90,6 +100,11 @@ contains
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ,sectorK
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_pairChi diag: Lanczos build pair Chi l"//str(iorb)
+#endif
+    !
     if(ed_total_ud)then
        ialfa = 1
        ipos  = iorb
@@ -103,12 +118,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        ksector = getCsector(ialfa,2,isector)
@@ -119,8 +134,8 @@ contains
              call build_sector(isector,sectorI)
              call build_sector(ksector,sectorK)
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  'Apply Cup*Cdw  :',isector,sectorI%Nups,sectorI%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
+                  'Apply Cup*Cdw',isector,sectorI%Nups,sectorI%Ndws
 
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
@@ -149,16 +164,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        endif
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -177,6 +183,11 @@ contains
     integer                     :: iorb,jorb
     type(sector)                :: sectorI,sectorJ,sectorK
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_pairChi mix: Lanczos build pair Chi l"//str(iorb)//",m"//str(jorb)
+#endif
+    !    
     if(ed_total_ud)then
        ialfa = 1
        jalfa = 1
@@ -192,12 +203,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        !
@@ -209,8 +220,8 @@ contains
              call build_sector(isector,sectorI)
              call build_sector(ksector,sectorK)
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-                  'Apply C_bup*C_bdw + C_aup*C_adw  :',isector,sectorI%Nups,sectorI%Ndws
+             if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
+                  'Apply C_bu*C_bd+C_au*C_ad',isector,sectorI%Nups,sectorI%Ndws
              allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
              allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
              !
@@ -251,16 +262,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        endif
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -284,6 +286,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw,chisp
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_pairChi: add-up to GF"
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -300,6 +307,10 @@ contains
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_pairChi: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     do j=1,nlanc

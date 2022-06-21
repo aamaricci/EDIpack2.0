@@ -11,6 +11,10 @@ MODULE ED_BATH_FIT
   USE ED_AUX_FUNX
   USE ED_BATH
   USE ED_BATH_FUNCTIONS
+  USE ED_FIT_COMMON
+  USE ED_FIT_NORMAL
+  USE ED_FIT_HYBRID
+  USE ED_FIT_REPLICA
 #ifdef _MPI
   USE MPI
   USE SF_MPI
@@ -40,33 +44,6 @@ MODULE ED_BATH_FIT
   public :: ed_chi2_fitgf
 
 
-  integer                               :: Ldelta
-  complex(8),dimension(:,:),allocatable :: Gdelta
-  complex(8),dimension(:,:),allocatable :: Fdelta
-  real(8),dimension(:),allocatable      :: Xdelta,Wdelta
-  integer                               :: totNorb,totNspin,totNso
-  integer,dimension(:),allocatable      :: getIorb,getJorb,getIspin,getJspin
-  integer                               :: Orb_indx,Spin_indx,Spin_mask
-  type(effective_bath)                  :: chi2_bath
-  integer                               :: cg_iter_count=0
-  logical                               :: para_
-
-  integer                               :: MPI_RANK=0
-  integer                               :: MPI_SIZE=1
-  logical                               :: MPI_MASTER=.true.
-  integer                               :: MPI_IERR
-
-  !This contains the number of the lambda expansion
-  !for each replica of the impurity
-  integer                              :: Nlambdas
-  !
-  !This is a dummy object which is used here to point
-  !to the replica bath lambdas, i.e. the coefficients
-  !of the bath item-th Hamiltonian expansion 
-  type nsymm_vector
-     real(8),dimension(:),allocatable   :: element          
-  end type nsymm_vector
-
 contains
 
 
@@ -81,6 +58,10 @@ contains
     real(8),dimension(:)            :: bath
     integer,optional                :: ispin,iorb
     integer                         :: ispin_
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+    write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_normal: Start Chi**2 fit"
+#endif
     ispin_=1;if(present(ispin))ispin_=ispin
     call assert_shape(fg,[Nspin,Nspin,Norb,Norb,size(fg,5)],"chi2_fitgf_generic_normal","fg")
     !
@@ -127,6 +108,9 @@ contains
     !set trim_state_list to true after the first fit has been done: this 
     !marks the ends of the cycle of the 1st DMFT loop.
     trim_state_list=.true.
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine chi2_fitgf_generic_normal
 
   subroutine chi2_fitgf_generic_superc(fg,bath,ispin,iorb)
@@ -134,6 +118,10 @@ contains
     real(8),dimension(:)            :: bath
     integer,optional                :: ispin,iorb
     integer                         :: ispin_
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+    write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_superc: Start Chi**2 fit"
+#endif
     ispin_=1;if(present(ispin))ispin_=ispin
     call assert_shape(fg,[2,Nspin,Nspin,Norb,Norb,size(fg,6)],"chi2_fitgf_generic_superc","fg")
     !
@@ -171,6 +159,9 @@ contains
     !set trim_state_list to true after the first fit has been done: this 
     !marks the ends of the cycle of the 1st DMFT loop.
     trim_state_list=.true.
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine chi2_fitgf_generic_superc
 
 
@@ -187,6 +178,10 @@ contains
     integer,optional                :: ispin,iorb
     integer                         :: ispin_
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+    write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_normal_mpi: Start Chi**2 fit"
+#endif
     MPI_MASTER=get_Master_MPI(comm)
     !
     ispin_=1;if(present(ispin))ispin_=ispin
@@ -238,6 +233,9 @@ contains
     !set trim_state_list to true after the first fit has been done: this 
     !marks the ends of the cycle of the 1st DMFT loop.
     trim_state_list=.true.
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine chi2_fitgf_generic_normal_mpi
 
   subroutine chi2_fitgf_generic_superc_mpi(comm,fg,bath,ispin,iorb)
@@ -246,6 +244,10 @@ contains
     real(8),dimension(:)              :: bath
     integer,optional                  :: ispin,iorb
     integer                           :: ispin_
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+    write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_superc_mpi: Start Chi**2 fit"
+#endif
     !
     MPI_MASTER=get_Master_MPI(comm)
     !
@@ -293,32 +295,14 @@ contains
     !set trim_state_list to true after the first fit has been done: this 
     !marks the ends of the cycle of the 1st DMFT loop.
     trim_state_list=.true.
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine chi2_fitgf_generic_superc_mpi
 #endif
 
 
 
-
-  !*****************************************************************************
-  !*****************************************************************************
-  !*****************************************************************************
-  !*****************************************************************************
-  !NORMAL bath
-  include "fitgf_normal_normal.f90"
-  include "fitgf_normal_superc.f90"
-  include "fitgf_normal_nonsu2.f90"
-
-  !HYBRID bath
-  include "fitgf_hybrid_normal.f90"  
-  include "fitgf_hybrid_superc.f90"  
-  include "fitgf_hybrid_nonsu2.f90"
-
-  !REPLICA bath
-  include "fitgf_replica.f90"
-  !*****************************************************************************
-  !*****************************************************************************
-  !*****************************************************************************
-  !*****************************************************************************
 
 
 
@@ -346,6 +330,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     ! Check dimensions !
     Nsites=size(bath,1)
     !
@@ -356,6 +343,9 @@ contains
     !
     bath_tmp=0d0
     do ilat = 1, Nsites
+#ifdef _DEBUG
+       write(Logfile,"(A)")"DEBUG ed_fit_bath_sites_normal: Start Chi**2 fit for site:"//str(ilat)
+#endif
        bath_tmp(ilat,:)=bath(ilat,:)
        impHloc = Hloc(ilat,:,:,:,:)
        !
@@ -387,6 +377,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     Nsites=size(bath,1)
     !
     do ilat = 1,Nsites
@@ -398,6 +391,9 @@ contains
     !
     do ilat=1, Nsites
        !
+#ifdef _DEBUG
+       write(Logfile,"(A)")"DEBUG ed_fit_bath_sites_superc: Start Chi**2 fit for site:"//str(ilat)
+#endif
        bath_tmp(ilat,:) = bath(ilat,:)
        impHloc = Hloc(ilat,:,:,:,:)
        !
@@ -434,6 +430,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     MPI_RANK = get_Rank_MPI(comm)
     MPI_SIZE = get_Size_MPI(comm)
     MPI_MASTER=get_Master_MPI(comm)
@@ -448,6 +447,9 @@ contains
     !
     bath_tmp=0d0
     do ilat = 1+MPI_RANK,Nsites,MPI_SIZE
+#ifdef _DEBUG
+       write(Logfile,"(A)")"DEBUG ed_fit_bath_sites_normal_mpi: Start Chi**2 fit for site:"//str(ilat)
+#endif
        bath_tmp(ilat,:)=bath(ilat,:)
        impHloc = Hloc(ilat,:,:,:,:)
        !
@@ -480,6 +482,9 @@ contains
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
     MPI_RANK = get_Rank_MPI(comm)
     MPI_SIZE = get_Size_MPI(comm)
     MPI_MASTER=get_Master_MPI(comm)
@@ -487,6 +492,9 @@ contains
     Nsites=size(bath,1)
     !
     do ilat = 1 + MPI_RANK, Nsites, MPI_SIZE
+#ifdef _DEBUG
+       write(Logfile,"(A)")"DEBUG ed_fit_bath_sites_superc_mpi: Start Chi**2 fit for site:"//str(ilat)
+#endif
        check_dim = check_bath_dimension(bath(ilat,:))
        if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
     end do

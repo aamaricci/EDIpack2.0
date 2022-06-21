@@ -18,17 +18,17 @@ MODULE ED_CHI_SPIN
 
   public :: build_chi_spin_normal
 
-  integer                      :: istate,iorb,jorb,ispin
-  integer                      :: isector
-  real(8),allocatable          :: vvinit(:)
-  real(8),allocatable          :: alfa_(:),beta_(:)
-  integer                      :: ialfa
-  integer                      :: jalfa
-  integer                      :: ipos,jpos
-  integer                      :: i,j
-  real(8)                      :: sgn,norm2
-  real(8),dimension(:),pointer :: state_dvec
-  real(8)                      :: state_e
+  integer                          :: istate,iorb,jorb,ispin
+  integer                          :: isector
+  real(8),allocatable              :: vvinit(:)
+  real(8),allocatable              :: alfa_(:),beta_(:)
+  integer                          :: ialfa
+  integer                          :: jalfa
+  integer                          :: ipos,jpos
+  integer                          :: i,j
+  real(8)                          :: sgn,norm2
+  real(8),dimension(:),allocatable :: state_dvec
+  real(8)                          :: state_e
 
 
 
@@ -45,12 +45,19 @@ contains
   ! reduction for both values of isign in the same call.
   !+------------------------------------------------------------------+
   subroutine build_chi_spin_normal()
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_Chi_spin_normal: build spin-Chi"
+#endif
     write(LOGfile,"(A)")"Get impurity spin Chi:"
     do iorb=1,Norb
        write(LOGfile,"(A)")"Get Chi_spin_l"//reg(txtfy(iorb))
        if(MPIMASTER)call start_timer()
        call lanc_ed_build_spinChi_diag(iorb)
        if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
     enddo
     !
     if(Norb>1)then
@@ -60,6 +67,9 @@ contains
              if(MPIMASTER)call start_timer()
              call lanc_ed_build_spinChi_mix(iorb,jorb)
              if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+             if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
           end do
        end do
        !
@@ -104,6 +114,11 @@ contains
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_spinChi diag: Lanczos build spin Chi l"//str(iorb)
+#endif
+    !
     if(ed_total_ud)then
        ialfa = 1
        ipos  = iorb
@@ -117,18 +132,18 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'Apply Sz  :',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'Apply Sz',isector,sectorI%Nups,sectorI%Ndws
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
           do i=1,sectorI%Dim
              call apply_op_Sz(i,sgn,ipos,ialfa,sectorI)            
@@ -143,16 +158,7 @@ contains
        call add_to_lanczos_spinChi(norm2,state_e,alfa_,beta_,iorb,iorb)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
     enddo
     return
   end subroutine lanc_ed_build_spinChi_diag
@@ -170,6 +176,12 @@ contains
     type(sector)                :: sectorI,sectorJ
     real(8)                     :: Siorb,Sjorb
     !
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_spinChi mix: Lanczos build spin Chi l"//str(iorb)//",m"//str(jorb)
+#endif
+    !    
     if(ed_total_ud)then
        ialfa = 1
        jalfa = 1
@@ -187,20 +199,20 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        !EVALUATE (Sz_jorb + Sz_iorb)|gs> = Sz_jorb|gs> + Sz_iorb|gs>
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'From sector  :',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose==3)write(LOGfile,"(A,I15)")'Apply (Sz_jorb + Sz_iorb):',isector
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'From sector',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I15)")'Apply (Sz_a + Sz_b)',isector
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
           do i=1,sectorI%Dim
              call apply_op_Sz(i,Siorb,ipos,ialfa,sectorI)
@@ -217,16 +229,7 @@ contains
        call add_to_lanczos_spinChi(norm2,state_e,alfa_,beta_,iorb,iorb)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
     enddo
     return
   end subroutine lanc_ed_build_spinChi_mix
@@ -249,6 +252,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw,chisp
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_spinChi: add-up to GF"
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -265,6 +273,10 @@ contains
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_spinChi: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     do j=1,nlanc

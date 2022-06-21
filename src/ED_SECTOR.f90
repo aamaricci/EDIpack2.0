@@ -91,10 +91,11 @@ contains
     integer            :: dim,iud,i,ibath,iorb
     integer            :: ivec(Ns),jvec(Ns)
     !
+    !
     if(self%status)call delete_sector(self)
     !
     self%index = isector
-
+    !
     select case(ed_mode)
     case default
        allocate(self%H(2*Ns_Ud))
@@ -105,6 +106,10 @@ contains
        !
        call get_Nup(isector,self%Nups);self%Nup=sum(self%Nups)
        call get_Ndw(isector,self%Ndws);self%Ndw=sum(self%Ndws)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A,2"//str(Ns_Ud)//"I3)")&
+            "DEBUG build_sector: sector:"//str(isector)//"- Nups,Ndws",self%Nups,self%Ndws
+#endif
        call get_DimUp(isector,self%DimUps);self%DimUp=product(self%DimUps)
        call get_DimDw(isector,self%DimDws);self%DimDw=product(self%DimDws)
        self%DimEl=self%DimUp*self%DimDw
@@ -134,6 +139,10 @@ contains
     case ("superc")
        allocate(self%H(1))
        self%Sz    = getSz(isector)
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A,I4)")&
+            "DEBUG build_sector: sector:"//str(isector)//"- Sz",self%Sz
+#endif
        self%DimEl = getDim(isector)
        self%DimPh = Nph+1
        self%Dim   = self%DimEl*self%DimPh
@@ -155,6 +164,10 @@ contains
        allocate(self%H(1))
        if(Jz_basis)then
           self%Ntot  = getN(isector)
+#ifdef _DEBUG
+          if(ed_verbose>3)write(Logfile,"(A,I4)")&
+               "DEBUG build_sector: sector:"//str(isector)//"- N",self%Ntot
+#endif
           self%DimEl = getDim(isector)
           self%DimPh = Nph+1
           self%Dim   = self%DimEl*self%DimPh
@@ -184,6 +197,10 @@ contains
           enddo
        else
           self%Ntot  = getN(isector)
+#ifdef _DEBUG
+          if(ed_verbose>4)write(Logfile,"(A,I4)")&
+               "DEBUG build_sector: sector:"//str(isector)//"- N",self%Ntot
+#endif
           self%DimEl = getDim(isector)
           self%DimPh = Nph+1
           self%Dim   = self%DimEl*self%DimPh
@@ -209,6 +226,9 @@ contains
 
   subroutine delete_sector(self)
     type(sector) :: self
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A,I4)")"DEBUG delete_sector"
+#endif
     call map_deallocate(self%H)
     if(allocated(self%H))deallocate(self%H)
     if(allocated(self%DimUps))deallocate(self%DimUps)
@@ -457,10 +477,12 @@ contains
     case("superc","nonsu2")
        ii = sectorI%H(1)%map(i)
        Ib = bdecomp(ii,2*Ns)
-       do iorb=1,Norb
-          Nup(iorb)= dble(ib(iorb))
-          Ndw(iorb)= dble(ib(iorb+Ns))
-       enddo
+       Nup = Ib(1:Ns)
+       Ndw = Ib(Ns+1:)
+       ! do ii=1,Ns
+       !    Nup(ii)= ib(ii)
+       !    Ndw(ii)= ib(ii+Ns)
+       ! enddo
     end select
     !
   end subroutine build_op_Ns

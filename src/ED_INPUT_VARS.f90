@@ -1,7 +1,7 @@
 MODULE ED_INPUT_VARS
   USE SF_VERSION
   USE SF_PARSE_INPUT
-  USE SF_IOTOOLS, only:str
+  USE SF_IOTOOLS, only:str,free_unit
   USE ED_VERSION
   implicit none
 
@@ -35,7 +35,12 @@ MODULE ED_INPUT_VARS
   real(8)              :: gs_threshold        !Energy threshold for ground state degeneracy loop up
   real(8)              :: deltasc             !breaking symmetry field
   real(8)              :: sb_field            !symmetry breaking field
-
+  !
+  real(8),dimension(5) :: spin_field_x        !magnetic field per orbital coupling to X-spin component
+  real(8),dimension(5) :: spin_field_y        !magnetic field per orbital coupling to Y-spin component
+  real(8),dimension(5) :: spin_field_z        !magnetic field per orbital coupling to Z-spin component
+  real(8),dimension(4) :: exc_field           !external field coupling to exciton order parameter
+  real(8),dimension(5) :: pair_field          !pair field per orbital coupling to s-wave order parameter component
   !
   logical              :: chispin_flag        !evaluate spin susceptibility
   logical              :: chidens_flag        !evaluate dens susceptibility
@@ -77,7 +82,7 @@ MODULE ED_INPUT_VARS
   real(8)              :: cg_Ftol             !Tolerance in the cg fit
   integer              :: cg_stop             !fit stop condition:0-3, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).
   integer              :: cg_Weight           !CGfit mode 0=1, 1=1/n , 2=1/w_n weight
-  integer              :: cg_pow              !fit power for the calculation of the Chi distance function as |G0 - G0and|**cg_pow
+  integer              :: cg_pow              !fit power to generalize the distance as |G0 - G0and|**cg_pow
   logical              :: cg_minimize_ver     !flag to pick old (Krauth) or new (Lichtenstein) version of the minimize CG routine
   real(8)              :: cg_minimize_hh      !unknown parameter used in the CG minimize procedure.  
   !
@@ -123,8 +128,12 @@ contains
 #endif
     character(len=*) :: INPUTunit
     integer,optional :: comm
-    logical          :: master=.true.
+    logical          :: master=.true.,bool
     integer          :: i,rank=0
+    integer          :: unit_xmu
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A,A)")"DEBUG ed_read_input: read input from",trim(INPUTunit)
+#endif
 #ifdef _MPI
     if(present(comm))then
        master=get_Master_MPI(comm)
@@ -158,7 +167,14 @@ contains
     call parse_input_variable(xmu,"XMU",INPUTunit,default=0.d0,comment="Chemical potential. If HFMODE=T, xmu=0 indicates half-filling condition.")
     call parse_input_variable(g_ph,"G_PH",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="Electron-phonon coupling constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
-    !
+
+    call parse_input_variable(spin_field_x,"SPIN_FIELD_X",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to X-spin component")
+    call parse_input_variable(spin_field_y,"SPIN_FIELD_Y",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Y-spin component")
+    call parse_input_variable(spin_field_z,"SPIN_FIELD_Z",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Z-spin component")
+    call parse_input_variable(exc_field,"EXC_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0],comment="external field coupling to exciton order parameters")
+    call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="pair field per orbital coupling to s-wave order parameter component")
+
+
     call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !
     call parse_input_variable(ed_diag_type,"ED_DIAG_TYPE",INPUTunit,default="lanc",comment="flag to select the diagonalization type: 'lanc' for Lanczos/Davidson, 'full' for Full diagonalization method")
     call parse_input_variable(ed_finite_temp,"ED_FINITE_TEMP",INPUTunit,default=.false.,comment="flag to select finite temperature method. note that if T then lanc_nstates_total must be > 1")
@@ -214,14 +230,14 @@ contains
     call parse_input_variable(lanc_tolerance,"LANC_TOLERANCE",INPUTunit,default=1d-18,comment="Tolerance for the Lanczos iterations as used in Arpack and plain lanczos.")
     call parse_input_variable(lanc_dim_threshold,"LANC_DIM_THRESHOLD",INPUTunit,default=1024,comment="Min dimension threshold to use Lanczos determination of the spectrum rather than Lapack based exact diagonalization.")
     !
-    call parse_input_variable(cg_method,"CG_METHOD",INPUTunit,default=0,comment="Conjugate-Gradient method: 0=NR, 1=minimize.")
+    call parse_input_variable(cg_method,"CG_METHOD",INPUTunit,default=0,comment="Conjugate-Gradient method: 0=NumericalRecipes, 1=minimize.")
     call parse_input_variable(cg_grad,"CG_GRAD",INPUTunit,default=0,comment="Gradient evaluation method: 0=analytic (default), 1=numeric.")
     call parse_input_variable(cg_ftol,"CG_FTOL",INPUTunit,default=0.00001d0,comment="Conjugate-Gradient tolerance.")
-    call parse_input_variable(cg_stop,"CG_STOP",INPUTunit,default=0,comment="Conjugate-Gradient stopping condition: 0-3, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).")
+    call parse_input_variable(cg_stop,"CG_STOP",INPUTunit,default=0,comment="Conjugate-Gradient stopping condition: 0-2, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).")
     call parse_input_variable(cg_niter,"CG_NITER",INPUTunit,default=500,comment="Max. number of Conjugate-Gradient iterations.")
     call parse_input_variable(cg_weight,"CG_WEIGHT",INPUTunit,default=1,comment="Conjugate-Gradient weight form: 1=1.0, 2=1/n , 3=1/w_n.")
     call parse_input_variable(cg_scheme,"CG_SCHEME",INPUTunit,default='weiss',comment="Conjugate-Gradient fit scheme: delta or weiss.")
-    call parse_input_variable(cg_pow,"CG_POW",INPUTunit,default=2,comment="Fit power for the calculation of the Chi distance function as 1/L*|G0 - G0and|**cg_pow ")
+    call parse_input_variable(cg_pow,"CG_POW",INPUTunit,default=2,comment="Fit power for the calculation of the generalized distance as |G0 - G0and|**cg_pow")
     call parse_input_variable(cg_minimize_ver,"CG_MINIMIZE_VER",INPUTunit,default=.false.,comment="Flag to pick old/.false. (Krauth) or new/.true. (Lichtenstein) version of the minimize CG routine")
     call parse_input_variable(cg_minimize_hh,"CG_MINIMIZE_HH",INPUTunit,default=1d-4,comment="Unknown parameter used in the CG minimize procedure.")
     !
@@ -254,6 +270,17 @@ contains
        call save_input(INPUTunit)
        call scifor_version()
        call code_version(version)
+    endif
+    !
+    if(nread .ne. 0d0) then
+      inquire(file="xmu.restart",EXIST=bool)
+      if(bool)then
+        open(free_unit(unit_xmu),file="xmu.restart")
+        read(unit_xmu,*)xmu,ndelta
+        ndelta=abs(ndelta)*ncoeff
+        close(unit_xmu)
+        write(*,"(A,F9.7,A)")"Adjusting XMU to ",xmu," as per provided xmu.restart "
+      endif
     endif
     !Act on the input variable only after printing.
     !In the new parser variables are hard-linked into the list:

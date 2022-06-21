@@ -28,17 +28,22 @@ contains
 
   subroutine ed_checks_global
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_checks_global: Checking input inconsistencies"
+#endif
+    !
     if(Lfit>Lmats)Lfit=Lmats
     if(Nspin>2)stop "ED ERROR: Nspin > 2 is currently not supported"
     if(Norb>5)stop "ED ERROR: Norb > 5 is currently not supported"
     !
     if(.not.ed_total_ud)then
        if(bath_type=="hybrid")stop "ED ERROR: ed_total_ud=F can not be used with bath_type=hybrid"
+       if(bath_type=="replica")print*,"ED WARNING: ed_total_ud=F with bath_type=replica requires some care with H_bath"
        if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))stop "ED ERROR: ed_total_ud=F can not be used with Jx!=0 OR Jp!=0"
     endif
     !
     if(ed_mode=="superc")then
-       if(Nspin>1)stop "ED ERROR: SC + AFM is currently not supported ."
+       if(Nspin>1)stop "ED ERROR: SC + Magnetism is currently not supported."
        if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
     endif
     if(ed_mode=="nonsu2")then
@@ -99,6 +104,9 @@ contains
   subroutine ed_setup_dimensions()
     integer :: maxtwoJz,inJz,dimJz
     integer :: isector,in,shift
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_setup_dimensions: Setting up system dimensions"
+#endif
     select case(bath_type)
     case default
        Ns = (Nbath+1)*Norb
@@ -169,6 +177,9 @@ contains
     integer                          :: dim_sector_max,iorb,jorb,ispin,jspin
     integer,dimension(:),allocatable :: DimUps,DimDws
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG init_ed_structure: Massive allocation of internal memory"
+#endif
     call ed_checks_global
     !
     call ed_setup_dimensions
@@ -337,6 +348,8 @@ contains
     impDmats_ph=zero
     impDreal_ph=zero
     !
+    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    !
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_phisc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
     allocate(ed_mag(3,Norb))
@@ -350,18 +363,27 @@ contains
     allocate(spinChi_tau(Norb,Norb,0:Ltau))
     allocate(spinChi_w(Norb,Norb,Lreal))
     allocate(spinChi_iv(Norb,Norb,0:Lmats))
+    allocate(spinChiMatrix(Norb,Norb))
     !
     allocate(densChi_tau(Norb,Norb,0:Ltau))
     allocate(densChi_w(Norb,Norb,Lreal))
     allocate(densChi_iv(Norb,Norb,0:Lmats))
+    allocate(densChiMatrix(Norb,Norb))
     !
     allocate(pairChi_tau(Norb,Norb,0:Ltau))
     allocate(pairChi_w(Norb,Norb,Lreal))
     allocate(pairChi_iv(Norb,Norb,0:Lmats))
+    allocate(pairChiMatrix(Norb,Norb))
     !
     allocate(exctChi_tau(0:2,Norb,Norb,0:Ltau))
     allocate(exctChi_w(0:2,Norb,Norb,Lreal))
     allocate(exctChi_iv(0:2,Norb,Norb,0:Lmats))
+    allocate(exctChiMatrix(0:2,Norb,Norb))
+    !
+    allocate(spin_field(Norb,3))
+    spin_field(:,1) = spin_field_x(1:Norb)
+    spin_field(:,2) = spin_field_y(1:Norb)
+    spin_field(:,3) = spin_field_z(1:Norb)
     !
   end subroutine init_ed_structure
 
@@ -374,6 +396,9 @@ contains
   !+------------------------------------------------------------------+
   subroutine set_Himpurity_nn_c(hloc)
     complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
+#endif
     if(allocated(impHloc))deallocate(impHloc)
     allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
     impHloc = Hloc
@@ -382,6 +407,9 @@ contains
 
   subroutine set_Himpurity_so_c(hloc)
     complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
+#endif
     if(allocated(impHloc))deallocate(impHloc)
     allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
     impHloc = so2nn_reshape(Hloc,Nspin,Norb)
@@ -422,6 +450,10 @@ contains
     integer                          :: list_len
     integer,dimension(:),allocatable :: list_sector
     type(sector) :: sectorI,sectorJ,sectorK,sectorG,sectorL
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG setup_global_normal"
+#endif
     !
     !Store full dimension of the sectors:
     do isector=1,Nsectors
@@ -466,7 +498,10 @@ contains
        do isector=1,Nsectors
           call get_Nup(isector,Nups)
           call get_Ndw(isector,Ndws)
-          if(any(Nups < Ndws))twin_mask(isector)=.false.
+          if(any(Nups .ne. Ndws))then
+            call get_Sector([Ndws,Nups],Ns_Orb,jsector)
+            if (twin_mask(jsector))twin_mask(isector)=.false.
+          endif
        enddo
        write(LOGfile,"(A,I6,A,I9)")"Looking into ",count(twin_mask)," sectors out of ",Nsectors
     endif
@@ -548,6 +583,9 @@ contains
     real(8)                                           :: adouble
     integer                                           :: list_len
     integer,dimension(:),allocatable                  :: list_sector
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG setup_global_superc"
+#endif
     isector=0
     do isz=-Ns,Ns
        sz=abs(isz)
@@ -666,6 +704,9 @@ contains
     integer                                           :: maxtwoJz,twoJz
     integer                                           :: dimJz,inJz,shift
     integer                                           :: twoJz_add,twoJz_del,twoJz_trgt
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG setup_global_nonsu2"
+#endif
     isector=0
     if(Jz_basis)then
        !pointers definition

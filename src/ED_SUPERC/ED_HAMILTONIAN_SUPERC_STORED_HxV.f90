@@ -36,6 +36,10 @@ contains
     integer                                           :: first_state_up,last_state_up
     integer                                           :: first_state_dw,last_state_dw
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_buildH_main SUPERC: build H"
+#endif
+    !
     if(.not.Hsector%status)stop "ed_buildh_main ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
@@ -90,15 +94,27 @@ contains
     !-----------------------------------------------!
     !
     !IMPURITY  HAMILTONIAN
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_SUPERC: stored/Himp"
+#endif
     include "stored/Himp.f90"
     !
     !LOCAL INTERACTION
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_SUPERC: stored/Hint"
+#endif
     include "stored/Hint.f90"
     !
     !BATH HAMILTONIAN
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_SUPERC: stored/Hbath"
+#endif
     include "stored/Hbath.f90"
     !
     !IMPURITY- BATH HYBRIDIZATION
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_SUPERC: stored/Himp_bath"
+#endif
     include "stored/Himp_bath.f90"
     !
     !

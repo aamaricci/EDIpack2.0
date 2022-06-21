@@ -19,18 +19,18 @@ MODULE ED_CHI_DENS
 
   public :: build_chi_dens_normal
 
-  integer                      :: istate,iorb,jorb,ispin,jspin
-  integer                      :: isector
-  real(8),allocatable          :: vvinit(:)
-  real(8),allocatable          :: alfa_(:),beta_(:)
-  integer                      :: ialfa
-  integer                      :: jalfa
-  integer                      :: ipos,jpos
-  integer                      :: i,j
-  integer                      :: iph,i_el
-  real(8)                      :: sgn,norm2
-  real(8),dimension(:),pointer :: state_dvec
-  real(8)                      :: state_e
+  integer                          :: istate,iorb,jorb,ispin,jspin
+  integer                          :: isector
+  real(8),allocatable              :: vvinit(:)
+  real(8),allocatable              :: alfa_(:),beta_(:)
+  integer                          :: ialfa
+  integer                          :: jalfa
+  integer                          :: ipos,jpos
+  integer                          :: i,j
+  integer                          :: iph,i_el
+  real(8)                          :: sgn,norm2
+  real(8),dimension(:),allocatable :: state_dvec
+  real(8)                          :: state_e
 
 
 contains
@@ -42,12 +42,19 @@ contains
   ! \chi_ab = <n_a(\tau)n_b(0)>
   !+------------------------------------------------------------------+
   subroutine build_chi_dens_normal()
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG build_Chi_dens_normal: build dens-Chi"
+#endif
     write(LOGfile,"(A)")"Get impurity dens Chi:"
     do iorb=1,Norb
        write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))
        if(MPIMASTER)call start_timer()
        call lanc_ed_build_densChi_diag(iorb)
        if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
     enddo
     !
     if(Norb>1)then
@@ -57,6 +64,9 @@ contains
              if(MPIMASTER)call start_timer()
              call lanc_ed_build_densChi_mix(iorb,jorb)
              if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+             if(ed_verbose>1)write(Logfile,"(A)")""
+#endif
           end do
        end do
        !
@@ -101,6 +111,11 @@ contains
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_densChi diag: Lanczos build dens Chi l"//str(iorb)
+#endif
+    !
     if(ed_total_ud)then
        ialfa = 1
        ipos  = iorb
@@ -114,19 +129,19 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'From sector  :',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose==3)write(LOGfile,"(A,I12)")'Apply N:',isector
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'From sector',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose==3)write(LOGfile,"(A20,I12)")'Apply N',isector
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
           do i=1,sectorI%Dim
              call apply_op_N(i,sgn,ipos,ialfa,sectorI)
@@ -141,16 +156,7 @@ contains
        call add_to_lanczos_densChi(norm2,state_e,alfa_,beta_,iorb,iorb)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
     enddo
     return
   end subroutine lanc_ed_build_densChi_diag
@@ -165,6 +171,11 @@ contains
     integer                     :: iorb,jorb
     type(sector)                :: sectorI,sectorJ
     real(8)                     :: Niorb,Njorb
+    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG lanc_ed_build_densChi mix: Lanczos build dens Chi l"//str(iorb)//",m"//str(jorb)
+#endif
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -183,20 +194,20 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        !EVALUATE (N_jorb + N_iorb)|gs> = N_jorb|gs> + N_iorb|gs>
        if(MpiMaster)then
           call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,20I4)")&
-               'From sector  :',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose==3)write(LOGfile,"(A,I15)")'Apply Na+Nb:',isector
+          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+               'From sector',isector,sectorI%Nups,sectorI%Ndws
+          if(ed_verbose>=3)write(LOGfile,"(A20,I15)")'Apply Na+Nb',isector
           allocate(vvinit(sectorI%Dim)) ; vvinit=zero
           do i=1,sectorI%Dim
              call apply_op_N(i,Niorb,ipos,ialfa,sectorI)
@@ -213,16 +224,7 @@ contains
        call add_to_lanczos_densChi(norm2,state_e,alfa_,beta_,iorb,jorb)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
     enddo
     return
   end subroutine lanc_ed_build_densChi_mix
@@ -247,6 +249,11 @@ contains
     integer                                    :: i,j,ierr
     complex(8)                                 :: iw,chisp
     !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_densChi: add-up to GF"
+#endif
+    !
     Egs = state_list%emin       !get the gs energy
     !
     Nlanc = size(alanc)
@@ -263,6 +270,10 @@ contains
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
+#ifdef _DEBUG
+    if(ed_verbose>4)write(Logfile,"(A)")&
+         "DEBUG add_to_lanczos_densChi: LApack tridiagonalization"
+#endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     do j=1,nlanc

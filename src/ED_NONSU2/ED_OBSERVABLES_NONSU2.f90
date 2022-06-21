@@ -53,7 +53,7 @@ MODULE ED_OBSERVABLES_NONSU2
   integer                               :: isector,jsector
   !
   complex(8),dimension(:),allocatable   :: vvinit
-  complex(8),dimension(:),pointer       :: state_cvec
+  complex(8),dimension(:),allocatable   :: state_cvec
   logical                               :: Jcondition
   !
   type(sector)                          :: sectorI,sectorJ
@@ -68,11 +68,17 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_nonsu2()
-    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
-    real(8),dimension(Norb)         :: nup,ndw,Sz,nt
-    real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw
-    real(8),dimension(Norb,Norb)    :: theta_updw,theta_dwup
-    real(8),dimension(Norb,Norb)    :: omega_updw,omega_dwup
+    integer,dimension(2*Ns)      :: ib
+    integer,dimension(2,Ns)      :: Nud
+    integer,dimension(Ns)        :: IbUp,IbDw
+    real(8),dimension(Norb)      :: nup,ndw,Sz,nt
+    real(8),dimension(Norb,Norb) :: theta_upup,theta_dwdw
+    real(8),dimension(Norb,Norb) :: theta_updw,theta_dwup
+    real(8),dimension(Norb,Norb) :: omega_updw,omega_dwup
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG observables_nonsu2"
+#endif
     !
     !LOCAL OBSERVABLES:
     ! density, 
@@ -110,18 +116,26 @@ contains
     omega_updw = 0d0
     omega_dwup = 0d0
     !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_nonsu2: get local observables"
+#endif    
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
        !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -130,22 +144,14 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             ! m  = sectorI%H(1)%map(i)
-             ! ib = bdecomp(m,2*Ns)
-             ! !
-             ! gs_weight=peso*abs(state_cvec(i))**2
-             ! !
-             ! !Get operators:
-             ! do iorb=1,Norb
-             !    nup(iorb)= dble(ib(iorb))
-             !    ndw(iorb)= dble(ib(iorb+Ns))
-             !    sz(iorb) = (nup(iorb) - ndw(iorb))/2.d0
-             !    nt(iorb) =  nup(iorb) + ndw(iorb)
-             ! enddo
              gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             !
+             m  = sectorI%H(1)%map(i)
+             ib = bdecomp(m,2*Ns)
+             do iorb=1,Norb
+                nup(iorb)= dble(ib(iorb))
+                ndw(iorb)= dble(ib(iorb+Ns))
+             enddo
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
              !
@@ -168,32 +174,39 @@ contains
              s2tot = s2tot  + (sum(sz))**2*gs_weight
           enddo
        endif
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
-    !
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
+
+
+
+
     !EVALUATE <SX> AND <SY>
     do iorb=1,Norb
        !
+#ifdef _DEBUG
+       if(ed_verbose>2)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: eval in-plane magnetization <Sx>, <Sy>, a:"//str(iorb)
+#endif
        do istate=1,state_list%size
           isector = es_return_sector(state_list,istate)
           Ei      = es_return_energy(state_list,istate)
+          !
+#ifdef _DEBUG
+          if(ed_verbose>3)write(Logfile,"(A)")&
+               "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
           if(MpiStatus)then
-             state_cvec => es_return_cvector(MpiComm,state_list,istate)
+             call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
           else
-             state_cvec => es_return_cvector(state_list,istate)
+             call es_return_cvector(state_list,istate,state_cvec) 
           endif
 #else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
 #endif
           !
           peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -201,8 +214,8 @@ contains
           !
           !GET <(CDG_UP + CDG_DW)(C_UP + C_DW)> = 
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> + <CDG_UP*C_DW + CDG_DW*C_UP> = 
-          !<N_UP> + <N_DW> + 2*<Sx>
-          !<Sx> = <CDG_UP*C_DW + CDG_DW*C_UP>
+          !<N_UP> + <N_DW> + <Sx> 
+          !since <Sx> = <CDG_UP*C_DW + CDG_DW*C_UP> 
           jsector = getCsector(1,1,isector)
           if(jsector/=0)then
              if(Mpimaster)then
@@ -228,8 +241,8 @@ contains
           !
           !GET <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> = 
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> - i<CDG_UP*C_DW - CDG_DW*C_UP> = 
-          !<N_UP> + <N_DW> + 2*<Sy>
-          !<Sy> = -i/2<CDG_UP*C_DW - CDG_DW*C_UP>         
+          !<N_UP> + <N_DW> + <Sy>
+          !since <Sy> = -i<CDG_UP*C_DW - CDG_DW*C_UP>         
           jsector = getCsector(1,1,isector)
           if(jsector/=0)then
              if(Mpimaster)then
@@ -252,35 +265,41 @@ contains
                 if(allocated(vvinit))deallocate(vvinit)
              endif
           endif
-#ifdef _MPI
-          if(MpiStatus)then
-             if(associated(state_cvec))deallocate(state_cvec)
-          else
-             if(associated(state_cvec))nullify(state_cvec)
-          endif
-#else
-          if(associated(state_cvec))nullify(state_cvec)
-#endif
+          if(allocated(state_cvec))deallocate(state_cvec)
        enddo
-       magx(iorb) = 0.5d0*(magx(iorb) - dens_up(iorb) - dens_dw(iorb))
-       magy(iorb) = 0.5d0*(magy(iorb) - dens_up(iorb) - dens_dw(iorb))
+       !So we have:
+       !<Sx> = <(CDG_UP + CDG_DW)(C_UP + C_DW)> - <N_UP> - <N_DW>
+       magx(iorb) = magx(iorb) - dens_up(iorb) - dens_dw(iorb)
+       !<Sy> = <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> - <N_UP> - <N_DW 
+       magy(iorb) = magy(iorb) - dens_up(iorb) - dens_dw(iorb)
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
 
 
-    !
+
     !EVALUATE EXCITON OP <S_ab> AND <T^x,y,z_ab>
-
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_nonsu2: eval excitoninc OP <S_av>, <T^{x,y,z}_ab>"
+#endif
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -463,15 +482,7 @@ contains
           enddo
        enddo
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
     ! <S_ab>  = Theta_uu + Theta_dd - n_a - n_b
@@ -486,22 +497,33 @@ contains
           exct_ty(iorb,jorb) = omega_updw(iorb,jorb) - omega_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb)
        enddo
     enddo
-    !
+
+
+
     !IMPURITY DENSITY MATRIX
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")&
+         "DEBUG observables_nonsu2: eval impurity density matrix <C^+_a C_b>"
+#endif
     if(allocated(imp_density_matrix))deallocate(imp_density_matrix)
     allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb))
     imp_density_matrix=zero
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -552,16 +574,12 @@ contains
           enddo
           call delete_sector(sectorI)
        endif
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
     enddo
+#ifdef _DEBUG
+    if(ed_verbose>2)write(Logfile,"(A)")""
+#endif
+
     !
     !
     if(MPIMASTER)then
@@ -637,9 +655,15 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_nonsu2()
-    integer,dimension(Nlevels)      :: ib,Nud(2,Ns)
+    integer,dimension(2*Ns) :: ib
+    integer,dimension(2,Ns) :: Nud
+    integer,dimension(Ns)   :: IbUp,IbDw
     real(8),dimension(Norb)         :: nup,ndw
     real(8),dimension(Nspin,Norb)   :: eloc
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG local_energy_nonsu2"
+#endif
     !
     Egs     = state_list%emin
     ed_Ehartree= 0.d0
@@ -660,14 +684,19 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")&
+            "DEBUG local_energy_nonsu2: get contribution from state:"//str(istate)
+#endif
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate)
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -677,12 +706,13 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
+             gs_weight=peso*abs(state_cvec(i))**2
              m  = sectorI%H(1)%map(i)
              ib = bdecomp(m,2*Ns)
-             gs_weight=peso*abs(state_cvec(i))**2
-             call build_op_Ns(i,Nud(1,:),Nud(2,:),sectorI)
-             nup = Nud(1,1:Norb)
-             ndw = Nud(2,1:Norb)
+             do iorb=1,Norb
+                nup(iorb)= dble(ib(iorb))
+                ndw(iorb)= dble(ib(iorb+Ns))
+             enddo
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !LOCAL ENERGY
@@ -696,9 +726,7 @@ contains
                       call cdg(iorb,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
                       if(Jz_basis.and.j==0)cycle
-                      !WARNING: note that the previous line, and all the other hereafter, are equivalent to:
-                      !if(Jz_basis.and.(.not.dmft_bath%mask(1,1,iorb,jorb,1)).and.(.not.dmft_bath%mask(1,1,iorb,jorb,2)))cycle
-                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                    !SPIN DW
                    if((ib(iorb+Ns)==0).AND.(ib(jorb+Ns)==1))then
@@ -706,33 +734,31 @@ contains
                       call cdg(iorb+Ns,k1,k2,sg2)
                       j=binary_search(sectorI%H(1)%map,k2)
                       if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                 enddo
              enddo
              !==> HYBRIDIZATION TERMS II: same or different orbitals, opposite spins.
-             if(ed_mode=="nonsu2")then
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      !UP-DW
-                      if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
-                         call c(jorb+Ns,m,k1,sg1)
-                         call cdg(iorb,k1,k2,sg2)
-                         j=binary_search(sectorI%H(1)%map,k2)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
-                      endif
-                      !DW-UP
-                      if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
-                         call c(jorb,m,k1,sg1)
-                         call cdg(iorb+Ns,k1,k2,sg2)
-                         j=binary_search(sectorI%H(1)%map,k2)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))
-                      endif
-                   enddo
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   !UP-DW
+                   if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
+                      call c(jorb+Ns,m,k1,sg1)
+                      call cdg(iorb,k1,k2,sg2)
+                      j=binary_search(sectorI%H(1)%map,k2)
+                      if(Jz_basis.and.j==0)cycle
+                      ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
+                   endif
+                   !DW-UP
+                   if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
+                      call c(jorb,m,k1,sg1)
+                      call cdg(iorb+Ns,k1,k2,sg2)
+                      j=binary_search(sectorI%H(1)%map,k2)
+                      if(Jz_basis.and.j==0)cycle
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
+                   endif
                 enddo
-             endif
+             enddo
              !
              !DENSITY-DENSITY INTERACTION: SAME ORBITAL, OPPOSITE SPINS
              !Euloc=\sum=i U_i*(n_u*n_d)_i
@@ -783,8 +809,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j=binary_search(sectorI%H(1)%map,k4)
                          if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
-                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
+                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
                    enddo
                 enddo
@@ -809,8 +835,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j=binary_search(sectorI%H(1)%map,k4)
                          if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
-                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))!gs_weight
+                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
                    enddo
                 enddo
@@ -836,18 +862,13 @@ contains
           call delete_sector(sectorI)
        endif
        !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
 #ifdef _MPI
     if(MpiStatus)then
        call Bcast_MPI(MpiComm,ed_Epot)
@@ -862,7 +883,7 @@ contains
     !
     ed_Epot = ed_Epot + ed_Ehartree
     !
-    if(ed_verbose==3)then
+    if(ed_verbose>=3)then
        write(LOGfile,"(A,10f18.12)")"<Hint>  =",ed_Epot
        write(LOGfile,"(A,10f18.12)")"<V>     =",ed_Epot-ed_Ehartree
        write(LOGfile,"(A,10f18.12)")"<E0>    =",ed_Eknot

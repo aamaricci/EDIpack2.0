@@ -23,8 +23,6 @@ module ED_DIAG_NORMAL
 
   public :: diagonalize_impurity_normal
 
-  real(8),dimension(:),pointer       :: state_cvec
-
 
 contains
 
@@ -65,6 +63,9 @@ contains
     real(8),allocatable :: eig_basis(:,:),eig_basis_tmp(:,:)
     logical             :: lanc_solve,Tflag,lanc_verbose,bool
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: digonalization"
+#endif
     if(state_list%status)call es_delete_espace(state_list)
     state_list=es_init_espace()
     oldzero=1000.d0
@@ -143,54 +144,63 @@ contains
           !
           select case (lanc_method)
           case default       !use P-ARPACK
+#ifdef _DEBUG
+             if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: calling P-Arpack"
+#endif
 #ifdef _MPI
              if(MpiStatus)then
                 call sp_eigh(MpiComm,spHtimesV_p,eig_values,eig_basis,&
                      Nblock,&
                      Nitermax,&
                      tol=lanc_tolerance,&
-                     iverbose=(ed_verbose>3))
+                     iverbose=(ed_verbose>4))
              else
                 call sp_eigh(spHtimesV_p,eig_values,eig_basis,&
                      Nblock,&
                      Nitermax,&
                      tol=lanc_tolerance,&
-                     iverbose=(ed_verbose>3))
+                     iverbose=(ed_verbose>4))
              endif
 #else
              call sp_eigh(spHtimesV_p,eig_values,eig_basis,&
                   Nblock,&
                   Nitermax,&
                   tol=lanc_tolerance,&
-                  iverbose=(ed_verbose>3))
+                  iverbose=(ed_verbose>4))
 #endif             
              !
              !
           case ("lanczos")   !use Simple Lanczos
+#ifdef _DEBUG
+             if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: calling Lanczos"
+#endif
 #ifdef _MPI
              if(MpiStatus)then
                 call sp_lanc_eigh(MpiComm,spHtimesV_p,eig_values(1),eig_basis(:,1),Nitermax,&
-                     iverbose=(ed_verbose>3),threshold=lanc_tolerance)
+                     iverbose=(ed_verbose>4),threshold=lanc_tolerance)
              else
                 call sp_lanc_eigh(spHtimesV_p,eig_values(1),eig_basis(:,1),Nitermax,&
-                     iverbose=(ed_verbose>3),threshold=lanc_tolerance)
+                     iverbose=(ed_verbose>4),threshold=lanc_tolerance)
              endif
 #else
              call sp_lanc_eigh(spHtimesV_p,eig_values(1),eig_basis(:,1),Nitermax,&
-                  iverbose=(ed_verbose>3),threshold=lanc_tolerance)
+                  iverbose=(ed_verbose>4),threshold=lanc_tolerance)
 #endif
              !
           end select
           if(MpiMaster.AND.ed_verbose>3)write(LOGfile,*)""
           call delete_Hv_sector_normal()
+          call Bcast_MPI(MpiComm,eig_values)
           !
           !
        else                     !else LAPACK_SOLVE
           allocate(eig_values(Dim)) ; eig_values=0d0
           allocate(eig_basis_tmp(Dim,Dim)) ; eig_basis_tmp=0d0
-          !!
           call build_Hv_sector_normal(isector,eig_basis_tmp)
           !
+#ifdef _DEBUG
+          if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: calling LApack"
+#endif
           if(MpiMaster)call eigh(eig_basis_tmp,eig_values)
           if(dim==1)eig_basis_tmp(dim,dim)=1d0
           !
@@ -213,13 +223,13 @@ contains
        endif
        !
        if(ed_verbose>=3.AND.MPIMASTER)call stop_timer(unit=LOGfile)
+       if(ed_verbose>=4)write(LOGfile,*)"EigValues: ",eig_values(:Neigen)
+       if(ed_verbose>2)write(LOGfile,*)""
+       if(ed_verbose>2)write(LOGfile,*)""
        !
-       if(ed_verbose>=4)then
-          write(LOGfile,*)"EigValues: ",eig_values(:Neigen)
-          write(LOGfile,*)""
-          write(LOGfile,*)""
-       endif
-       !
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: building states list"
+#endif
        if(finiteT)then
           do i=1,Neigen
              call es_add_state(state_list,eig_values(i),eig_basis(:,i),isector,twin=Tflag,size=lanc_nstates_total)
@@ -227,7 +237,7 @@ contains
        else
           do i=1,Neigen
              enemin = eig_values(i)
-             if (enemin < oldzero-10.d0*gs_threshold)then
+             if (enemin < oldzero-10d0*gs_threshold)then
                 oldzero=enemin
                 call es_free_espace(state_list)
                 call es_add_state(state_list,enemin,eig_basis(:,i),isector,twin=Tflag)
@@ -251,6 +261,9 @@ contains
        !
     enddo sector
     if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+    write(Logfile,"(A)")""
+#endif
   end subroutine ed_diag_d
 
 
@@ -277,6 +290,9 @@ contains
     integer                          :: list_len
     integer,dimension(:),allocatable :: list_sector
     !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_pre_diag NORMAL: pre diagonalization analysis"
+#endif
     sectors_mask=.true.
     !
     if(ed_sectors)then
@@ -345,7 +361,10 @@ contains
     type(histogram)     :: hist
     real(8)             :: hist_a,hist_b,hist_w
     integer             :: hist_n
-    integer,allocatable :: list_sector(:),count_sector(:)    
+    integer,allocatable :: list_sector(:),count_sector(:)
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG ed_post_diag NORMAL: post diagonalization analysis"
+#endif
     !POST PROCESSING:
     if(MPIMASTER)then
        open(free_unit(unit),file="state_list"//reg(ed_file_suffix)//".ed")

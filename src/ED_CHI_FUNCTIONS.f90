@@ -28,9 +28,14 @@ contains
   !+------------------------------------------------------------------+
   subroutine buildChi_impurity()
     !
+
     select case(ed_mode)
     case default;return
     case("normal")
+#ifdef _DEBUG
+       write(Logfile,"(A)")&
+            "DEBUG buildChi_impurity: build susceptibilities Chi"
+#endif
        call allocate_grids
        !
        !
@@ -62,6 +67,11 @@ contains
        !
        !
        !PRINTING:
+#ifdef _DEBUG
+       write(Logfile,"(A)")&
+            "DEBUG buildChi_impurity: write results"
+       write(Logfile,"(A)")""
+#endif
        if(MPIMASTER.AND.(any([chispin_flag,chidens_flag,chipair_flag,chiexct_flag])))call ed_print_impChi()
        !
        call deallocate_grids

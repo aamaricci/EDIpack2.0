@@ -16,6 +16,12 @@
         htmp = htmp + impHloc(Nspin,Nspin,iorb,iorb)*Ndw(iorb)
         htmp = htmp - xmu*( Nup(iorb)+Ndw(iorb) )
      enddo
+     if(any(spin_field(:,3)/=0d0))then
+        !F_z.S^z:= F_z.(n_up-n_dw)
+        do iorb=1,Norb
+           htmp = htmp + spin_field(iorb,3)*(nup(iorb)-ndw(iorb))
+        enddo
+     endif
      !
      !
      !> H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
