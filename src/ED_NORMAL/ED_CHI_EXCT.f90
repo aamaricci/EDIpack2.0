@@ -235,7 +235,7 @@ contains
              do k=1,sectorK%Dim
                 call apply_op_CDG(k,i,sgn,ipos,ialfa,2,sectorK,sectorI)
                 if(sgn==0.OR.k==0)cycle
-                vvinit(i) = sgn*vvinit_tmp(k)
+                vvinit(i) = -sgn*vvinit_tmp(k) 
              enddo
              deallocate(vvinit_tmp)
              call delete_sector(sectorK)
@@ -256,7 +256,7 @@ contains
              do k=1,sectorK%Dim
                 call apply_op_CDG(k,i,sgn,ipos,ialfa,1,sectorK,sectorI)
                 if(sgn==0.OR.k==0)cycle
-                vvinit(i) =  sgn*vvinit_tmp(k) - vvinit(i)
+                vvinit(i) =  sgn*vvinit_tmp(k) + vvinit(i)
              enddo
              deallocate(vvinit_tmp)
              call delete_sector(sectorK)
