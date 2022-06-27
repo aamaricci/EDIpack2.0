@@ -12,7 +12,7 @@ MODULE ED_VARS_GLOBAL
 
   !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type H_operator
-     complex(8),dimension(:,:,:,:),allocatable :: O      !Replica hamilt
+     complex(8),dimension(:,:,:,:),allocatable :: O !Replica hamiltonian
   end type H_operator
 
   type effective_bath_component
@@ -199,8 +199,8 @@ MODULE ED_VARS_GLOBAL
 
   !Replica bath basis set
   !=========================================================
-  type(H_operator),dimension(:),allocatable          :: Hreplica_basis
-  real(8),dimension(:),allocatable                   :: Hreplica_lambda
+  type(H_operator),dimension(:),allocatable          :: Hreplica_basis   ![Nsym]
+  real(8),dimension(:,:),allocatable                 :: Hreplica_lambda  ![Nbath,Nsym]
   logical                                            :: Hreplica_status=.false.
 
   !local part of the Hamiltonian
@@ -348,7 +348,7 @@ MODULE ED_VARS_GLOBAL
   real(8),dimension(:,:),allocatable,save            :: dd_ineq,e_ineq
   integer,allocatable,dimension(:,:)                 :: neigen_sector_ineq
   integer,allocatable,dimension(:)                   :: neigen_total_ineq
-  real(8),dimension(:,:),allocatable                 :: Hreplica_lambda_ineq
+  real(8),dimension(:,:,:),allocatable               :: Hreplica_lambda_ineq ![Nineq,Nbath,Nsym]
 
   !File suffixes for printing fine tuning.
   !=========================================================

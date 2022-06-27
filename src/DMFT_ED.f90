@@ -3,6 +3,7 @@ MODULE DMFT_ED
        ed_read_input , &
        Norb          , &
        Nspin         , &
+       Nbath         , &
        Nloop         , &
        Nph           , &
        Uloc          , &
@@ -32,6 +33,7 @@ MODULE DMFT_ED
        LOGfile       , &
        ed_mode       , &
        ed_verbose    , &
+       ed_hw_bath    , &
        bath_type 
 
   USE ED_BATH, only:                                                    &

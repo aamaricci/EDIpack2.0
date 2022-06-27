@@ -1,6 +1,6 @@
 MODULE ED_BATH
   USE SF_CONSTANTS, only: zero
-  USE SF_IOTOOLS, only:free_unit,reg,file_length,txtfy
+  USE SF_IOTOOLS, only:free_unit,reg,file_length,str
   USE SF_LINALG, only: eye,inv
   USE SF_ARRAYS, only:linspace
   USE SF_MISC, only: assert_shape
@@ -26,6 +26,7 @@ MODULE ED_BATH
      module procedure init_Hreplica_direct_so
      module procedure init_Hreplica_direct_nn
      module procedure init_Hreplica_symmetries_site
+     module procedure init_Hreplica_symmetries_legacy  ! (deprecation-cycle) 
      module procedure init_Hreplica_symmetries_lattice
   end interface set_Hreplica
 
@@ -183,11 +184,11 @@ contains
        !
     case('replica')
        allocate(Hloc(Nspin,Nspin,Norb,Norb))
-       if(present(Hloc_nn))then              !User defined Hloc_nn 
+       if(present(Hloc_nn))then    !User defined Hloc_nn 
           Hloc=Hloc_nn
        elseif(Hreplica_status)then !User defined Hreplica_basis
-          Hloc=Hreplica_build(Hreplica_lambda)
-       else                                  !Error:
+          Hloc=Hreplica_build(Hreplica_lambda(Nbath,:))
+       else                        !Error:
           deallocate(Hloc)
           stop "ERROR get_bath_dimension_direct: ed_mode=replica neither Hloc_nn present nor Hreplica_basis defined"
        endif
@@ -228,7 +229,7 @@ contains
     !
     !number of symmetries
     Nsym=size(Hloc_nn,5)
-    if(Nsym/=size(Hreplica_lambda))stop "ERROR get_bath_dimension_symmetries:  neither Hloc_nn present nor Hreplica_basis defined"
+    if(Nsym/=size(Hreplica_lambda(Nbath,:)))stop "ERROR get_bath_dimension_symmetries:  neither Hloc_nn present nor Hreplica_basis defined"
     !
     ndx=Nsym
     !
@@ -384,7 +385,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call break_symmetry_bath_site(bath_(ilat,:),field,sign,save_)
     enddo
     ed_file_suffix=""
@@ -429,7 +430,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call spin_symmetrize_bath_site(bath_(ilat,:),save_)
     enddo
     ed_file_suffix=""
@@ -475,7 +476,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call orb_symmetrize_bath_site(bath_(ilat,:),save_)
     enddo
     ed_file_suffix=""
@@ -524,7 +525,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call orb_symmetrize_bath_site_o1o2(bath_(ilat,:),orb1,orb2,save_)
     enddo
     ed_file_suffix=""
@@ -579,7 +580,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call orb_equality_bath_site(bath_(ilat,:),indx_,save_)
     enddo
     ed_file_suffix=""
@@ -627,7 +628,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call ph_symmetrize_bath_site(bath_(ilat,:),save_)
     enddo
     ed_file_suffix=""
@@ -679,7 +680,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call ph_trans_bath_site(bath_(ilat,:),save_)
     enddo
     ed_file_suffix=""
@@ -708,7 +709,7 @@ contains
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
-       ed_file_suffix=reg(ineq_site_suffix)//reg(txtfy(ilat,site_indx_padding))
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
        call enforce_normal_bath_site(bath_(ilat,:),save_)
     enddo
     ed_file_suffix=""
@@ -1093,11 +1094,12 @@ contains
     type(effective_bath) :: dmft_bath_
     logical,optional     :: used
     integer              :: Nbasis
-    integer              :: i,unit,flen,Nh,isym,Nsym
-    integer              :: io,jo,iorb,ispin,jorb,jspin,ibath
-    logical              :: IOfile,used_
+    integer              :: i,ibath,isym,unit,flen,Nh,Nsym
+    integer              :: io,jo,iorb,ispin,jorb,jspin
+    logical              :: IOfile,used_,diagonal_hsym,all_lambdas_are_equal
     real(8)              :: de
     real(8)              :: offset(Nbath)
+    real(8)              :: one_lambdaval
     character(len=20)    :: hsuffix
     !
 #ifdef _DEBUG
@@ -1156,16 +1158,32 @@ contains
        Nsym = dmft_bath%Nbasis
        do isym=1,Nsym
           do ibath=1,Nbath
-             dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(isym)
+             dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym)
           enddo
-          if(is_diagonal(Hreplica_basis(isym)%O))then
+          diagonal_hsym = is_diagonal(Hreplica_basis(isym)%O)
+          one_lambdaval = Hreplica_lambda(Nbath,isym)
+          all_lambdas_are_equal = all(Hreplica_lambda(:,isym)==one_lambdaval)
+          if(diagonal_hsym.AND.all_lambdas_are_equal)then
              offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
              if(is_identity(Hreplica_basis(isym)%O).AND.mod(Nbath,2)==0)then
                 offset(Nbath/2) = max(-1.d-1,offset(Nbath/2))
                 offset(Nbath/2 + 1) = min(1.d-1,offset(Nbath/2 + 1))
              endif
              do ibath=1,Nbath
-                dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(isym) + offset(ibath)
+                dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym) + offset(ibath)
+                write(*,*) "                                                                    "
+                write(*,*) "WARNING: some of your lambdasym values have been internally changed "
+                write(*,*) "         while calling ed_init_solver. This happens whenever the    "
+                write(*,*) "         corresponding Hsym is diagonal and all the replicas receive"
+                write(*,*) "         the same initial lambda value, due to the deprecated legacy"
+                write(*,*) "         practice of defining a unique lambda vector forall replicas"
+                write(*,*) "         and let the solver decide how to handle these degeneracies."
+                write(*,*) "         >>> If you really intend to have a degenerate diagonal term"
+                write(*,*) "             in the bath you can define a suitable restart file.    "
+                write(*,*) "         >>> If instead this is what you expected please consider to"
+                write(*,*) "             move the desired rescaling in your driver, since this  "
+                write(*,*) "             funcionality might be removed in a future update.      "
+                write(*,*) "                                                                    "
              enddo
           endif
        enddo
@@ -1291,8 +1309,8 @@ contains
        case default
           write(unit_,"(90(A21,1X))")&
                ((&
-               "#Ek_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
-               "Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
+               "#Ek_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
+               "Vk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
                iorb=1,Norb),ispin=1,Nspin)
           do i=1,Nbath
              write(unit_,"(90(ES21.12,1X))")((&
@@ -1303,9 +1321,9 @@ contains
        case ("superc")
           write(unit_,"(90(A21,1X))")&
                ((&
-               "#Ek_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
-               "Dk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)) ,&
-               "Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
+               "#Ek_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
+               "Dk_l"//reg(str(iorb))//"_s"//reg(str(ispin)) ,&
+               "Vk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
                iorb=1,Norb),ispin=1,Nspin)
           do i=1,Nbath
              write(unit_,"(90(ES21.12,1X))")((&
@@ -1317,9 +1335,9 @@ contains
        case ("nonsu2")
           write(unit_,"(90(A21,1X))")&
                ((&
-               "#Ek_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
-               "Vak_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
-               "Vbk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
+               "#Ek_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
+               "Vak_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
+               "Vbk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
                iorb=1,Norb), ispin=1,Nspin)
           do i=1,Nbath
              write(unit,"(90(ES21.12,1X))")((&
@@ -1335,8 +1353,8 @@ contains
        select case(ed_mode)
        case default
           write(unit_,"(90(A21,1X))")(&
-               "#Ek_s"//reg(txtfy(ispin)),&
-               ("Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),iorb=1,Norb),&
+               "#Ek_s"//reg(str(ispin)),&
+               ("Vk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),iorb=1,Norb),&
                ispin=1,Nspin)
           do i=1,Nbath
              write(unit_,"(90(ES21.12,1X))")(&
@@ -1346,9 +1364,9 @@ contains
           enddo
        case ("superc")
           write(unit_,"(90(A21,1X))")(&
-               "#Ek_s"//reg(txtfy(ispin)),&
-               "Dk_s"//reg(txtfy(ispin)) ,&
-               ("Vk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),iorb=1,Norb),&
+               "#Ek_s"//reg(str(ispin)),&
+               "Dk_s"//reg(str(ispin)) ,&
+               ("Vk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),iorb=1,Norb),&
                ispin=1,Nspin)
           do i=1,Nbath
              write(unit_,"(90(ES21.12,1X))")(&
@@ -1359,10 +1377,10 @@ contains
           enddo
        case ("nonsu2")
           write(unit_,"(90(A21,1X))")(&
-               "#Ek_s"//reg(txtfy(ispin)),&
+               "#Ek_s"//reg(str(ispin)),&
                (&
-               "Vak_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
-               "Vbk_l"//reg(txtfy(iorb))//"_s"//reg(txtfy(ispin)),&
+               "Vak_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
+               "Vbk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
                iorb=1,Norb),&
                ispin=1,Nspin)
           do i=1,Nbath
@@ -1377,7 +1395,7 @@ contains
        !
        string_fmt      ="("//str(Nspin*Norb)//"(A1,F5.2,A1,F5.2,A1,2x))" 
        !
-       write(unit_,"(90(A21,1X))")"#V_i",("Lambda_i"//reg(txtfy(io)),io=1,dmft_bath_%Nbasis)
+       write(unit_,"(90(A21,1X))")"#V_i",("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
        write(unit_,"(I3)")dmft_bath_%Nbasis
        do i=1,Nbath
           write(unit_,"(90(ES21.12,1X))")dmft_bath_%item(i)%v,&
@@ -1929,8 +1947,8 @@ contains
   !-------------------------------------------------------------------!
 
   !allocate GLOBAL basis for H (used for impHloc and bath) and vectors coefficient
-  subroutine allocate_hreplica(N)
-    integer          :: N
+  subroutine allocate_hreplica(Nsym)
+    integer          :: Nsym
     integer          :: isym
     !
 #ifdef _DEBUG
@@ -1939,12 +1957,12 @@ contains
     if(allocated(Hreplica_basis))deallocate(Hreplica_basis)
     if(allocated(Hreplica_lambda))deallocate(Hreplica_lambda)
     !
-    allocate(Hreplica_basis(N))
-    allocate(Hreplica_lambda(N))
-    do isym=1,N
+    allocate(Hreplica_basis(Nsym))
+    allocate(Hreplica_lambda(Nbath,Nsym))
+    do isym=1,Nsym
        allocate(Hreplica_basis(isym)%O(Nspin,Nspin,Norb,Norb))
-       Hreplica_basis(isym)%O=0d0
-       Hreplica_lambda(isym)=0d0
+       Hreplica_basis(isym)%O=zero
+       Hreplica_lambda(:,isym)=0d0
     enddo
     Hreplica_status=.true.
   end subroutine allocate_hreplica
@@ -2010,7 +2028,7 @@ contains
                    counter=counter+1
                    Hreplica_basis(counter)%O(ispin,jspin,iorb,jorb)=1d0
                    Hreplica_basis(counter)%O(ispin,jspin,jorb,iorb)=1d0
-                   Hreplica_lambda(counter)=Hloc(ispin,ispin,iorb,jorb)
+                   Hreplica_lambda(:,counter)=Hloc(ispin,ispin,iorb,jorb)
                 endif
              enddo
           enddo
@@ -2029,56 +2047,114 @@ contains
 
 
   subroutine init_Hreplica_symmetries_site(Hvec,lambdavec)
-    complex(8),dimension(:,:,:,:,:) :: Hvec
-    real(8),dimension(:)            :: lambdavec
-    integer                         :: isym,N
+    complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(Hloc),Nsym]
+    real(8),dimension(:,:)          :: lambdavec ![Nbath,Nsym]
+    integer                         :: isym,Nsym
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_nn: from {[Hs,Lam]}_b"
 #endif
     !
-    N=size(lambdavec)
-    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,N],"init_Hreplica_symmetries","Hvec")
+    if(size(lambdavec(:,1))/=Nbath)then
+         write(*,*) "                                                                               "
+         write(*,*) "ERROR: if you are trying to init Hreplica for inequivalent sites please note   "
+         write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
+         write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
+         write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+         write(*,*) "                                                                               "
+         stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
+    else
+         Nsym=size(lambdavec(Nbath,:))
+    endif
     !
-    call allocate_hreplica(N)
+    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
-    do isym=1,N
-       Hreplica_lambda(isym)  = lambdavec(isym)
+    call allocate_hreplica(Nsym)
+    !
+    do isym=1,Nsym
+       Hreplica_lambda(:,isym)  = lambdavec(:,isym)
        Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
     enddo
     !
-    if(ed_verbose>2)call print_hloc(Hreplica_build(Hreplica_lambda))
+    if(ed_verbose>2)then
+         do ibath=1,Nbath
+            write(*,*) "Hreplica #"//str(ibath)//":"
+            call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
+         enddo
+    endif
+    !
   end subroutine init_Hreplica_symmetries_site
 
-
+  subroutine init_Hreplica_symmetries_legacy(Hvec,lambdavec)
+   complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(Hloc),Nsym]
+   real(8),dimension(:)            :: lambdavec ![Nsym]
+   integer                         :: isym,Nsym
+   !
+   Nsym=size(lambdavec)
+   call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+   !
+   call allocate_hreplica(Nsym)
+   !
+   do isym=1,Nsym
+      do ibath=1,Nbath
+      !> BACK-COMPATIBILITY PATCH (cfr. init_dmft_bath in dmft_aux.f90)
+         Hreplica_lambda(ibath,isym) = lambdavec(isym)
+      enddo
+      Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
+   enddo
+   !
+   ! PRINT DEPRECATION MESSAGE TO LOG
+   write(*,*) "                                                                               "
+   write(*,*) "WARNING: Passing a single lambdasym vector to ed_set_Hreplica is /deprecated/. "
+   write(*,*) "         You should instead define a different lambda for each bath component, "
+   write(*,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
+   write(*,*) "         Your single lambda vector has been internally copied into the required"
+   write(*,*) "         higher-rank array, so giving each replica the same set of lambdas.    "
+   write(*,*) "         >>> This back-compatibility patch might be removed in a future update."
+   write(*,*) "                                                                               "
+   !
+   if(ed_verbose>2)then
+    do ibath=1,Nbath
+       write(*,*) "Hreplica #"//str(ibath)//":"
+       call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
+    enddo
+   endif
+   !
+   end subroutine init_Hreplica_symmetries_legacy
 
   subroutine init_Hreplica_symmetries_lattice(Hvec,lambdavec)
-    complex(8),dimension(:,:,:,:,:) :: Hvec
-    real(8),dimension(:,:)          :: lambdavec ![Nlat,Nsym]
-    integer                         :: isym,ilat,N,Nlat
+    complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(Hloc),Nsym]
+    real(8),dimension(:,:,:)        :: lambdavec ![Nlat,Nbath,Nsym]
+    integer                         :: ilat,Nlat
+    integer                         :: isym,Nsym
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_nn: from ({[Hs,Lam]}_b)_site"
 #endif
     !
     Nlat=size(lambdavec,1)
-    N   =size(lambdavec,2)
-    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,N],"init_Hreplica_symmetries","Hvec")
+    Nsym=size(lambdavec,3)
+    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
     if(allocated(Hreplica_lambda_ineq))deallocate(Hreplica_lambda_ineq)
-    allocate(Hreplica_lambda_ineq(Nlat,N))
-    call allocate_hreplica(N)
+    allocate(Hreplica_lambda_ineq(Nlat,Nbath,Nsym))
+    call allocate_hreplica(Nsym)
     !
-    do isym=1,N
-       Hreplica_lambda_ineq(:,isym)  = lambdavec(:,isym)
+    do isym=1,Nsym
+       Hreplica_lambda_ineq(:,:,isym)  = lambdavec(:,:,isym)
        Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
     enddo
     !
     if(ed_verbose>2)then
        do ilat=1,Nlat
-          call print_hloc(Hreplica_build(Hreplica_lambda_ineq(ilat,:)))
+         write(*,*) "Inequivalent #"//str(ilat)//":"
+         do ibath=1,Nbath
+            write(*,*) "> Hreplica #"//str(ibath)//":"
+            call print_hloc(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
+         enddo
        enddo
     endif
+    !
   end subroutine init_Hreplica_symmetries_lattice
 
 
@@ -2115,13 +2191,13 @@ contains
     integer :: site
     if(site<1.OR.site>size(Hreplica_lambda_ineq,1))stop "ERROR Hreplica_site: site not in [1,Nlat]"
     if(.not.allocated(Hreplica_lambda_ineq))stop "ERROR Hreplica_site: Hreplica_lambda_ineq not allocated"
-    Hreplica_lambda(:)  = Hreplica_lambda_ineq(site,:)
+    Hreplica_lambda(:,:)  = Hreplica_lambda_ineq(site,:,:)
   end subroutine Hreplica_site
 
 
   !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
   function Hreplica_build(lambdavec) result(H)
-    real(8),dimension(:)                        :: lambdavec
+    real(8),dimension(:)                        :: lambdavec ![Nsym]
     integer                                     :: isym
     complex(8),dimension(Nspin,Nspin,Norb,Norb) :: H
     !
@@ -2148,7 +2224,7 @@ contains
     wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
     uplo_ =.false.;if(present(uplo))  uplo_=uplo
     !
-    Hloc = Hreplica_build(Hreplica_lambda)
+    Hloc = Hreplica_build(Hreplica_lambda(Nbath,:)) !The mask should be replica-independent
     Hmask=.false.
     where(abs(Hloc)>1d-6)Hmask=.true.
     !
