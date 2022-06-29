@@ -25,9 +25,7 @@ MODULE ED_BATH
    interface set_Hreplica
       module procedure init_Hreplica_direct_so
       module procedure init_Hreplica_direct_nn
-      module procedure init_Hreplica_symmetries_site
-      module procedure init_Hreplica_symmetries_legacy  ! (deprecation-cycle)
-      module procedure init_Hreplica_symmetries_lattice
+      module procedure init_Hreplica_symmetries
    end interface set_Hreplica
 
    !explicit symmetries:
@@ -2046,117 +2044,136 @@ contains
    end subroutine init_Hreplica_direct_so
 
 
-   subroutine init_Hreplica_symmetries_site(Hvec,lambdavec)
-      complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(Hloc),Nsym]
-      real(8),dimension(:,:)          :: lambdavec ![Nbath,Nsym]
+
+
+   !+------------------------------------------------------------------------+
+   !PURPOSE  : Set Hreplica from user defined symmetry expansion {Hsym,λsym}
+   !  - Hsym :: [Nspin,Nspin,Norb,Norb,Nsym]
+   !  - λsym :: [Nsym] or [Nbath,Nsym] or [Nineq,Nsym] or [Nineq,Nbath,Nsym]
+   !+------------------------------------------------------------------------+
+   subroutine init_Hreplica_symmetries(Hvec,lambdavec)
+      complex(8),dimension(:,:,:,:,:) :: Hvec       ![size(Hloc),Nsym]
+      real(8),dimension(..)           :: lambdavec  !ASSUMED-RANK (f18 feature...)
+      integer                         :: ilat,Nlat
       integer                         :: isym,Nsym
       !
 #ifdef _DEBUG
       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: from {[Hs,Lam]}_b"
 #endif
       !
-      if(size(lambdavec(:,1))/=Nbath)then
+      Nsym = size(Hvec,5)
+      call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+      call allocate_hreplica(Nsym)
+      !
+      !TAKE CARE OF SYMMETRY OPERATORS
+      do isym=1,Nsym
+         Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
+      enddo
+      !
+      !TAKE CARE OF SYMMETRY COEFFICIENTS
+      select rank(lambdavec)
+       rank(1) ![Nsym]
+         !
+         !PRINT DEPRECATION MESSAGE TO LOG
          write(*,*) "                                                                               "
-         write(*,*) "ERROR: if you are trying to init Hreplica for inequivalent sites please note   "
-         write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
-         write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
-         write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+         write(*,*) "WARNING: Passing a single lambdasym vector to ed_set_Hreplica is /deprecated/. "
+         write(*,*) "         You should instead define a different lambda for each bath component, "
+         write(*,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
+         write(*,*) "         Your single lambda vector has been internally copied into the required"
+         write(*,*) "         higher-rank array, so giving each replica the same set of lambdas.    "
+         write(*,*) "         >>> This back-compatibility patch might be removed in a future update."
          write(*,*) "                                                                               "
-         stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
-      else
-         Nsym=size(lambdavec(Nbath,:))
-      endif
-      !
-      call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
-      !
-      call allocate_hreplica(Nsym)
-      !
-      do isym=1,Nsym
-         Hreplica_lambda(:,isym)  = lambdavec(:,isym)
-         Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
-      enddo
-      !
-      if(ed_verbose>2)then
-         do ibath=1,Nbath
-            write(*,*) "Hreplica #"//str(ibath)//":"
-            call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
-         enddo
-      endif
-      !
-   end subroutine init_Hreplica_symmetries_site
-
-   subroutine init_Hreplica_symmetries_legacy(Hvec,lambdavec)
-      complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(Hloc),Nsym]
-      real(8),dimension(:)            :: lambdavec ![Nsym]
-      integer                         :: isym,Nsym
-      !
-      Nsym=size(lambdavec)
-      call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
-      !
-      call allocate_hreplica(Nsym)
-      !
-      do isym=1,Nsym
-         do ibath=1,Nbath
-         !> BACK-COMPATIBILITY PATCH (cfr init_dmft_bath)
-            Hreplica_lambda(ibath,isym) = lambdavec(isym)
-         enddo
-         Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
-      enddo
-      !
-      ! PRINT DEPRECATION MESSAGE TO LOG
-      write(*,*) "                                                                               "
-      write(*,*) "WARNING: Passing a single lambdasym vector to ed_set_Hreplica is /deprecated/. "
-      write(*,*) "         You should instead define a different lambda for each bath component, "
-      write(*,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
-      write(*,*) "         Your single lambda vector has been internally copied into the required"
-      write(*,*) "         higher-rank array, so giving each replica the same set of lambdas.    "
-      write(*,*) "         >>> This back-compatibility patch might be removed in a future update."
-      write(*,*) "                                                                               "
-      !
-      if(ed_verbose>2)then
-         do ibath=1,Nbath
-            write(*,*) "Hreplica #"//str(ibath)//":"
-            call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
-         enddo
-      endif
-      !
-   end subroutine init_Hreplica_symmetries_legacy
-
-   subroutine init_Hreplica_symmetries_lattice(Hvec,lambdavec)
-      complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(Hloc),Nsym]
-      real(8),dimension(:,:,:)        :: lambdavec ![Nlat,Nbath,Nsym]
-      integer                         :: ilat,Nlat
-      integer                         :: isym,Nsym
-      !
-#ifdef _DEBUG
-      if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: from ({[Hs,Lam]}_b)_site"
-#endif
-      !
-      Nlat=size(lambdavec,1)
-      Nsym=size(lambdavec,3)
-      call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
-      !
-      if(allocated(Hreplica_lambda_ineq))deallocate(Hreplica_lambda_ineq)
-      allocate(Hreplica_lambda_ineq(Nlat,Nbath,Nsym))
-      call allocate_hreplica(Nsym)
-      !
-      do isym=1,Nsym
-         Hreplica_lambda_ineq(:,:,isym)  = lambdavec(:,:,isym)
-         Hreplica_basis(isym)%O = Hvec(:,:,:,:,isym)
-      enddo
-      !
-      if(ed_verbose>2)then
-         do ilat=1,Nlat
-            write(*,*) "Inequivalent #"//str(ilat)//":"
+         !
+         do isym=1,Nsym
             do ibath=1,Nbath
-               write(*,*) "> Hreplica #"//str(ibath)//":"
-               call print_hloc(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
+            !> BACK-COMPATIBILITY PATCH (see init_dmft_bath)
+               Hreplica_lambda(ibath,isym) = lambdavec(isym)
             enddo
          enddo
+         !
+         Nlat = 1
+         !
+       rank(2) ![Nbath][Nsym] or [Nineq][Nsym]
+         !
+         if(size(lambdavec,1)==Nbath)then
+            !  [Nbath][Nsym]
+            do isym=1,Nsym
+               Hreplica_lambda(:,isym) = lambdavec(:,isym)
+            enddo
+            !
+            Nlat = 1
+            !
+         else ![Nineq][Nsym]
+            !
+            !PRINT DEPRECATION MESSAGE TO LOG
+            write(*,*) "                                                                                "
+            write(*,*) "WARNING: if you are trying to init Hreplica for inequivalent sites please note  "
+            write(*,*) "         that the lambdasym array should have [Nineq]x[Nbath]x[Nsym] shape.     "
+            write(*,*) "         The legacy [Nineq]x[Nsym] has limited support, for it can clash with   "
+            write(*,*) "         the new recommended [Nbath]x[Nsym] shape for the single impurity case. "
+            write(*,*) "         Whenever Nineq=Nbath, we have cannot determine which API is requested, "
+            write(*,*) "         so we enforce the new convention, thus preparing just one bath.        "
+            write(*,*) "         Otherwise your input lambda vectors will be internally copied into the "
+            write(*,*) "         required higher-rank arrays, giving each replica the same init values. "
+            write(*,*) "         >>> This back-compatibility patch might be removed in a future update. "
+            write(*,*) "                                                                                "
+            !
+            Nlat=size(lambdavec,1)
+            if(allocated(Hreplica_lambda_ineq))deallocate(Hreplica_lambda_ineq)
+            allocate(Hreplica_lambda_ineq(Nlat,Nbath,Nsym))
+            !
+            do isym=1,Nsym
+               do ibath=1,Nbath
+               !> BACK-COMPATIBILITY PATCH (see init_dmft_bath)
+                  Hreplica_lambda_ineq(:,ibath,isym) = lambdavec(:,isym)
+               enddo
+            enddo
+            !
+         endif
+         !
+       rank(3) ![Nlat][Nbath][Nsym]
+         !
+         Nlat=size(lambdavec,1)
+         if(allocated(Hreplica_lambda_ineq))deallocate(Hreplica_lambda_ineq)
+         allocate(Hreplica_lambda_ineq(Nlat,Nbath,Nsym))
+         !
+         do isym=1,Nsym
+            Hreplica_lambda_ineq(:,:,isym)  = lambdavec(:,:,isym)
+         enddo
+         !
+       rank default
+         !
+         write(*,*) "                                              "
+         write(*,*) "ERROR: invalid rank for symmetry lambda array,"
+         write(*,*) "       it should be [Nsym] or [Nbath,Nsym] or "
+         write(*,*) "       [Nlat,Nsym] or [Nlat,Nbath,Nsym].      "
+         write(*,*) "                                              "
+         stop
+         !
+      end select
+      !
+      !PRINT INFO TO LOGFILE
+      if(ed_verbose>2)then
+#ifdef _DEBUG
+         write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: inferred Nineq is "//str(Nlat)
+#endif
+         if(Nlat>1)then
+            do ilat=1,Nlat
+               write(*,*) "Inequivalent #"//str(ilat)//":"
+               do ibath=1,Nbath
+                  write(*,*) "> Hreplica #"//str(ibath)//":"
+                  call print_hloc(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
+               enddo
+            enddo
+         else
+            do ibath=1,Nbath
+               write(*,*) "Hreplica #"//str(ibath)//":"
+               call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
+            enddo
+         endif
       endif
       !
-   end subroutine init_Hreplica_symmetries_lattice
-
+   end subroutine init_Hreplica_symmetries
 
 
 
