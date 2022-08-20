@@ -226,7 +226,7 @@ contains
        endif
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_spinChi(norm2,state_e,alfa_,beta_,iorb,iorb)
+       call add_to_lanczos_spinChi(norm2,state_e,alfa_,beta_,iorb,jorb)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
        if(allocated(state_dvec))deallocate(state_dvec)
