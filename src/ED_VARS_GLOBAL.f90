@@ -197,6 +197,12 @@ MODULE ED_VARS_GLOBAL
   !=========================================================
   type(effective_bath)                               :: dmft_bath
 
+
+  !Global Nambu factor for SC calculations (Nspin=1 but this index is 2 to
+  !correctly allocate  Nambu arrays of dim 2*Norb) 
+  !=========================================================
+  integer                                            :: Nnambu=1
+  
   !Replica bath basis set
   !=========================================================
   type(H_operator),dimension(:),allocatable          :: Hreplica_basis   ![Nsym]

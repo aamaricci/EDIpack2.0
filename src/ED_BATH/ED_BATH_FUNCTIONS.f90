@@ -1,7 +1,8 @@
 MODULE ED_BATH_FUNCTIONS
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,txtfy,str
-  USE SF_LINALG, only: eye,inv,zeye,inv_her
+  USE SF_LINALG, only: eye,inv,zeye,inv_her,kron
+  USE SF_PAULI, only: pauli_sigma_z
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_BATH
@@ -50,23 +51,24 @@ contains
 
 
   function delta_bath_array(x,dmft_bath_,axis) result(Delta)
-    complex(8),dimension(:),intent(in)                  :: x
-    type(effective_bath)                                :: dmft_bath_
-    character(len=*),optional                           :: axis    
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: Delta
-    integer                                             :: i,ih,L
-    integer                                             :: iorb,jorb,ispin,jspin,ibath
-    integer                                             :: io,jo
-    real(8),dimension(Nbath)                            :: eps,dps,vps
-    real(8),dimension(Norb,Nbath)                       :: vops
+    complex(8),dimension(:),intent(in)                        :: x
+    type(effective_bath)                                      :: dmft_bath_
+    character(len=*),optional                                 :: axis    
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))       :: Delta
+    integer                                                   :: i,ih,L
+    integer                                                   :: iorb,jorb,ispin,jspin,ibath
+    integer                                                   :: io,jo
+    real(8),dimension(Nbath)                                  :: eps,dps,vps
+    real(8),dimension(Norb,Nbath)                             :: vops
     !
-    real(8),dimension(Nspin,Nbath)                      :: ehel
-    real(8),dimension(Nspin,Nspin,Nbath)                :: whel
-    real(8),dimension(Nspin,Nspin,Norb,Nbath)           :: wohel
+    real(8),dimension(Nspin,Nbath)                            :: ehel
+    real(8),dimension(Nspin,Nspin,Nbath)                      :: whel
+    real(8),dimension(Nspin,Nspin,Norb,Nbath)                 :: wohel
     !
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)         :: invH_k
-    complex(8),dimension(Nspin,Nspin,Norb,Norb)         :: invH_knn
-    character(len=4)                                    :: axis_
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: invH_k
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: invH_knn
+    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)             :: JJ
+    character(len=4)                                          :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
     !
@@ -75,6 +77,8 @@ contains
     L = size(x)
     !
     select case(bath_type)
+
+    case default                !normal: only _{aa} are allowed (no inter-orbital local mixing)
        !NORMAL:
        !\Delta_{aa} = \sum_k [ V_{a}(k) * V_{a}(k)/(x - E_{a}(k)) ]
        !SUPERC:
@@ -84,7 +88,6 @@ contains
        ! \Delta_{aa}^{ss} = - \sum_k [ V_{a}(k) * V_{a}(k) * (w+i\h + E_{a}(k)) / ((w+i\h)*(-w-i\h) + E(k)**2 + \D(k)**2 ]
        !NONSU2:
        !\Delta_{aa}^{ss`} = \sum_h \sum_k [ W_{a}^{sh}(k) * W_{a}^{s`h}(k)/(x - H_{a}^{h}(k))]
-    case default                !normal: only _{aa} are allowed (no inter-orbital local mixing)
        select case(ed_mode)
        case default
           do ispin=1,Nspin
@@ -134,6 +137,8 @@ contains
           !
        end select
        !
+
+    case ("hybrid")
        !NORMAL:
        !\Delta_{ab} = \sum_k [ V_{a}(k) * V_{b}(k)/(iw_n - E(k)) ]
        !SUPERC:
@@ -143,7 +148,6 @@ contains
        ! \Delta_{ab} = - \sum_k [ V_{a}(k) * V_{b}(k) * (w+i\h + E(k)) / ((w+i\h)*(-w-i\h) + E(k)**2 + \D(k)**2 ]
        !NONSU2:
        !\Delta_{ab}^{ss`} = \sum_h \sum_k [ W_{a}^{sh}(k) * W_{b}^{s`h}(k)/(x - H^{h}(k))]
-    case ("hybrid")
        select case(ed_mode)
        case default
           do ispin=1,Nspin
@@ -202,19 +206,43 @@ contains
        end select
        !
     case ("replica")
-       invH_k=zero
-       do i=1,L
-          do ibath=1,Nbath
-             invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
-             invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
-             invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
-             call inv(invH_k)
-             invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
-             Delta(:,:,:,:,i)=Delta(:,:,:,:,i) + &
-                  dmft_bath_%item(ibath)%v*invH_knn*dmft_bath_%item(ibath)%v
+       !NORMAL/NONSU2
+       !\Delta_{ab} = \sum_k [ V_{a}(k) * (z - H(k))_{ab}^-1 V_{b}(k)]
+       !SUPERC:
+
+       !IF(MATS):
+       ! \Delta_{ab} = - \sum_k [ V_{a}(k) * V_{b}(k) * (iw_n + E(k)) / Den(k) ]
+       !ELSE:
+       ! \Delta_{ab} = - \sum_k [ V_{a}(k) * V_{b}(k) * (w+i\h + E(k)) / ((w+i\h)*(-w-i\h) + E(k)**2 + \D(k)**2 ]
+       select case(ed_mode)
+       case default             !normal OR nonsu2
+          invH_k=zero
+          do i=1,L
+             do ibath=1,Nbath
+                invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
+                invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
+                invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
+                call inv(invH_k)
+                invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
+                Delta(:,:,:,:,i)=Delta(:,:,:,:,i) + &
+                     dmft_bath_%item(ibath)%v*invH_knn*dmft_bath_%item(ibath)%v
+             enddo
           enddo
-          !
-       enddo
+       case ("superc")
+          JJ = kron(pauli_sigma_z,zeye(Norb))
+          do i=1,L
+             do ibath=1,Nbath
+                invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
+                invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
+                invH_k   = JJ*x(i) - invH_k
+                call inv(invH_k)
+                invH_k   = matmul(matmul(JJ,invH_k),JJ)
+                invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
+                Delta(1,1,:,:,i)=Delta(1,1,:,:,i) + &
+                     dmft_bath_%item(ibath)%v*invH_knn(1,1,:,:)*dmft_bath_%item(ibath)%v
+             enddo
+          enddo
+       end select
        !
     end select
   end function delta_bath_array
@@ -222,15 +250,18 @@ contains
 
   !ANOMALous:
   function fdelta_bath_array(x,dmft_bath_,axis) result(Fdelta)
-    complex(8),dimension(:),intent(in)                  :: x
-    type(effective_bath)                                :: dmft_bath_
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: Fdelta
-    integer                                             :: iorb,ispin,jorb
-    real(8),dimension(Nbath)                            :: eps,dps,vps
-    real(8),dimension(Norb,Nbath)                       :: vops
-    integer                                             :: i,L
-    character(len=*),optional                           :: axis    
-    character(len=4)                                    :: axis_
+    complex(8),dimension(:),intent(in)                        :: x
+    type(effective_bath)                                      :: dmft_bath_
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))       :: Fdelta
+    integer                                                   :: iorb,ispin,jorb,ibath
+    real(8),dimension(Nbath)                                  :: eps,dps,vps
+    real(8),dimension(Norb,Nbath)                             :: vops
+    integer                                                   :: i,L
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: invH_k
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: invH_knn
+    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)             :: JJ
+    character(len=*),optional                                 :: axis    
+    character(len=4)                                          :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
     !
@@ -239,8 +270,6 @@ contains
     L = size(x)
     !
     select case(bath_type)
-    case ("replica")
-       stop "Fdelta_bath_mats error: called with bath_type=replica"
     case default                !normal: only _{aa} are allowed (no inter-orbital local mixing)
        select case(ed_mode)
        case default
@@ -303,7 +332,27 @@ contains
                 enddo
              enddo
           enddo
+       end select
+       !
+    case ("replica")
+       select case(ed_mode)
+       case default
+          stop "Fdelta_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=replica"
           !
+       case ("superc")
+          JJ = kron(pauli_sigma_z,zeye(Norb))
+          do i=1,L
+             do ibath=1,Nbath
+                invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
+                invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
+                invH_k   = JJ*x(i) - invH_k
+                call inv(invH_k)
+                invH_k = matmul(matmul(JJ,invH_k),JJ)
+                invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
+                FDelta(1,1,:,:,i)=FDelta(1,1,:,:,i) + &
+                     dmft_bath_%item(ibath)%v*invH_knn(1,2,:,:)*dmft_bath_%item(ibath)%v
+             enddo
+          enddo
        end select
     end select
   end function fdelta_bath_array
@@ -412,7 +461,7 @@ contains
           Fdelta= fdelta_bath_array(x,dmft_bath_,axis_)
           select case(axis_)
           case default
-             do ispin=1,Nspin
+             do ispin=1,Nspin   !==1
                 do i=1,L
                    zeta = zero
                    fgorb= zero
@@ -434,7 +483,7 @@ contains
              enddo
              !
           case("real")
-             do ispin=1,Nspin
+             do ispin=1,Nspin   !==1
                 do i=1,L
                    zeta = zero
                    fgorb= zero

@@ -13,7 +13,7 @@ MODULE ED_INPUT_VARS
   integer              :: Nspin               !Nspin=# spin degeneracy (max 2)
   integer              :: nloop               !max dmft loop variables
   integer              :: Nph                 !max number of phonons allowed (cut off)
-  real(8),dimension(5) :: Uloc                !local interactions
+  real(8),allocatable  :: Uloc(:)             !local interactions
   real(8)              :: Ust                 !intra-orbitals interactions
   real(8)              :: Jh                  !J_Hund: Hunds' coupling constant 
   real(8)              :: Jx                  !J_X: coupling constant for the spin-eXchange interaction term
@@ -22,7 +22,7 @@ MODULE ED_INPUT_VARS
   real(8)              :: beta                !inverse temperature
   !
   integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
-  real(8),dimension(5) :: g_ph                !g_ph: electron-phonon coupling constant
+  real(8),allocatable  :: g_ph(:)             !g_ph: electron-phonon coupling constant
   real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
   !
   integer              :: Nsuccess            !# of repeated success to fall below convergence threshold  
@@ -36,11 +36,11 @@ MODULE ED_INPUT_VARS
   real(8)              :: deltasc             !breaking symmetry field
   real(8)              :: sb_field            !symmetry breaking field
   !
-  real(8),dimension(5) :: spin_field_x        !magnetic field per orbital coupling to X-spin component
-  real(8),dimension(5) :: spin_field_y        !magnetic field per orbital coupling to Y-spin component
-  real(8),dimension(5) :: spin_field_z        !magnetic field per orbital coupling to Z-spin component
+  real(8),allocatable  :: spin_field_x(:)        !magnetic field per orbital coupling to X-spin component
+  real(8),allocatable  :: spin_field_y(:)        !magnetic field per orbital coupling to Y-spin component
+  real(8),allocatable  :: spin_field_z(:)        !magnetic field per orbital coupling to Z-spin component
+  real(8),allocatable  :: pair_field(:)          !pair field per orbital coupling to s-wave order parameter component
   real(8),dimension(4) :: exc_field           !external field coupling to exciton order parameter
-  real(8),dimension(5) :: pair_field          !pair field per orbital coupling to s-wave order parameter component
   !
   logical              :: chispin_flag        !evaluate spin susceptibility
   logical              :: chidens_flag        !evaluate dens susceptibility
@@ -151,7 +151,8 @@ contains
     call parse_input_variable(Nph,"NPH",INPUTunit,default=0,comment="Max number of phonons allowed (cut off)")
     call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp)")
     !
-    call parse_input_variable(uloc,"ULOC",INPUTunit,default=[2d0,0d0,0d0,0d0,0d0],comment="Values of the local interaction per orbital (max 5)")
+    allocate(Uloc(Norb))
+    call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
     call parse_input_variable(ust,"UST",INPUTunit,default=0.d0,comment="Value of the inter-orbital interaction term")
     call parse_input_variable(Jh,"JH",INPUTunit,default=0.d0,comment="Hunds coupling")
     call parse_input_variable(Jx,"JX",INPUTunit,default=0.d0,comment="S-E coupling")
@@ -165,17 +166,23 @@ contains
 
     call parse_input_variable(beta,"BETA",INPUTunit,default=1000.d0,comment="Inverse temperature, at T=0 is used as a IR cut-off.")
     call parse_input_variable(xmu,"XMU",INPUTunit,default=0.d0,comment="Chemical potential. If HFMODE=T, xmu=0 indicates half-filling condition.")
-    call parse_input_variable(g_ph,"G_PH",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="Electron-phonon coupling constant")
+
+    allocate(g_ph(Norb))
+    call parse_input_variable(g_ph,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
 
-    call parse_input_variable(spin_field_x,"SPIN_FIELD_X",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to X-spin component")
-    call parse_input_variable(spin_field_y,"SPIN_FIELD_Y",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Y-spin component")
-    call parse_input_variable(spin_field_z,"SPIN_FIELD_Z",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Z-spin component")
+    allocate(spin_field_x(Norb))
+    allocate(spin_field_y(Norb))
+    allocate(spin_field_z(Norb))
+    allocate(pair_field(Norb))
+    call parse_input_variable(spin_field_x,"SPIN_FIELD_X",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="magnetic field per orbital coupling to X-spin component")
+    call parse_input_variable(spin_field_y,"SPIN_FIELD_Y",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="magnetic field per orbital coupling to Y-spin component")
+    call parse_input_variable(spin_field_z,"SPIN_FIELD_Z",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="magnetic field per orbital coupling to Z-spin component")
     call parse_input_variable(exc_field,"EXC_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0],comment="external field coupling to exciton order parameters")
-    call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="pair field per orbital coupling to s-wave order parameter component")
+    call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="pair field per orbital coupling to s-wave order parameter component")
 
 
-    call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !
+    call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !    
     call parse_input_variable(ed_diag_type,"ED_DIAG_TYPE",INPUTunit,default="lanc",comment="flag to select the diagonalization type: 'lanc' for Lanczos/Davidson, 'full' for Full diagonalization method")
     call parse_input_variable(ed_finite_temp,"ED_FINITE_TEMP",INPUTunit,default=.false.,comment="flag to select finite temperature method. note that if T then lanc_nstates_total must be > 1")
     call parse_input_variable(ed_twin,"ED_TWIN",INPUTunit,default=.false.,comment="flag to reduce (T) or not (F,default) the number of visited sector using twin symmetry.")
@@ -273,14 +280,14 @@ contains
     endif
     !
     if(nread .ne. 0d0) then
-      inquire(file="xmu.restart",EXIST=bool)
-      if(bool)then
-        open(free_unit(unit_xmu),file="xmu.restart")
-        read(unit_xmu,*)xmu,ndelta
-        ndelta=abs(ndelta)*ncoeff
-        close(unit_xmu)
-        write(*,"(A,F9.7,A)")"Adjusting XMU to ",xmu," as per provided xmu.restart "
-      endif
+       inquire(file="xmu.restart",EXIST=bool)
+       if(bool)then
+          open(free_unit(unit_xmu),file="xmu.restart")
+          read(unit_xmu,*)xmu,ndelta
+          ndelta=abs(ndelta)*ncoeff
+          close(unit_xmu)
+          write(*,"(A,F9.7,A)")"Adjusting XMU to ",xmu," as per provided xmu.restart "
+       endif
     endif
     !Act on the input variable only after printing.
     !In the new parser variables are hard-linked into the list:

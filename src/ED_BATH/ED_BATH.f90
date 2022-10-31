@@ -183,7 +183,7 @@ contains
        bath_size=Nspin*bath_size
        !
     case('replica')
-       allocate(H(Nspin,Nspin,Norb,Norb))
+       allocate(H(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
        if(present(H_nn))then    !User defined H_nn
           H=H_nn
        elseif(Hreplica_status)then !User defined Hreplica_basis
@@ -199,12 +199,12 @@ contains
        !       if(abs(dimag(H(ispin,ispin,iorb,iorb))).gt.1d-6)stop "H is not Hermitian"
        !    enddo
        ! enddo
-       if( all(abs(nn2so_reshape(H,Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
+       if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
        !
        !Re/Im off-diagonal non-vanishing elements
        ndx=0
-       do ispin=1,Nspin
-          do jspin=1,Nspin
+       do ispin=1,Nnambu*Nspin
+          do jspin=1,Nnambu*Nspin
              do iorb=1,Norb
                 do jorb=1,Norb
                    io = iorb + (ispin-1)*Norb
@@ -224,14 +224,12 @@ contains
     end select
   end function get_bath_dimension_direct
 
-  function get_bath_dimension_symmetries(H_nn) result(bath_size)
-    complex(8),dimension(:,:,:,:,:),intent(in) :: H_nn ![Nspin][Nspin][Norb][Norb][Nsym]
-    integer                                    :: bath_size,ndx,isym,Nsym
+  function get_bath_dimension_symmetries(Nsym) result(bath_size)
+    integer :: bath_size,ndx,isym,Nsym
     !
-    !number of symmetries
-    Nsym=size(H_nn,5)
+    if(.not.Hreplica_status)STOP "get_bath_dimension_symmetries: Hreplica_basis not allocated"
     if(Nsym/=size(Hreplica_lambda,2))&
-         stop "ERROR get_bath_dimension_symmetries:  neither H_nn present nor Hreplica_basis defined"
+         stop "ERROR get_bath_dimension_symmetries:  size(Hreplica_basis) != size(Hreplica_lambda,2)"
     !
     ndx=Nsym
     !
@@ -261,12 +259,7 @@ contains
     case default
        Ntrue = get_bath_dimension()
     case ('replica')
-       if(.not.Hreplica_status)STOP "check_bath_dimension: Hreplica_basis not allocated"
-       if(.not.allocated(Hreplica))allocate(Hreplica(Nspin,Nspin,Norb,Norb,size(Hreplica_basis)))
-       do i=1,size(Hreplica_basis)
-          Hreplica(:,:,:,:,i)=Hreplica_basis(i)%O
-       enddo
-       Ntrue   = get_bath_dimension_symmetries(Hreplica)
+       Ntrue   = get_bath_dimension_symmetries(size(Hreplica_basis))
     end select
     bool  = ( size(bath_) == Ntrue )
   end function check_bath_dimension
@@ -1297,7 +1290,7 @@ contains
     integer              :: i,Nsym
     integer              :: io,jo,iorb,ispin,isym
     real(8)              :: hybr_aux
-    complex(8)           :: ho(Nspin*Norb,Nspin*Norb)
+    complex(8)           :: ho(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)
     character(len=64)    :: string_fmt,string_fmt_first
     !
 #ifdef _DEBUG
@@ -1396,7 +1389,7 @@ contains
        !
     case ('replica')
        !
-       string_fmt      ="("//str(Nspin*Norb)//"(A1,F5.2,A1,F5.2,A1,2x))"
+       string_fmt      ="("//str(Nnambu*Nspin*Norb)//"(A1,F5.2,A1,F5.2,A1,2x))"
        !
        write(unit_,"(90(A21,1X))")"#V_i",("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
        write(unit_,"(I3)")dmft_bath_%Nbasis
@@ -1408,10 +1401,10 @@ contains
        if(unit_/=LOGfile)then
           write(unit_,*)""
           do isym=1,size(Hreplica_basis)
-             Ho = nn2so_reshape(Hreplica_basis(isym)%O,nspin,norb)
-             do io=1,Nspin*Norb
+             Ho = nn2so_reshape(Hreplica_basis(isym)%O,Nnambu*Nspin,Norb)
+             do io=1,Nnambu*Nspin*Norb
                 write(unit,string_fmt)&
-                     ('(',dreal(Ho(io,jo)),',',dimag(Ho(io,jo)),')',jo =1,Nspin*Norb)
+                     ('(',dreal(Ho(io,jo)),',',dimag(Ho(io,jo)),')',jo =1,Nnambu*Nspin*Norb)
              enddo
              write(unit,*)""
           enddo
@@ -1963,7 +1956,7 @@ contains
     allocate(Hreplica_basis(Nsym))
     allocate(Hreplica_lambda(Nbath,Nsym))
     do isym=1,Nsym
-       allocate(Hreplica_basis(isym)%O(Nspin,Nspin,Norb,Norb))
+       allocate(Hreplica_basis(isym)%O(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
        Hreplica_basis(isym)%O=zero
        Hreplica_lambda(:,isym)=0d0
     enddo
@@ -1987,70 +1980,8 @@ contains
   end subroutine deallocate_hreplica
 
 
-  !+------------------------------------------------------------------+
-  !PURPOSE  : Set Hreplica from user defined Hloc
-  !1: [Nspin,Nspin,Norb,Norb]
-  !2: [Nspin*Norb,Nspin*Norb]
-  !+------------------------------------------------------------------+
-  !   subroutine init_Hreplica_direct_nn(H)
-  !     integer                                     :: ispin,jspin,iorb,jorb,counter,io,jo,Nsym
-  !     complex(8),dimension(Nspin,Nspin,Norb,Norb) :: H
-  !     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
-  !     !
-  ! #ifdef _DEBUG
-  !     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_nn: from H[:,:,:,:]"
-  ! #endif
-  !     !
-  !     Hmask=.false.
-  !     !
-  !     counter=0
-  !     do ispin=1,Nspin
-  !        do jspin=1,Nspin
-  !           do iorb=1,Norb
-  !              do jorb=1,Norb
-  !                 io=index_stride_so(ispin,iorb)
-  !                 jo=index_stride_so(jspin,jorb)
-  !                 if(io > jo )cycle
-  !                 if(H(ispin,jspin,iorb,jorb)/=zero)counter=counter+1
-  !              enddo
-  !           enddo
-  !        enddo
-  !     enddo
-  !     !
-  !     call allocate_hreplica(counter)
-  !     !
-  !     counter=0
-  !     do ispin=1,Nspin
-  !        do jspin=1,Nspin
-  !           do iorb=1,Norb
-  !              do jorb=1,Norb
-  !                 io=index_stride_so(ispin,iorb)
-  !                 jo=index_stride_so(jspin,jorb)
-  !                 if(io > jo )cycle
-  !                 if(H(ispin,jspin,iorb,jorb)/=zero)then
-  !                    counter=counter+1
-  !                    Hreplica_basis(counter)%O(ispin,jspin,iorb,jorb)=1d0
-  !                    Hreplica_basis(counter)%O(ispin,jspin,jorb,iorb)=1d0
-  !                    Hreplica_lambda(:,counter)=H(ispin,ispin,iorb,jorb)
-  !                 endif
-  !              enddo
-  !           enddo
-  !        enddo
-  !     enddo
-  !     !
-  !   end subroutine init_Hreplica_direct_nn
-
-  !   subroutine init_Hreplica_direct_so(H)
-  !     complex(8),dimension(Nspin*Norb,Nspin*Norb) :: H
-  ! #ifdef _DEBUG
-  !     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_direct_so: from H[:,:]"
-  ! #endif
-  !     call init_Hreplica_direct_nn(so2nn_reshape(H,Nspin,Norb))
-  !   end subroutine init_Hreplica_direct_so
-
-
   subroutine init_Hreplica_symmetries_site(Hvec,lambdavec)
-    complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(H),Nsym]
+    complex(8),dimension(:,:,:,:,:) :: Hvec      ![Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym]
     real(8),dimension(:,:)          :: lambdavec ![Nbath,Nsym]
     integer                         :: isym,Nsym
     !
@@ -2070,7 +2001,7 @@ contains
        Nsym=size(lambdavec,2)
     endif
     !
-    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+    call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
     call allocate_hreplica(Nsym)
     !
@@ -2094,7 +2025,7 @@ contains
     integer                         :: isym,Nsym
     !
     Nsym=size(lambdavec)
-    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+    call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
     call allocate_hreplica(Nsym)
     !
@@ -2137,7 +2068,7 @@ contains
     !
     Nlat=size(lambdavec,1)
     Nsym=size(lambdavec,3)
-    call assert_shape(Hvec,[Nspin,Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+    call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
     if(allocated(Hreplica_lambda_ineq))deallocate(Hreplica_lambda_ineq)
     allocate(Hreplica_lambda_ineq(Nlat,Nbath,Nsym))
@@ -2200,9 +2131,9 @@ contains
 
   !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
   function Hreplica_build(lambdavec) result(H)
-    real(8),dimension(:)                        :: lambdavec ![Nsym]
-    integer                                     :: isym
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: H
+    real(8),dimension(:)                                      :: lambdavec ![Nsym]
+    integer                                                   :: isym
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
     !
     if(.not.Hreplica_status)STOP "ERROR Hreplica_build: Hreplica_basis is not setup"
     if(size(lambdavec)/=size(Hreplica_basis)) STOP "ERROR Hreplica_build: Wrong coefficient vector size"
@@ -2218,11 +2149,11 @@ contains
   !PURPOSE  : Create bath mask
   !+-------------------------------------------------------------------+
   function Hreplica_mask(wdiag,uplo) result(Hmask)
-    logical,optional                            :: wdiag,uplo
-    logical                                     :: wdiag_,uplo_
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: H
-    logical,dimension(Nspin,Nspin,Norb,Norb)    :: Hmask
-    integer                                     :: iorb,jorb,ispin,jspin,io,jo
+    logical,optional                                          :: wdiag,uplo
+    logical                                                   :: wdiag_,uplo_
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
+    logical,dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)    :: Hmask
+    integer                                                   :: iorb,jorb,ispin,jspin,io,jo
     !
     wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
     uplo_ =.false.;if(present(uplo))  uplo_=uplo
@@ -2233,7 +2164,7 @@ contains
     !
     !
     if(wdiag_)then
-       do ispin=1,Nspin
+       do ispin=1,Nnambu*Nspin
           do iorb=1,Norb
              Hmask(ispin,ispin,iorb,iorb)=.true.
           enddo
@@ -2241,8 +2172,8 @@ contains
     endif
     !
     if(uplo_)then
-       do ispin=1,Nspin
-          do jspin=1,Nspin
+       do ispin=1,Nnambu*Nspin
+          do jspin=1,Nnambu*Nspin
              do iorb=1,Norb
                 do jorb=1,Norb
                    io = index_stride_so(ispin,iorb)
@@ -2263,21 +2194,21 @@ contains
   !PURPOSE  : Check if a matrix is the identity
   !+-------------------------------------------------------------------+
   function is_identity_nn(mnnn) result(flag)
-    complex(8),dimension(nspin,nspin,norb,norb) :: mnnn
-    real(8),dimension(nspin*norb,nspin*norb) :: mtmp
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: mnnn
+    real(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                  :: i,j
     logical                                  :: flag
     !
     flag=.true.
     !
-    mtmp=nn2so_reshape(mnnn,nspin,norb)
+    mtmp=nn2so_reshape(mnnn,Nnambu*Nspin,Norb)
     !
-    do i=1,Nspin*Norb-1
+    do i=1,Nnambu*Nspin*Norb-1
        if((mtmp(i,i).ne.mtmp(i+1,i+1)).or.(mtmp(i,i).lt.1.d-6))flag=.false.
     enddo
     !
-    do i=1,Nspin*Norb
-       do j=1,Nspin*Norb
+    do i=1,Nnambu*Nspin*Norb
+       do j=1,Nnambu*Nspin*Norb
           if((i.ne.j).and.(mtmp(i,j).gt.1.d-6))flag=.false.
        enddo
     enddo
@@ -2285,8 +2216,8 @@ contains
   end function is_identity_nn
 
   function is_identity_so(mlso) result(flag)
-    complex(8),dimension(nspin*norb,nspin*norb) :: mlso
-    real(8),dimension(nspin*norb,nspin*norb) :: mtmp
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mlso
+    real(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                  :: i,j
     logical                                  :: flag
     !
@@ -2294,12 +2225,12 @@ contains
     !
     mtmp=mlso
     !
-    do i=1,Nspin*Norb-1
+    do i=1,Nnambu*Nspin*Norb-1
        if((mtmp(i,i).ne.mtmp(i+1,i+1)).or.(mtmp(i,i).lt.1.d-6))flag=.false.
     enddo
     !
-    do i=1,Nspin*Norb
-       do j=1,Nspin*Norb
+    do i=1,Nnambu*Nspin*Norb
+       do j=1,Nnambu*Nspin*Norb
           if((i.ne.j).and.(mtmp(i,j).gt.1.d-6))flag=.false.
        enddo
     enddo
@@ -2312,17 +2243,17 @@ contains
   !PURPOSE  : Check if a matrix is diagonal
   !+-------------------------------------------------------------------+
   function is_diagonal_nn(mnnn) result(flag)
-    complex(8),dimension(nspin,nspin,norb,norb) :: mnnn
-    complex(8),dimension(nspin*norb,nspin*norb) :: mtmp
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: mnnn
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                     :: i,j
     logical                                     :: flag
     !
     flag=.true.
     !
-    mtmp=abs((nn2so_reshape(mnnn,nspin,norb)))
+    mtmp=abs((nn2so_reshape(mnnn,Nnambu*Nspin,Norb)))
     !
-    do i=1,Nspin*Norb
-       do j=1,Nspin*Norb
+    do i=1,Nnambu*Nspin*Norb
+       do j=1,Nnambu*Nspin*Norb
           if((i.ne.j).and.(abs(mtmp(i,j)).gt.1.d-6))flag=.false.
        enddo
     enddo
@@ -2330,8 +2261,8 @@ contains
   end function is_diagonal_nn
 
   function is_diagonal_so(mlso) result(flag)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: mlso
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: mtmp
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mlso
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                     :: i,j
     logical                                     :: flag
     !
@@ -2339,8 +2270,8 @@ contains
     !
     mtmp=abs((mlso))
     !
-    do i=1,Nspin*Norb
-       do j=1,Nspin*Norb
+    do i=1,Nnambu*Nspin*Norb
+       do j=1,Nnambu*Nspin*Norb
           if((i.ne.j).and.(abs(mtmp(i,j)).gt.1.d-6))flag=.false.
        enddo
     enddo

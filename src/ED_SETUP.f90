@@ -43,7 +43,7 @@ contains
     endif
     !
     if(ed_mode=="superc")then
-       if(Nspin>1)print*,"ED WARNING: SC + Magnetism is currently not supported."
+       if(Nspin>1)stop "ED ERROR: SC + Magnetism can not be solved in DMFT (ask CDMFT boys)"
        ! if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
     endif
     if(ed_mode=="nonsu2")then
@@ -128,15 +128,17 @@ contains
     !
     DimPh    = Nph+1
     Nlevels  = 2*Ns
+    Nhel     = 1
+    Nnambu   = 1
     !
     select case(ed_mode)
     case default
        Nsectors = ((Ns_Orb+1)*(Ns_Orb+1))**Ns_Ud
-       Nhel     = 1
     case ("superc")
        Nsectors = Nlevels+1     !sz=-Ns:Ns=2*Ns+1=Nlevels+1
-       Nhel     = 1
+       Nnambu   = 2
     case("nonsu2")
+       Nhel     = 2
        if(Jz_basis)then
           isector=0
           do in=0,Nlevels
@@ -157,10 +159,8 @@ contains
              enddo
           enddo
           Nsectors=isector
-          Nhel     = 2
        else
           Nsectors = Nlevels+1     !n=0:2*Ns=2*Ns+1=Nlevels+1
-          Nhel     = 2
        endif
     end select
 

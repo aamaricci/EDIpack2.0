@@ -1458,10 +1458,10 @@ contains
   !PURPOSE  : Print Hloc
   !+------------------------------------------------------------------+
   subroutine print_Hloc_nn_c(hloc,file)
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
-    character(len=*),optional                   :: file
-    integer                                     :: iorb,jorb,ispin,jspin,Nso,unit
-    character(len=32)                           :: fmt
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: hloc
+    character(len=*),optional                                 :: file
+    integer                                                   :: iorb,jorb,ispin,jspin,Nso,unit
+    character(len=32)                                         :: fmt
     !
     unit=LOGfile
     !
@@ -1470,14 +1470,14 @@ contains
        write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
     endif
     !
-    do ispin=1,Nspin
+    do ispin=1,Nnambu*Nspin
        do iorb=1,Norb
           write(unit,"(100(A1,F8.4,A1,F8.4,A1,2x))")&
                (&
                (&
                '(',dreal(Hloc(ispin,jspin,iorb,jorb)),',',dimag(Hloc(ispin,jspin,iorb,jorb)),')',&
                jorb =1,Norb),&
-               jspin=1,Nspin)
+               jspin=1,Nnambu*Nspin)
        enddo
     enddo
     write(unit,*)""
@@ -1486,7 +1486,7 @@ contains
   end subroutine print_Hloc_nn_c
 
   subroutine print_Hloc_so_c(hloc,file)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: hloc
     character(len=*),optional                   :: file
     integer                                     :: is,js,Nso,unit
     character(len=32)                           :: fmt
@@ -1498,7 +1498,7 @@ contains
        write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
     endif
     !
-    Nso = Nspin*Norb
+    Nso = Nnambu*Nspin*Norb
     do is=1,Nso
        write(unit,"(20(A1,F8.4,A1,F8.4,A1,2x))")&
             ('(',dreal(Hloc(is,js)),',',dimag(Hloc(is,js)),')',js =1,Nso)
