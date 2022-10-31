@@ -43,8 +43,8 @@ contains
     endif
     !
     if(ed_mode=="superc")then
-       if(Nspin>1)stop "ED ERROR: SC + Magnetism is currently not supported."
-       if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
+       if(Nspin>1)print*,"ED WARNING: SC + Magnetism is currently not supported."
+       ! if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
     endif
     if(ed_mode=="nonsu2")then
        if(Nspin/=2)then
@@ -651,7 +651,7 @@ contains
     case ('replica')
        do i=1,Nbath
           do iorb=1,Norb
-             getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb
+             getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb !iorb + i*Norb see above normal case
           enddo
        enddo
     end select

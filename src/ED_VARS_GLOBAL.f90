@@ -25,7 +25,7 @@ MODULE ED_VARS_GLOBAL
      real(8),dimension(:,:,:),allocatable      :: e !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
      real(8),dimension(:,:,:),allocatable      :: v !spin-keep hyb. [Nspin][Norb][Nbath]
      !superc
-     real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
+     real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
      !nonsu2
      real(8),dimension(:,:,:),allocatable      :: u !spin-flip hyb. [Nspin][Norb][Nbath]
      !replica
