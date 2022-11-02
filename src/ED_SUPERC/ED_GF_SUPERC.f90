@@ -536,7 +536,7 @@ contains
     !
     do istate=1,state_list%size
        !
-       call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,Nchan=4) !2*[Odg.O,Pdg.P]
+       call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,Nchan=4) !2*[Odg.O,Pdg.P]
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -585,7 +585,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,1,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,1,Nexc=0)
        endif
        !
        !EVALUATE [c_{up,iorb} + cdg_{dw,jorb}]|gs> --> <Odg.O>
@@ -616,7 +616,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,2,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,2,Nexc=0)
        endif
        !
        !
@@ -648,7 +648,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,3,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,3,Nexc=0)
        endif
        !
        !EVALUATE [c_{up,iorb} + xi*c^+_{dw,jorb}]|gs>  += -xi*<Pdg.P>
@@ -679,7 +679,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,4,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,4,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -704,7 +704,7 @@ contains
     integer                                    :: isign,ichan,iorb,jorb,istate,ic
     real(8),dimension(size(alanc),size(alanc)) :: Z
     real(8),dimension(size(alanc))             :: diag,subdiag
-    integer                                    :: i,j,ierr
+    integer                                    :: i,j,ierr,myic
     complex(8)                                 :: iw
     !
 #ifdef _DEBUG
@@ -742,14 +742,16 @@ contains
 #endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
-    call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,ic,Nlanc)
+    myic=1
+    if(ichan=4)myic=Nnambu
+    call allocate_GFmatrix(impGmatrix(myic,myic,iorb,jorb),istate,ic,Nlanc)
     !
     do j=1,nlanc
        de = diag(j)-Ei
        peso = pesoBZ*Z(1,j)*Z(1,j)
        !
-       impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%weight(j) = peso
-       impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%poles(j)  = isign*de
+       impGmatrix(myic,myic,iorb,jorb)%state(istate)%channel(ic)%weight(j) = peso
+       impGmatrix(myic,myic,iorb,jorb)%state(istate)%channel(ic)%poles(j)  = isign*de
        !
        do i=1,Lmats
           iw=xi*wm(i)
