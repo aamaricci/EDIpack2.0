@@ -32,7 +32,7 @@
            do iorb=1,Norb
               ialfa = getBathStride(iorb,kp)
               htmp = htmp + bath_diag(1          ,iorb,kp)*ib(ialfa)    !UP
-              htmp = htmp + bath_diag(Nambu*Nspin,iorb,kp)*ib(ialfa+Ns) !DW
+              htmp = htmp + bath_diag(Nnambu*Nspin,iorb,kp)*ib(ialfa+Ns) !DW
            enddo
         enddo
         !
@@ -71,13 +71,13 @@
                  ialfa = getBathStride(iorb,kp) + Ns
                  ibeta = getBathStride(jorb,kp) + Ns
                  Jcondition = &
-                      (hbath_tmp(Nambu*Nspin,Nambu*Nspin,iorb,jorb,kp)/=zero) .AND. &
+                      (hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp)/=zero) .AND. &
                       (ib(ibeta)==0).AND. (ib(ialfa)==1)
                  if (Jcondition)then
                     call cdg(ibeta,m,k1,sg1)
                     call c(ialfa,k1,k2,sg2)
                     j = binary_search(Hsector%H(1)%map,k2)
-                    htmp = conjg(hbath_tmp(Nambu*Nspin,Nambu*Nspin,iorb,jorb,kp))*sg1*sg2
+                    htmp = conjg(hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
                     !
                     select case(MpiStatus)
                     case (.true.)
@@ -144,13 +144,13 @@
                  ialfa = getBathStride(iorb,kp)
                  ibeta = getBathStride(jorb,kp) + Ns
                  Jcondition = &
-                      (hbath_tmp(1,Nambu,iorb,jorb,kp)/=zero) .AND. &
+                      (hbath_tmp(1,Nnambu,iorb,jorb,kp)/=zero) .AND. &
                       (ib(ibeta)==0) .AND. (ib(ialfa)==0)
                  if(Jcondition)then
                     call cdg(ibeta,m,k1,sg1)
                     call cdg(ialfa,k1,k2,sg2)
                     j=binary_search(Hsector%H(1)%map,k2)
-                    htmp=conjg(hbath_tmp(1,Nambu,iorb,jorb,kp))*sg1*sg2
+                    htmp=conjg(hbath_tmp(1,Nnambu,iorb,jorb,kp))*sg1*sg2
                     !
                     select case(MpiStatus)
                     case (.true.)
@@ -163,13 +163,13 @@
                  ialfa = getBathStride(iorb,kp) + Ns
                  ibeta = getBathStride(jorb,kp)
                  Jcondition = &
-                      (hbath_tmp(Nambu,1,iorb,jorb,kp)/=zero) .AND. &
+                      (hbath_tmp(Nnambu,1,iorb,jorb,kp)/=zero) .AND. &
                       (ib(ibeta)==1) .AND. (ib(ialfa)==1)
                  if(Jcondition)then
                     call c(ibeta,m,k1,sg1)
                     call c(ialfa,k1,k2,sg2)
                     j=binary_search(Hsector%H(1)%map,k2)
-                    htmp=conjg(hbath_tmp(Nambu,1,iorb,jorb,kp))*sg1*sg2
+                    htmp=conjg(hbath_tmp(Nnambu,1,iorb,jorb,kp))*sg1*sg2
                     !
                     select case(MpiStatus)
                     case (.true.)

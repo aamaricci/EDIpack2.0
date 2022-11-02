@@ -95,6 +95,7 @@ contains
 #ifdef _DEBUG
           write(Logfile,"(A)")""
 #endif
+          ! auxG{mats,real}(4,:) !this is <Odg.O> -xi*<Pdg.P>, w O=(a_up+adg_dw), P=(a_up+xi*adg_dw)
           impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(iorb,:)) )
           impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(iorb,:)) )
        enddo
@@ -113,7 +114,7 @@ contains
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
-             ! auxG{mats,real}(3,:) !this is <Qdg.Q> -xi*<Rdg.R>, w Q=(iorb+jorb), R=(iorb+xi.jorb)
+             ! auxG{mats,real}(3,:) !this is <Qdg.Q> -xi*<Rdg.R>, w Q=(a_up+b_up), R=(a_up+xi.b_up)
              impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+impGmats(ispin,ispin,jorb,jorb,:)))
              impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+impGreal(ispin,ispin,jorb,jorb,:)))
           enddo
@@ -130,6 +131,7 @@ contains
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
+             ! auxG{mats,real}(4,:) !this is <Odg.O> -xi*<Pdg.P>, w O=(a_up+bdg_dw), P=(a_up+xi*bdg_dw)
              impFmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(jorb,:)) )
              impFreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(jorb,:)) )
           enddo
@@ -139,7 +141,7 @@ contains
     deallocate(auxGmats,auxGreal)
   end subroutine build_gf_superc
 
-
+  
   subroutine rebuild_gf_superc()
     integer    :: iorb,jorb,ispin,i,isign
     complex(8) :: barGmats(Norb,Lmats),barGreal(Norb,Lreal)
@@ -160,8 +162,8 @@ contains
     do iorb=1,Norb
        auxGmats=zero
        auxGreal=zero
-       write(LOGfile,"(A)")"Get G&F_l"//str(iorb)//"_s"//str(ispin)
-       call rebuild_gf_superc_diag(iorb)
+       write(LOGfile,"(A)")"Get G_l"//str(iorb) !//"_s"//str(ispin)
+       call rebuild_gf_superc_Gdiag(iorb)
        !
        impGmats(ispin,ispin,iorb,iorb,:) = auxGmats(1,:) !this is G_{up,up;iorb,iorb}
        impGreal(ispin,ispin,iorb,iorb,:) = auxGreal(1,:)  
@@ -169,32 +171,51 @@ contains
        barGreal(                 iorb,:) = auxGreal(2,:)
        !                                   auxGmats(3,:) !this is G_oo -xi*G_pp = A_aa -xi*B_aa
        !                                   auxGreal(3,:)
-       impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*auxGmats(1,:)-(one-xi)*auxGmats(2,:))
-       impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*auxGreal(1,:)-(one-xi)*auxGreal(2,:))
+       !impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*auxGmats(1,:)-(one-xi)*auxGmats(2,:))
+       !impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*auxGreal(1,:)-(one-xi)*auxGreal(2,:))
     enddo
     !
     !now we add the other mixed/anomalous GF in for the bath_type="hybrid" case
-    if(bath_type=='hybrid')then
+    select case(bath_type)
+    case default
+       ! Get F^{aa}_{updw} = <adg_up . adg_dw>
+       do iorb=1,Norb
+          write(LOGfile,"(A)")"Get F_l"//str(iorb)
+          call rebuild_gf_superc_Fmix(iorb,iorb)
+#ifdef _DEBUG
+          write(Logfile,"(A)")""
+#endif
+          impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(iorb,:)) )
+          impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(iorb,:)) )
+       enddo
+       !
+    case ('hybrid','replica')
+       !
+       ! Get G^{ab}_{upup} = <adg_up . b_up>
        do iorb=1,Norb
           do jorb=1,Norb
              if(iorb==jorb)cycle
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
-             call rebuild_gf_superc_mix(iorb,jorb)
-             impGmats(ispin,ispin,iorb,jorb,:) = auxGmats(4,:) !This is G_oo -xi*G_pp = A_ab -xi*B_ab
-             impGreal(ispin,ispin,iorb,jorb,:) = auxGreal(4,:)
+             call rebuild_gf_superc_Gmix(iorb,jorb)
+             ! auxG{mats,real}(3,:) !this is <Qdg.Q> -xi*<Rdg.R>, w Q=(iorb+jorb), R=(iorb+xi.jorb)
+             impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+impGmats(ispin,ispin,jorb,jorb,:)))
+             impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+impGreal(ispin,ispin,jorb,jorb,:)))
           enddo
        enddo
        !
+       ! Get F^{ab}_{updw} = <adg_up . bdg_dw>
        do iorb=1,Norb
           do jorb=1,Norb
-             if(iorb==jorb)cycle
+             write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
+             call rebuild_gf_superc_Fmix(iorb,jorb)
+             
              impFmats(ispin,ispin,iorb,jorb,:) = 0.5d0*( impGmats(ispin,ispin,iorb,jorb,:) - &
                   (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) - (one-xi)*barGmats(jorb,:) )
              impFreal(ispin,ispin,iorb,jorb,:) = 0.5d0*( impGreal(ispin,ispin,iorb,jorb,:) - &
                   (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) - (one-xi)*barGreal(jorb,:) )
           enddo
        enddo
-    endif
+    end select
     deallocate(auxGmats,auxGreal)
   end subroutine rebuild_gf_superc
 
@@ -743,7 +764,7 @@ contains
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
     myic=1
-    if(ichan=4)myic=Nnambu
+    if(ichan==4)myic=Nnambu
     call allocate_GFmatrix(impGmatrix(myic,myic,iorb,jorb),istate,ic,Nlanc)
     !
     do j=1,nlanc
@@ -777,7 +798,7 @@ contains
 
 
 
-  subroutine rebuild_gf_superc_diag(iorb)
+  subroutine rebuild_gf_superc_Gdiag(iorb)
     integer,intent(in) :: iorb
     integer            :: Nstates,istate
     integer            :: Nchannels,ic,ichan
@@ -786,7 +807,7 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG rebuild_gf SUPERC: reconstruct diagonal impurity GFs"
+         "DEBUG rebuild_gf SUPERC: reconstruct G_diagonal impurity GFs"
 #endif
     !
     if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state)) then
@@ -803,7 +824,7 @@ contains
           select case(ic)
           case(1,2);ichan=1
           case(3,4);ichan=2
-          case(5:8);ichan=3
+             !case(5:8);ichan=3 !should not exist
           end select
           do iexc=1,Nexcs
              peso  = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
@@ -814,9 +835,9 @@ contains
        enddo
     enddo
     return
-  end subroutine rebuild_gf_superc_diag
+  end subroutine rebuild_gf_superc_Gdiag
 
-  subroutine rebuild_gf_superc_mix(iorb,jorb)
+  subroutine rebuild_gf_superc_Gmix(iorb,jorb)
     integer,intent(in) :: iorb,jorb
     integer            :: Nstates,istate
     integer            :: Nchannels,ic,ichan
@@ -825,7 +846,7 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG rebuild_gf SUPERC: reconstruct mixed impurity GFs"
+         "DEBUG rebuild_gf SUPERC: reconstruct G_mixed impurity GFs"
 #endif
     !
     !
@@ -834,7 +855,7 @@ contains
        return
     endif
     !
-    ichan = 4
+    ichan = 3
     !
     Nstates = size(impGmatrix(1,1,iorb,jorb)%state)
     do istate=1,Nstates
@@ -851,13 +872,50 @@ contains
        enddo
     enddo
     return
-  end subroutine rebuild_gf_superc_mix
+  end subroutine rebuild_gf_superc_Gmix
+
+  
+  subroutine rebuild_gf_superc_Fmix(iorb,jorb)
+    integer,intent(in) :: iorb,jorb
+    integer            :: Nstates,istate
+    integer            :: Nchannels,ic,ichan
+    integer            :: Nexcs,iexc
+    real(8)            :: peso,de
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG rebuild_gf SUPERC: reconstruct F_mixed impurity GFs"
+#endif
+    !
+    !
+    if(.not.allocated(impGmatrix(Nnambu,Nnambu,iorb,jorb)%state)) then
+       print*, "ED_GF_SUPERC WARNING: impGmatrix%state not allocated. Nothing to do"
+       return
+    endif
+    !
+    ichan = 4
+    !
+    Nstates = size(impGmatrix(Nnambu,Nnambu,iorb,jorb)%state)
+    do istate=1,Nstates
+       Nchannels = size(impGmatrix(Nnambu,Nnambu,iorb,jorb)%state(istate)%channel)     
+       do ic=1,Nchannels        
+          Nexcs  = size(impGmatrix(Nnambu,Nnambu,iorb,jorb)%state(istate)%channel(ic)%poles)
+          if(Nexcs==0)cycle
+          do iexc=1,Nexcs
+             peso  = impGmatrix(Nnambu,Nnambu,iorb,jorb)%state(istate)%channel(ic)%weight(iexc)
+             de    = impGmatrix(Nnambu,Nnambu,iorb,jorb)%state(istate)%channel(ic)%poles(iexc)
+             auxGmats(ichan,:)=auxGmats(ichan,:) + peso/(dcmplx(0d0,wm(i))-de)
+             auxGreal(ichan,:)=auxGreal(ichan,:) + peso/(dcmplx(wr(i),eps)-de)
+          enddo
+       enddo
+    enddo
+    return
+  end subroutine rebuild_gf_superc_Fmix
+
+  
 
 
-
-
-
-
+  
   !################################################################
   !################################################################
   !################################################################
@@ -922,25 +980,25 @@ contains
        enddo
        !
        !
-    case ("hybrid")
+    case ("hybrid","replica")
        do i=1,Lmats
           invGimp=zero
-          invGimp(1:Norb,1:Norb)               = impGmats(ispin,ispin,:,:,i)
-          invGimp(1:Norb,Norb+1:2*Norb)        = impFmats(ispin,ispin,:,:,i)
-          invGimp(Norb+1:2*Norb,1:Norb)        = impFmats(ispin,ispin,:,:,i)
-          invGimp(Norb+1:2*Norb,Norb+1:2*Norb) =-conjg(impGmats(ispin,ispin,:,:,i))
+          invGimp(1     :Norb  ,      1:Norb  ) = impGmats(ispin,ispin,:,:,i)
+          invGimp(1     :Norb  , Norb+1:2*Norb) = impFmats(ispin,ispin,:,:,i)
+          invGimp(Norb+1:2*Norb,      1:Norb  ) = conjg(transpose(impFmats(ispin,ispin,:,:,i)))
+          invGimp(Norb+1:2*Norb, Norb+1:2*Norb) =-conjg(impGmats(ispin,ispin,:,:,i))
           call inv(invGimp)
-          invGmats(ispin,ispin,:,:,i) = invGimp(1:Norb,1:Norb)
+          invGmats(ispin,ispin,:,:,i) = invGimp(1:Norb,     1:Norb  )
           invFmats(ispin,ispin,:,:,i) = invGimp(1:Norb,Norb+1:2*Norb)
        enddo
        do i=1,Lreal
           invGimp=zero
-          invGimp(1:Norb,1:Norb)               = impGreal(ispin,ispin,:,:,i)
-          invGimp(1:Norb,Norb+1:2*Norb)        = impFreal(ispin,ispin,:,:,i)
-          invGimp(Norb+1:2*Norb,1:Norb)        = impFreal(ispin,ispin,:,:,i)
+          invGimp(1:Norb       ,     1:Norb)   = impGreal(ispin,ispin,:,:,i)
+          invGimp(1:Norb       ,Norb+1:2*Norb) = impFreal(ispin,ispin,:,:,i)
+          invGimp(Norb+1:2*Norb,     1:Norb)   = conjg(transpose(impFreal(ispin,ispin,:,:,i)))
           invGimp(Norb+1:2*Norb,Norb+1:2*Norb) =-conjg(impGreal(ispin,ispin,:,:,Lreal-i+1))
           call inv(invGimp)
-          invGreal(ispin,ispin,:,:,i) =  invGimp(1:Norb,1:Norb)
+          invGreal(ispin,ispin,:,:,i) =  invGimp(1:Norb,     1:Norb  )
           invFreal(ispin,ispin,:,:,i) =  invGimp(1:Norb,Norb+1:2*Norb)
        enddo
        impSmats(ispin,ispin,:,:,:)  = invG0mats(ispin,ispin,:,:,:) - invGmats(ispin,ispin,:,:,:)
