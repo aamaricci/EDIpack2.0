@@ -26,15 +26,15 @@ contains
   !             BUILD SPARSE HAMILTONIAN of the SECTOR
   !####################################################################
   subroutine ed_buildH_superc_main(isector,Hmat)
-    integer                                           :: isector
-    complex(8),dimension(:,:),optional                :: Hmat
-    integer,dimension(Nlevels)                        :: ib
-    integer,dimension(Ns)                             :: ibup,ibdw
-    real(8),dimension(Norb)                           :: nup,ndw
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
-    integer                                           :: first_state,last_state
-    integer                                           :: first_state_up,last_state_up
-    integer                                           :: first_state_dw,last_state_dw
+    integer                                                         :: isector
+    complex(8),dimension(:,:),optional                              :: Hmat
+    integer,dimension(Nlevels)                                      :: ib
+    integer,dimension(Ns)                                           :: ibup,ibdw
+    real(8),dimension(Norb)                                         :: nup,ndw
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nbath) :: Hbath_tmp
+    integer                                                         :: first_state,last_state
+    integer                                                         :: first_state_up,last_state_up
+    integer                                                         :: first_state_dw,last_state_dw
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_buildH_main SUPERC: build H"
@@ -67,11 +67,11 @@ contains
           enddo
        enddo
     case ("replica")
-       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
-       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
        do ibath=1,Nbath
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
-          do ispin=1,Nspin
+          do ispin=1,Nnambu*Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)

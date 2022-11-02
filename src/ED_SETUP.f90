@@ -348,7 +348,7 @@ contains
     impDmats_ph=zero
     impDreal_ph=zero
     !
-    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    allocate(impGmatrix(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
     !
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_phisc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
@@ -402,7 +402,7 @@ contains
     if(allocated(impHloc))deallocate(impHloc)
     allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
     impHloc = Hloc
-    if(ed_verbose>2)call print_hloc(impHloc)
+    if(ed_verbose>2)call print_hloc(impHloc)    
   end subroutine set_Himpurity_nn_c
 
   subroutine set_Himpurity_so_c(hloc)

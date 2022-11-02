@@ -19,17 +19,17 @@ contains
 
 
   subroutine directMatVec_superc_main(Nloc,vin,Hv)
-    integer                                           :: Nloc
-    complex(8),dimension(Nloc)                        :: vin
-    complex(8),dimension(Nloc)                        :: Hv
-    integer                                           :: isector
-    integer,dimension(Nlevels)                        :: ib
-    integer,dimension(Ns)                             :: ibup,ibdw  
-    real(8),dimension(Norb)                           :: nup,ndw
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
-    integer                                           :: first_state,last_state
-    integer                                           :: first_state_up,last_state_up
-    integer                                           :: first_state_dw,last_state_dw
+    integer                                                         :: Nloc
+    complex(8),dimension(Nloc)                                      :: vin
+    complex(8),dimension(Nloc)                                      :: Hv
+    integer                                                         :: isector
+    integer,dimension(Nlevels)                                      :: ib
+    integer,dimension(Ns)                                           :: ibup,ibdw  
+    real(8),dimension(Norb)                                         :: nup,ndw
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nbath) :: Hbath_tmp
+    integer                                                         :: first_state,last_state
+    integer                                                         :: first_state_up,last_state_up
+    integer                                                         :: first_state_dw,last_state_dw
     !
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
@@ -57,11 +57,11 @@ contains
           enddo
        enddo
     case ("replica")
-       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
-       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
        do ibath=1,Nbath
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
-          do ispin=1,Nspin
+          do ispin=1,Nnambu*Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
@@ -102,21 +102,21 @@ contains
 
 #ifdef _MPI
   subroutine directMatVec_MPI_superc_main(Nloc,v,Hv)
-    integer                                        :: Nloc
-    complex(8),dimension(Nloc)                     :: v
-    complex(8),dimension(Nloc)                     :: Hv
-    integer                                        :: N
-    complex(8),dimension(:),allocatable            :: vin
-    integer,allocatable,dimension(:)               :: Counts,Offset
-    integer                                        :: isector
-    integer,dimension(Nlevels)                     :: ib
-    integer,dimension(Ns)                          :: ibup,ibdw  
-    real(8),dimension(Norb)                        :: nup,ndw
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
-    integer                                        :: first_state,last_state
-    integer                                        :: first_state_up,last_state_up
-    integer                                        :: first_state_dw,last_state_dw
-    integer                                        :: mpiIerr
+    integer                                                         :: Nloc
+    complex(8),dimension(Nloc)                                      :: v
+    complex(8),dimension(Nloc)                                      :: Hv
+    integer                                                         :: N
+    complex(8),dimension(:),allocatable                             :: vin
+    integer,allocatable,dimension(:)                                :: Counts,Offset
+    integer                                                         :: isector
+    integer,dimension(Nlevels)                                      :: ib
+    integer,dimension(Ns)                                           :: ibup,ibdw  
+    real(8),dimension(Norb)                                         :: nup,ndw
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nbath) :: Hbath_tmp
+    integer                                                         :: first_state,last_state
+    integer                                                         :: first_state_up,last_state_up
+    integer                                                         :: first_state_dw,last_state_dw
+    integer                                                         :: mpiIerr
     !
     if(MpiComm==MPI_UNDEFINED)stop "directMatVec_MPI_cc ERRROR: MpiComm = MPI_UNDEFINED"
     if(.not.MpiStatus)stop "directMatVec_MPI_cc ERROR: MpiStatus = F"
@@ -146,11 +146,11 @@ contains
           enddo
        enddo
     case ("replica")
-       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
-       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
        do ibath=1,Nbath
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
-          do ispin=1,Nspin
+          do ispin=1,Nnambu*Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)

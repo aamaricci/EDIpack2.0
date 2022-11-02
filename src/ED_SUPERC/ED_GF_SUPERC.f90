@@ -64,63 +64,78 @@ contains
     !
     ispin=1                       !in this channel Nspin=2 is forbidden. check in ED_AUX_FUNX.
     !
+    !1: Get G^{aa}_{upup}-> saved in impG(1,1,a,a) and \bar{G}^{aa}_{dwdw}-> saved in barG 
     do iorb=1,Norb
        auxGmats=zero
        auxGreal=zero
        write(LOGfile,"(A)")"Get G&F_l"//str(iorb)//"_s"//str(ispin)
        if(MPIMASTER)call start_timer()
        call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
-       call lanc_build_gf_superc_c(iorb)
+       call lanc_build_gf_superc_Gdiag(iorb)
        if(MPIMASTER)call stop_timer(unit=logfile)
 #ifdef _DEBUG
        write(Logfile,"(A)")""
 #endif
-       !
        impGmats(ispin,ispin,iorb,iorb,:) = auxGmats(1,:) !this is G_{up,up;iorb,iorb}
        impGreal(ispin,ispin,iorb,iorb,:) = auxGreal(1,:)  
        barGmats(                 iorb,:) = auxGmats(2,:) !this is G_{dw,dw;iorb,iorb}
        barGreal(                 iorb,:) = auxGreal(2,:)
-       !                                   auxGmats(3,:) !this is G_oo -xi*G_pp = A_aa -xi*B_aa
-       !                                   auxGreal(3,:)
-       impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-auxGmats(1,:)-auxGmats(2,:))
-       impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-auxGreal(1,:)-auxGreal(2,:))
-       !
-       ! Comment out lines marked with >/<ANOMAL to use the more general algorithm to evaluate anomalous gf
-       ! >ANOMAL
-       ! impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*auxGmats(1,:)-(one-xi)*auxGmats(2,:))
-       ! impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*auxGreal(1,:)-(one-xi)*auxGreal(2,:))
-       ! <ANOMAL
     enddo
     !
-    !now we add the other mixed/anomalous GF in for the bath_type="hybrid" case
-    if(bath_type=='hybrid')then
+    !
+    select case(bath_type)
+    case default
+       !get F^{aa}_{updw} = <adg_up . adg_dw>
+       do iorb=1,Norb
+          write(LOGfile,"(A)")"Get F_l"//str(iorb)
+          if(MPIMASTER)call start_timer()
+          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,iorb),Nstate=state_list%size)
+          call lanc_build_gf_superc_Fmix(iorb,iorb)
+          if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+          write(Logfile,"(A)")""
+#endif
+          impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(iorb,:)) )
+          impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(iorb,:)) )
+       enddo
+       !
+    case ('hybrid','replica')
+       !       
+       !Get G^{ab}_{upup} --> saved in impG(1,1,a,b)
        do iorb=1,Norb
           do jorb=1,Norb
              if(iorb==jorb)cycle
-             write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
+             write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)
              if(MPIMASTER)call start_timer()
              call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
-             call lanc_build_gf_superc_mix_c(iorb,jorb)
-             if(MPIMASTER)call stop_timer()
+             call lanc_build_gf_superc_Gmix(iorb,jorb)
+             if(MPIMASTER)call stop_timer(unit=logfile)
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
-             !
-             impGmats(ispin,ispin,iorb,jorb,:) = auxGmats(4,:) !G_oo -xi*G_pp=A_ab-xi*B_ab
-             impGreal(ispin,ispin,iorb,jorb,:) = auxGreal(4,:)
+             ! auxG{mats,real}(3,:) !this is <Qdg.Q> -xi*<Rdg.R>, w Q=(iorb+jorb), R=(iorb+xi.jorb)
+             impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+impGmats(ispin,ispin,jorb,jorb,:)))
+             impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+impGreal(ispin,ispin,jorb,jorb,:)))
           enddo
        enddo
        !
+       !get F^{ab}_{updw} = <adg_up . bdg_dw>
        do iorb=1,Norb
           do jorb=1,Norb
-             if(iorb==jorb)cycle
-             impFmats(ispin,ispin,iorb,jorb,:) = 0.5d0*( impGmats(ispin,ispin,iorb,jorb,:) - &
-                  (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) - (one-xi)*barGmats(jorb,:) )
-             impFreal(ispin,ispin,iorb,jorb,:) = 0.5d0*( impGreal(ispin,ispin,iorb,jorb,:) - &
-                  (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) - (one-xi)*barGreal(jorb,:) )
+             write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)
+             if(MPIMASTER)call start_timer()
+             call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),Nstate=state_list%size)
+             call lanc_build_gf_superc_Fmix(iorb,jorb)
+             if(MPIMASTER)call stop_timer(unit=logfile)
+#ifdef _DEBUG
+             write(Logfile,"(A)")""
+#endif
+             impFmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(jorb,:)) )
+             impFreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(jorb,:)) )
           enddo
        enddo
-    endif
+    end select
+
     deallocate(auxGmats,auxGreal)
   end subroutine build_gf_superc
 
@@ -154,14 +169,8 @@ contains
        barGreal(                 iorb,:) = auxGreal(2,:)
        !                                   auxGmats(3,:) !this is G_oo -xi*G_pp = A_aa -xi*B_aa
        !                                   auxGreal(3,:)
-       impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-auxGmats(1,:)-auxGmats(2,:))
-       impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-auxGreal(1,:)-auxGreal(2,:))
-       !
-       ! Comment out lines marked with >/<ANOMAL to use the more general algorithm to evaluate anomalous gf
-       ! >ANOMAL
-       ! impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*auxGmats(1,:)-(one-xi)*auxGmats(2,:))
-       ! impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*auxGreal(1,:)-(one-xi)*auxGreal(2,:))
-       ! <ANOMAL
+       impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*auxGmats(1,:)-(one-xi)*auxGmats(2,:))
+       impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*auxGreal(1,:)-(one-xi)*auxGreal(2,:))
     enddo
     !
     !now we add the other mixed/anomalous GF in for the bath_type="hybrid" case
@@ -202,7 +211,7 @@ contains
 
 
 
-  subroutine lanc_build_gf_superc_c(iorb)
+  subroutine lanc_build_gf_superc_Gdiag(iorb)
     integer      :: iorb
     type(sector) :: sectorI,sectorJ
     !
@@ -215,10 +224,7 @@ contains
     !
     do istate=1,state_list%size
        !
-       call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,Nchan=6) !2*[uu,dd,aux]
-       !<ANOMAL
-       ! call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,Nchan=8) !2*[uu,dd,aux1,aux2]
-       !>ANOMAL
+       call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,Nchan=4) !2*[uu,dd]
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -340,162 +346,30 @@ contains
           call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,4,Nexc=0)
        endif
        !
-       !
-       !
-       !EVALUATE [c^+_{up,iorb} + c_{dw,iorb}]|gs> --> A^>_{iorb,iorb}
-       isz = getsz(isector)
-       if(isz<Ns)then
-          jsector = getsector(isz+1,1)
-          if(MpiMaster)then
-             call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,up + c_a,dw:',sectorJ%Sz
-             allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
-             do i=1,sectorI%Dim
-                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c^+_a,up
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*state_cvec(i)
-             enddo
-             do i=1,sectorI%Dim
-                call apply_op_C(i,j,sgn,iorb,ialfa,2,sectorI,sectorJ) !c_a,dw
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-             enddo
-             call delete_sector(sectorJ)
-          else
-             allocate(vvinit(1));vvinit=zero
-          endif
-          !
-          call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,1,3,iorb,iorb,5,istate)
-          deallocate(alfa_,beta_)
-          if(allocated(vvinit))deallocate(vvinit)
-       else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,5,Nexc=0)
-       endif
-       !
-       !EVALUATE [c_{up,iorb} + c^+_{dw,iorb}]|gs>  --> A^<_{iorb,iorb}
-       isz = getsz(isector)
-       if(isz>-Ns)then
-          jsector = getsector(isz-1,1)
-          if(MpiMaster)then
-             call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up + c^+_a,dw:',sectorJ%Sz
-             allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
-             do i=1,sectorI%Dim
-                call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !c_a,up
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*state_cvec(i)
-             enddo
-             do i=1,sectorI%Dim
-                call apply_op_CDG(i,j,sgn,iorb,ialfa,2,sectorI,sectorJ) !c^+_a,dw
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-             enddo
-             call delete_sector(sectorJ)
-          else
-             allocate(vvinit(1));vvinit=zero
-          endif
-          !
-          call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,-1,3,iorb,iorb,6,istate)
-          deallocate(alfa_,beta_)
-          if(allocated(vvinit))deallocate(vvinit)
-       else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,6,Nexc=0)
-       endif
-       !
-       !
-       !
-       ! !<ANOMAL
-       ! !EVALUATE [c^+_{up,iorb} + xi*c_{dw,iorb}]|gs> --> -xi*B^>_{iorb,iorb}
-       ! isz = getsz(isector)
-       ! if(isz<Ns)then
-       !    jsector = getsector(isz+1,1)
-       !    if(MpiMaster)then
-       !       call build_sector(jsector,sectorJ)
-       !       if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,up + xi*c_a,dw:',sectorJ%Sz
-       !       allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
-       !       do i=1,sectorI%Dim
-       !          call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c^+_a,up
-       !          if(sgn==0d0.OR.j==0)cycle
-       !          vvinit(j) = sgn*state_cvec(i)
-       !       enddo
-       !       do i=1,sectorI%Dim
-       !          call apply_op_C(i,j,sgn,iorb,ialfa,2,sectorI,sectorJ) !xi*c_a,dw
-       !          if(sgn==0d0.OR.j==0)cycle
-       !          vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
-       !       enddo
-       !       call delete_sector(sectorJ)
-       !    else
-       !       allocate(vvinit(1));vvinit=zero
-       !    endif
-       !    !
-       !    call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
-       !    call add_to_lanczos_gf_superc(-xi*norm2,state_e,alfa_,beta_,1,3,iorb,iorb,7,istate)
-       !    deallocate(alfa_,beta_)
-       !    if(allocated(vvinit))deallocate(vvinit)
-       ! else
-       !  call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,7,Nexc=0)
-       ! endif
-       ! !
-       ! !EVALUATE [c_{up,iorb} - xi*c^+_{dw,iorb}]|gs> --> -xi*B^<_{iorb,iorb}
-       ! isz = getsz(isector)
-       ! if(isz>-Ns)then
-       !    jsector = getsector(isz-1,1)
-       !    if(MpiMaster)then
-       !       call build_sector(jsector,sectorJ)
-       !       if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up - xi*c^+_a,dw:',sectorJ%Sz
-       !       allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
-       !       do i=1,sectorI%Dim
-       !          call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c_a,up
-       !          if(sgn==0d0.OR.j==0)cycle
-       !          vvinit(j) = sgn*state_cvec(i)
-       !       enddo
-       !       do i=1,sectorI%Dim
-       !          call apply_op_CDG(i,j,sgn,iorb,ialfa,2,sectorI,sectorJ) !-xi*c^+_a,dw
-       !          if(sgn==0d0.OR.j==0)cycle
-       !          vvinit(j) = vvinit(j) - xi*sgn*state_cvec(i)
-       !       enddo
-       !       call delete_sector(sectorJ)
-       !    else
-       !       allocate(vvinit(1));vvinit=zero
-       !    endif
-       !    !
-       !    call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
-       !    call add_to_lanczos_gf_superc(-xi*norm2,state_e,alfa_,beta_,-1,3,iorb,iorb,8,istate)
-       !    deallocate(alfa_,beta_)
-       !    if(allocated(vvinit))deallocate(vvinit)
-       ! else
-       !  call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,8,Nexc=0)
-       ! endif
-       ! !>ANOMAL
-       !
        if(MpiMaster)call delete_sector(sectorI)
        if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
     return
-  end subroutine lanc_build_gf_superc_c
+  end subroutine lanc_build_gf_superc_Gdiag
 
 
 
 
-
-  subroutine lanc_build_gf_superc_mix_c(iorb,jorb)
-    integer                :: iorb,jorb
-    type(sector)           :: sectorI,sectorJ
+  subroutine lanc_build_gf_superc_Gmix(iorb,jorb)
+    integer      :: iorb,jorb
+    type(sector) :: sectorI,sectorJ
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG lanc_build_gf SUPERC DIAG: build mixed GF l"//str(iorb)//",m"//str(jorb)
+         "DEBUG lanc_build_gf SUPERC DIAG: build off-diagonal GF l"//str(iorb)//"_m"//str(jorb)
 #endif
     !
     ialfa = 1
     !
-    !
     do istate=1,state_list%size
        !
-       call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,Nchan=4) !2*[aux1,aux2]
+       call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,Nchan=4) !2*[QdgQ,RdgR]
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -515,7 +389,174 @@ contains
                'From sector  :',isector,sectorI%Sz
        endif
        !
-       !EVALUATE [c^+_{up,iorb} + c_{dw,jorb}]|gs> --> A^>_{iorb,jorb}
+       !EVALUATE (cdg_iorb + cdg_jorb)|gs>  --> <Q. Qdg>
+       jsector = getCDGsector(ialfa,1,isector)
+       if(jsector/=0)then 
+          if(MpiMaster)then
+             call build_sector(jsector,sectorJ)
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_{a,up} + cdg_{b,up}:',sectorJ%Sz
+             allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
+             do i=1,sectorI%Dim
+                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !Cdg_{a,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = sgn*state_cvec(i)
+             enddo
+             do i=1,sectorI%Dim
+                call apply_op_CDG(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !Cdg_{b,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+             enddo
+             call delete_sector(sectorJ)
+          else
+             allocate(vvinit(1));vvinit=zero
+          endif
+          !
+          call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
+          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,1,3,iorb,jorb,1,istate)
+          deallocate(alfa_,beta_)
+          if(allocated(vvinit))deallocate(vvinit)
+       else
+          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,1,Nexc=0)
+       endif
+       !
+       !EVALUATE (c_iorb + c_jorb)|gs>  --> <Qdg. Q>
+       jsector = getCsector(ialfa,1,isector)
+       if(jsector/=0)then 
+          if(MpiMaster)then
+             call build_sector(jsector,sectorJ)
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_{a,up} + c_{b,up}:',sectorJ%Sz
+             allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
+             do i=1,sectorI%Dim
+                call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !C_{a,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = sgn*state_cvec(i)
+             enddo
+             do i=1,sectorI%Dim
+                call apply_op_C(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !C_{b,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+             enddo
+             call delete_sector(sectorJ)
+          else
+             allocate(vvinit(1));vvinit=zero
+          endif
+          !
+          call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
+          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,-1,3,iorb,jorb,2,istate)
+          deallocate(alfa_,beta_)
+          if(allocated(vvinit))deallocate(vvinit)
+       else
+          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,2,Nexc=0)
+       endif
+       !
+       !
+       !
+       !EVALUATE (cdg_iorb -xi cdg_jorb)|gs>  --> <R. Rdg> => -xi*<Pdg.P>
+       jsector = getCDGsector(ialfa,1,isector)
+       if(jsector/=0)then 
+          if(MpiMaster)then
+             call build_sector(jsector,sectorJ)
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_{a,up} - xi.cdg_{b,up}:',sectorJ%Sz
+             allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
+             do i=1,sectorI%Dim
+                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !Cdg_{a,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = sgn*state_cvec(i)
+             enddo
+             do i=1,sectorI%Dim
+                call apply_op_CDG(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !-xi.Cdg_{b,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = vvinit(j) -xi*sgn*state_cvec(i)
+             enddo
+             call delete_sector(sectorJ)
+          else
+             allocate(vvinit(1));vvinit=zero
+          endif
+          !
+          call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
+          call add_to_lanczos_gf_superc(-xi*norm2,state_e,alfa_,beta_,1,3,iorb,jorb,3,istate)
+          deallocate(alfa_,beta_)
+          if(allocated(vvinit))deallocate(vvinit)
+       else
+          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,3,Nexc=0)
+       endif
+       !
+       !EVALUATE (c_iorb + xi c_jorb)|gs>  --> <Rdg. R> => -xi*<P.Pdg>
+       jsector = getCsector(ialfa,1,isector)
+       if(jsector/=0)then 
+          if(MpiMaster)then
+             call build_sector(jsector,sectorJ)
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_{a,up} + xi.c_{b,up}:',sectorJ%Sz
+             allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
+             do i=1,sectorI%Dim
+                call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !C_{a,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = sgn*state_cvec(i)
+             enddo
+             do i=1,sectorI%Dim
+                call apply_op_C(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !+xi.C_{b,up}
+                if(sgn==0d0.OR.j==0)cycle
+                vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
+             enddo
+             call delete_sector(sectorJ)
+          else
+             allocate(vvinit(1));vvinit=zero
+          endif
+          !
+          call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
+          call add_to_lanczos_gf_superc(-xi*norm2,state_e,alfa_,beta_,-1,3,iorb,jorb,4,istate)
+          deallocate(alfa_,beta_)
+          if(allocated(vvinit))deallocate(vvinit)
+       else
+          call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,4,Nexc=0)
+       endif
+       !
+       if(MpiMaster)call delete_sector(sectorI)
+       if(allocated(state_cvec))deallocate(state_cvec)
+       !
+    enddo
+    return
+  end subroutine lanc_build_gf_superc_Gmix
+
+
+
+
+
+  subroutine lanc_build_gf_superc_Fmix(iorb,jorb)
+    integer                :: iorb,jorb
+    type(sector)           :: sectorI,sectorJ
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf SUPERC DIAG: build mixed F l"//str(iorb)//",m"//str(jorb)
+#endif
+    !
+    ialfa = 1
+    !
+    !
+    do istate=1,state_list%size
+       !
+       call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,Nchan=4) !2*[Odg.O,Pdg.P]
+       !
+       isector    =  es_return_sector(state_list,istate)
+       state_e    =  es_return_energy(state_list,istate)
+#ifdef _MPI
+       if(MpiStatus)then
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
+       else
+          call es_return_cvector(state_list,istate,state_cvec) 
+       endif
+#else
+       call es_return_cvector(state_list,istate,state_cvec) 
+#endif
+       !
+       if(MpiMaster)then
+          call build_sector(isector,sectorI)
+          if(ed_verbose>=3)write(LOGfile,"(A,I6,I6)")&
+               'From sector  :',isector,sectorI%Sz
+       endif
+       !
+       !EVALUATE [cdg_{up,iorb} + c_{dw,jorb}]|gs> --> <O.Odg>
        isz = getsz(isector)
        if(isz<Ns)then
           jsector = getsector(isz+1,1)
@@ -547,7 +588,7 @@ contains
           call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,1,Nexc=0)
        endif
        !
-       !EVALUATE [c_{up,iorb} + c^+_{dw,jorb}]|gs>  --> A^<_{iorb,jorb}
+       !EVALUATE [c_{up,iorb} + cdg_{dw,jorb}]|gs> --> <Odg.O>
        isz = getsz(isector)
        if(isz>-Ns)then
           jsector = getsector(isz-1,1)
@@ -579,14 +620,13 @@ contains
        endif
        !
        !
-       !
-       !EVALUATE [c^+_{up,iorb} + xi*c_{dw,jorb}]|gs> --> -xi*B^>_{iorb,jorb}
+       !EVALUATE [c^+_{up,iorb} - xi*c_{dw,jorb}]|gs>  += -xi*<P.Pdg>
        isz = getsz(isector)
        if(isz<Ns)then
           jsector = getsector(isz+1,1)
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,up + xi*c_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,up - xi*c_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c^+_a,up
@@ -594,9 +634,9 @@ contains
                 vvinit(j) = sgn*state_cvec(i)
              enddo
              do i=1,sectorI%Dim
-                call apply_op_C(i,j,sgn,jorb,ialfa,2,sectorI,sectorJ) !xi*c_b,dw
+                call apply_op_C(i,j,sgn,jorb,ialfa,2,sectorI,sectorJ) !-xi*c_b,dw
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
+                vvinit(j) = vvinit(j) - xi*sgn*state_cvec(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -611,13 +651,13 @@ contains
           call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,3,Nexc=0)
        endif
        !
-       !EVALUATE [c_{up,iorb} - xi*c^+_{dw,jorb}]|gs> --> -xi*B^<_{iorb,jorb}
+       !EVALUATE [c_{up,iorb} + xi*c^+_{dw,jorb}]|gs>  += -xi*<Pdg.P>
        isz = getsz(isector)
        if(isz>-Ns)then
           jsector = getsector(isz-1,1)
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up - xi*c^+_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up + xi*c^+_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c_a,up
@@ -625,9 +665,9 @@ contains
                 vvinit(j) = sgn*state_cvec(i)
              enddo
              do i=1,sectorI%Dim
-                call apply_op_CDG(i,j,sgn,jorb,ialfa,2,sectorI,sectorJ) !-xi*c^+_b,dw
+                call apply_op_CDG(i,j,sgn,jorb,ialfa,2,sectorI,sectorJ) !+xi*c^+_b,dw
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) - xi*sgn*state_cvec(i)
+                vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -648,8 +688,7 @@ contains
     enddo
     !
     return
-  end subroutine lanc_build_gf_superc_mix_c
-
+  end subroutine lanc_build_gf_superc_Fmix
 
 
 

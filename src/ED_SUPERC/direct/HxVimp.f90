@@ -4,7 +4,7 @@
   !
   do iorb=1,Norb
      htmp = htmp + impHloc(1,1,iorb,iorb)*nup(iorb)
-     htmp = htmp + impHloc(Nspin,Nspin,iorb,iorb)*ndw(iorb)
+     htmp = htmp + impHloc(Nnambu*Nspin,Nnambu*Nspin,iorb,iorb)*ndw(iorb)
   enddo
   !
   i = j
@@ -44,4 +44,30 @@
      enddo
   enddo
   !
-
+  !Evaluate: Fd . D = Fd . (C^+_{a,up}C^+_{a,dw} + C_{a,dw}C_{a,up})
+  if(any(pair_field/=0d0))then
+     do iorb=1,Norb
+        !
+        Jcondition = (ib(iorb)==1) .AND. (ib(iorb+Ns)==1)
+        if(Jcondition)then
+           call c(iorb,m,k1,sg1)
+           call c(iorb+Ns,k1,k2,sg2)
+           i=binary_search(Hsector%H(1)%map,k2)
+           htmp=one*pair_field(iorb)*sg1*sg2
+           !
+           hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+           !
+        endif
+        !
+        Jcondition = (ib(iorb)==0) .AND. (ib(iorb+Ns)==0)
+        if(Jcondition)then
+           call cdg(iorb+Ns,m,k1,sg1)
+           call cdg(iorb,k1,k2,sg2)
+           i=binary_search(Hsector%H(1)%map,k2)
+           htmp=one*pair_field(iorb)*sg1*sg2 !
+           !
+           hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+           !
+        endif
+     enddo
+  endif

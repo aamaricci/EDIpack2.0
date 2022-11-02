@@ -51,24 +51,25 @@ contains
 
 
   function delta_bath_array(x,dmft_bath_,axis) result(Delta)
-    complex(8),dimension(:),intent(in)                        :: x
-    type(effective_bath)                                      :: dmft_bath_
-    character(len=*),optional                                 :: axis    
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))       :: Delta
-    integer                                                   :: i,ih,L
-    integer                                                   :: iorb,jorb,ispin,jspin,ibath
-    integer                                                   :: io,jo
-    real(8),dimension(Nbath)                                  :: eps,dps,vps
-    real(8),dimension(Norb,Nbath)                             :: vops
+    complex(8),dimension(:),intent(in)                                :: x
+    type(effective_bath)                                              :: dmft_bath_
+    character(len=*),optional                                         :: axis    
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Delta
+    integer                                                           :: i,ih,L
+    integer                                                           :: iorb,jorb,ispin,jspin,ibath
+    integer                                                           :: io,jo
+    real(8),dimension(Nbath)                                          :: eps,dps,vps
+    real(8),dimension(Norb,Nbath)                                     :: vops
     !
-    real(8),dimension(Nspin,Nbath)                            :: ehel
-    real(8),dimension(Nspin,Nspin,Nbath)                      :: whel
-    real(8),dimension(Nspin,Nspin,Norb,Nbath)                 :: wohel
+    real(8),dimension(Nspin,Nbath)                                    :: ehel
+    real(8),dimension(Nspin,Nspin,Nbath)                              :: whel
+    real(8),dimension(Nspin,Nspin,Norb,Nbath)                         :: wohel
     !
-    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: invH_k
-    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: invH_knn
-    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)             :: JJ
-    character(len=4)                                          :: axis_
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb,size(x)) :: zeta
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
+    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)                     :: JJ
+    character(len=4)                                                  :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
     !
@@ -77,7 +78,6 @@ contains
     L = size(x)
     !
     select case(bath_type)
-
     case default                !normal: only _{aa} are allowed (no inter-orbital local mixing)
        !NORMAL:
        !\Delta_{aa} = \sum_k [ V_{a}(k) * V_{a}(k)/(x - E_{a}(k)) ]
@@ -209,7 +209,6 @@ contains
        !NORMAL/NONSU2
        !\Delta_{ab} = \sum_k [ V_{a}(k) * (z - H(k))_{ab}^-1 V_{b}(k)]
        !SUPERC:
-
        !IF(MATS):
        ! \Delta_{ab} = - \sum_k [ V_{a}(k) * V_{b}(k) * (iw_n + E(k)) / Den(k) ]
        !ELSE:
@@ -230,13 +229,19 @@ contains
           enddo
        case ("superc")
           JJ = kron(pauli_sigma_z,zeye(Norb))
+          select case(axis_)
+          case default
+             zeta(:,:,i) = x(i)*zeye(Nnambu*Nspin*Norb)
+          case ('real')
+             zeta(:,:,i) = x(i)*JJ
+          end select
           do i=1,L
              do ibath=1,Nbath
                 invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
-                invH_k   = JJ*x(i) - invH_k
+                invH_k   = zeta(:,:,i) - invH_k
                 call inv(invH_k)
-                invH_k   = matmul(matmul(JJ,invH_k),JJ)
+                ! invH_k   = matmul(matmul(JJ,invH_k),JJ)
                 invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
                 Delta(1,1,:,:,i)=Delta(1,1,:,:,i) + &
                      dmft_bath_%item(ibath)%v*invH_knn(1,1,:,:)*dmft_bath_%item(ibath)%v
@@ -250,18 +255,19 @@ contains
 
   !ANOMALous:
   function fdelta_bath_array(x,dmft_bath_,axis) result(Fdelta)
-    complex(8),dimension(:),intent(in)                        :: x
-    type(effective_bath)                                      :: dmft_bath_
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))       :: Fdelta
-    integer                                                   :: iorb,ispin,jorb,ibath
-    real(8),dimension(Nbath)                                  :: eps,dps,vps
-    real(8),dimension(Norb,Nbath)                             :: vops
-    integer                                                   :: i,L
-    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: invH_k
-    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: invH_knn
-    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)             :: JJ
-    character(len=*),optional                                 :: axis    
-    character(len=4)                                          :: axis_
+    complex(8),dimension(:),intent(in)                                :: x
+    type(effective_bath)                                              :: dmft_bath_
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Fdelta
+    integer                                                           :: iorb,ispin,jorb,ibath
+    real(8),dimension(Nbath)                                          :: eps,dps,vps
+    real(8),dimension(Norb,Nbath)                                     :: vops
+    integer                                                           :: i,L
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb,size(x)) :: zeta
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
+    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)                     :: JJ
+    character(len=*),optional                                         :: axis    
+    character(len=4)                                                  :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
     !
@@ -341,18 +347,25 @@ contains
           !
        case ("superc")
           JJ = kron(pauli_sigma_z,zeye(Norb))
+          select case(axis_)
+          case default
+             zeta(:,:,i) = x(i)*zeye(Nnambu*Nspin*Norb)
+          case ('real')
+             zeta(:,:,i) = x(i)*JJ
+          end select
           do i=1,L
              do ibath=1,Nbath
                 invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
-                invH_k   = JJ*x(i) - invH_k
+                invH_k   = zeta(:,:,i) - invH_k
                 call inv(invH_k)
-                invH_k = matmul(matmul(JJ,invH_k),JJ)
+                ! invH_k   = matmul(matmul(JJ,invH_k),JJ)
                 invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
                 FDelta(1,1,:,:,i)=FDelta(1,1,:,:,i) + &
                      dmft_bath_%item(ibath)%v*invH_knn(1,2,:,:)*dmft_bath_%item(ibath)%v
              enddo
           enddo
+          !
        end select
     end select
   end function fdelta_bath_array
@@ -456,7 +469,7 @@ contains
           deallocate(fgorb,zeta)
           !
        case ("superc")
-          allocate(fgorb(2*Norb,2*Norb),zeta(2*Norb,2*Norb))
+          allocate(fgorb(2*Norb,2*Norb),zeta(2*Norb,2*Norb)) !2==Nnambu
           Delta =  delta_bath_array(x,dmft_bath_,axis_)
           Fdelta= fdelta_bath_array(x,dmft_bath_,axis_)
           select case(axis_)
@@ -473,8 +486,8 @@ contains
                       do jorb=1,Norb
                          fgorb(iorb,jorb)           = zeta(iorb,jorb)           - impHloc(ispin,ispin,iorb,jorb)  - Delta(ispin,ispin,iorb,jorb,i)
                          fgorb(iorb,jorb+Norb)      = zeta(iorb,jorb+Norb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + impHloc(ispin,ispin,iorb,jorb)  + conjg( Delta(ispin,ispin,iorb,jorb,i) )
+                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - conjg(Fdelta(ispin,ispin,iorb,jorb,i))
+                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + conjg(impHloc(ispin,ispin,iorb,jorb)) + conjg( Delta(ispin,ispin,iorb,jorb,i) )
                       enddo
                    enddo
                    call inv(fgorb)
@@ -489,14 +502,14 @@ contains
                    fgorb= zero
                    do iorb=1,Norb
                       zeta(iorb,iorb)           =        x(i)     + xmu
-                      zeta(iorb+Norb,iorb+Norb) = -conjg(x(L-i+1) + xmu)
+                      zeta(iorb+Norb,iorb+Norb) = -conjg(x(L-i+1) + xmu) !as above this is == -x(i)-mu == -w-i*eta - mu
                    enddo
                    do iorb=1,Norb
                       do jorb=1,Norb
                          fgorb(iorb,jorb)           = zeta(iorb,jorb)           - impHloc(ispin,ispin,iorb,jorb)  - Delta(ispin,ispin,iorb,jorb,i)
                          fgorb(iorb,jorb+Norb)      = zeta(iorb,jorb+Norb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + impHloc(ispin,ispin,iorb,jorb)  + conjg( Delta(ispin,ispin,iorb,jorb,L-i+1) )
+                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - conjg(Fdelta(ispin,ispin,iorb,jorb,i))
+                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + conjg(impHloc(ispin,ispin,iorb,jorb))  + conjg( Delta(ispin,ispin,iorb,jorb,L-i+1) )
                       enddo
                    enddo
                    call inv(fgorb)
@@ -596,7 +609,7 @@ contains
        end select
        !
        !
-    case ("hybrid")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
+    case ("hybrid","replica")             !hybrid/replica: all _{ab} components allowed (inter-orbital local mixing present)
        select case(ed_mode)
        case default
           stop "F0and_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=hybrid"
@@ -619,8 +632,8 @@ contains
                       do jorb=1,Norb
                          fgorb(iorb,jorb)           = zeta(iorb,jorb)           - impHloc(ispin,ispin,iorb,jorb)  - Delta(ispin,ispin,iorb,jorb,i)
                          fgorb(iorb,jorb+Norb)      = zeta(iorb,jorb+Norb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + impHloc(ispin,ispin,iorb,jorb)  + conjg( Delta(ispin,ispin,iorb,jorb,i) )
+                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - conjg(Fdelta(ispin,ispin,iorb,jorb,i))
+                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + conjg(impHloc(ispin,ispin,iorb,jorb))  + conjg( Delta(ispin,ispin,iorb,jorb,i) )
                       enddo
                    enddo
                    call inv(fgorb)
@@ -640,8 +653,8 @@ contains
                       do jorb=1,Norb
                          fgorb(iorb,jorb)           = zeta(iorb,jorb)           - impHloc(ispin,ispin,iorb,jorb)  - Delta(ispin,ispin,iorb,jorb,i)
                          fgorb(iorb,jorb+Norb)      = zeta(iorb,jorb+Norb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - Fdelta(ispin,ispin,iorb,jorb,i)
-                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + impHloc(ispin,ispin,iorb,jorb)  + conjg( Delta(ispin,ispin,iorb,jorb,L-i+1) )
+                         fgorb(iorb+Norb,jorb)      = zeta(iorb+Norb,jorb)                                        - conjg(Fdelta(ispin,ispin,iorb,jorb,i))
+                         fgorb(iorb+Norb,jorb+Norb) = zeta(iorb+Norb,jorb+Norb) + conjg(impHloc(ispin,ispin,iorb,jorb))  + conjg( Delta(ispin,ispin,iorb,jorb,L-i+1) )
                       enddo
                    enddo
                    call inv(fgorb)
@@ -737,17 +750,13 @@ contains
           enddo
           !
        case ("superc")
-          allocate(zeta(2*Norb,2*Norb))
+          allocate(zeta(Norb,Norb))
           Delta =  delta_bath_array(x,dmft_bath_,axis_)
           select case(axis_)
           case default
              do ispin=1,Nspin
                 do i=1,L
-                   zeta = zero
-                   do iorb=1,Norb
-                      zeta(iorb,iorb)           = x(i) + xmu
-                      zeta(iorb+Norb,iorb+Norb) = x(i) - xmu
-                   enddo
+                   zeta = (x(i)+xmu)*zeye(Nso)
                    do iorb=1,Norb
                       do jorb=1,Norb
                          G0and(ispin,ispin,iorb,jorb,i) = zeta(iorb,jorb) - impHloc(ispin,ispin,iorb,jorb) - Delta(ispin,ispin,iorb,jorb,i)
@@ -758,7 +767,7 @@ contains
           case("real")
              do ispin=1,Nspin
                 do i=1,L
-                   zeta = ((x(i))  + xmu)*eye(Norb)
+                   zeta = ((x(i))  + xmu)*zeye(Norb)
                    do iorb=1,Norb
                       do jorb=1,Norb
                          G0and(ispin,ispin,iorb,jorb,i) = zeta(iorb,jorb) - impHloc(ispin,ispin,iorb,jorb)  - Delta(ispin,ispin,iorb,jorb,i)
@@ -829,7 +838,7 @@ contains
        end select
        !
        !
-    case ("hybrid")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
+    case ("hybrid","replica")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
        select case(ed_mode)
        case default
           stop "Invf0_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=hybrid"

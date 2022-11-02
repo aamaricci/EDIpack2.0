@@ -1984,6 +1984,7 @@ contains
     complex(8),dimension(:,:,:,:,:) :: Hvec      ![Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym]
     real(8),dimension(:,:)          :: lambdavec ![Nbath,Nsym]
     integer                         :: isym,Nsym
+    logical                         :: bool
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: from {[Hs,Lam]}_b"
@@ -2003,7 +2004,22 @@ contains
     !
     call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
+    !CHECK NAMBU and HERMITICTY of each Hvec
+    do isym=1,Nsym
+       select case(ed_mode)
+       case default
+          bool = check_herm(nn2so_reshape(Hvec(:,:,:,:,isym),Nspin,Norb),Nspin*Norb)
+       case("superc")
+          bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
+       end select
+       if(.not.bool)then
+          write(LOGfile,"(A)")"init_Hreplica_symmetries_site ERROR: not Hermitian/Nambu of replica basis O_"//str(isym)
+          stop
+       endif
+    enddo
+    !
     call allocate_hreplica(Nsym)
+    !
     !
     do isym=1,Nsym
        Hreplica_lambda(:,isym)  = lambdavec(:,isym)
@@ -2023,9 +2039,24 @@ contains
     complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(H),Nsym]
     real(8),dimension(:)            :: lambdavec ![Nsym]
     integer                         :: isym,Nsym
+    logical                         :: bool
     !
     Nsym=size(lambdavec)
     call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+    !
+    !CHECK NAMBU and HERMITICTY of each Hvec
+    do isym=1,Nsym
+       select case(ed_mode)
+       case default
+          bool = check_herm(nn2so_reshape(Hvec(:,:,:,:,isym),Nspin,Norb),Nspin*Norb)
+       case("superc")
+          bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
+       end select
+       if(.not.bool)then
+          write(LOGfile,"(A)")"init_Hreplica_symmetries_site ERROR: not Hermitian/Nambu of replica basis O_"//str(isym)
+          stop
+       endif
+    enddo
     !
     call allocate_hreplica(Nsym)
     !
@@ -2061,6 +2092,7 @@ contains
     real(8),dimension(:,:,:)        :: lambdavec ![Nlat,Nbath,Nsym]
     integer                         :: ilat,Nlat
     integer                         :: isym,Nsym
+    logical                         :: bool
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: from ({[Hs,Lam]}_b)_site"
@@ -2069,6 +2101,20 @@ contains
     Nlat=size(lambdavec,1)
     Nsym=size(lambdavec,3)
     call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
+    !
+    !CHECK NAMBU and HERMITICTY of each Hvec
+    do isym=1,Nsym
+       select case(ed_mode)
+       case default
+          bool = check_herm(nn2so_reshape(Hvec(:,:,:,:,isym),Nspin,Norb),Nspin*Norb)
+       case("superc")
+          bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
+       end select
+       if(.not.bool)then
+          write(LOGfile,"(A)")"init_Hreplica_symmetries_site ERROR: not Hermitian/Nambu of replica basis O_"//str(isym)
+          stop
+       endif
+    enddo
     !
     if(allocated(Hreplica_lambda_ineq))deallocate(Hreplica_lambda_ineq)
     allocate(Hreplica_lambda_ineq(Nlat,Nbath,Nsym))
@@ -2283,6 +2329,30 @@ contains
 
 
 
+  function check_herm(A,N,error) result(bool)
+    integer,intent(in)                   :: N
+    complex(8),dimension(N,N),intent(in) :: A
+    logical                              :: bool
+    real(8),optional                     :: error
+    real(8)                              :: error_
+    error_ = 1d-6 ; if(present(error))error_=error
+    bool   = all(abs(A - conjg(transpose(A)))<error_)
+  end function check_herm
+
+
+  function check_nambu(A,N,error) result(bool)
+    integer,intent(in)                       :: N
+    complex(8),dimension(2*N,2*N),intent(in) :: A
+    complex(8),dimension(N,N)                :: h11,h22
+    logical                                  :: bool
+    real(8),optional                         :: error
+    real(8)                                  :: error_
+    error_ = 1d-6 ; if(present(error))error_=error
+    h11    = A(1:N    ,1:N)
+    h22    = A(N+1:2*N,N+1:2*N)
+    bool   = check_herm(A,2*N,error_) !this checks also for F = A_12, s.t. A_21=herm(A_12)
+    bool   = bool.AND.( all(abs(h22 + conjg(h11))<error_) )
+  end function check_nambu
 
 
 
