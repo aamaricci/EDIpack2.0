@@ -129,14 +129,12 @@ contains
     DimPh    = Nph+1
     Nlevels  = 2*Ns
     Nhel     = 1
-    Nnambu   = 1
     !
     select case(ed_mode)
     case default
        Nsectors = ((Ns_Orb+1)*(Ns_Orb+1))**Ns_Ud
     case ("superc")
        Nsectors = Nlevels+1     !sz=-Ns:Ns=2*Ns+1=Nlevels+1
-       Nnambu   = 2
     case("nonsu2")
        Nhel     = 2
        if(Jz_basis)then

@@ -23,8 +23,6 @@ MODULE ED_BATH
   end interface get_bath_dimension
 
   interface set_Hreplica
-     ! module procedure init_Hreplica_direct_so  ! REMOVED
-     ! module procedure init_Hreplica_direct_nn
      module procedure init_Hreplica_symmetries_site
      module procedure init_Hreplica_symmetries_legacy  ! (deprecation-cycle)
      module procedure init_Hreplica_symmetries_lattice
@@ -1986,8 +1984,9 @@ contains
     integer                         :: isym,Nsym
     logical                         :: bool
     !
+    if(ed_mode=="superc")Nnambu=2
 #ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: from {[Hs,Lam]}_b"
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries_site: from {[Hs,Lam]}_b"
 #endif
     !
     if(size(lambdavec,1)/=Nbath)then
@@ -2041,7 +2040,11 @@ contains
     integer                         :: isym,Nsym
     logical                         :: bool
     !
+    if(ed_mode=="superc")Nnambu=2
     Nsym=size(lambdavec)
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries_legacy: from {[Hs,Lam]}_b"
+#endif
     call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hreplica_symmetries","Hvec")
     !
     !CHECK NAMBU and HERMITICTY of each Hvec
@@ -2094,8 +2097,9 @@ contains
     integer                         :: isym,Nsym
     logical                         :: bool
     !
+    if(ed_mode=="superc")Nnambu=2
 #ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries: from ({[Hs,Lam]}_b)_site"
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries_lattice: from ({[Hs,Lam]}_b)_site"
 #endif
     !
     Nlat=size(lambdavec,1)
