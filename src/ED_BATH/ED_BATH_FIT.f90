@@ -97,11 +97,16 @@ contains
        case ("nonsu2")
           call chi2_fitgf_hybrid_nonsu2(fg(:,:,:,:,:),bath)
        case default
-          stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
+          stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided"
        end select
        !
     case ("replica")
-       call chi2_fitgf_replica(fg,bath)
+       select case(ed_mode)
+       case ("normal","nonsu")
+          call chi2_fitgf_replica(fg,bath)
+       case default
+          stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
+       end select
        !
     end select
     !
@@ -154,6 +159,14 @@ contains
        case default
           write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
           call chi2_fitgf_hybrid_normal(fg(1,ispin_,ispin_,:,:,:),bath,ispin_)          
+       end select
+    case ("replica")
+       select case(ed_mode)
+       case ("superc")
+          call chi2_fitgf_replica_superc(fg(:,:,:,:,:,:),bath)
+       case default
+          write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
+          call chi2_fitgf_replica(fg(1,:,:,:,:,:),bath)
        end select
     end select
     !set trim_state_list to true after the first fit has been done: this 
@@ -223,7 +236,12 @@ contains
           end select
           !
        case ("replica")
-          call chi2_fitgf_replica(fg,bath)
+          select case(ed_mode)
+          case ("normal","nonsu")
+             call chi2_fitgf_replica(fg,bath)
+          case default
+             stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
+          end select
        end select
     endif
     !
@@ -284,7 +302,15 @@ contains
              call chi2_fitgf_hybrid_superc(fg(:,ispin_,ispin_,:,:,:),bath,ispin_)
           case default
              write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
-             call chi2_fitgf_hybrid_normal(fg(1,ispin_,ispin_,:,:,:),bath,ispin_)          
+             call chi2_fitgf_hybrid_normal(fg(1,ispin_,ispin_,:,:,:),bath,ispin_)       
+          end select
+       case ("replica")
+          select case(ed_mode)
+          case ("superc")
+             call chi2_fitgf_replica_superc(fg(:,:,:,:,:,:),bath)
+          case default
+             write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
+             call chi2_fitgf_replica(fg(1,:,:,:,:,:),bath)
           end select
        end select
     endif
