@@ -56,6 +56,7 @@ contains
     case("nonsu2");call build_gf_nonsu2()
     end select
     !
+    write(LOGfile,"(A)")"Get impurity Self Energies:"
     select case(ed_mode)
     case default  ;call build_sigma_normal()
     case("superc");call build_sigma_superc()

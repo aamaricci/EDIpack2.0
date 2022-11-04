@@ -276,7 +276,7 @@ contains
        call print_input()
        call save_input(INPUTunit)
        call scifor_version()
-       call code_version(version)
+       !call code_version(version)
     endif
     !
     if(nread .ne. 0d0) then

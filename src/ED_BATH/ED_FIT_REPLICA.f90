@@ -668,8 +668,6 @@ contains
        else
           select case (cg_scheme)
           case ("weiss")
-             print*,"CORRECT FIT"
-             print*, chi2_weiss_replica_superc(array_bath)
              call fmin_cg(array_bath,chi2_weiss_replica_superc,&
                   iter,chi,&
                   itmax=cg_niter,&
