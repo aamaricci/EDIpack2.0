@@ -24,7 +24,7 @@ MODULE ED_FIT_COMMON
   complex(8),dimension(:,:),allocatable :: Fdelta
   real(8),dimension(:),allocatable      :: Xdelta,Wdelta
   integer                               :: totNorb,totNspin,totNso
-  integer,dimension(:),allocatable      :: getIorb,getJorb,getIspin,getJspin
+  integer,dimension(:),allocatable      :: getIorb,getJorb,getIspin,getJspin,getInambu
   integer                               :: Orb_indx,Spin_indx,Spin_mask
   type(effective_bath)                  :: chi2_bath
   integer                               :: cg_iter_count=0

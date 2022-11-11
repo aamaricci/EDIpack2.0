@@ -228,20 +228,20 @@ contains
              enddo
           enddo
        case ("superc")
-          select case(axis_)
-          case default
-             JJ = zeye(Nnambu*Nspin*Norb)
-          case ('real')
-             JJ = kron(pauli_sigma_z,zeye(Norb))
-          end select
+          JJ=kron(pauli_sigma_z,zeye(Norb))
           do i=1,L
-             zeta(:,:,i) = x(i)*JJ
+             select case(axis_)
+             case default
+                zeta(:,:,i) = x(i)*zeye(Nnambu*Nspin*Norb)
+             case ('real')
+                zeta(:,:,i)= x(i)*JJ
+             end select
              do ibath=1,Nbath
                 invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
                 invH_k   = zeta(:,:,i) - invH_k
                 call inv(invH_k)
-                ! invH_k   = matmul(matmul(JJ,invH_k),JJ)
+                invH_k   = matmul(matmul(JJ,invH_k),JJ)
                 invH_knn = so2nn_reshape(invH_k,Nnambu*Nspin,Norb)
                 Delta(1,1,:,:,i)=Delta(1,1,:,:,i) + &
                      dmft_bath_%item(ibath)%v*invH_knn(1,1,:,:)*dmft_bath_%item(ibath)%v
@@ -346,20 +346,21 @@ contains
           stop "Fdelta_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=replica"
           !
        case ("superc")
-          select case(axis_)
-          case default
-             JJ = zeye(Nnambu*Nspin*Norb)
-          case ('real')
-             JJ = kron(pauli_sigma_z,zeye(Norb))
-          end select
+          
           do i=1,L
-             zeta(:,:,i) = x(i)*JJ
+             JJ = kron(pauli_sigma_z,zeye(Norb))
+             select case(axis_)
+             case default
+                zeta(:,:,i) = x(i)*zeye(Nnambu*Nspin*Norb)
+             case ('real')
+                zeta(:,:,i) = x(i)*JJ
+             end select
              do ibath=1,Nbath
                 invH_knn = Hreplica_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
                 invH_k   = zeta(:,:,i) - invH_k
                 call inv(invH_k)
-                ! invH_k   = matmul(matmul(JJ,invH_k),JJ)
+                invH_k   = matmul(matmul(JJ,invH_k),JJ)
                 invH_knn = so2nn_reshape(invH_k,Nnambu*Nspin,Norb)
                 FDelta(1,1,:,:,i)=FDelta(1,1,:,:,i) + &
                      dmft_bath_%item(ibath)%v*invH_knn(1,2,:,:)*dmft_bath_%item(ibath)%v
@@ -750,7 +751,7 @@ contains
           enddo
           !
        case ("superc")
-          allocate(zeta(Norb,Norb))
+          allocate(zeta(Nso,Nso))
           Delta =  delta_bath_array(x,dmft_bath_,axis_)
           select case(axis_)
           case default
@@ -767,7 +768,7 @@ contains
           case("real")
              do ispin=1,Nspin
                 do i=1,L
-                   zeta = ((x(i))  + xmu)*zeye(Norb)
+                   zeta = ((x(i))  + xmu)*zeye(Nso)
                    do iorb=1,Norb
                       do jorb=1,Norb
                          G0and(ispin,ispin,iorb,jorb,i) = zeta(iorb,jorb) - impHloc(ispin,ispin,iorb,jorb)  - Delta(ispin,ispin,iorb,jorb,i)

@@ -1,7 +1,7 @@
 MODULE ED_GF_SUPERC
   USE SF_CONSTANTS, only:one,xi,zero,pi
-  USE SF_TIMER  
-  USE SF_IOTOOLS, only: str,reg,txtfy
+  USE SF_TIMER
+  USE SF_IOTOOLS, only: str,reg,txtfy      , save_array
   USE SF_LINALG,  only: inv,eigh,eye
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
@@ -87,6 +87,8 @@ contains
     case default
        !get F^{aa}_{updw} = <adg_up . adg_dw>
        do iorb=1,Norb
+          auxGmats=zero
+          auxGreal=zero
           write(LOGfile,"(A)")"Get F_l"//str(iorb)
           if(MPIMASTER)call start_timer()
           call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,iorb),Nstate=state_list%size)
@@ -105,6 +107,8 @@ contains
        !Get G^{ab}_{upup} --> saved in impG(1,1,a,b)
        do iorb=1,Norb
           do jorb=1,Norb
+             auxGmats=zero
+             auxGreal=zero
              if(iorb==jorb)cycle
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)
              if(MPIMASTER)call start_timer()
@@ -123,6 +127,8 @@ contains
        !get F^{ab}_{updw} = <adg_up . bdg_dw>
        do iorb=1,Norb
           do jorb=1,Norb
+             auxGmats=zero
+             auxGreal=zero
              write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)
              if(MPIMASTER)call start_timer()
              call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),Nstate=state_list%size)
@@ -556,7 +562,6 @@ contains
     !
     !
     do istate=1,state_list%size
-       !
        call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,Nchan=4) !2*[Odg.O,Pdg.P]
        !
        isector    =  es_return_sector(state_list,istate)
@@ -584,10 +589,10 @@ contains
           !
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,up + c_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_a,up + c_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
-                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c^+_a,up
+                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!Cdg_a,up
                 if(sgn==0d0.OR.j==0)cycle
                 vvinit(j) = sgn*state_cvec(i)
              enddo
@@ -647,10 +652,10 @@ contains
           jsector = getsector(isz+1,1)
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c^+_a,up - xi*c_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_a,up - xi*c_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
-                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c^+_a,up
+                call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!Cdg_a,up
                 if(sgn==0d0.OR.j==0)cycle
                 vvinit(j) = sgn*state_cvec(i)
              enddo
@@ -678,7 +683,7 @@ contains
           jsector = getsector(isz-1,1)
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up + xi*c^+_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up + xi*cdg_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c_a,up

@@ -32,7 +32,7 @@
            do iorb=1,Norb
               ialfa = getBathStride(iorb,kp)
               htmp = htmp + bath_diag(1          ,iorb,kp)*ib(ialfa)    !UP
-              htmp = htmp + bath_diag(Nnambu*Nspin,iorb,kp)*ib(ialfa+Ns) !DW
+              htmp = htmp -conjg(bath_diag(Nnambu*Nspin,iorb,kp)*ib(ialfa+Ns)) !DW CHANGE due to Nambu repr
            enddo
         enddo
         !
@@ -77,8 +77,7 @@
                     call cdg(ibeta,m,k1,sg1)
                     call c(ialfa,k1,k2,sg2)
                     j = binary_search(Hsector%H(1)%map,k2)
-                    htmp = conjg(hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
-                    !
+                    htmp = -(hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
                     select case(MpiStatus)
                     case (.true.)
                        call sp_insert_element(MpiComm,spH0,htmp,i,j)

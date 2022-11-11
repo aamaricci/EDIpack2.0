@@ -1,5 +1,7 @@
 MODULE ED_FIT_REPLICA
   USE ED_FIT_COMMON
+  USE SF_PAULI, only: pauli_sigma_z
+  USE SF_LINALG, only: kron
 
   implicit none
   private
@@ -573,7 +575,7 @@ contains
     logical,dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)    :: Hmask
     real(8),dimension(:),intent(inout)            :: bath_
     real(8),dimension(:),allocatable              :: array_bath
-    integer                                       :: i,j,iorb,jorb,ispin,jspin,io,jo,ibath
+    integer                                       :: i,j,iorb,jorb,ispin,jspin,io,jo,ibath,inambu
     integer                                       :: iter,stride,counter,Asize
     real(8)                                       :: chi
     logical                                       :: check
@@ -583,13 +585,13 @@ contains
     complex(8),dimension(:,:,:,:,:,:),allocatable :: fgand ![2][Nspin][][Norb][][Ldelta]  
     !
 #ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_replica: Fit"
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_replica_superc: Fit"
 #endif
     !
     call assert_shape(fg,[2,Nspin,Nspin,Norb,Norb,Lmats],"chi2_fitgf_replica_superc","fg")
     !
     check= check_bath_dimension(bath_)
-    if(.not.check)stop "chi2_fitgf_replica error: wrong bath dimensions"
+    if(.not.check)stop "chi2_fitgf_replica_superc error: wrong bath dimensions"
     !
     call allocate_dmft_bath(dmft_bath)
     call set_dmft_bath(bath_,dmft_bath)
@@ -599,40 +601,58 @@ contains
     !
     if(ed_all_g)then
        Hmask=.true.
+       write(*,*) "!! WARNING !!"
+       write(*,*) "USING ED_ALL_G=.true."
+       write(*,*) "superc-replica is able to choose which components should be fitted"
+       write(*,*) "the use of ED_ALL_G=.false. is strongly suggested to avoid fit problems"
        ! Aren't we sure about hermiticity?
        ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
        !HERE WE ARE ON REPLICA SUPERC
        !WE ONLY WANT TO FIT (1,1) and (1,2) SPIN
        !SECTORS CORRESPONDING TO G0 AND F0
        !THEREFORE THE SECOND SPIN INDEX IS EQUIVALENT
-       !TO THE INDEX SELECTING G0/F0 
-       Hmask(2,:,:,:)=.false.
+       !TO THE INDEX SELECTING G0/F0
     else
        Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
     endif
     !
+    ! Taking only upper-diagonal
+    do ispin=1,Nspin*Nnambu
+       do jspin=1,Nspin*Nnambu
+          do iorb=1,Norb
+             do jorb=1,Norb
+                if(ispin>jspin .or. iorb>jorb)Hmask(ispin,jspin,iorb,jorb)=.false.
+             enddo
+          enddo
+       enddo
+    enddo
+    !
     totNso=count(Hmask)
     !
+    allocate(getInambu(totNso))
     allocate(getIspin(totNso),getJspin(totNso))
     allocate(getIorb(totNso) ,getJorb(totNso))
     counter=0
+    !HERE NSPIN=1
     do ispin=1,Nspin*Nnambu
        do jspin=1,Nspin*Nnambu
           do iorb=1,Norb
              do jorb=1,Norb
                 if (Hmask(ispin,jspin,iorb,jorb))then
                    counter=counter+1
-                   getIspin(counter) = ispin
-                   getIorb(counter)  = iorb
-                   getJspin(counter) = jspin
-                   getJorb(counter)  = jorb
+                   getInambu(counter) = 1
+                   if(ispin/=jspin)getInambu(counter)=2
+                   getIspin(counter)  = 1
+                   getIorb(counter)   = iorb
+                   getJspin(counter)  = 1
+                   getJorb(counter)   = jorb
                 endif
              enddo
           enddo
        enddo
     enddo
     !
-    Ldelta = Lfit ; if(Ldelta>size(fg,5))Ldelta=size(fg,5)
+    Ldelta = Lfit ; if(Ldelta>size(fg,6))Ldelta=size(fg,6)
     !
     allocate(Gdelta(totNso,Ldelta))
     allocate(Xdelta(Ldelta))
@@ -651,12 +671,12 @@ contains
     !
     write(LOGfile,*)"Fitted functions",totNso
     do i=1,totNso
-       Gdelta(i,1:Ldelta) = fg(getJspin(i),getIspin(i),getIspin(i),getIorb(i),getJorb(i),1:Ldelta)
+       Gdelta(i,1:Ldelta) = fg(getInambu(i),getIspin(i),getJspin(i),getIorb(i),getJorb(i),1:Ldelta)
     enddo
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")&
-         "DEBUG chi2_fitgf_replica: cg_method:"//str(cg_method)//&
+         "DEBUG chi2_fitgf_replica_superc: cg_method:"//str(cg_method)//&
          ", cg_grad:"//str(cg_grad)//&
          ", cg_scheme:"//str(cg_scheme)
 #endif
@@ -682,7 +702,7 @@ contains
                   istop=cg_stop, &
                   iverbose=(ed_verbose>3))
           case default
-             stop "chi2_fitgf_replica error: cg_scheme != [weiss,delta]"
+             stop "chi2_fitgf_replica_superc error: cg_scheme != [weiss,delta]"
           end select
        endif
        !
@@ -706,7 +726,7 @@ contains
                new_version=cg_minimize_ver,hh_par=cg_minimize_hh,&
                iverbose=(ed_verbose>3))
        case default
-          stop "chi2_fitgf_replica error: cg_scheme != [weiss,delta]"
+          stop "chi2_fitgf_replica_superc error: cg_scheme != [weiss,delta]"
        end select
        !
     end select
@@ -740,6 +760,7 @@ contains
     deallocate(Gdelta,Xdelta,Wdelta)
     deallocate(getIspin,getJspin)
     deallocate(getIorb,getJorb)
+    deallocate(getInambu)
     deallocate(array_bath)
     !
   contains
@@ -779,7 +800,7 @@ contains
     end subroutine write_fit_result
     !
   end subroutine chi2_fitgf_replica_superc
-  !
+  
   !##################################################################
   ! THESE PROCEDURES EVALUATE THE \chi^2 FUNCTIONS TO MINIMIZE. 
   !##################################################################
@@ -797,7 +818,7 @@ contains
     integer                                              :: i,l,iorb,jorb,ispin,jspin
     !
 #ifdef _DEBUG
-    if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_replica. a:",a
+    if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG grad_chi2_delta_replica_superc. a:",a
 #endif
     !
     Delta = delta_replica_superc(a)
@@ -816,7 +837,7 @@ contains
     chi2=sum(chi2_so)
     chi2=chi2/Ldelta/totNso
 #ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_replica. Chi**2:",chi2
+    if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_delta_replica_superc. Chi**2:",chi2
 #endif
     !
   end function chi2_delta_replica_superc
@@ -826,15 +847,15 @@ contains
   !PURPOSE: Evaluate the \chi^2 distance of G_0_Anderson function.
   !+--------------------------------------------------------------+
   function chi2_weiss_replica_superc(a) result(chi2)
-    real(8),dimension(:)                               :: a
-    real(8)                                            :: chi2
-    real(8),dimension(totNso)                          :: chi2_so
+    real(8),dimension(:)                                 :: a
+    real(8)                                              :: chi2
+    real(8),dimension(totNso)                            :: chi2_so
     complex(8),dimension(2,Nspin,Nspin,Norb,Norb,Ldelta) :: g0and
-    real(8),dimension(Ldelta)                          :: Ctmp
-    integer                                            :: i,l,iorb,jorb,ispin,jspin
+    real(8),dimension(Ldelta)                            :: Ctmp
+    integer                                              :: i,l,iorb,jorb,ispin,jspin,inambu
     !
 #ifdef _DEBUG
-    if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_replica. a:",a
+    if(ed_verbose>5)write(Logfile,"(A,"//str(size(a))//"ES10.2)")"DEBUG chi2_weiss_replica_superc. a:",a
 #endif
     !
     g0and = g0and_replica_superc(a)
@@ -844,21 +865,21 @@ contains
        jorb = getJorb(l)
        ispin = getIspin(l)
        jspin = getJspin(l)
+       inambu= getInambu(l)
        !
-       !HERE JSPIN GIVES G0/F0 SEE ABOVE
-       Ctmp = abs(Gdelta(l,:)-g0and(jspin,ispin,ispin,iorb,jorb,:))
+       Ctmp = abs(Gdelta(l,:)-g0and(inambu,ispin,jspin,iorb,jorb,:))
        chi2_so(l) = sum( Ctmp**cg_pow/Wdelta )
     enddo
     !
     chi2=sum(chi2_so)
     chi2=chi2/Ldelta/totNso
 #ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_replica. Chi**2:",chi2
+    if(ed_verbose>3)write(Logfile,"(A,ES10.2)")"DEBUG chi2_weiss_replica_superc. Chi**2:",chi2
 #endif
     !
   end function chi2_weiss_replica_superc
-  !
-  !
+  
+  
   !##################################################################
   ! THESE PROCEDURES EVALUATE THE ANDERSON FUNCTIONS:
   ! - \Delta (hybridization)
@@ -871,11 +892,13 @@ contains
     complex(8),dimension(2,Nspin,Nspin,Norb,Norb,Ldelta) :: Delta
     integer                                              :: ispin,jspin,iorb,jorb,ibath
     integer                                              :: i,stride
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)          :: Haux,Htmp
-    complex(8),dimension(Nspin,Nspin,Norb,Norb)          :: invH_knn
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)          :: Haux,Htmp
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)          :: invH_knn
     real(8),dimension(Nbath)                             :: dummy_Vbath
     type(nsymm_vector),dimension(Nbath)                  :: dummy_lambda
+    complex(8),dimension(Nnambu*Norb,Nnambu*Norb)                      :: JJ
     !
+    JJ=kron(pauli_sigma_z,zeye(Norb))
     !Get Hs
     stride = 0
     do ibath=1,Nbath
@@ -894,6 +917,7 @@ contains
        do i=1,Ldelta
           Haux     = zeye(Nnambu*Nspin*Norb)*xi*Xdelta(i) - Htmp
           call inv(Haux)
+          Haux =matmul(matmul(JJ,Haux),JJ)
           invH_knn = so2nn_reshape(Haux,Nnambu*Nspin,Norb)
           !
           Delta(1,1,1,:,:,i)=Delta(1,1,1,:,:,i) + &
@@ -918,8 +942,8 @@ contains
     !
     do i=1,Ldelta
        FGorb(      :Norb,      :Norb) = (xi*Xdelta(i)+xmu)*zeye(Nso) - nn2so_reshape(impHloc + Delta(1,:,:,:,:,i), Nspin,Norb)
-       FGorb(Norb+1:    ,      :Norb) = - nn2so_reshape( Delta(2,:,:,:,:,i), Nspin,Norb)
-       FGorb(      :Norb,Norb+1:    ) = - conjg(nn2so_reshape(Delta(2,:,:,:,:,i), Nspin,Norb))
+       FGorb(      :Norb,Norb+1:    ) = - nn2so_reshape( Delta(2,:,:,:,:,i), Nspin,Norb)
+       FGorb(Norb+1:    ,      :Norb) = - conjg(nn2so_reshape(Delta(2,:,:,:,:,i), Nspin,Norb))
        FGorb(Norb+1:    ,Norb+1:    ) = (xi*Xdelta(i)-xmu)*zeye(Nso) + conjg(nn2so_reshape(impHloc + Delta(1,:,:,:,:,i), Nspin,Norb))
        call inv(FGorb)
        G0and(1,:,:,:,:,i) = so2nn_reshape(FGorb(1:Norb,     1:Norb  ),Nspin,Norb)

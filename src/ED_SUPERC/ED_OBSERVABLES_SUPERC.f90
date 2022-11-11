@@ -23,6 +23,7 @@ MODULE ED_OBSERVABLES_SUPERC
   real(8),dimension(:),allocatable    :: dens,dens_up,dens_dw
   real(8),dimension(:),allocatable    :: docc
   real(8),dimension(:),allocatable    :: magZ,magX,magY
+  real(8),dimension(:,:),allocatable  :: phiscAB
   real(8),dimension(:),allocatable    :: phisc
   real(8),dimension(:,:),allocatable  :: sz2,n2
   real(8),dimensioN(:,:),allocatable  :: zimp,simp
@@ -75,7 +76,7 @@ contains
     allocate(dens(Norb),dens_up(Norb),dens_dw(Norb))
     allocate(docc(Norb))
     allocate(magz(Norb),sz2(Norb,Norb),n2(Norb,Norb))
-    allocate(phisc(Norb))
+    allocate(phisc(Norb),phiscAB(Norb,Norb))
     allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
     !
     Egs     = state_list%emin
@@ -83,7 +84,8 @@ contains
     dens_up = 0.d0
     dens_dw = 0.d0
     docc    = 0.d0
-    phisc   = 0.d0    
+    phisc   = 0.d0
+    phiscAB = 0.d0
     magz    = 0.d0
     sz2     = 0.d0
     n2      = 0.d0
@@ -151,30 +153,32 @@ contains
 #ifdef _DEBUG
           if(ed_verbose>2)write(Logfile,"(A)")"DEBUG observables_superc: get OP"
 #endif
-          do ispin=1,Nspin
-             do iorb=1,Norb
-                !GET <(C_UP + CDG_DW)(CDG_UP + C_DW)> = 
-                !<C_UP*CDG_UP> + <CDG_DW*C_DW> + <C_UP*C_DW> + <CDG_DW*CDG_UP> = 
-                !<N_UP> + < 1 - N_DW> + 2*<PHI>
-                isz = getsz(isector)
-                if(isz<Ns)then
-                   jsector = getsector(isz+1,1)
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_CDG(i,j,sgn,iorb,1,1,sectorI,sectorJ)!c^+_a,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !c_a,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   phisc(iorb) = phisc(iorb) + dot_product(vvinit,vvinit)*peso
-                endif
-                if(allocated(vvinit))deallocate(vvinit)
+          do ispin=1,Nspin 
+             !GET <(b_up + adg_dw)(bdg_up + a_dw)> = 
+             !<b_up*bdg_up> + <adg_dw*a_dw> + <b_up*a_dw> + <adg_dw*bdg_up> = 
+             !<n_a,dw> + < 1 - n_b,up> + 2*<PHI>_ab
+             do iorb=1,Norb !A
+                do jorb=1,Norb !B
+                   isz = getsz(isector)
+                   if(isz<Ns)then
+                      jsector = getsector(isz+1,1)
+                      call build_sector(jsector,sectorJ)
+                      allocate(vvinit(sectorJ%Dim));vvinit=zero
+                      do i=1,sectorI%Dim
+                         call apply_op_CDG(i,j,sgn,jorb,1,1,sectorI,sectorJ)!bdg_up
+                         if(sgn==0d0.OR.j==0)cycle
+                         vvinit(j) = sgn*state_cvec(i)
+                      enddo
+                      do i=1,sectorI%Dim
+                         call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !a_dw
+                         if(sgn==0d0.OR.j==0)cycle
+                         vvinit(j) = vvinit(j) + sgn*state_cvec(i)
+                      enddo
+                      call delete_sector(sectorJ)
+                      phiscAB(iorb,jorb) = phiscAB(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                   endif
+                   if(allocated(vvinit))deallocate(vvinit)
+                enddo
              enddo
           enddo
           !
@@ -190,7 +194,10 @@ contains
 #endif
     !
     do iorb=1,Norb
-       phisc(iorb) = 0.5d0*(phisc(iorb) - dens_up(iorb) - (1.d0-dens_dw(iorb)))
+       do jorb=1,Norb
+          phiscAB(iorb,jorb) = 0.5d0*(phiscAB(iorb,jorb) - dens_dw(iorb) - (1.d0-dens_up(jorb)))
+       enddo
+       phisc(iorb)=phiscAB(iorb,iorb)
     enddo
     !
     !
@@ -201,7 +208,8 @@ contains
     endif
     write(LOGfile,"(A,10f18.12,f18.12,A)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
     write(LOGfile,"(A,10f18.12,A)")    "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
-    write(LOGfile,"(A,20f18.12,A)")    "phi "//reg(ed_file_suffix)//"=",(phisc(iorb),iorb=1,Norb),(abs(uloc(iorb))*phisc(iorb),iorb=1,Norb)
+    write(LOGfile,"(A,20f18.12,A)")    "phiAB "//reg(ed_file_suffix)//"=",((phiscAB(iorb,jorb),iorb=1,Norb),jorb=1,Norb)
+    write(LOGfile,"(A,20f18.12,A)")     " | ",(abs(uloc(iorb))*phisc(iorb),iorb=1,Norb) !THIS TO BE UNDERSTOOD
     if(Nspin==2)then
        write(LOGfile,"(A,10f18.12,A)")    "magZ"//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
     endif
@@ -211,8 +219,8 @@ contains
        ed_dens_dw(iorb)=dens_dw(iorb)
        ed_dens(iorb)   =dens(iorb)
        ed_docc(iorb)   =docc(iorb)
-       ed_phisc(iorb)  =phisc(iorb)
        ed_mag(1,iorb)  =magZ(iorb)
+       ed_phisc(iorb)  =phisc(iorb)
     enddo
 #ifdef _MPI
     if(MpiStatus)then
@@ -226,7 +234,7 @@ contains
     endif
 #endif
     !
-    deallocate(dens,docc,phisc,dens_up,dens_dw,magz,sz2,n2)
+    deallocate(dens,docc,phiscAB,phisc,dens_up,dens_dw,magz,sz2,n2)
     deallocate(simp,zimp)
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
@@ -506,17 +514,17 @@ contains
     open(unit,file="observables_info.ed")
     write(unit,"(A1,90(A10,6X))")"#",&
          (reg(txtfy(iorb))//"dens_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(Norb+iorb))//"phi_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(2*Norb+iorb))//"docc_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(3*Norb+iorb))//"nup_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(4*Norb+iorb))//"ndw_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(5*Norb+iorb))//"mag_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         reg(txtfy(6*Norb+1))//"s2",&
-         reg(txtfy(6*Norb+2))//"egs",&
-         ((reg(txtfy(6*Norb+2+(iorb-1)*Norb+jorb))//"sz2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
-         ((reg(txtfy((6+Norb)*Norb+2+(iorb-1)*Norb+jorb))//"n2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
-         ((reg(txtfy((6+2*Norb)*Norb+2+(ispin-1)*Nspin+iorb))//"z_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin),&
-         ((reg(txtfy((7+2*Norb)*Norb+2+Nspin+(ispin-1)*Nspin+iorb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
+         ((reg(txtfy(Norb+iorb+(jorb-1)*Norb))//"phi_"//reg(txtfy(iorb))//reg(txtfy(jorb)),iorb=1,Norb),jorb=1,Norb),&
+         (reg(txtfy((1+Norb)*Norb+iorb))//"docc_"//reg(txtfy(iorb)),iorb=1,Norb),&
+         (reg(txtfy((2+Norb)*Norb+iorb))//"nup_"//reg(txtfy(iorb)),iorb=1,Norb),&
+         (reg(txtfy((3+Norb)*Norb+iorb))//"ndw_"//reg(txtfy(iorb)),iorb=1,Norb),&
+         (reg(txtfy((4+Norb)*Norb+iorb))//"mag_"//reg(txtfy(iorb)),iorb=1,Norb),&
+         reg(txtfy((5+Norb)*Norb+1))//"s2",&
+         reg(txtfy((5+Norb)*Norb+2))//"egs",&
+         ((reg(txtfy((5+Norb)*Norb+2+(iorb-1)*Norb+jorb))//"sz2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
+         ((reg(txtfy((5+2*Norb)*Norb+2+(iorb-1)*Norb+jorb))//"n2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
+         ((reg(txtfy((5+3*Norb)*Norb+2+(ispin-1)*Nspin+iorb))//"z_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin),&
+         ((reg(txtfy((5+3*Norb+Nspin)*Norb+2+(ispin-1)*Nspin+iorb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
@@ -556,7 +564,7 @@ contains
     open(unit,file="observables_all"//reg(ed_file_suffix)//".ed",position='append')
     write(unit,"(90(F15.9,1X))")&
          (dens(iorb),iorb=1,Norb),&
-         (phisc(iorb),iorb=1,Norb),&
+         ((phiscAB(iorb,jorb),iorb=1,Norb),jorb=1,Norb),&
          (docc(iorb),iorb=1,Norb),&
          (dens_up(iorb),iorb=1,Norb),&
          (dens_dw(iorb),iorb=1,Norb),&
@@ -577,7 +585,7 @@ contains
     open(unit,file="observables_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90(F15.9,1X))")&
          (dens(iorb),iorb=1,Norb),&
-         (phisc(iorb),iorb=1,Norb),&
+         ((phiscAB(iorb,jorb),iorb=1,Norb),jorb=1,Norb),&
          (docc(iorb),iorb=1,Norb),&
          (dens_up(iorb),iorb=1,Norb),&
          (dens_dw(iorb),iorb=1,Norb),&

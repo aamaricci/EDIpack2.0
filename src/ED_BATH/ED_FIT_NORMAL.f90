@@ -1014,7 +1014,7 @@ contains
   function chi2_weiss_normal_superc(a) result(chi2)
     real(8),dimension(:)           ::  a
     complex(8),dimension(2,Ldelta) ::  g0and
-    real(8),dimension(Ldelta)    ::  Gtmp,Ftmp
+    real(8),dimension(Ldelta)      ::  Gtmp,Ftmp
     real(8)                        ::  chi2
     !
 #ifdef _DEBUG

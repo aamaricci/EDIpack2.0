@@ -11,7 +11,7 @@
      htmp = zero
      do iorb=1,Norb
         htmp = htmp + impHloc(1,1,iorb,iorb)*nup(iorb)
-        htmp = htmp + impHloc(Nnambu*Nspin,Nnambu*Nspin,iorb,iorb)*ndw(iorb)
+        htmp = htmp + impHloc(Nspin,Nspin,iorb,iorb)*ndw(iorb)
         htmp = htmp - xmu*(nup(iorb)+ndw(iorb))
      enddo
      !
