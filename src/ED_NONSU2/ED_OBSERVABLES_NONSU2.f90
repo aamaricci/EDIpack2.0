@@ -852,8 +852,8 @@ contains
                 if(Norb>1)then
                    do iorb=1,Norb
                       do jorb=iorb+1,Norb
-                         ed_Ehartree=ed_Ehartree - 0.5d0*Ust*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.25d0*Ust*gs_weight
-                         ed_Ehartree=ed_Ehartree - 0.5d0*(Ust-Jh)*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.25d0*(Ust-Jh)*gs_weight
+                         ed_Ehartree=ed_Ehartree - 0.5d0*Ust*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.5d0*Ust*gs_weight
+                         ed_Ehartree=ed_Ehartree - 0.5d0*(Ust-Jh)*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.5d0*(Ust-Jh)*gs_weight
                       enddo
                    enddo
                 endif
@@ -929,27 +929,51 @@ contains
   !+-------------------------------------------------------------------+
   subroutine write_legend()
     integer :: unit,iorb,jorb,ispin
-    unit = free_unit()
-    open(unit,file="observables_info.ed")
-    write(unit,"(A1,90(A10,6X))")"#",&
-         (reg(txtfy(iorb))//"dens_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(Norb+iorb))//"docc_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(2*Norb+iorb))//"nup_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(3*Norb+iorb))//"ndw_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(4*Norb+iorb))//"magX_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(5*Norb+iorb))//"magY_"//reg(txtfy(iorb)),iorb=1,Norb),&
-         (reg(txtfy(6*Norb+iorb))//"magZ_"//reg(txtfy(iorb)),iorb=1,Norb),&            
-         reg(txtfy(7*Norb+1))//"s2",&
-         reg(txtfy(7*Norb+2))//"egs",&
-         ((reg(txtfy(7*Norb+2+(iorb-1)*Norb+jorb))//"sz2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
-         ((reg(txtfy((7+Norb)*Norb+2+(iorb-1)*Norb+jorb))//"n2_"//reg(txtfy(iorb))//reg(txtfy(jorb)),jorb=1,Norb),iorb=1,Norb),&
-         ((reg(txtfy((7+2*Norb)*Norb+2+(ispin-1)*Nspin+iorb))//"z_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin),&
-         ((reg(txtfy((8+2*Norb)*Norb+2+Nspin+(ispin-1)*Nspin+iorb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
     !
     unit = free_unit()
-    open(unit,file="exciton_info.ed")
-    write(unit,"(A1,4(A10,6X))")"#","1S_0","2T_z","3T_x","4T_y"
+    open(unit,file="observables_info.ed")
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# dens_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"dens_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# docc_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"docc_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# dens_up_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"dens_up_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# dens_dw_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"dens_dw_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# magX_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"magX_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# magY_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"magY_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# magZ_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"magZ_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# Sz2_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(jorb-1)*Norb))//"Sz2_"//reg(txtfy(iorb)),iorb=1,Norb),jorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# n2_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(jorb-1)*Norb))//"n2_"//reg(txtfy(iorb)),iorb=1,Norb),jorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# Z_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(ispin-1)*Norb))//"z_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# sig_last.ed"
+    write(unit,"(A1,90(A10,6X))") "#",((reg(txtfy(iorb+(ispin-1)*Norb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# phisc_last.ed"
+    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"phisc_"//reg(txtfy(iorb)),iorb=1,Norb)
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# imp_last.ed"
+    write(unit,"(A1,90(A10,6X))") "#", "1s2tot", "2egs"
+    write(unit,"(A1,90(A10,6X))") "# *****"
+    write(unit,"(A1,90(A10,6X))") "# exciton_last.ed"
+    write(unit,"(A1,90(A10,6X))") "#","1S_0" , "2T_z", "3T_x", "4T_y"
     close(unit)
     !
     unit = free_unit()
@@ -985,46 +1009,73 @@ contains
   subroutine write_observables()
     integer :: unit
     integer :: iorb,jorb,ispin
+    !
+    !ALL OBSERVABLES
     unit = free_unit()
-    open(unit,file="observables_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))")&
-         (dens(iorb),iorb=1,Norb),&
-         (docc(iorb),iorb=1,Norb),&
-         (dens_up(iorb),iorb=1,Norb),&
-         (dens_dw(iorb),iorb=1,Norb),&
-         (magX(iorb),iorb=1,Norb),&
-         (magY(iorb),iorb=1,Norb),&
-         (magZ(iorb),iorb=1,Norb),&
-         s2tot,egs,&
-         ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb),&
-         ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb),&
-         ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin),&
-         ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    open(unit,file="dens_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
+    open(unit,file="docc_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="observables_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))")&
-         (dens(iorb),iorb=1,Norb),&
-         (docc(iorb),iorb=1,Norb),&
-         (dens_up(iorb),iorb=1,Norb),&
-         (dens_dw(iorb),iorb=1,Norb),&
-         (magX(iorb),iorb=1,Norb),&
-         (magY(iorb),iorb=1,Norb),&
-         (magZ(iorb),iorb=1,Norb),&
-         s2tot,egs,&
-         ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb),&
-         ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb),&
-         ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin),&
-         ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    open(unit,file="dens_up_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
     close(unit)
     !
-
+    unit = free_unit()
+    open(unit,file="dens_dw_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magX_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magY_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="Sz2_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="n2_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="sig_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="phisc_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="imp_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(A1,90(F15.9,1X))") s2tot, egs
+    close(unit)
+    !
     unit = free_unit()
     open(unit,file="exciton_all"//reg(ed_file_suffix)//".ed",position='append')
     do iorb=1,Norb
@@ -1034,7 +1085,73 @@ contains
        enddo
     enddo
     close(unit)
-
+    !
+    !LAST OBSERVABLES
+    unit = free_unit()
+    open(unit,file="dens_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="docc_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="dens_up_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="dens_dw_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magX_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magY_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magZ_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="Sz2_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="n2_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="sig_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="phisc_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="imp_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(A1,90(F15.9,1X))") s2tot, egs
+    close(unit)
+    !
     unit = free_unit()
     open(unit,file="exciton_last"//reg(ed_file_suffix)//".ed")
     do iorb=1,Norb
@@ -1044,6 +1161,12 @@ contains
        enddo
     enddo
     close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
+    close(unit)
+
   end subroutine write_observables
 
   subroutine write_energy()
