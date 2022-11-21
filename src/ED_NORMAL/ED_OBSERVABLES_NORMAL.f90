@@ -175,8 +175,9 @@ contains
              !compute the lattice probability distribution function
              if(Dimph>1 .AND. iph==1) then
                 val = 1
+                !val = 1 + Nr. of polarized orbitals (full or empty) makes sense only for 2 orbs
                 do iorb=1,Norb
-                   val = val + abs(nint(sign((nt(iorb) - 1.d0),g_ph(iorb))))
+                   val = val + abs(nint(sign((nt(iorb) - 1.d0),real(g_ph(iorb,iorb)))))
                 enddo
                 call prob_distr_ph(state_dvec,val)
              end if
@@ -426,7 +427,7 @@ contains
 
 
 
-  !+-------------------------------------------------------------------+
+  !+------------------------------------------------------------------+
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_normal()
@@ -782,52 +783,52 @@ contains
     !ALL OBSERVABLES
     unit = free_unit()
     open(unit,file="dens_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="docc_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_up_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_dw_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Sz2_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="n2_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="imp_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
+    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
     close(unit)
     !
     unit = free_unit()
@@ -841,52 +842,52 @@ contains
     !LAST OBSERVABLES
     unit = free_unit()
     open(unit,file="dens_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="docc_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_up_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_dw_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magZ_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Sz2_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="n2_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="imp_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
+    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
     close(unit)
     !
     unit = free_unit()

@@ -22,7 +22,8 @@ MODULE ED_INPUT_VARS
   real(8)              :: beta                !inverse temperature
   !
   integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
-  real(8),allocatable  :: g_ph(:)             !g_ph: electron-phonon coupling constant
+  complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
+  real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
   real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
   !
   integer              :: Nsuccess            !# of repeated success to fall below convergence threshold  
@@ -108,7 +109,7 @@ MODULE ED_INPUT_VARS
 
   !LOG AND Hamiltonian UNITS
   !=========================================================
-  character(len=100)   :: Hfile,HLOCfile,SectorFile
+  character(len=100)   :: Hfile,HLOCfile,SectorFile,GPHfile
   integer,save         :: LOGfile
 
   !THIS IS JUST A RELOCATED GLOBAL VARIABLE
@@ -129,8 +130,8 @@ contains
     character(len=*) :: INPUTunit
     integer,optional :: comm
     logical          :: master=.true.,bool
-    integer          :: i,rank=0
-    integer          :: unit_xmu
+    integer          :: i,iorb,rank=0
+    integer          :: unit_xmu, unit_gph
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A,A)")"DEBUG ed_read_input: read input from",trim(INPUTunit)
 #endif
@@ -167,9 +168,11 @@ contains
     call parse_input_variable(beta,"BETA",INPUTunit,default=1000.d0,comment="Inverse temperature, at T=0 is used as a IR cut-off.")
     call parse_input_variable(xmu,"XMU",INPUTunit,default=0.d0,comment="Chemical potential. If HFMODE=T, xmu=0 indicates half-filling condition.")
 
-    allocate(g_ph(Norb))
-    call parse_input_variable(g_ph,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling constant")
+    allocate(g_ph(Norb,Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
+    allocate(g_ph_diag(Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
+    call parse_input_variable(g_ph_diag,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling density constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
+    call parse_input_variable(GPHfile,"GPHfile",INPUTunit,default="GPHinput.in",comment="File of Phonon couplings. Put NONE to use only density couplings.")
 
     allocate(spin_field_x(Norb))
     allocate(spin_field_y(Norb))
@@ -257,6 +260,35 @@ contains
     call parse_input_variable(HLOCfile,"HLOCfile",INPUTunit,default="inputHLOC.in",comment="File read the input local H.")
     call parse_input_variable(LOGfile,"LOGFILE",INPUTunit,default=6,comment="LOG unit.")
 
+    !temporarily phononic couplings are only diagonal
+    !this is a sketch for a generic implementation
+    g_ph=0.d0
+    if(trim(GPHfile).eq."NONE")then
+       do iorb=1,Norb
+          g_ph(iorb,iorb)=g_ph_diag(iorb)
+       enddo
+    else
+       inquire(file=trim(GPHfile),EXIST=bool)
+       if(bool)then
+          open(free_unit(unit_gph),file=GPHfile)
+          do iorb=1,Norb
+             read(unit_gph,*) g_ph(iorb,:)
+          enddo
+          close(unit_gph)
+          !maybe an assert_hermitian would be globally useful
+          if(any(g_ph /= transpose(conjg(g_ph))))then
+             stop "ERROR: non hermitian phonon coupling matrix (g_ph) in input"
+          end if
+       else
+          stop "GPHfile/=NONE but there is no GPHfile with the provided name"
+       endif
+    endif
+    !TO BE PUT SOMEWHERE ELSE
+    open(free_unit(unit_gph),file="GPHinput.used")
+    do iorb=1,Norb
+       write(unit_gph,*) g_ph(iorb,:)
+    enddo
+    close(unit_gph)
 
 #ifdef _MPI
     if(present(comm))then

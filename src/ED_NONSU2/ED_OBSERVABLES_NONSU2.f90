@@ -1013,67 +1013,67 @@ contains
     !ALL OBSERVABLES
     unit = free_unit()
     open(unit,file="dens_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="docc_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_up_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_dw_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magX_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magY_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Sz2_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="n2_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="phisc_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="imp_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(A1,90(F15.9,1X))") s2tot, egs
+    write(unit,"(90(F15.9,1X))") s2tot, egs
     close(unit)
     !
     unit = free_unit()
@@ -1089,67 +1089,67 @@ contains
     !LAST OBSERVABLES
     unit = free_unit()
     open(unit,file="dens_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="docc_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_up_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="dens_dw_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magX_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magY_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="magZ_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Sz2_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="n2_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="phisc_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
+    write(unit,"(90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
     open(unit,file="imp_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(A1,90(F15.9,1X))") s2tot, egs
+    write(unit,"(90(F15.9,1X))") s2tot, egs
     close(unit)
     !
     unit = free_unit()
