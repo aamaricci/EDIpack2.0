@@ -57,7 +57,7 @@
      ! DW spin
      ! remark: iorb=jorb can't have simultaneously n=0 and n=1 (Jcondition)
      do iorb=1,Norb
-        do jorb=iorb+1,Norb
+        do jorb=1,Norb
            Jcondition = &
                 (g_ph(iorb,jorb)/=zero) .AND. &
                 (Ndw(jorb)==1) .AND. (Ndw(iorb)==0)

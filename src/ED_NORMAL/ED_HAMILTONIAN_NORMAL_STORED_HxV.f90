@@ -23,7 +23,7 @@ contains
 
   subroutine ed_buildh_normal_main(Hmat)
     real(8),dimension(:,:),optional                :: Hmat
-    integer                                        :: isector   
+    integer                                        :: isector
     real(8),dimension(:,:),allocatable             :: Htmp_up,Htmp_dw,Hrdx,Hmat_tmp
     real(8),dimension(:,:),allocatable             :: Htmp_ph,Htmp_eph_e,Htmp_eph_ph
     integer,dimension(2*Ns_Ud)                     :: Indices    ![2-2*Norb]

@@ -143,10 +143,10 @@ contains
        if(ed_verbose>3)write(Logfile,"(A,I4)")&
             "DEBUG build_sector: sector:"//str(isector)//"- Sz",self%Sz
 #endif
-       self%DimEl = getDim(isector)
        self%DimPh = Nph+1
+       self%DimEl = getDim(isector)/(Nph+1)
        self%Dim   = self%DimEl*self%DimPh
-       call map_allocate(self%H,[self%Dim])
+       call map_allocate(self%H,[self%DimEl])
        dim=0
        do idw=0,2**Ns-1
           ndw_= popcnt(idw)
@@ -298,7 +298,7 @@ contains
 
 
 
-
+  !> i=instate , j=outstate, ipos=site+orb index, ialfa=?, ispin, sectorI=sector in,sectorJ=sector out
   subroutine apply_op_C(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ) 
     integer, intent(in)         :: i,ipos,ialfa,ispin
     type(sector),intent(in)     :: sectorI,sectorJ
@@ -306,7 +306,7 @@ contains
     real(8),intent(out)         :: sgn
     integer                     :: ibeta,isite
     integer                     :: r
-    integer                     :: iph,i_el
+    integer                     :: iph,i_el,j_el,el_state
     integer,dimension(2*Ns_Ud)  :: Indices
     integer,dimension(2*Ns_Ud)  :: Jndices
     integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
@@ -337,12 +337,15 @@ contains
        !
     case("superc","nonsu2")
        isite= ipos + (ispin-1)*Ns
-       i_el = sectorI%H(1)%map(i)
-       ib   = bdecomp(i_el,2*Ns)
+       iph  = (i-1)/(sectorI%DimEl)+1
+       i_el = mod(i-1,sectorI%DimEl)+1
+       el_state = sectorI%H(1)%map(i_el)
+       ib   = bdecomp(el_state,2*Ns)
        if(ib(isite)/=1)return
-       call c(isite,i_el,r,sgn)
+       call c(isite,el_state,r,sgn)
        !
-       j    = binary_search(sectorJ%H(1)%map,r)
+       j_el    = binary_search(sectorJ%H(1)%map,r)
+       j = j_el + (iph-1)*sectorJ%DimEl
        !
     end select
   end subroutine apply_op_C
@@ -353,9 +356,9 @@ contains
     type(sector),intent(in)     :: sectorI,sectorJ
     integer,intent(out)         :: j
     real(8),intent(out)         :: sgn
-    integer                     :: ibeta
+    integer                     :: ibeta,isite
     integer                     :: r
-    integer                     :: iph,i_el
+    integer                     :: iph,i_el,j_el,el_state
     integer,dimension(2*Ns_Ud)  :: Indices
     integer,dimension(2*Ns_Ud)  :: Jndices
     integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
@@ -380,18 +383,21 @@ contains
        call cdg(ipos,iud(ispin),r,sgn)
        Jndices        = Indices
        Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
-       call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j)
+       call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j_el)
        !
-       j = j + (iph-1)*sectorJ%DimEl
+       j = j_el + (iph-1)*sectorJ%DimEl
        !
     case("superc","nonsu2")
-       ibeta= ipos + (ispin-1)*Ns
-       i_el = sectorI%H(1)%map(i)
-       ib   = bdecomp(i_el,2*Ns)
-       if(ib(ibeta)/=0)return
-       call cdg(ibeta,i_el,r,sgn)
+       isite= ipos + (ispin-1)*Ns
+       iph  = (i-1)/(sectorI%DimEl)+1
+       i_el = mod(i-1,sectorI%DimEl) + 1
+       el_state = sectorI%H(1)%map(i_el)
+       ib   = bdecomp(el_state,2*Ns)
+       if(ib(isite)/=0)return
+       call cdg(isite,el_state,r,sgn)
        !
-       j    = binary_search(sectorJ%H(1)%map,r)
+       j_el    = binary_search(sectorJ%H(1)%map,r)
+       j = j_el + (iph-1)*sectorJ%DimEl
        !
     end select
   end subroutine apply_op_CDG
@@ -421,7 +427,6 @@ contains
     sgn = dble(nud(1,ipos))-dble(nud(2,ipos))
     sgn = sgn/2d0
   end subroutine apply_op_Sz
-
 
 
   subroutine apply_op_N(i,sgn,ipos,ialfa,sectorI) 

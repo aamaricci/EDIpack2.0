@@ -47,6 +47,8 @@ contains
   !+------------------------------------------------------------------+
   !                        SUPERC
   !+------------------------------------------------------------------+
+  !PURPOSE  : Evaluate the Green's function of the impurity electrons
+  ! & phonons D = -<x(\tau)x(0)> with x = (b + b^+)
   subroutine build_gf_superc()
     integer    :: iorb,jorb,ispin,i,isign
     complex(8) :: barGmats(Norb,Lmats),barGreal(Norb,Lreal)
@@ -143,7 +145,17 @@ contains
           enddo
        enddo
     end select
-
+    !
+    !PHONONS
+    if(DimPh>1)then
+       write(LOGfile,"(A)")"Get phonon Green function:"
+       if(MPIMASTER)call start_timer()
+       call lanc_build_gf_phonon_main()
+       if(MPIMASTER)call stop_timer(unit=LOGfile)
+#ifdef _DEBUG
+       write(Logfile,"(A)")""
+#endif
+    endif
     deallocate(auxGmats,auxGreal)
   end subroutine build_gf_superc
 
@@ -789,6 +801,131 @@ contains
        enddo
     enddo
   end subroutine add_to_lanczos_gf_superc
+
+  !################################################################
+
+
+  subroutine lanc_build_gf_phonon_main()
+    type(sector)                :: sectorI
+    integer,dimension(Ns_Ud)    :: iDimUps,iDimDws
+    integer                     :: Nups(Ns_Ud)
+    integer                     :: Ndws(Ns_Ud)
+    !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf_phonon: build phonon GF"
+#endif
+    do istate=1,state_list%size
+       !
+       ! call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
+       !
+       isector    =  es_return_sector(state_list,istate)
+       state_e    =  es_return_energy(state_list,istate)
+#ifdef _MPI
+       if(MpiStatus)then
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec)
+       else
+          call es_return_cvector(state_list,istate,state_cvec)
+       endif
+#else
+       call es_return_cvector(state_list,istate,state_cvec)
+#endif
+       !
+       if(MpiMaster)then
+          call build_sector(isector,sectorI)
+          if(ed_verbose>=3)write(LOGfile,"(A,I6,I6)")&
+               'From sector  :',isector,sectorI%Sz
+       endif
+       !
+       if(MpiMaster)then
+          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
+          !
+          allocate(vvinit(sectorI%Dim));vvinit=0d0
+          !
+          do i=1,sectorI%Dim
+             iph = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             !
+             !apply destruction operator
+             if(iph>1) then
+                j = i_el + ((iph-1)-1)*sectorI%DimEl
+                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*state_cvec(i)
+             endif
+             !
+             !apply creation operator
+             if(iph<DimPh) then
+                j = i_el + ((iph+1)-1)*sectorI%DimEl
+                vvinit(j) = vvinit(j) + sqrt(dble(iph))*state_cvec(i)
+             endif
+          enddo
+       else
+          allocate(vvinit(1));vvinit=0.d0
+       endif
+       !
+       call tridiag_Hv_sector_superc(isector,vvinit,alfa_,beta_,norm2)
+       call add_to_lanczos_phonon(norm2,state_e,alfa_,beta_,istate)
+       deallocate(alfa_,beta_)
+       if(allocated(vvinit))deallocate(vvinit)
+       if(allocated(state_cvec))deallocate(state_cvec)
+    end do
+    return
+  end subroutine lanc_build_gf_phonon_main
+
+
+  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
+    real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
+    integer                                    :: nlanc
+    real(8),dimension(:)                       :: alanc
+    real(8),dimension(size(alanc))             :: blanc
+    real(8),dimension(size(alanc),size(alanc)) :: Z
+    real(8),dimension(size(alanc))             :: diag,subdiag
+    integer                                    :: i,j,istate
+    complex(8)                                 :: iw
+    !
+    Egs = state_list%emin       !get the gs energy
+    !
+    Nlanc = size(alanc)
+    !
+    pesoF  = vnorm2/zeta_function
+    pesoBZ = 1d0
+    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
+    !
+#ifdef _MPI
+    if(MpiStatus)then
+       call Bcast_MPI(MpiComm,alanc)
+       call Bcast_MPI(MpiComm,blanc)
+    endif
+#endif
+    diag(1:Nlanc)    = alanc(1:Nlanc)
+    subdiag(2:Nlanc) = blanc(2:Nlanc)
+    call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
+    !
+    ! call allocate_GFmatrix(impDmatrx,istate,1,Nexc=Nlanc)
+    !
+    do j=1,nlanc
+       Ej     = diag(j)
+       dE     = Ej-Ei
+       pesoAB = Z(1,j)*Z(1,j)
+       peso   = pesoF*pesoAB*pesoBZ
+       !COPYPASTE FROM NORMAL, TO CHECK
+       ! impDmatrix%state(istate)%channel(ichan)%weight(j) = peso
+       ! impDmatrix%state(istate)%channel(ichan)%poles(j)  = de
+       !
+       ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
+       ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
+       ! This ensures that the correct null contribution is obtained.
+       ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
+       ! we do not include the contribution (because we are in the situation described above).
+       ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
+       if(beta*dE > 1d-3)impDmats_ph(0)=impDmats_ph(0) - peso*2*(1d0-exp(-beta*dE))/dE
+       do i=1,Lmats
+          impDmats_ph(i)=impDmats_ph(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
+       enddo
+       do i=1,Lreal
+          impDreal_ph(i)=impDreal_ph(i) + peso*(1d0-exp(-beta*dE))*(1d0/(dcmplx(vr(i),eps) - dE) - 1d0/(dcmplx(vr(i),eps) + dE))
+       enddo
+    enddo
+  end subroutine add_to_lanczos_phonon
 
 
 

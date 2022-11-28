@@ -560,7 +560,7 @@ contains
        iDimDw = product(iDimDws)
        !
        if(MpiMaster)then
-          if(ed_verbose==3)write(LOGfile,"(A20,I12)")'Apply x',isector
+          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
           !
           allocate(vvinit(idim));vvinit=0d0
           !

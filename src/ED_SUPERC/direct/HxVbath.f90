@@ -10,8 +10,8 @@
         enddo
      enddo
      !
-     i = j
-     hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(i)
+     j=i
+     hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(j)
      !
   case ("replica")
      htmp=zero
@@ -23,8 +23,8 @@
         enddo
      enddo
      !
-     i = j
-     hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(i)
+     j=i
+     hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(j)
      !
      !off-diagonal elements
      do kp=1,Nbath
@@ -39,10 +39,11 @@
               if (Jcondition)then
                  call c(ibeta,m,k1,sg1)
                  call cdg(ialfa,k1,k2,sg2)
-                 i = binary_search(Hsector%H(1)%map,k2)
+                 j_el = binary_search(Hsector%H(1)%map,k2)
+                 j    = j_el + (iph-1)*DimEl
                  htmp = conjg(hbath_tmp(1,1,iorb,jorb,kp))*sg1*sg2
                  !
-                 hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+                 hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
                  !
               endif
               !DW
@@ -54,10 +55,12 @@
               if (Jcondition)then
                  call cdg(ibeta,m,k1,sg1)
                  call c(ialfa,k1,k2,sg2)
-                 i = binary_search(Hsector%H(1)%map,k2)
+                 j_el = binary_search(Hsector%H(1)%map,k2)
+                 j    = j_el + (iph-1)*DimEl
+                 !hbat_tmp written in Nambu repr
                  htmp = -(hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
                  !
-                 hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+                 hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
                  !
               endif
            enddo
@@ -78,20 +81,22 @@
            if( (dmft_bath%d(1,iorb,kp)/=0d0) .AND. (ib(ms)==1) .AND. (ib(ms+Ns)==1) )then
               call c(ms,m,k1,sg1)
               call c(ms+Ns,k1,k2,sg2)
-              i = binary_search(Hsector%H(1)%map,k2)
-              htmp=one*dmft_bath%d(1,iorb,kp)*sg1*sg2
+              j_el = binary_search(Hsector%H(1)%map,k2)
+              j    = j_el + (iph-1)*DimEl
+              htmp = one*dmft_bath%d(1,iorb,kp)*sg1*sg2
               !
-              hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+              hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
               !
            endif
            !\Delta_l cdg_{\up,ms} cdg_{\dw,ms}
            if( (dmft_bath%d(1,iorb,kp)/=0d0) .AND. (ib(ms)==0) .AND. (ib(ms+Ns)==0) )then
               call cdg(ms+Ns,m,k1,sg1)
               call cdg(ms,k1,k2,sg2)
-              i=binary_search(Hsector%H(1)%map,k2)
-              htmp=one*dmft_bath%d(1,iorb,kp)*sg1*sg2 !
+              j_el = binary_search(Hsector%H(1)%map,k2)
+              j    = j_el + (iph-1)*DimEl
+              htmp = one*dmft_bath%d(1,iorb,kp)*sg1*sg2 !
               !
-              hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+              hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
               !
            endif
         enddo
@@ -113,10 +118,11 @@
               if(Jcondition)then
                  call cdg(ibeta,m,k1,sg1)
                  call cdg(ialfa,k1,k2,sg2)
-                 i=binary_search(Hsector%H(1)%map,k2)
+                 j_el = binary_search(Hsector%H(1)%map,k2)
+                 j    = j_el + (iph-1)*DimEl
                  htmp=conjg(hbath_tmp(1,Nnambu,iorb,jorb,kp))*sg1*sg2
                  !
-                 hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+                 hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
                  !
               endif
               !DW-UP \Delta_l c_{\dw,a} c_{\up,b}
@@ -128,10 +134,11 @@
               if(Jcondition)then
                  call c(ibeta,m,k1,sg1)
                  call c(ialfa,k1,k2,sg2)
-                 i=binary_search(Hsector%H(1)%map,k2)
+                 j_el = binary_search(Hsector%H(1)%map,k2)
+                 j    = j_el + (iph-1)*DimEl
                  htmp=conjg(hbath_tmp(Nnambu,1,iorb,jorb,kp))*sg1*sg2
                  !
-                 hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(j)
+                 hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
                  !
               endif
               !

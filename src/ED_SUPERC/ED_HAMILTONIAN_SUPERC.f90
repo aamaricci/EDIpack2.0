@@ -33,7 +33,7 @@ contains
     integer                            :: isector,SectorDim
     complex(8),dimension(:,:),optional :: Hmat
     integer                            :: irank
-    integer                            :: i,j,Dim
+    integer                            :: i,j,Dim,DimEl
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
@@ -44,21 +44,27 @@ contains
     call build_sector(isector,Hsector)
     !
     Dim    = Hsector%Dim
+    DimEl  = Hsector%DimEl
     !
     !#################################
     !          MPI SETUP
     !#################################
     mpiAllThreads=.true.
-    MpiQ = Dim/MpiSize
     MpiR = 0
-    if(MpiRank==(MpiSize-1))MpiR=mod(Dim,MpiSize)
+    if(ed_sparse_h .or. present(Hmat))then
+       MpiQ = DimEl/MpiSize
+       if(MpiRank==(MpiSize-1))MpiR=mod(DimEl,MpiSize)
+    else
+       MpiQ = Dim/MpiSize
+       if(MpiRank==(MpiSize-1))MpiR=mod(Dim,MpiSize)       
+    endif
     !
     MpiIshift = MpiRank*mpiQ
     MpiIstart = MpiRank*mpiQ + 1
     MpiIend   = (MpiRank+1)*mpiQ + mpiR
     !
 #ifdef _MPI
-#ifdef _DEBU
+#ifdef _DEBUG
     if(MpiStatus.AND.ed_verbose>4)then
        write(LOGfile,*)&
             "         mpiRank,   mpi_Q,   mpi_R,   mpi_Istart,   mpi_Iend,   mpi_Iend-mpi_Istart"
@@ -118,15 +124,23 @@ contains
     !
     call delete_sector(Hsector)
     Dim    = 0
+    DimEl  = 0
 #ifdef _MPI
     if(MpiStatus)then
        call sp_delete_matrix(MpiComm,spH0)
+       if(DimPh>1)call sp_delete_matrix(MpiComm,spH0e_eph)
     else
        call sp_delete_matrix(spH0)
+       call sp_delete_matrix(spH0e_eph)
     endif
 #else
     call sp_delete_matrix(spH0)
+    if(DimPh>1)call sp_delete_matrix(spH0e_eph)
 #endif
+    if(DimPh>1)then
+       call sp_delete_matrix(spH0_ph)
+       call sp_delete_matrix(spH0ph_eph)
+    endif
     !
     spHtimesV_cc => null()
     !
@@ -154,10 +168,11 @@ contains
 
   function vecDim_Hv_sector_superc(isector) result(vecDim)
     integer :: isector
-    integer :: Dim
+    integer :: Dim,DimEl
     integer :: vecDim
     !
-    Dim  = getdim(isector)
+    Dim   = getdim(isector)
+    DimEl = Dim/(nph+1)
     !
 #ifdef _MPI
     if(MpiStatus)then
@@ -188,13 +203,15 @@ contains
     complex(8),dimension(:)             :: vvinit
     real(8),dimension(:),allocatable    :: alanc,blanc
     real(8)                             :: norm2
-    complex(8),dimension(:),allocatable :: vvloc
-    integer                             :: vecDim
+    complex(8),dimension(:),allocatable :: vvloc,      dellete,indel
+    integer                             :: vecDim,     Lvvinit,iii
+    logical                             ::             existo
     !
 #ifdef _DEBUG
     if(ed_verbose>4)write(Logfile,"(A)")&
          "DEBUG tridiag_Hv_sector SUPERC: start tridiag of H sector:"//str(isector)
 #endif
+    !
     !
     if(MpiMaster)then
        norm2=dot_product(vvinit,vvinit)
@@ -206,6 +223,31 @@ contains
     call build_Hv_sector_superc(isector)
     allocate(alanc(Hsector%Nlanc),blanc(Hsector%Nlanc))
     alanc=0d0 ; blanc=0d0
+    !
+    !DELETE
+    INQUIRE(FILE="Hv.dat", EXIST=existo)
+    if(.not.existo)then
+       Lvvinit=size(vvinit,1)
+       allocate(dellete(lvvinit),indel(lvvinit))
+       indel=vvinit
+       print*,"spHtimesV"
+       call spHtimesV_cc(Lvvinit,indel,dellete)
+       open(19,file="Hv.dat")
+       do iii=1,Lvvinit
+          write(19,*) dellete(iii)
+       enddo
+       close(19)
+       deallocate(dellete,indel)
+    endif
+    INQUIRE(FILE="GS.dat", EXIST=existo)
+    if(.not.existo)then
+       open(19,file="GS.dat")
+       do iii=1,Lvvinit
+          write(19,*) vvinit(iii)
+       enddo
+       close(19)
+    endif
+    !
     if(norm2/=0d0)then
 #ifdef _MPI
        if(MpiStatus)then

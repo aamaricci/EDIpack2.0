@@ -28,6 +28,7 @@ contains
   subroutine ed_buildH_superc_main(isector,Hmat)
     integer                                                         :: isector
     complex(8),dimension(:,:),optional                              :: Hmat
+    complex(8),dimension(:,:),allocatable                           :: Htmp_e,Htmp_ph,Htmp_eph_e,Htmp_eph_ph
     integer,dimension(Nlevels)                                      :: ib
     integer,dimension(Ns)                                           :: ibup,ibdw
     real(8),dimension(Norb)                                         :: nup,ndw
@@ -35,6 +36,7 @@ contains
     integer                                                         :: first_state,last_state
     integer                                                         :: first_state_up,last_state_up
     integer                                                         :: first_state_dw,last_state_dw
+    integer                                                         :: jup, jdw, iph
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")"DEBUG ed_buildH_main SUPERC: build H"
@@ -43,7 +45,8 @@ contains
     if(.not.Hsector%status)stop "ed_buildh_main ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    Dim = getdim(isector)
+    Dim   = Hsector%Dim
+    DimEl = Hsector%DimEl
     !
     if(present(Hmat))call assert_shape(Hmat,[Dim,Dim],"ed_buildh_main","Hmat")
     !
@@ -83,13 +86,23 @@ contains
 #ifdef _MPI
     if(MpiStatus)then
        call sp_set_mpi_matrix(MpiComm,spH0,mpiIstart,mpiIend,mpiIshift)
-       call sp_init_matrix(MpiComm,spH0,Dim)
+       call sp_init_matrix(MpiComm,spH0,DimEl)
+       if(DimPh>1) then
+          call sp_set_mpi_matrix(MpiComm,spH0e_eph,mpiIstart,mpiIend,mpiIshift)
+          call sp_init_matrix(MpiComm,spH0e_eph,DimEl)
+       endif
     else
-       call sp_init_matrix(spH0,Dim)
+       call sp_init_matrix(spH0,DimEl)
+       if(DimPh>1) call sp_init_matrix(spH0e_eph,DimEl)
     endif
 #else
-    call sp_init_matrix(spH0,Dim)
+    call sp_init_matrix(spH0,DimEl)
+    if(DimPh>1) call sp_init_matrix(spH0e_eph,DimEl)
 #endif
+    if(DimPh>1) then
+       call sp_init_matrix(spH0_ph,DimPh)
+       call sp_init_matrix(spH0ph_eph,DimPh)
+    end if
     !
     !-----------------------------------------------!
     !
@@ -117,21 +130,65 @@ contains
 #endif
     include "stored/Himp_bath.f90"
     !
+    if(DimPh>1) then
+       !PHONON TERMS
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_SUPERC: stored/H_ph"
+#endif
+       include "stored/H_ph.f90"
+       !
+       !ELECTRON-PHONON TERMS
+#ifdef _DEBUG
+       if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_buildH_SUPERC: stored/H_e_ph"
+#endif
+       include "stored/H_e_ph.f90"
+    endif
     !
     !-----------------------------------------------!
     !
     !
     if(present(Hmat))then
+       Hmat=zero
+       allocate(Htmp_e(DimEl,DimEl)); Htmp_e=0.d0
 #ifdef _MPI
        if(MpiStatus)then
-          call sp_dump_matrix(MpiComm,spH0,Hmat)
+          call sp_dump_matrix(MpiComm,spH0,Htmp_e)
        else
-          call sp_dump_matrix(spH0,Hmat)
+          call sp_dump_matrix(spH0,Htmp_e)
        endif
 #else
-       call sp_dump_matrix(spH0,Hmat)
-#endif          
+       call sp_dump_matrix(spH0,Htmp_e)
+#endif
+       if(DimPh>1) then
+          allocate(Htmp_ph(DimPh,DimPh));Htmp_ph=0d0
+          allocate(Htmp_eph_ph(DimPh,DimPh));Htmp_eph_ph=0d0
+          allocate(Htmp_eph_e(DimEl,DimEl));Htmp_eph_e=0d0
+          !
+          call sp_dump_matrix(spH0_ph,Htmp_ph)
+#ifdef _MPI
+          if(MpiStatus)then
+             call sp_dump_matrix(MpiComm,spH0e_eph,Htmp_eph_e)
+          else
+             call sp_dump_matrix(spH0e_eph,Htmp_eph_e)
+          endif
+#else
+          call sp_dump_matrix(spH0e_eph,Htmp_eph_e)
+#endif
+          call sp_dump_matrix(spH0ph_eph,Htmp_eph_ph)
+          !
+          Hmat = kronecker_product(zeye(DimPh),Htmp_e) + &
+               kronecker_product(Htmp_ph,zeye(DimEl)) + &
+               kronecker_product(Htmp_eph_ph,Htmp_eph_e)
+          deallocate(Htmp_ph,Htmp_eph_e,Htmp_eph_ph)
+       else
+          print*,size(Hmat),size(Htmp_e)
+          Hmat = Htmp_e
+       endif
+       !
+       deallocate(Htmp_e)
     endif
+    deallocate(diag_hybr,bath_diag)
+    return
     !
   end subroutine ed_buildH_superc_main
 
@@ -156,13 +213,48 @@ contains
     integer                         :: Nloc
     complex(8),dimension(Nloc)      :: v
     complex(8),dimension(Nloc)      :: Hv
-    integer                         :: i,j
+    complex(8)                      :: val
+    integer                         :: i,j,iph,jp, i_el,j_el
+    !
     Hv=zero
+    ! Electron Part
     do i=1,Nloc
-       matmul: do j=1,spH0%row(i)%Size
-          Hv(i) = Hv(i) + spH0%row(i)%cvals(j)*v(spH0%row(i)%cols(j))
+       iph  = (i-1)/DimEl +1
+       i_el = mod(i-1,DimEl) +1
+       matmul: do j_el=1, spH0%row(i_el)%Size
+          val = spH0%row(i_el)%cvals(j_el)
+          j   = spH0%row(i_el)%cols(j_el) + (iph-1)*DimEl
+          Hv(i) = Hv(i) + val*v(j)
        end do matmul
     end do
+    !
+    ! Phononic Part
+    if(DimPh>1)then
+       do iph=1,DimPh
+          do i_el=1,DimEl
+             i =i_el + (iph-1)*DimEl
+             !
+             !PHONON
+             do jp=1,spH0_ph%row(iph)%size
+                val = spH0_ph%row(iph)%cvals(jp)
+                j = i_el + (spH0_ph%row(iph)%cols(jp)-1)*DimEl
+                Hv(i) = Hv(i) +val*v(j)
+             enddo
+             !
+             !ELECTRON-PHONON
+             do j_el =1,spH0e_eph%row(i_el)%size
+                do jp=1,spH0ph_eph%row(iph)%size
+                   val = spH0e_eph%row(i_el)%cvals(j_el)*&
+                        spH0ph_eph%row(iph)%cvals(jp)
+                   j   = spH0e_eph%row(i_el)%cols(j_el)+&
+                        (spH0ph_eph%row(iph)%cols(jp)-1)*DimEl
+                   Hv(i) = Hv(i) + val*v(j)
+                enddo
+             enddo
+          enddo
+       enddo
+    endif
+    !
   end subroutine spMatVec_superc_main
 
 
@@ -171,7 +263,8 @@ contains
     integer                             :: Nloc
     complex(8),dimension(Nloc)          :: v
     complex(8),dimension(Nloc)          :: Hv
-    integer                             :: i,j,mpiIerr
+    complex(8)                          :: val
+    integer                             :: i,j,mpiIerr,iph,jp, i_el,j_el
     integer                             :: N,MpiShift
     complex(8),dimension(:),allocatable :: vin
     integer,allocatable,dimension(:)    :: Counts,Offset
@@ -179,6 +272,7 @@ contains
     !
     if(MpiComm==MPI_UNDEFINED)stop "spHtimesV_mpi_cc ERRROR: MpiComm = MPI_UNDEFINED"
     if(.not.MpiStatus)stop "spMatVec_mpi_cc ERROR: MpiStatus = F"
+    if(DimPh>1) stop "ERROR: MPI superc phonon (Nph>0) is not supported"
     !
     MpiRank = get_Rank_MPI(MpiComm)
     MpiSize = get_Size_MPI(MpiComm)
@@ -210,12 +304,39 @@ contains
          v(1:Nloc),Nloc,MPI_Double_Complex,&
          vin      ,Counts,Offset,MPI_Double_Complex,&
          MpiComm,MpiIerr)
-    !
+    ! Electron Part
     do i=1,Nloc                 !==spH0%Nrow
        matmul: do j=1,spH0%row(i)%Size
           Hv(i) = Hv(i) + spH0%row(i)%cvals(j)*vin(spH0%row(i)%cols(j))
        end do matmul
     end do
+    !
+    ! Phononic Part
+    if(DimPh>1)then
+       do iph=1,DimPh
+          do i_el=1,DimEl
+             i = i_el + (iph-1)*DimEl
+             !
+             !PHONON
+             do jp=1,spH0_ph%row(iph)%size
+                val = spH0_ph%row(iph)%cvals(jp)
+                j = i_el + (spH0_ph%row(iph)%cols(jp)-1)*DimEl
+                Hv(i) = Hv(i) +val*v(j)
+             enddo
+             !
+             !ELECTRON-PHONON
+             do j_el =1,spH0e_eph%row(i_el)%size
+                do jp=1,spH0ph_eph%row(iph)%size
+                   val = spH0e_eph%row(i_el)%cvals(j_el)*&
+                        spH0ph_eph%row(iph)%cvals(jp)
+                   j   = spH0e_eph%row(i_el)%cols(j_el)+&
+                        (spH0ph_eph%row(iph)%cols(jp)-1)*DimEl
+                   Hv(i) = Hv(i) + val*v(j)
+                enddo
+             enddo
+          enddo
+       enddo
+    endif
     !
   end subroutine spMatVec_mpi_superc_main
 #endif

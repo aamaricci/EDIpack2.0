@@ -19,7 +19,7 @@ contains
 
 
   subroutine directMatVec_superc_main(Nloc,vin,Hv)
-    integer                                                         :: Nloc
+    integer                                                         :: Nloc, i_el, j_el, iph, jj
     complex(8),dimension(Nloc)                                      :: vin
     complex(8),dimension(Nloc)                                      :: Hv
     integer                                                         :: isector
@@ -34,7 +34,8 @@ contains
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    Dim = getdim(isector)
+    Dim   = Hsector%Dim
+    DimEl = Hsector%DimEl
     !
     if(Nloc/=dim)stop "directMatVec_cc ERROR: Nloc != dim(isector)"
     !
@@ -72,8 +73,10 @@ contains
     !
     Hv=zero
     !-----------------------------------------------!
-    states: do j=MpiIstart,MpiIend
-       m    = Hsector%H(1)%map(j)
+    states: do i=1,Dim
+       i_el = mod(i-1,DimEl) +1
+       iph  = (i-1)/DimEl +1
+       m    = Hsector%H(1)%map(i_el)
        ib   = bdecomp(m,2*Ns)
        !
        do iorb=1,Norb
@@ -93,6 +96,14 @@ contains
        !
        !IMPURITY- BATH HYBRIDIZATION
        include "direct/HxVimp_bath.f90"
+       !
+       if(DimPh>1)then
+          !PHONON TERMS
+          include "direct/HxV_ph.f90"
+          !
+          !ELECTRON-PHONON INTERACTION
+          include "direct/HxV_eph.f90"
+       endif
     enddo states
     !-----------------------------------------------!
     !
@@ -102,7 +113,7 @@ contains
 
 #ifdef _MPI
   subroutine directMatVec_MPI_superc_main(Nloc,v,Hv)
-    integer                                                         :: Nloc
+    integer                                                         :: Nloc, i_el, j_el, iph, jj
     complex(8),dimension(Nloc)                                      :: v
     complex(8),dimension(Nloc)                                      :: Hv
     integer                                                         :: N
@@ -124,7 +135,8 @@ contains
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    Dim = getdim(isector)
+    Dim   = Hsector%Dim
+    DimEl = Hsector%DimEl
     !
     !
     !Get diagonal hybridization, bath energy
@@ -182,8 +194,10 @@ contains
     Hv=zero
     !
     !-----------------------------------------------!
-    states: do j=MpiIstart,MpiIend
-       m  = Hsector%H(1)%map(j)
+    states: do i=MpiIstart,MpiIend
+       i_el = mod(i-1,DimEl) +1
+       iph  = (i-1)/DimEl +1
+       m  = Hsector%H(1)%map(i_el)
        ib = bdecomp(m,2*Ns)
        !
        do iorb=1,Norb
@@ -203,15 +217,19 @@ contains
        !
        !IMPURITY- BATH HYBRIDIZATION
        include "direct/HxVimp_bath.f90"
+       !
+       if(DimPh>1)then
+          !PHONON TERMS
+          include "direct/HxV_ph.f90"
+          !
+          !ELECTRON-PHONON INTERACTION
+          include "direct/HxV_eph.f90"
+       endif
     enddo states
     !-----------------------------------------------!
     !
   end subroutine directMatVec_MPI_superc_main
 #endif
-
-
-
-
 
 end MODULE ED_HAMILTONIAN_SUPERC_DIRECT_HXV
 

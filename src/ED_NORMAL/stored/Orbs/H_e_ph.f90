@@ -34,27 +34,31 @@
            if(Jcondition)then
               call c(jorb,mup,k1,sg1)
               call cdg(iorb,k1,k2,sg2)
-              iup = binary_search(Hsector%H(1)%map,k2)
+              jup  = binary_search(Hsector%H(1)%map,k2)
+              jdw  = idw
+              j   = jup + (jdw-1)*DimUp
               htmp = g_ph(iorb,jorb)*sg1*sg2
               !
-              call sp_insert_element(spH0e_eph,htmp,iup,jup)
+              call sp_insert_element(spH0e_eph,htmp,j,i)
            endif
         enddo
      enddo
      ! DW spin
      ! remark: iorb=jorb can't have simultaneously n=0 and n=1 (Jcondition)
      do iorb=1,Norb
-        do jorb=iorb+1,Norb
+        do jorb=1,Norb
            Jcondition = &
                 (g_ph(iorb,jorb)/=zero) .AND. &
                 (Ndw(jorb)==1) .AND. (Ndw(iorb)==0)
            if (Jcondition) then
               call c(jorb,mdw,k1,sg1)
               call cdg(iorb,k1,k2,sg2)
-              idw = binary_search(Hsector%H(2)%map,k2)
+              jup  = iup
+              jdw  = binary_search(Hsector%H(2)%map,k2)
+              j   = jup + (jdw-1)*DimUp
               htmp = g_ph(iorb,jorb)*sg1*sg2
               !
-              call sp_insert_element(spH0e_eph,htmp,idw,jdw)
+              call sp_insert_element(spH0e_eph,htmp,j,i)
               !
            endif
               

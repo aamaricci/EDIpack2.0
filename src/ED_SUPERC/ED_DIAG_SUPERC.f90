@@ -49,7 +49,7 @@ contains
   ! spectrum DOUBLE COMPLEX
   !+------------------------------------------------------------------+
   subroutine ed_diag_c
-    integer                :: nup,ndw,isector,dim
+    integer                :: nup,ndw,isector,dim,dimel
     integer                :: isect,izero,sz,nt
     integer                :: i,j,iter,unit,vecDim
     integer                :: Nitermax,Neigen,Nblock
@@ -81,6 +81,7 @@ contains
        Tflag = Tflag.AND.(getsz(isector)/=0)
        !
        Dim      = getdim(isector)
+       DimEl    = getdim(isector)/(nph+1)
        !
        select case (lanc_method)
        case default       !use P-ARPACK
@@ -324,7 +325,7 @@ contains
   !lanczos diagonalization. 
   !+------------------------------------------------------------------+
   subroutine ed_post_diag()
-    integer             :: nup,ndw,sz,n,isector,dim,jz
+    integer             :: nup,ndw,sz,n,isector,dim,dimel,jz
     integer             :: istate
     integer             :: i,unit
     integer             :: Nsize,NtoBremoved,nstates_below_cutoff

@@ -915,7 +915,7 @@ contains
     open(unit,file="Nph_probability"//reg(ed_file_suffix)//".ed")
     write(unit,"(90(F15.9,1X))") (prob_ph(i),i=1,DimPh)
     close(unit)
-    !x
+    !
   end subroutine write_observables
 
   subroutine write_energy()

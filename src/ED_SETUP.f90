@@ -591,7 +591,7 @@ contains
        getSector(isz,1)=isector
        getSz(isector)=isz
        dim = get_superc_sector_dimension(isz)
-       getDim(isector)=dim
+       getDim(isector)=dim*DimPh
     enddo
     !
     !

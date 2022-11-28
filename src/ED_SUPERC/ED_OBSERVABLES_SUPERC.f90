@@ -30,6 +30,12 @@ MODULE ED_OBSERVABLES_SUPERC
   real(8)                             :: s2tot
   real(8)                             :: Egs
   real(8)                             :: Ei
+  real(8),dimension(:),allocatable    :: Prob
+  real(8),dimension(:),allocatable    :: prob_ph
+  real(8),dimension(:),allocatable    :: pdf_ph
+  real(8),dimension(:,:),allocatable  :: pdf_part
+  real(8)                             :: dens_ph
+  real(8)                             :: w_ph
   !
   integer                             :: iorb,jorb,istate
   integer                             :: ispin,jspin
@@ -39,14 +45,14 @@ MODULE ED_OBSERVABLES_SUPERC
   integer                             :: iup,idw
   integer                             :: jup,jdw
   integer                             :: mup,mdw
-  integer                             :: iph,i_el,isz
+  integer                             :: iph,i_el,j_el,isz
   real(8)                             :: sgn,sgn1,sgn2,sg1,sg2,sg3,sg4
   real(8)                             :: gs_weight
   !
   real(8)                             :: peso
   real(8)                             :: norm
   !
-  integer                             :: i,j,ii
+  integer                             :: i,j,ii,iprob
   integer                             :: isector,jsector
   !
   complex(8),dimension(:),allocatable :: vvinit
@@ -64,6 +70,7 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_superc()
+    integer                 :: val
     integer,dimension(2*Ns) :: ib
     integer,dimension(2,Ns) :: Nud
     integer,dimension(Ns)   :: IbUp,IbDw
@@ -78,6 +85,10 @@ contains
     allocate(magz(Norb),sz2(Norb,Norb),n2(Norb,Norb))
     allocate(phisc(Norb),phiscAB(Norb,Norb))
     allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
+    allocate(Prob(3**Norb))
+    allocate(prob_ph(DimPh))
+    allocate(pdf_ph(Lpos))
+    allocate(pdf_part(Lpos,3))
     !
     Egs     = state_list%emin
     dens    = 0.d0
@@ -90,6 +101,12 @@ contains
     sz2     = 0.d0
     n2      = 0.d0
     s2tot   = 0.d0
+    Prob    = 0.d0
+    prob_ph = 0.d0
+    dens_ph = 0.d0
+    pdf_ph  = 0.d0
+    pdf_part= 0.d0
+    w_ph    = w0_ph
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
@@ -120,14 +137,22 @@ contains
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
              gs_weight=peso*abs(state_cvec(i))**2
-             m  = sectorI%H(1)%map(i)
-             ib = bdecomp(m,2*Ns)
+             i_el = mod(i-1,sectorI%DimEl)+1
+             m    = sectorI%H(1)%map(i_el)
+             ib   = bdecomp(m,2*Ns)
              do iorb=1,Norb
                 nup(iorb)= dble(ib(iorb))
                 ndw(iorb)= dble(ib(iorb+Ns))
              enddo
              sz = (nup-ndw)/2d0
              nt =  nup+ndw
+             !
+             !Configuration probability
+             iprob=1
+             do iorb=1,Norb
+                iprob=iprob+nint(nt(iorb))*3**(iorb-1)
+             end do
+             Prob(iprob) = Prob(iprob) + gs_weight
              !
              !Evaluate averages of observables:
              do iorb=1,Norb
@@ -146,6 +171,21 @@ contains
                 enddo
              enddo
              s2tot = s2tot  + (sum(sz))**2*gs_weight
+             !
+             iph = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             prob_ph(iph) = prob_ph(iph) + gs_weight
+             dens_ph = dens_ph + (iph-1)*gs_weight
+             !
+             !compute the lattice probability distribution function
+             if(Dimph>1 .AND. iph==1) then
+                val = 1
+                !val = 1 + Nr. of polarized orbitals (full or empty) makes sense only for 2 orbs
+                do iorb=1,Norb
+                   val = val + abs(nint(sign((nt(iorb) - 1.d0),real(g_ph(iorb,iorb)))))
+                enddo
+                call prob_distr_ph(state_cvec,val)
+             end if
           enddo
           !
           !
@@ -203,6 +243,7 @@ contains
     !
     if(MPIMASTER)then
        call get_szr
+       if(DimPh>1) w_ph = sqrt(-2.d0*w0_ph/impDmats_ph(0)) !renormalized phonon frequency
        if(iolegend)call write_legend
        call write_observables()
     endif
@@ -213,6 +254,8 @@ contains
     if(Nspin==2)then
        write(LOGfile,"(A,10f18.12,A)")    "magZ"//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
     endif
+    !
+    if(DimPh>1)call write_pdf()
     !
     do iorb=1,Norb
        ed_dens_up(iorb)=dens_up(iorb)
@@ -234,8 +277,8 @@ contains
     endif
 #endif
     !
-    deallocate(dens,docc,phiscAB,phisc,dens_up,dens_dw,magz,sz2,n2)
-    deallocate(simp,zimp)
+    deallocate(dens,docc,phiscAB,phisc,dens_up,dens_dw,magz,sz2,n2,Prob)
+    deallocate(simp,zimp,prob_ph,pdf_ph,pdf_part)
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
@@ -300,8 +343,10 @@ contains
           !
           call build_sector(isector,sectorI)
           do i=1,sectorI%Dim
-             m  = sectorI%H(1)%map(i)
-             ib = bdecomp(m,2*Ns)
+             iph  = (i-1)/(sectorI%DimEl)+1
+             i_el = mod(i-1,sectorI%DimEl)+1
+             m    = sectorI%H(1)%map(i_el)
+             ib   = bdecomp(m,2*Ns)
              do iorb=1,Norb
                 nup(iorb)=dble(ib(iorb))
                 ndw(iorb)=dble(ib(iorb+Ns))
@@ -326,7 +371,8 @@ contains
                    if (Jcondition) then
                       call c(jorb,m,k1,sg1)
                       call cdg(iorb,k1,k2,sg2)
-                      j=binary_search(sectorI%H(1)%map,k2)
+                      j_el=binary_search(sectorI%H(1)%map,k2)
+                      j   = j_el + (iph-1)*sectorI%DimEl
                       ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                    !SPIN DW
@@ -337,7 +383,8 @@ contains
                    if (Jcondition) then
                       call c(jorb+Ns,m,k1,sg1)
                       call cdg(iorb+Ns,k1,k2,sg2)
-                      j=binary_search(sectorI%H(1)%map,k2)
+                      j_el=binary_search(sectorI%H(1)%map,k2)
+                      j   = j_el + (iph-1)*sectorI%DimEl
                       ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
                    endif
                 enddo
@@ -390,7 +437,8 @@ contains
                          call c(iorb+Ns,k1,k2,sg2)
                          call cdg(jorb+Ns,k2,k3,sg3)
                          call cdg(iorb,k3,k4,sg4)
-                         j=binary_search(sectorI%H(1)%map,k4)
+                         j_el=binary_search(sectorI%H(1)%map,k4)
+                         j   = j_el + (iph-1)*sectorI%DimEl
                          ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                          ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
@@ -415,7 +463,8 @@ contains
                          call c(jorb+Ns,k1,k2,sg2)
                          call cdg(iorb+Ns,k2,k3,sg3)
                          call cdg(iorb,k3,k4,sg4)
-                         j=binary_search(sectorI%H(1)%map,k4)
+                         j_el=binary_search(sectorI%H(1)%map,k4)
+                         j   = j_el + (iph-1)*sectorI%DimEl
                          ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                          ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
                       endif
@@ -545,7 +594,7 @@ contains
     write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(jorb-1)*Norb))//"phisc_"//reg(txtfy(iorb)),iorb=1,Norb),jorb=1,Norb)
     write(unit,"(A1,90(A10,6X))") "# *****"
     write(unit,"(A1,90(A10,6X))") "# imp_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ", "s2tot", "egs"
+    write(unit,"(A1,90(A10,6X))") "# ", "1s2tot", "2egs", "3nph", "4w_ph"
     close(unit)
     
     unit = free_unit()
@@ -553,6 +602,12 @@ contains
     write(unit,"(A1,90(A14,1X))")"#","1xmu","2beta",&
          (reg(txtfy(2+iorb))//"U_"//reg(txtfy(iorb)),iorb=1,Norb),&
          reg(txtfy(2+Norb+1))//"U'",reg(txtfy(2+Norb+2))//"Jh"
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="Nph_probability_info.ed")
+    write(unit,"(A1,90(A10,6X))")"#",&
+         (reg(txtfy(i+1))//"Nph="//reg(txtfy(i)),i=0,DimPh-1)
     close(unit)
     !
     iolegend=.false.
@@ -635,7 +690,7 @@ contains
     !
     unit = free_unit()
     open(unit,file="imp_all.ed",position='append')
-    write(unit,"(90(F15.9,1X))") s2tot, egs
+    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
     close(unit)
     !
     !LAST OBSERVABLES
@@ -691,13 +746,18 @@ contains
     !
     unit = free_unit()
     open(unit,file="imp_last.ed")
-    write(unit,"(90(F15.9,1X))") s2tot, egs
+    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
     close(unit)
     !
     !PARAMETERS
     unit = free_unit()
     open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="Nph_probability"//reg(ed_file_suffix)//".ed")
+    write(unit,"(90(F15.9,1X))") (prob_ph(i),i=1,DimPh)
     close(unit)
     !
   end subroutine write_observables
@@ -709,6 +769,74 @@ contains
     write(unit,"(90F15.9)")ed_Epot,ed_Epot-ed_Ehartree,ed_Eknot,ed_Ehartree,ed_Dust,ed_Dund,ed_Dse,ed_Dph
     close(unit)
   end subroutine write_energy
+
+  
+  subroutine write_pdf()
+    integer :: unit,i
+    real(8) :: x,dx
+    unit = free_unit()
+    open(unit,file="lattice_prob"//reg(ed_file_suffix)//".ed")
+    dx = (xmax-xmin)/dble(Lpos)
+    x = xmin
+    do i=1,Lpos
+       write(unit,"(5F15.9)") x,pdf_ph(i),pdf_part(i,:)
+       x = x + dx
+    enddo
+    close(unit)
+  end subroutine write_pdf
+
+   !+-------------------------------------------------------------------+
+  !PURPOSE  : subroutines useful for the phonons
+  !+-------------------------------------------------------------------+
+  !Compute the local lattice probability distribution function (PDF), i.e. the local probability of displacement
+  !as a function of the displacement itself
+   subroutine prob_distr_ph(vec,val)
+    complex(8),dimension(:) :: vec
+    real(8)              :: psi(0:DimPh-1)
+    real(8)              :: x,dx
+    integer              :: i,j,j_ph,val
+    integer              :: istart,jstart,iend,jend
+    !
+    dx = (xmax-xmin)/dble(Lpos)
+    !
+    x = xmin
+    do i=1,Lpos !cycle over x
+       call Hermite(x,psi)
+       !
+       istart = i_el + (iph-1)*sectorI%DimEl !subroutine already inside a sectorI cycle
+       !
+       !phonon diagonal part
+       pdf_ph(i) = pdf_ph(i) + peso*psi(iph-1)*psi(iph-1)*abs(vec(istart))**2
+       pdf_part(i,val) = pdf_part(i,val) + peso*psi(iph-1)*psi(iph-1)*abs(vec(istart))**2
+       !
+       !phonon off-diagonal part
+       do j_ph=iph+1,DimPh
+          jstart = i_el + (j_ph-1)*sectorI%DimEl
+          pdf_ph(i)       = pdf_ph(i)       + peso*psi(iph-1)*psi(j_ph-1)*2.d0*real( vec(istart)*conjg(vec(jstart)) )
+          pdf_part(i,val) = pdf_part(i,val) + peso*psi(iph-1)*psi(j_ph-1)*2.d0*real( vec(istart)*conjg(vec(jstart)) )
+       enddo
+       !
+       x = x + dx
+    enddo
+  end subroutine prob_distr_ph
+
+  !Compute the Hermite functions (i.e. harmonic oscillator eigenfunctions)
+  !the output is a vector with the functions up to order Dimph-1 evaluated at position x
+  subroutine Hermite(x,psi)
+    real(8),intent(in)  ::  x
+    real(8),intent(out) ::  psi(0:DimPh-1)
+    integer             ::  i
+    real(8)             ::  den
+    !
+    den=1.331335373062335d0!pigr**(0.25d0)
+    !
+    psi(0)=exp(-0.5d0*x*x)/den
+    psi(1)=exp(-0.5d0*x*x)*sqrt(2d0)*x/den
+    !
+    do i=2,DimPh-1
+       psi(i)=2*x*psi(i-1)/sqrt(dble(2*i))-psi(i-2)*sqrt(dble(i-1)/dble(i))
+    enddo
+  end subroutine Hermite
 
 
 
