@@ -79,14 +79,12 @@
   ! Here we build the phononc part of the electron-phonon interaction: (b^+ + b)
   htmp = zero
   do iph=1,DimPh
-     i = iph + 1
-     if(i <= DimPh) then
+     if(iph < DimPh) then !bdg
         htmp = sqrt(dble(iph))
-        call sp_insert_element(spH0ph_eph,htmp,iph,i)
+        call sp_insert_element(spH0ph_eph,htmp,iph+1,iph)
      end if
-     i = iph - 1
-     if(i>0) then
-        htmp = sqrt(dble(iph - 1))
-        call sp_insert_element(spH0ph_eph,htmp,iph,i)
+     if(iph>1) then !b
+        htmp = sqrt(dble(iph-1))
+        call sp_insert_element(spH0ph_eph,htmp,iph-1,iph)
      end if
   end do

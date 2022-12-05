@@ -6,5 +6,8 @@
 
 - [ ] Extend the **superc** mode to include spin-dependency. 
 
-- [ ] Extend **superc** to use *replica* bath type
+- [x] Extend **superc** to use *replica* bath type
 
+- [ ] Extend replica case to orbital-dependent hybridization V_k
+
+- [ ] Extend ED_SECTOR=T to **superc** mode
