@@ -277,7 +277,7 @@ subroutine rebuild_gimp_nonsu2(zeta,gf)
   !
   select case(bath_type)
   case default;
-  case("hybrid","replica")
+  case("hybrid","replica","general")
      do ispin=1,Nspin
         do iorb=1,Norb
            do jorb=1,Norb

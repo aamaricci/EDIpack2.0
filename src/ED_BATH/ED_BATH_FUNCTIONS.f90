@@ -60,6 +60,7 @@ contains
     integer                                                           :: io,jo
     real(8),dimension(Nbath)                                          :: eps,dps,vps
     real(8),dimension(Norb,Nbath)                                     :: vops
+    real(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)            :: Vk
     !
     real(8),dimension(Nspin,Nbath)                                    :: ehel
     real(8),dimension(Nspin,Nspin,Nbath)                              :: whel
@@ -248,6 +249,50 @@ contains
              enddo
           enddo
        end select
+    case ("general")
+       !NORMAL/NONSU2
+       !\Delta_{ab} = \sum_k [ V_{a}(k) * (z - H(k))_{ab}^-1 V_{b}(k)]
+       !SUPERC:
+       !IF(MATS):
+       ! \Delta_{ab} = - \sum_k [ V_{a}(k) * V_{b}(k) * (iw_n + E(k)) / Den(k) ]
+       !ELSE:
+       ! \Delta_{ab} = - \sum_k [ V_{a}(k) * V_{b}(k) * (w+i\h + E(k)) / ((w+i\h)*(-w-i\h) + E(k)**2 + \D(k)**2 ]
+       select case(ed_mode)
+       case default             !normal OR nonsu2
+          invH_k=zero
+          do i=1,L
+             do ibath=1,Nbath
+                Vk       = ddiag(dmft_bath%item(ibath)%vg(:))
+                invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
+                invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
+                invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
+                call inv(invH_k)
+                invH_k   = matmul(matmul(Vk,invH_k),Vk)
+                invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
+                Delta(:,:,:,:,i)=Delta(:,:,:,:,i) + invH_knn
+             enddo
+          enddo
+       case ("superc")
+          JJ=kron(pauli_sigma_z,zeye(Norb))
+          do i=1,L
+             select case(axis_)
+             case default
+                zeta(:,:,i) = x(i)*zeye(Nnambu*Nspin*Norb)
+             case ('real')
+                zeta(:,:,i)= x(i)*JJ
+             end select
+             do ibath=1,Nbath
+                Vk       = kron(pauli_sigma_z,dmft_bath%item(ibath)%vg(:))
+                invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
+                invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
+                invH_k   = zeta(:,:,i) - invH_k
+                call inv(invH_k)
+                invH_k   = matmul(matmul(Vk,invH_k),Vk)
+                invH_knn = so2nn_reshape(invH_k,Nnambu*Nspin,Norb)
+                Delta(1,1,:,:,i)=Delta(1,1,:,:,i) + invH_knn(1,1,:,:)
+             enddo
+          enddo
+       end select
        !
     end select
   end function delta_bath_array
@@ -368,6 +413,34 @@ contains
           enddo
           !
        end select
+    case ("general")
+       select case(ed_mode)
+       case default
+          stop "Fdelta_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=general"
+          !
+       case ("superc")
+          
+          do i=1,L
+             JJ = kron(pauli_sigma_z,zeye(Norb))
+             select case(axis_)
+             case default
+                zeta(:,:,i) = x(i)*zeye(Nnambu*Nspin*Norb)
+             case ('real')
+                zeta(:,:,i) = x(i)*JJ
+             end select
+             do ibath=1,Nbath
+                Vk       = kron(pauli_sigma_z,dmft_bath_%item(ibath)%vg(:))
+                invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
+                invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
+                invH_k   = zeta(:,:,i) - invH_k
+                call inv(invH_k)
+                invH_k   = matmul(matmul(Vk,invH_k),Vk)
+                invH_knn = so2nn_reshape(invH_k,Nnambu*Nspin,Norb)
+                FDelta(1,1,:,:,i)=FDelta(1,1,:,:,i) +invH_knn(1,2,:,:)
+             enddo
+          enddo
+          !
+       end select
     end select
   end function fdelta_bath_array
 
@@ -455,7 +528,7 @@ contains
        end select
        !
        !
-    case ("hybrid","replica")
+    case ("hybrid","replica","general")
        select case(ed_mode)
        case default
           allocate(fgorb(Norb,Norb),zeta(Norb,Norb))
@@ -610,7 +683,7 @@ contains
        end select
        !
        !
-    case ("hybrid","replica")             !hybrid/replica: all _{ab} components allowed (inter-orbital local mixing present)
+    case ("hybrid","replica","general")             !hybrid/replica: all _{ab} components allowed (inter-orbital local mixing present)
        select case(ed_mode)
        case default
           stop "F0and_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=hybrid"
@@ -739,7 +812,7 @@ contains
        end select
        !
        !
-    case ("hybrid","replica")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
+    case ("hybrid","replica","general")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
        !
        select case(ed_mode)
        case default
@@ -839,10 +912,10 @@ contains
        end select
        !
        !
-    case ("hybrid","replica")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
+    case ("hybrid","replica","general")             !hybrid: all _{ab} components allowed (inter-orbital local mixing present)
        select case(ed_mode)
        case default
-          stop "Invf0_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=hybrid"
+          stop "Invf0_bath_mats error: called with ed_mode=normal/nonsu2, bath_type=hybrid/replica/general"
           !
        case ("superc")
           Fdelta= fdelta_bath_array(x,dmft_bath_,axis_)

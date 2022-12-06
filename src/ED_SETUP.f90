@@ -38,7 +38,7 @@ contains
     !
     if(.not.ed_total_ud)then
        if(bath_type=="hybrid")stop "ED ERROR: ed_total_ud=F can not be used with bath_type=hybrid"
-       if(bath_type=="replica")print*,"ED WARNING: ed_total_ud=F with bath_type=replica requires some care with H_bath"
+       if(bath_type=="replica".or.bath_type=="general")print*,"ED WARNING: ed_total_ud=F with bath_type=replica/general requires some care with H_bath"
        if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))stop "ED ERROR: ed_total_ud=F can not be used with Jx!=0 OR Jp!=0"
     endif
     !
@@ -113,7 +113,7 @@ contains
     case ('hybrid')
        Ns = Nbath+Norb
        if(.not.ed_total_ud)stop "ed_setup_dimension: bath_type==hybrid AND .NOT.ed_total_ud"
-    case ('replica')
+    case ('replica','general')
        Ns = Norb*(Nbath+1)
     end select
     !
@@ -515,7 +515,7 @@ contains
        do i=1,Nbath
           getBathStride(:,i)       = Norb + i
        enddo
-    case ('replica')
+    case ('replica','general')
        do i=1,Nbath
           do iorb=1,Norb
              getBathStride(iorb,i) = iorb + i*Norb 
@@ -646,7 +646,7 @@ contains
        do i=1,Nbath
           getBathStride(:,i)      = Norb + i
        enddo
-    case ('replica')
+    case ('replica','general')
        do i=1,Nbath
           do iorb=1,Norb
              getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb !iorb + i*Norb see above normal case
@@ -803,7 +803,7 @@ contains
        do i=1,Nbath
           getBathStride(:,i)      = Norb + i
        enddo
-    case ('replica')
+    case ('replica','general')
        do i=1,Nbath
           do iorb=1,Norb
              getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb

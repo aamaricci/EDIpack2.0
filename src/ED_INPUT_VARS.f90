@@ -147,10 +147,10 @@ contains
     !
     !DEFAULT VALUES OF THE PARAMETERS:
     call parse_input_variable(Norb,"NORB",INPUTunit,default=1,comment="Number of impurity orbitals (max 5).")
-    call parse_input_variable(Nbath,"NBATH",INPUTunit,default=6,comment="Number of bath sites:(normal=>Nbath per orb)(hybrid=>Nbath total)(replica=>Nbath=Nreplica)")
+    call parse_input_variable(Nbath,"NBATH",INPUTunit,default=6,comment="Number of bath sites:(normal=>Nbath per orb)(hybrid=>Nbath total)(replica/general=>Nbath=Nreplica/Ngeneral)")
     call parse_input_variable(Nspin,"NSPIN",INPUTunit,default=1,comment="Number of spin degeneracy (max 2)")
     call parse_input_variable(Nph,"NPH",INPUTunit,default=0,comment="Max number of phonons allowed (cut off)")
-    call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp)")
+    call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp), general(replica++)")
     !
     allocate(Uloc(Norb))
     call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
@@ -200,7 +200,7 @@ contains
     call parse_input_variable(ed_all_G,"ED_ALL_G",INPUTunit,default=.true.,comment="flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries")
     call parse_input_variable(ed_verbose,"ED_VERBOSE",INPUTunit,default=3,comment="Verbosity level: 0=almost nothing --> 5:all. Really: all")
     call parse_input_variable(ed_hw_bath,"ed_hw_bath",INPUTunit,default=2d0,comment="half-bandwidth for the bath initialization: flat in -ed_hw_bath:ed_hw_bath")
-    call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica bath: -offset:offset")
+    call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica/general bath: -offset:offset")
 
     !
     call parse_input_variable(Lmats,"LMATS",INPUTunit,default=4096,comment="Number of Matsubara frequencies.")

@@ -28,6 +28,12 @@ MODULE ED_BATH
      module procedure init_Hreplica_symmetries_lattice
   end interface set_Hreplica
 
+  interface set_Hgeneral
+     module procedure init_Hgeneral_symmetries_site
+     module procedure init_Hgeneral_symmetries_legacy  ! (deprecation-cycle)
+     module procedure init_Hgeneral_symmetries_lattice
+  end interface set_Hgeneral
+
   !explicit symmetries:
   interface break_symmetry_bath
      module procedure break_symmetry_bath_site
@@ -114,7 +120,7 @@ MODULE ED_BATH
   public :: impose_bath_offset
   !
   public :: set_Hreplica
-
+  public :: set_Hgeneral
 
   !##################################################################
   !
@@ -132,6 +138,10 @@ MODULE ED_BATH
   public :: hreplica_build                   !INTERNAL (for effective_bath)
   public :: hreplica_mask                    !INTERNAL (for effective_bath)
   public :: hreplica_site                    !INTERNAL (for effective_bath)
+  !
+  public :: hgeneral_build                   !INTERNAL (for effective_bath)
+  public :: hgeneral_mask                    !INTERNAL (for effective_bath)
+  public :: hgeneral_site                    !INTERNAL (for effective_bath)
 
 
   integer :: ibath,ilat,iorb
@@ -1044,6 +1054,19 @@ contains
           allocate(dmft_bath_%item(ibath)%lambda(Nsym))
        enddo
        !
+    case('general')
+       !
+       if(.not.Hreplica_status)stop "ERROR allocate_dmft_bath: Hgeneral_basis not allocated"
+       call deallocate_dmft_bath(dmft_bath_)     !
+       Nsym=size(Hgeneral_basis)
+       !
+       allocate(dmft_bath_%item(Nbath))
+       dmft_Bath_%Nbasis=Nsym
+       do ibath=1,Nbath
+          allocate(dmft_bath_%item(ibath)%lambda(Nsym))
+          allocate(dmft_bath_%item(ibath)%vg(Norb*Nspin))
+       enddo
+       !
     end select
     !
     dmft_bath_%status=.true.
@@ -1069,6 +1092,14 @@ contains
        dmft_bath_%Nbasis= 0
        do ibath=1,Nbath
           deallocate(dmft_bath_%item(ibath)%lambda)
+       enddo
+       deallocate(dmft_bath_%item)
+    endif
+    if(bath_type=="general")then
+       dmft_bath_%Nbasis= 0
+       do ibath=1,Nbath
+          deallocate(dmft_bath_%item(ibath)%lambda)
+          deallocate(dmft_bath_%item(ibath)%v)
        enddo
        deallocate(dmft_bath_%item)
     endif
@@ -1182,6 +1213,50 @@ contains
           endif
        enddo
        !
+    case('general')
+       offset=0.d0
+       if(Nbath>1) offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
+       !
+       !BATH V INITIALIZATION
+       do ibath=1,Nbath
+          dmft_bath%item(ibath)%v(:)=max(0.1d0,1d0/sqrt(dble(Nbath)))
+       enddo
+       !
+       !BATH LAMBDAS INITIALIZATION
+       !Do not need to check for Hgeneral_basis: this is done at allocation time of the dmft_bath.
+       Nsym = dmft_bath%Nbasis
+       do isym=1,Nsym
+          do ibath=1,Nbath
+             dmft_bath%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym)
+          enddo
+          diagonal_hsym = is_diagonal(Hgeneral_basis(isym)%O)
+          one_lambdaval = Hgeneral_lambda(Nbath,isym)
+          all_lambdas_are_equal = all(Hgeneral_lambda(:,isym)==one_lambdaval)
+          if(diagonal_hsym.AND.all_lambdas_are_equal)then
+             offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
+             if(is_identity(Hgeneral_basis(isym)%O).AND.mod(Nbath,2)==0)then
+                offset(Nbath/2) = max(-1.d-1,offset(Nbath/2))
+                offset(Nbath/2 + 1) = min(1.d-1,offset(Nbath/2 + 1))
+             endif
+             do ibath=1,Nbath
+                dmft_bath%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym) + offset(ibath)
+             enddo
+             write(*,*) "                                                                    "
+             write(*,*) "WARNING: some of your lambdasym values have been internally changed "
+             write(*,*) "         while calling ed_init_solver. This happens whenever the    "
+             write(*,*) "         corresponding Hsym is diagonal and all the generals receive"
+             write(*,*) "         the same initial lambda value, due to the deprecated legacy"
+             write(*,*) "         practice of defining a unique lambda vector forall generals"
+             write(*,*) "         and let the solver decide how to handle these degeneracies."
+             write(*,*) "         >>> If you really intend to have a degenerate diagonal term"
+             write(*,*) "             in the bath you can define a suitable restart file.    "
+             write(*,*) "         >>> If instead this is what you expected please consider to"
+             write(*,*) "             move the desired rescaling in your driver, since this  "
+             write(*,*) "             funcionality might be removed in a future update.      "
+             write(*,*) "                                                                    "
+          endif
+       enddo
+       !
     end select
     !
     !
@@ -1266,6 +1341,18 @@ contains
           read(unit,*)dmft_bath%Nbasis
           do i=1,Nbath
              read(unit,*)dmft_bath_%item(i)%v,&
+                  (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
+          enddo
+          !
+       end select
+       close(unit)
+       !
+       case ('general')
+          read(unit,*)
+          !
+          read(unit,*)dmft_bath%Nbasis
+          do i=1,Nbath
+             read(unit,*)dmft_bath_%item(i)%v(:),&
                   (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
           enddo
           !
@@ -1407,6 +1494,29 @@ contains
              write(unit,*)""
           enddo
        endif
+    case ('general')
+       !
+       string_fmt      ="("//str(Nnambu*Nspin*Norb)//"(A1,F5.2,A1,F5.2,A1,2x))"
+       !
+       write(unit_,"(90(A21,1X))")"#",("V_i"//reg(str(io),io=1,Nso),("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
+       write(unit_,"(I3)")dmft_bath_%Nbasis
+       do i=1,Nbath
+          write(unit_,"(90(ES21.12,1X))")(dmft_bath_%item(i)%v(io,io),io=1,Nso),&
+               (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
+       enddo
+       !
+       if(unit_/=LOGfile)then
+          write(unit_,*)""
+          do isym=1,size(Hreplica_basis)
+             Ho = nn2so_reshape(Hreplica_basis(isym)%O,Nnambu*Nspin,Norb)
+             do io=1,Nnambu*Nspin*Norb
+                write(unit,string_fmt)&
+                     ('(',dreal(Ho(io,jo)),',',dimag(Ho(io,jo)),')',jo =1,Nnambu*Nspin*Norb)
+             enddo
+             write(unit,*)""
+          enddo
+       endif
+
     end select
   end subroutine write_dmft_bath
 
@@ -1634,6 +1744,18 @@ contains
           dmft_bath_%item(ibath)%lambda=bath_(stride+1 :stride+dmft_bath_%Nbasis)
           stride=stride+dmft_bath_%Nbasis
        enddo
+    case ('general')
+       !
+       stride = 1
+       !Get Nbasis
+       dmft_bath_%Nbasis = NINT(bath_(stride))
+       !get Lambdas
+       do ibath=1,Nbath
+          dmft_bath_%item(ibath)%v(:) = bath_(stride+1:stride+Nso)
+          stride = stride + Nso
+          dmft_bath_%item(ibath)%lambda=bath_(stride+1 :stride+dmft_bath_%Nbasis)
+          stride=stride+dmft_bath_%Nbasis
+       enddo
     end select
   end subroutine set_dmft_bath
 
@@ -1826,7 +1948,17 @@ contains
           bath_(stride+1 : stride+dmft_bath_%Nbasis)=dmft_bath_%item(ibath)%lambda
           stride=stride+dmft_bath_%Nbasis
        enddo
-    end select
+    case ('replica')
+       !
+       stride = 1
+       bath_(stride)=dmft_bath_%Nbasis
+       do ibath=1,Nbath
+          bath_(stride+1:stride+Nso)=dmft_bath_%item(ibath)%v(:)
+          stride = stride + Nso
+          bath_(stride+1 : stride+dmft_bath_%Nbasis)=dmft_bath_%item(ibath)%lambda
+          stride=stride+dmft_bath_%Nbasis
+       enddo
+    end select    
   end subroutine get_dmft_bath
 
 
@@ -2141,34 +2273,10 @@ contains
     !
   end subroutine init_Hreplica_symmetries_lattice
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
   !##################################################################
   !
-  !     AUX FUNCTIONS:
+  !     AUX FUNCTIONS REPLICA:
   !
   !##################################################################
   subroutine Hreplica_site(site)
@@ -2236,6 +2344,316 @@ contains
     endif
     !
   end function Hreplica_mask
+
+
+
+  
+  !##################################################################
+  !
+  !     H_GENERAL ROUTINES:
+  !
+  !##################################################################
+  !-------------------------------------------------------------------!
+  ! PURPOSE: INITIALIZE INTERNAL Hgeneral STRUCTURES
+  !-------------------------------------------------------------------!
+
+  !allocate GLOBAL basis for H (used for Hbath) and vectors coefficient
+  subroutine allocate_hgeneral(Nsym)
+    integer          :: Nsym
+    integer          :: isym
+    !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG allocate_Hgeneral"
+#endif
+    if(allocated(Hgeneral_basis))deallocate(Hgeneral_basis)
+    if(allocated(Hgeneral_lambda))deallocate(Hgeneral_lambda)
+    !
+    allocate(Hgeneral_basis(Nsym))
+    allocate(Hgeneral_lambda(Nbath,Nsym))
+    do isym=1,Nsym
+       allocate(Hgeneral_basis(isym)%O(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
+       Hgeneral_basis(isym)%O=zero
+       Hgeneral_lambda(:,isym)=0d0
+    enddo
+    Hgeneral_status=.true.
+  end subroutine allocate_hgeneral
+
+
+  !deallocate GLOBAL basis for H (used for impHloc and bath) and vectors coefficient
+  subroutine deallocate_hgeneral()
+    integer              :: isym
+    !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG deallocate_Hgeneral"
+#endif
+    do isym=1,size(Hgeneral_basis)
+       deallocate(Hgeneral_basis(isym)%O)
+    enddo
+    deallocate(Hgeneral_basis)
+    deallocate(Hgeneral_lambda)
+    Hgeneral_status=.false.
+  end subroutine deallocate_hgeneral
+
+
+  subroutine init_Hgeneral_symmetries_site(Hvec,lambdavec)
+    complex(8),dimension(:,:,:,:,:) :: Hvec      ![Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym]
+    real(8),dimension(:,:)          :: lambdavec ![Nbath,Nsym]
+    integer                         :: isym,Nsym
+    logical                         :: bool
+    !
+    if(ed_mode=="superc")Nnambu=2
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hgeneral_symmetries_site: from {[Hs,Lam]}_b"
+#endif
+    !
+    if(size(lambdavec,1)/=Nbath)then
+       write(*,*) "                                                                               "
+       write(*,*) "ERROR: if you are trying to init Hgeneral for inequivalent sites please note   "
+       write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
+       write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
+       write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+       write(*,*) "                                                                               "
+       stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
+    else
+       Nsym=size(lambdavec,2)
+    endif
+    !
+    call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hgeneral_symmetries","Hvec")
+    !
+    !CHECK NAMBU and HERMITICTY of each Hvec
+    do isym=1,Nsym
+       select case(ed_mode)
+       case default
+          bool = check_herm(nn2so_reshape(Hvec(:,:,:,:,isym),Nspin,Norb),Nspin*Norb)
+       case("superc")
+          bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
+       end select
+       if(.not.bool)then
+          write(LOGfile,"(A)")"init_Hgeneral_symmetries_site ERROR: not Hermitian/Nambu of general basis O_"//str(isym)
+          stop
+       endif
+    enddo
+    !
+    call allocate_hgeneral(Nsym)
+    !
+    !
+    do isym=1,Nsym
+       Hgeneral_lambda(:,isym)  = lambdavec(:,isym)
+       Hgeneral_basis(isym)%O = Hvec(:,:,:,:,isym)
+    enddo
+    !
+    if(ed_verbose>2)then
+       do ibath=1,Nbath
+          write(*,*) "Hgeneral #"//str(ibath)//":"
+          call print_hloc(Hgeneral_build(Hgeneral_lambda(ibath,:)))
+       enddo
+    endif
+    !
+  end subroutine init_Hgeneral_symmetries_site
+
+  subroutine init_Hgeneral_symmetries_legacy(Hvec,lambdavec)
+    complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(H),Nsym]
+    real(8),dimension(:)            :: lambdavec ![Nsym]
+    integer                         :: isym,Nsym
+    logical                         :: bool
+    !
+    if(ed_mode=="superc")Nnambu=2
+    Nsym=size(lambdavec)
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hgeneral_symmetries_legacy: from {[Hs,Lam]}_b"
+#endif
+    call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hgeneral_symmetries","Hvec")
+    !
+    !CHECK NAMBU and HERMITICTY of each Hvec
+    do isym=1,Nsym
+       select case(ed_mode)
+       case default
+          bool = check_herm(nn2so_reshape(Hvec(:,:,:,:,isym),Nspin,Norb),Nspin*Norb)
+       case("superc")
+          bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
+       end select
+       if(.not.bool)then
+          write(LOGfile,"(A)")"init_Hgeneral_symmetries_site ERROR: not Hermitian/Nambu of general basis O_"//str(isym)
+          stop
+       endif
+    enddo
+    !
+    call allocate_hgeneral(Nsym)
+    !
+    do isym=1,Nsym
+       do ibath=1,Nbath
+          !> BACK-COMPATIBILITY PATCH (cfr init_dmft_bath)
+          Hgeneral_lambda(ibath,isym) = lambdavec(isym)
+       enddo
+       Hgeneral_basis(isym)%O = Hvec(:,:,:,:,isym)
+    enddo
+    !
+    ! PRINT DEPRECATION MESSAGE TO LOG
+    write(*,*) "                                                                               "
+    write(*,*) "WARNING: Passing a single lambdasym vector to ed_set_Hgeneral is /deprecated/. "
+    write(*,*) "         You should instead define a different lambda for each bath component, "
+    write(*,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
+    write(*,*) "         Your single lambda vector has been internally copied into the required"
+    write(*,*) "         higher-rank array, so giving each general the same set of lambdas.    "
+    write(*,*) "         >>> This back-compatibility patch might be removed in a future update."
+    write(*,*) "                                                                               "
+    !
+    if(ed_verbose>2)then
+       do ibath=1,Nbath
+          write(*,*) "Hgeneral #"//str(ibath)//":"
+          call print_hloc(Hgeneral_build(Hgeneral_lambda(ibath,:)))
+       enddo
+    endif
+    !
+  end subroutine init_Hgeneral_symmetries_legacy
+
+  subroutine init_Hgeneral_symmetries_lattice(Hvec,lambdavec)
+    complex(8),dimension(:,:,:,:,:) :: Hvec      ![size(H),Nsym]
+    real(8),dimension(:,:,:)        :: lambdavec ![Nlat,Nbath,Nsym]
+    integer                         :: ilat,Nlat
+    integer                         :: isym,Nsym
+    logical                         :: bool
+    !
+    if(ed_mode=="superc")Nnambu=2
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hgeneral_symmetries_lattice: from ({[Hs,Lam]}_b)_site"
+#endif
+    !
+    Nlat=size(lambdavec,1)
+    Nsym=size(lambdavec,3)
+    call assert_shape(Hvec,[Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nsym],"init_Hgeneral_symmetries","Hvec")
+    !
+    !CHECK NAMBU and HERMITICTY of each Hvec
+    do isym=1,Nsym
+       select case(ed_mode)
+       case default
+          bool = check_herm(nn2so_reshape(Hvec(:,:,:,:,isym),Nspin,Norb),Nspin*Norb)
+       case("superc")
+          bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
+       end select
+       if(.not.bool)then
+          write(LOGfile,"(A)")"init_Hgeneral_symmetries_site ERROR: not Hermitian/Nambu of general basis O_"//str(isym)
+          stop
+       endif
+    enddo
+    !
+    if(allocated(Hgeneral_lambda_ineq))deallocate(Hgeneral_lambda_ineq)
+    allocate(Hgeneral_lambda_ineq(Nlat,Nbath,Nsym))
+    call allocate_hgeneral(Nsym)
+    !
+    do isym=1,Nsym
+       Hgeneral_lambda_ineq(:,:,isym)  = lambdavec(:,:,isym)
+       Hgeneral_basis(isym)%O = Hvec(:,:,:,:,isym)
+    enddo
+    !
+    if(ed_verbose>2)then
+       do ilat=1,Nlat
+          write(*,*) "Inequivalent #"//str(ilat)//":"
+          do ibath=1,Nbath
+             write(*,*) "> Hgeneral #"//str(ibath)//":"
+             call print_hloc(Hgeneral_build(Hgeneral_lambda_ineq(ilat,ibath,:)))
+          enddo
+       enddo
+    endif
+    !
+  end subroutine init_Hgeneral_symmetries_lattice
+
+  
+  !##################################################################
+  !
+  !     AUX FUNCTIONS GENERAL:
+  !
+  !##################################################################
+  subroutine Hgeneral_site(site)
+    integer :: site
+    if(site<1.OR.site>size(Hgeneral_lambda_ineq,1))stop "ERROR Hgeneral_site: site not in [1,Nlat]"
+    if(.not.allocated(Hgeneral_lambda_ineq))stop "ERROR Hgeneral_site: Hgeneral_lambda_ineq not allocated"
+    Hgeneral_lambda(:,:)  = Hgeneral_lambda_ineq(site,:,:)
+  end subroutine Hgeneral_site
+
+
+  !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
+  function Hgeneral_build(lambdavec) result(H)
+    real(8),dimension(:)                                      :: lambdavec ![Nsym]
+    integer                                                   :: isym
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
+    !
+    if(.not.Hgeneral_status)STOP "ERROR Hgeneral_build: Hgeneral_basis is not setup"
+    if(size(lambdavec)/=size(Hgeneral_basis)) STOP "ERROR Hgeneral_build: Wrong coefficient vector size"
+    H=zero
+    do isym=1,size(lambdavec)
+       H=H+lambdavec(isym)*Hgeneral_basis(isym)%O
+    enddo
+  end function Hgeneral_build
+
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : Create bath mask
+  !+-------------------------------------------------------------------+
+  function Hgeneral_mask(wdiag,uplo) result(Hmask)
+    logical,optional                                          :: wdiag,uplo
+    logical                                                   :: wdiag_,uplo_
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
+    logical,dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)    :: Hmask
+    integer                                                   :: iorb,jorb,ispin,jspin,io,jo
+    !
+    wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
+    uplo_ =.false.;if(present(uplo))  uplo_=uplo
+    !
+    H = Hgeneral_build(Hgeneral_lambda(Nbath,:)) !The mask should be general-independent
+    Hmask=.false.
+    where(abs(H)>1d-6)Hmask=.true.
+    !
+    !
+    if(wdiag_)then
+       do ispin=1,Nnambu*Nspin
+          do iorb=1,Norb
+             Hmask(ispin,ispin,iorb,iorb)=.true.
+          enddo
+       enddo
+    endif
+    !
+    if(uplo_)then
+       do ispin=1,Nnambu*Nspin
+          do jspin=1,Nnambu*Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   io = index_stride_so(ispin,iorb)
+                   jo = index_stride_so(jspin,jorb)
+                   if(io>jo)Hmask(ispin,jspin,iorb,jorb)=.false.
+                enddo
+             enddo
+          enddo
+       enddo
+    endif
+    !
+  end function Hgeneral_mask
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

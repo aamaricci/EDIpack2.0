@@ -12,11 +12,12 @@ MODULE ED_VARS_GLOBAL
 
   !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type H_operator
-     complex(8),dimension(:,:,:,:),allocatable :: O !Replica hamiltonian
+     complex(8),dimension(:,:,:,:),allocatable :: O !Replica/General hamiltonian
   end type H_operator
 
   type effective_bath_component
      real(8)                                   :: v
+     real(8),dimension(:),allocatable          :: vg
      real(8),dimension(:),allocatable          :: lambda ![Nsym]
   end type effective_bath_component
 
@@ -28,9 +29,9 @@ MODULE ED_VARS_GLOBAL
      real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
      !nonsu2
      real(8),dimension(:,:,:),allocatable      :: u !spin-flip hyb. [Nspin][Norb][Nbath]
-     !replica
+     !replica/general
      integer                                                 :: Nbasis  !H Basis dimension     
-     type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica bath components, V included
+     type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica/General bath components, V included
      !
      logical                                                 :: status=.false.
   end type effective_bath
@@ -203,11 +204,15 @@ MODULE ED_VARS_GLOBAL
   !=========================================================
   integer                                            :: Nnambu=1
   
-  !Replica bath basis set
+  !Replica/General bath basis set
   !=========================================================
   type(H_operator),dimension(:),allocatable          :: Hreplica_basis   ![Nsym]
   real(8),dimension(:,:),allocatable                 :: Hreplica_lambda  ![Nbath,Nsym]
   logical                                            :: Hreplica_status=.false.
+  !
+  type(H_operator),dimension(:),allocatable          :: Hgeneral_basis   ![Nsym]
+  real(8),dimension(:,:),allocatable                 :: Hgeneral_lambda  ![Nbath,Nsym]
+  logical                                            :: Hgeneral_status=.false.
 
   !local part of the Hamiltonian
   !=========================================================
@@ -355,6 +360,7 @@ MODULE ED_VARS_GLOBAL
   integer,allocatable,dimension(:,:)                 :: neigen_sector_ineq
   integer,allocatable,dimension(:)                   :: neigen_total_ineq
   real(8),dimension(:,:,:),allocatable               :: Hreplica_lambda_ineq ![Nineq,Nbath,Nsym]
+  real(8),dimension(:,:,:),allocatable               :: Hgeneral_lambda_ineq ![Nineq,Nbath,Nsym]
 
   !File suffixes for printing fine tuning.
   !=========================================================
