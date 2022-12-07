@@ -263,6 +263,7 @@ contains
           case default
              stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
           end select
+       endif
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)

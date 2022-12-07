@@ -1099,7 +1099,7 @@ contains
        dmft_bath_%Nbasis= 0
        do ibath=1,Nbath
           deallocate(dmft_bath_%item(ibath)%lambda)
-          deallocate(dmft_bath_%item(ibath)%v)
+          deallocate(dmft_bath_%item(ibath)%vg)
        enddo
        deallocate(dmft_bath_%item)
     endif
@@ -1219,7 +1219,7 @@ contains
        !
        !BATH V INITIALIZATION
        do ibath=1,Nbath
-          dmft_bath%item(ibath)%v(:)=max(0.1d0,1d0/sqrt(dble(Nbath)))
+          dmft_bath%item(ibath)%vg(:)=max(0.1d0,1d0/sqrt(dble(Nbath)))
        enddo
        !
        !BATH LAMBDAS INITIALIZATION
@@ -1344,15 +1344,13 @@ contains
                   (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
           enddo
           !
-       end select
-       close(unit)
-       !
+          !
        case ('general')
           read(unit,*)
           !
           read(unit,*)dmft_bath%Nbasis
           do i=1,Nbath
-             read(unit,*)dmft_bath_%item(i)%v(:),&
+             read(unit,*)dmft_bath_%item(i)%vg(:),&
                   (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
           enddo
           !
@@ -1498,10 +1496,10 @@ contains
        !
        string_fmt      ="("//str(Nnambu*Nspin*Norb)//"(A1,F5.2,A1,F5.2,A1,2x))"
        !
-       write(unit_,"(90(A21,1X))")"#",("V_i"//reg(str(io),io=1,Nso),("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
+       write(unit_,"(90(A21,1X))")"#",("V_i"//reg(str(io)),io=1,Nspin*Norb),("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
        write(unit_,"(I3)")dmft_bath_%Nbasis
        do i=1,Nbath
-          write(unit_,"(90(ES21.12,1X))")(dmft_bath_%item(i)%v(io,io),io=1,Nso),&
+          write(unit_,"(90(ES21.12,1X))")(dmft_bath_%item(i)%vg(io),io=1,Nspin*Norb),&
                (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
        enddo
        !
@@ -1751,8 +1749,8 @@ contains
        dmft_bath_%Nbasis = NINT(bath_(stride))
        !get Lambdas
        do ibath=1,Nbath
-          dmft_bath_%item(ibath)%v(:) = bath_(stride+1:stride+Nso)
-          stride = stride + Nso
+          dmft_bath_%item(ibath)%vg(:) = bath_(stride+1:stride+Nspin*Norb)
+          stride = stride + Nspin*Norb
           dmft_bath_%item(ibath)%lambda=bath_(stride+1 :stride+dmft_bath_%Nbasis)
           stride=stride+dmft_bath_%Nbasis
        enddo
@@ -1948,13 +1946,13 @@ contains
           bath_(stride+1 : stride+dmft_bath_%Nbasis)=dmft_bath_%item(ibath)%lambda
           stride=stride+dmft_bath_%Nbasis
        enddo
-    case ('replica')
+    case ('general')
        !
        stride = 1
        bath_(stride)=dmft_bath_%Nbasis
        do ibath=1,Nbath
-          bath_(stride+1:stride+Nso)=dmft_bath_%item(ibath)%v(:)
-          stride = stride + Nso
+          bath_(stride+1:stride+Nspin*Norb)=dmft_bath_%item(ibath)%vg(:)
+          stride = stride + Nspin*Norb
           bath_(stride+1 : stride+dmft_bath_%Nbasis)=dmft_bath_%item(ibath)%lambda
           stride=stride+dmft_bath_%Nbasis
        enddo

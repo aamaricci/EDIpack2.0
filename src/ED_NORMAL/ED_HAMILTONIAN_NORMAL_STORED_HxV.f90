@@ -299,7 +299,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v(iorb+(ispin-1)*Nspin)!(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+(ispin-1)*Nspin)!(ispin)
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo

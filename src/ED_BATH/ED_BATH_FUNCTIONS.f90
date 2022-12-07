@@ -1,7 +1,7 @@
 MODULE ED_BATH_FUNCTIONS
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,txtfy,str
-  USE SF_LINALG, only: eye,inv,zeye,inv_her,kron
+  USE SF_LINALG, only: eye,inv,diag,zeye,inv_her,kron
   USE SF_PAULI, only: pauli_sigma_z
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
@@ -60,7 +60,7 @@ contains
     integer                                                           :: io,jo
     real(8),dimension(Nbath)                                          :: eps,dps,vps
     real(8),dimension(Norb,Nbath)                                     :: vops
-    real(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)            :: Vk
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: Vk
     !
     real(8),dimension(Nspin,Nbath)                                    :: ehel
     real(8),dimension(Nspin,Nspin,Nbath)                              :: whel
@@ -262,7 +262,7 @@ contains
           invH_k=zero
           do i=1,L
              do ibath=1,Nbath
-                Vk       = ddiag(dmft_bath%item(ibath)%vg(:))
+                Vk       = diag(dmft_bath%item(ibath)%vg(:))
                 invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
                 invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
@@ -282,7 +282,7 @@ contains
                 zeta(:,:,i)= x(i)*JJ
              end select
              do ibath=1,Nbath
-                Vk       = kron(pauli_sigma_z,dmft_bath%item(ibath)%vg(:))
+                Vk       = kron(pauli_sigma_z,dzdiag(dmft_bath%item(ibath)%vg(:)))
                 invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
                 invH_k   = zeta(:,:,i) - invH_k
@@ -304,6 +304,7 @@ contains
     type(effective_bath)                                              :: dmft_bath_
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Fdelta
     integer                                                           :: iorb,ispin,jorb,ibath
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)            :: Vk
     real(8),dimension(Nbath)                                          :: eps,dps,vps
     real(8),dimension(Norb,Nbath)                                     :: vops
     integer                                                           :: i,L
@@ -429,7 +430,7 @@ contains
                 zeta(:,:,i) = x(i)*JJ
              end select
              do ibath=1,Nbath
-                Vk       = kron(pauli_sigma_z,dmft_bath_%item(ibath)%vg(:))
+                Vk       = kron(pauli_sigma_z,dzdiag(dmft_bath_%item(ibath)%vg(:)))
                 invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
                 invH_k   = zeta(:,:,i) - invH_k
@@ -932,6 +933,18 @@ contains
     end select
   end function invf0_bath_array
 
+  function dzdiag(x) result(A)
+    real(8),dimension(:)                   :: x
+    complex(8),dimension(:,:),allocatable  :: A
+    integer                                :: N,i
+
+    N=size(x,1)
+    allocate(A(N,N))
+    A=0.d0
+    do i=1,N
+       A(i,i)=x(i)
+    enddo
+  end function dzdiag
 
 
 

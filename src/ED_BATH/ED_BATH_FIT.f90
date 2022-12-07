@@ -106,7 +106,8 @@ contains
        case ("normal","nonsu")
           call chi2_fitgf_replica(fg,bath)
        case default
-          stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
+          stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided"
+       end select
     case ("general")
        select case(ed_mode)
        case ("normal","nonsu")
