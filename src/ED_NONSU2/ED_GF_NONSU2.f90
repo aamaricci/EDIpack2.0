@@ -70,12 +70,19 @@ contains
     write(LOGfile,"(A)")""
     write(LOGfile,"(A)")"Get mask(G):"
     if(ed_all_g)then
-      Hmask=.true.
-      ! Aren't we sure about hermiticity?
-      ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
+       Hmask=.true.
+       ! Aren't we sure about hermiticity?
+       ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
     else
-      Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-    endif 
+       select case(bath_type)
+       case("replica")
+          Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       case("general")
+          Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       case default
+          stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+       end select
+    endif
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -104,7 +111,7 @@ contains
           if(ispin==jspin)cycle
           do iorb=1,Norb
              MaskBool=.true.   
-             if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,iorb)
+             if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,iorb)
              if(.not.MaskBool)cycle
              !
              write(LOGfile,"(A)")""
@@ -140,14 +147,14 @@ contains
     !
     select case(bath_type)
     case default;
-    case("hybrid","replica")
+    case("hybrid","replica","general")
        !different orbital, same spin GF: G_{ab}^{ss}(z)
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")""
@@ -188,7 +195,7 @@ contains
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
                    MaskBool=.true.   
-                   if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,jorb)
+                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,jorb)
                    if(.not.MaskBool)cycle
                    !
                    write(LOGfile,"(A)")""
@@ -247,7 +254,15 @@ contains
 #endif
     !
     Hmask= .true.
-    if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+    if(.not.ed_all_g)then
+       select case(bath_type)
+          case("replica")
+             Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+          case("general")
+             Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+          case default
+             stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+          end select
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -269,7 +284,7 @@ contains
           if(ispin==jspin)cycle
           do iorb=1,Norb
              MaskBool=.true.   
-             if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,iorb)
+             if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,iorb)
              if(.not.MaskBool)cycle
              !
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(iorb)//"_s"//str(ispin)//str(jspin)
@@ -297,14 +312,14 @@ contains
     !
     select case(bath_type)
     case default;
-    case("hybrid","replica")
+    case("hybrid","replica","general")
        !different orbital, same spin GF: G_{ab}^{ss}(z)
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(ispin)
@@ -338,7 +353,7 @@ contains
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
                    MaskBool=.true.   
-                   if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,jorb)
+                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,jorb)
                    if(.not.MaskBool)cycle
                    !
                    write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
@@ -935,7 +950,7 @@ contains
        enddo
        !
        !
-    case ("hybrid","replica")
+    case ("hybrid","replica","general")
        do i=1,Lmats
           invGimp  = nn2so_reshape(impGmats(:,:,:,:,i),Nspin,Norb)
           call inv(invGimp)

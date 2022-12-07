@@ -68,6 +68,18 @@ contains
              enddo
           enddo
        enddo
+    case ("general")
+       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       do ibath=1,Nbath
+          Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+          do ispin=1,Nspin
+             do iorb=1,Norb
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))
+                bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
+             enddo
+          enddo
+       enddo
     end select
     !
     Hv=zero
@@ -153,6 +165,18 @@ contains
           do ispin=1,Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
+                bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
+             enddo
+          enddo
+       enddo
+    case ("general")
+       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       do ibath=1,Nbath
+          Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+          do ispin=1,Nspin
+             do iorb=1,Norb
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
