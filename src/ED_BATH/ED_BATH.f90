@@ -229,22 +229,75 @@ contains
        ndx = ndx + Nbath !diagonal hybridizations: Vs (different per spin)
        ndx = ndx + 1     !we also print Nbasis
        bath_size = ndx
+    case('general')
+       allocate(H(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
+       if(present(H_nn))then    !User defined H_nn
+          H=H_nn
+       elseif(Hgeneral_status)then !User defined Hgeneral_basis
+          H=Hgeneral_build(Hgeneral_lambda(Nbath,:))
+       else                        !Error:
+          deallocate(H)
+          stop "ERROR get_bath_dimension_direct: ed_mode=general neither H_nn present nor Hgeneral_basis defined"
+       endif
+       !
+       !Check Hermiticity:
+       ! do ispin=1,Nspin
+       !    do iorb=1,Norb
+       !       if(abs(dimag(H(ispin,ispin,iorb,iorb))).gt.1d-6)stop "H is not Hermitian"
+       !    enddo
+       ! enddo
+       if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
+       !
+       !Re/Im off-diagonal non-vanishing elements
+       ndx=0
+       do ispin=1,Nnambu*Nspin
+          do jspin=1,Nnambu*Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   io = iorb + (ispin-1)*Norb
+                   jo = jorb + (jspin-1)*Norb
+                   if(io > jo)cycle
+                   if(dreal(H(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
+                   if(dimag(H(ispin,jspin,iorb,jorb)) /= 0d0)ndx=ndx+1
+                enddo
+             enddo
+          enddo
+       enddo
+       !
+       ndx = ndx * Nbath            !number of non vanishing elements for each general
+       ndx = ndx + Nbath*Norb*Nspin !diagonal hybridizations: Vs (different per spin and orbitals)
+       ndx = ndx + 1                !we also print Nbasis
+       bath_size = ndx
     end select
   end function get_bath_dimension_direct
 
   function get_bath_dimension_symmetries(Nsym) result(bath_size)
     integer :: bath_size,ndx,isym,Nsym
     !
-    if(.not.Hreplica_status)STOP "get_bath_dimension_symmetries: Hreplica_basis not allocated"
-    if(Nsym/=size(Hreplica_lambda,2))&
-         stop "ERROR get_bath_dimension_symmetries:  size(Hreplica_basis) != size(Hreplica_lambda,2)"
+    select case(bath_type)
+    case("replica")
+       if(.not.Hreplica_status)STOP "get_bath_dimension_symmetries: H(replica/general)_basis  not allocated"
+       if(Nsym/=size(Hreplica_lambda,2))&
+            stop "ERROR get_bath_dimension_symmetries:  size(Hreplica_basis) != size(Hreplica_lambda,2)"
+    case("general")
+       if(.not.Hgeneral_status)STOP "get_bath_dimension_symmetries: H(general/general)_basis  not allocated"
+       if(Nsym/=size(Hgeneral_lambda,2))&
+            stop "ERROR get_bath_dimension_symmetries:  size(Hgeneral_basis) != size(Hgeneral_lambda,2)"
+    case default
+       stop "ERROR get_bath_dimension_symmetris wiht bath_type!=replica/general"
+    end select
     !
     ndx=Nsym
     !
     !number of replicas
     ndx = ndx * Nbath
     !diagonal hybridizations: Vs
-    ndx = ndx + Nbath
+    select case(bath_type)
+    case("replica") ! Vk depends only on bath site
+       ndx = ndx + Nbath
+    case("general")
+       ndx = ndx + Nbath*Norb*Nspin
+    end select
     !
     !include Nbasis
     ndx=ndx+1
@@ -262,12 +315,14 @@ contains
     real(8),dimension(:)           :: bath_
     integer                        :: Ntrue,i
     logical                        :: bool
-    complex(8),allocatable         :: Hreplica(:,:,:,:,:)![Nspin][:][Norb][:][Nsym]
+    !complex(8),allocatable         :: Hreplica(:,:,:,:,:)![Nspin][:][Norb][:][Nsym]
     select case (bath_type)
     case default
        Ntrue = get_bath_dimension()
     case ('replica')
        Ntrue   = get_bath_dimension_symmetries(size(Hreplica_basis))
+    case ('general')
+       Ntrue   = get_bath_dimension_symmetries(size(Hgeneral_basis))
     end select
     bool  = ( size(bath_) == Ntrue )
   end function check_bath_dimension
@@ -345,14 +400,27 @@ contains
     call allocate_dmft_bath(dmft_bath_)
     call set_dmft_bath(bath_,dmft_bath_)
     !
-    if(size(Hreplica_basis) .ne. dmft_bath_%Nbasis)then
-       dmft_bath_%item(ibath)%lambda(dmft_bath_%Nbasis)=offset
-    else
-       do isym=1,size(Hreplica_basis)
-          if(is_identity(Hreplica_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
-          return
-       enddo
-    endif
+    select case(bath_type)
+    case default
+       if(size(Hreplica_basis) .ne. dmft_bath_%Nbasis)then
+          dmft_bath_%item(ibath)%lambda(dmft_bath_%Nbasis)=offset
+       else
+          do isym=1,size(Hreplica_basis)
+             if(is_identity(Hreplica_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
+             return
+          enddo
+       endif
+    case("general")
+       if(size(Hgeneral_basis) .ne. dmft_bath_%Nbasis)then
+          dmft_bath_%item(ibath)%lambda(dmft_bath_%Nbasis)=offset
+       else
+          do isym=1,size(Hgeneral_basis)
+             if(is_identity(Hgeneral_basis(isym)%O)) dmft_bath_%item(ibath)%lambda(isym)=offset
+             return
+          enddo
+       endif
+    end select
+       
     !
     call get_dmft_bath(dmft_bath_,bath_)
     call deallocate_dmft_bath(dmft_bath_)
@@ -368,6 +436,7 @@ contains
     logical,optional       :: save
     logical                :: save_
     if(bath_type=="replica")stop "break_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "break_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     call allocate_dmft_bath(dmft_bath_)
     call set_dmft_bath(bath_,dmft_bath_)
@@ -404,6 +473,7 @@ contains
     logical                :: save_
     integer :: ibath
     if(bath_type=="replica")stop "spin_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "spin_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     if(Nspin==1)then
        write(LOGfile,"(A)")"spin_symmetrize_bath: Nspin=1 nothing to symmetrize"
@@ -425,6 +495,7 @@ contains
     call get_dmft_bath(dmft_bath_,bath_)
     call deallocate_dmft_bath(dmft_bath_)
   end subroutine spin_symmetrize_bath_site
+  !
   subroutine spin_symmetrize_bath_lattice(bath_,save)
     real(8),dimension(:,:) :: bath_
     logical,optional       :: save
@@ -449,6 +520,7 @@ contains
     integer                :: iorb
     real(8),allocatable    :: lvl(:,:),hyb(:,:)
     if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     if(Norb==1)then
        write(LOGfile,"(A)")"orb_symmetrize_bath: Norb=1 nothing to symmetrize"
@@ -476,6 +548,7 @@ contains
     logical                :: save_
     integer                :: Nsites,ilat
     if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
@@ -494,6 +567,7 @@ contains
     integer                :: iorb,orb1,orb2
     real(8),allocatable    :: lvl(:,:),hyb(:,:)
     if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     if(Norb==1)then
        write(LOGfile,"(A)")"orb_symmetrize_bath: Norb=1 nothing to symmetrize"
@@ -525,6 +599,7 @@ contains
     logical                :: save_
     integer                :: Nsites,ilat,orb1,orb2
     if(bath_type=="replica")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "orb_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
@@ -547,6 +622,7 @@ contains
     integer                :: iorb
     real(8),allocatable    :: lvl(:,:),hyb(:,:)
     if(bath_type=="replica")stop "orb_equality_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "orb_equality_bath_site ERROR: can not be used with bath_type=general"
     indx_=1     ;if(present(indx))indx_=indx
     save_=.true.;if(present(save))save_=save
     if(Norb==1)then
@@ -579,6 +655,7 @@ contains
     integer                :: iorb
     integer                :: Nsites,ilat
     if(bath_type=="replica")stop "orb_equality_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "orb_equality_bath_site ERROR: can not be used with bath_type=general"
     indx_=1     ;if(present(indx))indx_=indx
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
@@ -600,6 +677,7 @@ contains
     logical,optional       :: save
     logical                :: save_
     if(bath_type=="replica")stop "ph_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "ph_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     call allocate_dmft_bath(dmft_bath_)
     call set_dmft_bath(bath_,dmft_bath_)
@@ -628,6 +706,7 @@ contains
     logical                :: save_
     integer                :: Nsites,ilat
     if(bath_type=="replica")stop "ph_symmetry_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "ph_symmetry_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
@@ -647,6 +726,7 @@ contains
     logical,optional       :: save
     logical                :: save_
     if(bath_type=="replica")stop "ph_trans_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "ph_trans_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     call allocate_dmft_bath(dmft_bath_)
     call allocate_dmft_bath(tmp_dmft_bath)
@@ -680,6 +760,7 @@ contains
     logical                :: save_
     integer                :: Nsites,ilat
     if(bath_type=="replica")stop "ph_trans_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "ph_trans_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     Nsites=size(bath_,1)
     do ilat=1,Nsites
@@ -697,6 +778,7 @@ contains
     logical,optional       :: save
     logical                :: save_
     if(bath_type=="replica")stop "enforce_normal_bath_site ERROR: can not be used with bath_type=replica"
+    if(bath_type=="general")stop "enforce_normal_bath_site ERROR: can not be used with bath_type=general"
     save_=.true.;if(present(save))save_=save
     call allocate_dmft_bath(dmft_bath_)
     call set_dmft_bath(bath_,dmft_bath_)
@@ -743,7 +825,7 @@ contains
        case ("nonsu2")
           if(type/="e".AND.type/='v'.AND.type/='u')stop "check_bath_component error: type!=e,v,u"
        end select
-    case ("replica")
+    case ("replica","general")
        if(type/="v".AND.type/="l")stop "check_bath_component error: type!=v,l"
     end select
     return
@@ -1056,7 +1138,7 @@ contains
        !
     case('general')
        !
-       if(.not.Hreplica_status)stop "ERROR allocate_dmft_bath: Hgeneral_basis not allocated"
+       if(.not.Hgeneral_status)stop "ERROR allocate_dmft_bath: Hgeneral_basis not allocated"
        call deallocate_dmft_bath(dmft_bath_)     !
        Nsym=size(Hgeneral_basis)
        !
@@ -1486,35 +1568,35 @@ contains
           do isym=1,size(Hreplica_basis)
              Ho = nn2so_reshape(Hreplica_basis(isym)%O,Nnambu*Nspin,Norb)
              do io=1,Nnambu*Nspin*Norb
-                write(unit,string_fmt)&
+                write(unit_,string_fmt)&
                      ('(',dreal(Ho(io,jo)),',',dimag(Ho(io,jo)),')',jo =1,Nnambu*Nspin*Norb)
              enddo
-             write(unit,*)""
+             write(unit_,*)""
           enddo
        endif
     case ('general')
        !
        string_fmt      ="("//str(Nnambu*Nspin*Norb)//"(A1,F5.2,A1,F5.2,A1,2x))"
        !
-       write(unit_,"(90(A21,1X))")"#",("V_i"//reg(str(io)),io=1,Nspin*Norb),("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
+       write(unit_,"(A1,90(A21,1X))")"#",("V_i"//reg(str(io)),io=1,Nspin*Norb),("Lambda_i"//reg(str(io)),io=1,dmft_bath_%Nbasis)
        write(unit_,"(I3)")dmft_bath_%Nbasis
        do i=1,Nbath
           write(unit_,"(90(ES21.12,1X))")(dmft_bath_%item(i)%vg(io),io=1,Nspin*Norb),&
-               (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
+               (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis) 
        enddo
        !
        if(unit_/=LOGfile)then
           write(unit_,*)""
-          do isym=1,size(Hreplica_basis)
-             Ho = nn2so_reshape(Hreplica_basis(isym)%O,Nnambu*Nspin,Norb)
+          do isym=1,size(Hgeneral_basis)
+             Ho = nn2so_reshape(Hgeneral_basis(isym)%O,Nnambu*Nspin,Norb)
              do io=1,Nnambu*Nspin*Norb
-                write(unit,string_fmt)&
+                write(unit_,string_fmt)&
                      ('(',dreal(Ho(io,jo)),',',dimag(Ho(io,jo)),')',jo =1,Nnambu*Nspin*Norb)
              enddo
-             write(unit,*)""
+             write(unit_,*)""
           enddo
        endif
-
+       
     end select
   end subroutine write_dmft_bath
 
@@ -2628,32 +2710,9 @@ contains
     !
   end function Hgeneral_mask
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  !+-------------------------------------------------------------------+
+  !AUXILIARY FUNCTIONS AND SUBROUTINES
+  !+-------------------------------------------------------------------+
 
 
   !+-------------------------------------------------------------------+
@@ -2778,3 +2837,4 @@ contains
 
 
 END MODULE ED_BATH
+

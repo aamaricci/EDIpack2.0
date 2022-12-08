@@ -262,7 +262,7 @@ contains
           invH_k=zero
           do i=1,L
              do ibath=1,Nbath
-                Vk       = diag(dmft_bath%item(ibath)%vg(:))
+                Vk       = dzdiag(dmft_bath_%item(ibath)%vg(:))
                 invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
                 invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
@@ -282,7 +282,7 @@ contains
                 zeta(:,:,i)= x(i)*JJ
              end select
              do ibath=1,Nbath
-                Vk       = kron(pauli_sigma_z,dzdiag(dmft_bath%item(ibath)%vg(:)))
+                Vk       = kron(pauli_sigma_z,dzdiag(dmft_bath_%item(ibath)%vg(:)))
                 invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
                 invH_k   = nn2so_reshape(invH_knn,Nnambu*Nspin,Norb)
                 invH_k   = zeta(:,:,i) - invH_k

@@ -103,14 +103,14 @@ contains
        !
     case ("replica")
        select case(ed_mode)
-       case ("normal","nonsu")
+       case ("normal","nonsu2")
           call chi2_fitgf_replica(fg,bath)
        case default
           stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided"
        end select
     case ("general")
        select case(ed_mode)
-       case ("normal","nonsu")
+       case ("normal","nonsu2")
           call chi2_fitgf_general(fg,bath)
        case default
           stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
@@ -253,14 +253,14 @@ contains
           !
        case ("replica")
           select case(ed_mode)
-          case ("normal","nonsu")
+          case ("normal","nonsu2")
              call chi2_fitgf_replica(fg,bath)
           case default
              stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
           end select
        case ("general")
           select case(ed_mode)
-          case ("normal","nonsu")
+          case ("normal","nonsu2")
              call chi2_fitgf_general(fg,bath)
           case default
              stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 

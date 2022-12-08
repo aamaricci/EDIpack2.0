@@ -106,6 +106,72 @@ contains
 #ifdef _MPI
   subroutine ed_init_solver_single_mpi(MpiComm,bath)
     integer                            :: MpiComm
+    real(8),dimension(:),intent(inout) :: bath
+    logical                            :: check 
+    logical,save                       :: isetup=.true.
+    integer                            :: i
+    !
+    !SET THE LOCAL MPI COMMUNICATOR :
+    call ed_set_MpiComm(MpiComm)
+    !
+    write(LOGfile,"(A)")"INIT SOLVER FOR "//trim(ed_file_suffix)
+    !
+    !Init ED Structure & memory
+    if(isetup)call init_ed_structure() 
+    !
+    check = check_bath_dimension(bath)
+    if(.not.check)stop "init_ed_solver_single error: wrong bath dimensions"
+    !
+    bath = 0d0
+    !
+    call allocate_dmft_bath(dmft_bath)
+    call init_dmft_bath(dmft_bath)
+    call get_dmft_bath(dmft_bath,bath)
+    !
+    if(isetup)then
+       call setup_global
+    endif
+    call deallocate_dmft_bath(dmft_bath)
+    isetup=.false.
+    !
+    call ed_del_MpiComm()
+    !
+  end subroutine ed_init_solver_single_mpi
+#endif
+
+
+  !+-----------------------------------------------------------------------------+!
+  !                           INEQUVALENT SITES                                   !
+  !+-----------------------------------------------------------------------------+!
+  subroutine ed_init_solver_lattice(bath)
+    real(8),dimension(:,:) :: bath        ![Nlat,Nb]
+    integer                :: ilat,Nineq
+    logical                :: check_dim
+    integer                :: MPI_ERR
+    !
+    if(allocated(dens_ineq))deallocate(dens_ineq)
+    if(allocated(docc_ineq))deallocate(docc_ineq)
+    if(allocated(mag_ineq))deallocate(mag_ineq)
+    if(allocated(phisc_ineq))deallocate(phisc_ineq)
+    if(allocated(e_ineq))deallocate(e_ineq)
+    if(allocated(dd_ineq))deallocate(dd_ineq)
+    if(allocated(Smats_ineq))deallocate(Smats_ineq)
+    if(allocated(Sreal_ineq))deallocate(Sreal_ineq)
+    if(allocated(SAmats_ineq))deallocate(SAmats_ineq)
+    if(allocated(SAreal_ineq))deallocate(SAreal_ineq)
+    if(allocated(Gmats_ineq))deallocate(Gmats_ineq)
+    if(allocated(Greal_ineq))deallocate(Greal_ineq)
+    if(allocated(Fmats_ineq))deallocate(Fmats_ineq)
+    if(allocated(Freal_ineq))deallocate(Freal_ineq)
+    if(allocated(Dmats_ph_ineq))deallocate(Dmats_ph_ineq)
+    if(allocated(Dreal_ph_ineq))deallocate(Dreal_ph_ineq)
+    if(allocated(neigen_sector_ineq))deallocate(neigen_sector_ineq)
+    if(allocated(neigen_total_ineq))deallocate(neigen_total_ineq)
+    !
+    Nineq = size(bath,1)
+    if(bath_type=='replica' .AND. .not.allocated(Hreplica_lambda_ineq))&
+         stop "ERROR ed_init_solver: replica parameters lambda not defined for all sites"
+
     if(bath_type=='general' .AND. .not.allocated(Hgeneral_lambda_ineq))&
          stop "ERROR ed_init_solver: general parameters lambda not defined for all sites"
     !
@@ -148,7 +214,6 @@ contains
     end do
     !
   end subroutine ed_init_solver_lattice
-#endif
   
 #ifdef _MPI
   subroutine ed_init_solver_lattice_mpi(MpiComm,bath)
