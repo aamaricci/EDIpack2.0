@@ -1,86 +1,149 @@
-!NORMAL, MATSUBARA GREEN'S FUNCTIONS
-subroutine ed_get_gimp_matsubara_main(Gmats)
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats),intent(inout) :: Gmats
-  Gmats(:,:,:,:,:) = impGmats(:,:,:,:,:)
-end subroutine ed_get_gimp_matsubara_main
-
-subroutine ed_get_gimp_matsubara_site(Gmats,ilat)
-  integer                                                         :: ilat
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats),intent(inout) :: Gmats
-  Gmats(:,:,:,:,:) = Gmats_ineq(ilat,:,:,:,:,:)
-end subroutine ed_get_gimp_matsubara_site
-
-subroutine ed_get_gimp_matsubara_lattice(Gmats,nlat)
-  integer                                                              :: nlat
-  complex(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Gmats
-  if(Nlat/=size(Gmats_ineq,1))stop "ERROR ed_get_gimp_matsubara: wrong Nlat"
-  Gmats = Gmats_ineq
-end subroutine ed_get_gimp_matsubara_lattice
-
-
-
-!NORMAL, REAL GREEN'S FUNCTION
-subroutine ed_get_gimp_realaxis_main(Greal)
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Greal
-  Greal(:,:,:,:,:) = impGreal(:,:,:,:,:)
-end subroutine ed_get_gimp_realaxis_main
-
-subroutine ed_get_gimp_realaxis_site(Greal,ilat)
-  integer                                                         :: ilat
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Greal
-  Greal(:,:,:,:,:) = Greal_ineq(ilat,:,:,:,:,:)
-end subroutine ed_get_gimp_realaxis_site
-
-subroutine ed_get_gimp_realaxis_lattice(Greal,nlat)
-  integer                                                              :: nlat
-  complex(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Greal
-  if(Nlat/=size(Greal_ineq,1))stop "ERROR ed_get_gimp_realaxis: wrong Nlat"
-  Greal = Greal_ineq
-end subroutine ed_get_gimp_realaxis_lattice
-
-
-
-
-!ANOMALous, MATSUBARA GREEN'S FUNCTION
-subroutine ed_get_fimp_matsubara_main(Fmats)
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats),intent(inout) :: Fmats
-  Fmats(:,:,:,:,:) = impFmats(:,:,:,:,:)
-end subroutine ed_get_fimp_matsubara_main
-
-subroutine ed_get_fimp_matsubara_site(Fmats,ilat)
-  integer                                                         :: ilat
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats),intent(inout) :: Fmats
-  Fmats(:,:,:,:,:) = Fmats_ineq(ilat,:,:,:,:,:)
-end subroutine ed_get_fimp_matsubara_site
-
-subroutine ed_get_fimp_matsubara_lattice(Fmats,nlat)
-  integer                                                              :: nlat
-  complex(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Fmats
-  if(Nlat/=size(Fmats_ineq,1))stop "ERROR ed_get_fimp_matsubara: wrong Nlat"
-  Fmats = Fmats_ineq
-end subroutine ed_get_fimp_matsubara_lattice
-
+subroutine ed_get_gimp_site(self,axis,type)
+  complex(8),dimension(..),intent(inout) :: self
+  character(len=*),optional              :: axis
+  character(len=*),optional              :: type
+  character(len=1)                       :: axis_
+  character(len=1)                       :: type_
+  axis_='m';if(present(axis))axis_=trim(axis)
+  type_='n';if(present(type))type_=trim(type)
+  select case(type_)
+  case default; stop "ed_get_gimp ERROR: type is neither Normal, nor Anomalous"
+  case ('n','N')
+     select case(axis_)
+     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case ('m','M')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nspin*Norb,Nspin*Norb,Lmats],'ed_get_gimp','self')
+        self = nn2so_reshape(impGmats,Nspin,Norb,Lmats)
+        rank (5)
+        call assert_shape(self,[Nspin,Nspin,Norb,Norb,Lmats],'ed_get_gimp','self')
+        self = impGmats
+        end select
+     case('r','R')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nspin*Norb,Nspin*Norb,Lreal],'ed_get_gimp','self')
+        self = nn2so_reshape(impGreal,Nspin,Norb,Lmats)
+        rank (5)
+        call assert_shape(self,[Nspin,Nspin,Norb,Norb,Lreal],'ed_get_gimp','self')
+        self = impGreal
+        end select
+     end select
+  case('a','A')
+     select case(axis_)
+     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case ('m','M')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nspin*Norb,Nspin*Norb,Lmats],'ed_get_gimp','self')
+        self = nn2so_reshape(impFmats,Nspin,Norb,Lmats)
+        rank (5)
+        call assert_shape(self,[Nspin,Nspin,Norb,Norb,Lmats],'ed_get_gimp','self')
+        self = impFmats
+        end select
+     case('r','R')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nspin*Norb,Nspin*Norb,Lreal],'ed_get_gimp','self')
+        self = nn2so_reshape(impFreal,Nspin,Norb,Lmats)
+        rank (5)
+        call assert_shape(self,[Nspin,Nspin,Norb,Norb,Lreal],'ed_get_gimp','self')
+        self = impFreal
+        end select
+     end select
+  end select
+end subroutine ed_get_gimp_site
 
 
 
+subroutine ed_get_gimp_lattice(self,nlat,axis,type)
+  complex(8),dimension(..),intent(inout) :: self
+  integer,intent(in)                     :: nlat
+  character(len=*),optional              :: axis
+  character(len=*),optional              :: type
+  character(len=1)                       :: axis_
+  character(len=1)                       :: type_
+  integer                                :: ilat
+  axis_='m';if(present(axis))axis_=trim(axis)
+  type_='n';if(present(type))type_=trim(type)
+  if(Nlat/=size(Gmats_ineq,1))stop "ERROR ed_get_gimp: wrong Nlat"
+  select case(type_)
+  case default; stop "ed_get_gimp ERROR: type is neither Normal, nor Anomalous"
+  case ('n','N')
+     select case(axis_)
+     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case ('m','M')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nlat*Nspin*Norb,Nlat*Nspin*Norb,Lmats],'ed_get_gimp','self')
+        self = nnn2lso_reshape(Gmats_ineq,Nlat,Nspin,Norb,Lmats)
+        rank (4)
+        call assert_shape(self,[Nlat,Nspin*Norb,Nspin*Norb,Lmats],'ed_get_gimp','self')
+        do ilat=1,Nlat
+           self(ilat,:,:,:) = nn2so_reshape(Gmats_ineq(ilat,:,:,:,:,:),Nspin,Norb,Lmats)
+        enddo
+        rank (6)
+        call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,Lmats],'ed_get_gimp','self')
+        self = Gmats_ineq
+        end select
+     case('r','R')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nlat*Nspin*Norb,Nlat*Nspin*Norb,Lreal],'ed_get_gimp','self')
+        self = nnn2lso_reshape(Freal_ineq,Nlat,Nspin,Norb,Lreal)
+        rank (4)
+        call assert_shape(self,[Nlat,Nspin*Norb,Nspin*Norb,Lreal],'ed_get_gimp','self')
+        do ilat=1,Nlat
+           self(ilat,:,:,:) = nn2so_reshape(Freal_ineq(ilat,:,:,:,:,:),Nspin,Norb,Lreal)
+        enddo
+        rank (6)
+        call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,Lreal],'ed_get_gimp','self')
+        self = Freal_ineq
+        end select
+     end select
+  case('a','A')
+     select case(axis_)
+     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case ('m','M')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nlat*Nspin*Norb,Nlat*Nspin*Norb,Lmats],'ed_get_gimp','self')
+        self = nnn2lso_reshape(Fmats_ineq,Nlat,Nspin,Norb,Lmats)
+        rank (4)
+        call assert_shape(self,[Nlat,Nspin*Norb,Nspin*Norb,Lmats],'ed_get_gimp','self')
+        do ilat=1,Nlat
+           self(ilat,:,:,:) = nn2so_reshape(Fmats_ineq(ilat,:,:,:,:,:),Nspin,Norb,Lmats)
+        enddo
+        rank (6)
+        call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,Lmats],'ed_get_gimp','self')
+        self = Fmats_ineq
+        end select
+     case('r','R')
+        select rank(self)
+        rank default; stop "ed_get_gimp ERROR: self has a wrong rank"
+        rank (3)
+        call assert_shape(self,[Nlat*Nspin*Norb,Nlat*Nspin*Norb,Lreal],'ed_get_gimp','self')
+        self = nnn2lso_reshape(Freal_ineq,Nlat,Nspin,Norb,Lreal)
+        rank (4)
+        call assert_shape(self,[Nlat,Nspin*Norb,Nspin*Norb,Lreal],'ed_get_gimp','self')
+        do ilat=1,Nlat
+           self(ilat,:,:,:) = nn2so_reshape(Freal_ineq(ilat,:,:,:,:,:),Nspin,Norb,Lreal)
+        enddo
+        rank (6)
+        call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,Lreal],'ed_get_gimp','self')
+        self = Freal_ineq
+        end select
+     end select
+  end select
+end subroutine ed_get_gimp_lattice
 
 
 
-!ANOMALous, REAL GREEN'S FUNCTION
-subroutine ed_get_fimp_realaxis_main(Freal)
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Freal
-  Freal(:,:,:,:,:) = impFreal(:,:,:,:,:)
-end subroutine ed_get_fimp_realaxis_main
-
-subroutine ed_get_fimp_realaxis_site(Freal,ilat)
-  integer                                                         :: ilat
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Freal
-  Freal(:,:,:,:,:) = Freal_ineq(ilat,:,:,:,:,:)
-end subroutine ed_get_fimp_realaxis_site
-
-subroutine ed_get_fimp_realaxis_lattice(Freal,nlat)
-  integer                                                              :: nlat
-  complex(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,Lreal),intent(inout) :: Freal
-  if(Nlat/=size(Freal_ineq,1))stop "ERROR ed_get_fimp_realaxis: wrong Nlat"
-  Freal = Freal_ineq
-end subroutine ed_get_fimp_realaxis_lattice

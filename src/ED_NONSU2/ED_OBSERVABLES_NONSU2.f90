@@ -1066,10 +1066,10 @@ contains
     write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
-    unit = free_unit()
-    open(unit,file="phisc_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
-    close(unit)
+    ! unit = free_unit()
+    ! open(unit,file="phisc_all"//reg(ed_file_suffix)//".ed",position='append')
+    ! write(unit,"(90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
+    ! close(unit)
     !
     unit = free_unit()
     open(unit,file="imp_all"//reg(ed_file_suffix)//".ed",position='append')
