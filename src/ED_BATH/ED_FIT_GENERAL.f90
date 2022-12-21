@@ -525,7 +525,6 @@ contains
        enddo
        counter = counter + Nspin*Norb
 
-       dDelta(:,:,:,:,:,counter)=invH_knn(:,:,:,:,:)
        !
        !Derivate_lambda_p
        do k=1,Nlambdas

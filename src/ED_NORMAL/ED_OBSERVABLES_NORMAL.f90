@@ -838,6 +838,7 @@ contains
           write(unit,"(90(F15.9,1X))")exct_s0(iorb,jorb),exct_tz(iorb,jorb)
        enddo
     enddo
+    close(unit)
     !
     !LAST OBSERVABLES
     unit = free_unit()
