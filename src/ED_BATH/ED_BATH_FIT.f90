@@ -344,9 +344,11 @@ contains
   ! Delta/G0 functions and fit them to update the effective baths for ED.
   !+----------------------------------------------------------------------!
   !RDMFT WRAPPER:
-  subroutine ed_fit_bath_sites_normal(bath,Delta,Hloc,ispin)
+  subroutine ed_fit_bath_sites_normal(bath,Weiss,Hlocs,ispin)
     real(8),intent(inout)    :: bath(:,:)
-    complex(8),intent(inout) :: Delta(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
+    complex(8),dimension(..) :: Weiss
+    complex(8)               :: Delta(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
+    complex(8),dimension(..) :: Hlocs
     complex(8)               :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
     integer,optional         :: ispin
     !MPI auxiliary vars
@@ -366,6 +368,36 @@ contains
        check_dim = check_bath_dimension(bath(ilat,:))
        if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
     end do
+    !
+    select rank(Weiss)
+    rank (3)
+    call assert_shape(Weiss,[Nsites*Nspin*Norb,Nsites*Nspin*Norb,Lmats],'ed_fit_bath','Weiss')
+    Delta = lso2nnn_reshape(Weiss,Nsites,Nspin,Norb,Lmats)
+    rank (4)
+    call assert_shape(Weiss,[Nsites,Nspin*Norb,Nspin*Norb,Lmats],'ed_fit_bath','Weiss')
+    do ilat=1,Nsites
+       Delta(ilat,:,:,:,:,:) = so2nn_reshape(Weiss(ilat,:,:,:),Nspin,Norb,Lmats)
+    enddo
+    rank (6)
+    call assert_shape(Weiss,[Nsites,Nspin,Nspin,Norb,Norb,Lmats],'ed_fit_bath','Weiss')
+    Delta = Weiss
+    rank default; stop "ed_fit_bath ERROR: Weiss  have wrong rank"
+    end select
+    !
+    select rank(Hlocs)
+    rank (2)
+    call assert_shape(Hlocs,[Nsites*Nspin*Norb,Nsites*Nspin*Norb],'ed_fit_bath','Hlocs')
+    Hloc = lso2nnn_reshape(Hlocs,Nsites,Nspin,Norb)
+    rank (3)
+    call assert_shape(Hlocs,[Nsites,Nspin*Norb,Nspin*Norb],'ed_fit_bath','Hlocs')
+    do ilat=1,Nsites
+       Hloc(ilat,:,:,:,:) = so2nn_reshape(Hlocs(ilat,:,:),Nspin,Norb)
+    enddo
+    rank (5)
+    call assert_shape(Hlocs,[Nsites,Nspin,Nspin,Norb,Norb],'ed_fit_bath','Hlocs')
+    Hloc = Hlocs
+    rank default; stop "ed_fit_bath ERROR: Hlocs have wrong rank"
+    end select
     !
     bath_tmp=0d0
     do ilat = 1, Nsites
@@ -391,10 +423,13 @@ contains
     ed_file_suffix=""
   end subroutine ed_fit_bath_sites_normal
 
-  subroutine ed_fit_bath_sites_superc(bath,Delta,Hloc,ispin)
+  subroutine ed_fit_bath_sites_superc(bath,Weiss,Fweiss,Hloc,ispin)
     integer                  :: comm
     real(8),intent(inout)    :: bath(:,:)
-    complex(8),intent(inout) :: Delta(2,size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
+    complex(8),intent(inout) :: Weiss(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
+    complex(8),intent(inout) :: Fweiss(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
+    !
+    complex(8)               :: Delta(2,size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
     complex(8)               :: Hloc(size(bath,1),Nspin,Nspin,Norb,Norb)
     integer,optional         :: ispin
     !MPI auxiliary
@@ -407,6 +442,9 @@ contains
     write(Logfile,"(A)")""
 #endif
     Nsites=size(bath,1)
+    !
+    Delta(1,:,:,:,:,:,:)=Weiss
+    Delta(2,:,:,:,:,:,:)=FWeiss
     !
     do ilat = 1,Nsites
        check_dim = check_bath_dimension(bath(ilat,:))

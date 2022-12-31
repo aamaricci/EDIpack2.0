@@ -202,7 +202,7 @@ MODULE ED_VARS_GLOBAL
   !correctly allocate  Nambu arrays of dim 2*Norb) 
   !=========================================================
   integer                                            :: Nnambu=1
-  
+
   !Replica bath basis set
   !=========================================================
   type(H_operator),dimension(:),allocatable          :: Hreplica_basis   ![Nsym]
@@ -339,7 +339,8 @@ MODULE ED_VARS_GLOBAL
 
 
   !--------------- LATTICE WRAP VARIABLES -----------------!
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Smats_ineq,Sreal_ineq          ![Nlat][Nspin][Nspin][Norb][Norb][L]
+  complex(8),dimension(:,:,:,:,:),allocatable        :: Hloc_ineq
+  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Smats_ineq,Sreal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: SAmats_ineq,SAreal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Gmats_ineq,Greal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Fmats_ineq,Freal_ineq
@@ -356,6 +357,8 @@ MODULE ED_VARS_GLOBAL
   integer,allocatable,dimension(:)                   :: neigen_total_ineq
   real(8),dimension(:,:,:),allocatable               :: Hreplica_lambda_ineq ![Nineq,Nbath,Nsym]
 
+
+  
   !File suffixes for printing fine tuning.
   !=========================================================
   character(len=32)                                  :: ed_file_suffix=""       !suffix string attached to the output files.
@@ -399,13 +402,13 @@ contains
 
 
   !=========================================================
-  subroutine ed_set_MpiComm(comm)
+  subroutine ed_set_MpiComm()
 #ifdef _MPI
-    integer :: comm,ierr
+    integer :: ierr
     ! call MPI_Comm_dup(Comm,MpiComm_Global,ierr)
     ! call MPI_Comm_dup(Comm,MpiComm,ierr)
-    MpiComm_Global = comm
-    MpiComm        = comm
+    MpiComm_Global = MPI_COMM_WORLD
+    MpiComm        = MPI_COMM_WORLD
     call Mpi_Comm_group(MpiComm_Global,MpiGroup_Global,ierr)
     MpiStatus      = .true.
     MpiSize        = get_Size_MPI(MpiComm_Global)
@@ -414,13 +417,10 @@ contains
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG ed_set_MpiComm: setting MPI comm"
 #endif
-#else
-    integer,optional :: comm
 #endif
   end subroutine ed_set_MpiComm
 
   subroutine ed_del_MpiComm()
-
 #ifdef _MPI    
     MpiComm_Global = MPI_UNDEFINED
     MpiComm        = MPI_UNDEFINED

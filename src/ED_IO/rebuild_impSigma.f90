@@ -1,6 +1,5 @@
-subroutine rebuild_sigma_single(zeta,Hloc,sigma,self)
+subroutine rebuild_sigma_single(zeta,sigma,self)
   complex(8),dimension(:)                     :: zeta
-  complex(8),dimension(..)                    :: Hloc
   complex(8),dimension(..)                    :: Sigma
   complex(8),dimension(..),optional           :: Self
   integer                                     :: i,L
@@ -9,11 +8,7 @@ subroutine rebuild_sigma_single(zeta,Hloc,sigma,self)
   !
   call ed_read_impGmatrix()
   !
-  select rank(Hloc)
-  rank default;stop "REBUILD_SIGMA ERROR: Hloc has a wrong rank"
-  rank (2);call set_Himpurity(so2nn_reshape(Hloc,Nspin,Norb))
-  rank (4);call set_Himpurity(Hloc)
-  end select
+  if(.not.allocated(impHloc))stop "rebuild_sigma error: impHloc not allocated. Call ed_set_Hloc first."  
   !
   call allocate_dmft_bath(dmft_bath)
   call init_dmft_bath(dmft_bath,used=.true.)
@@ -59,45 +54,30 @@ end subroutine rebuild_sigma_single
 
 
 
-subroutine rebuild_sigma_ineq(zeta,Hloc,Nlat,sigma,self)
+subroutine rebuild_sigma_ineq(zeta,Nlat,sigma,self)
   complex(8),dimension(:)                       :: zeta
-  complex(8),dimension(..)                      :: Hloc
   integer                                       :: Nlat
   complex(8),dimension(..)                      :: Sigma
   complex(8),dimension(..),optional             :: Self
   integer                                       :: i,ilat,Nineq,L
   logical                                       :: check
-  complex(8),dimension(:,:,:,:,:),allocatable   :: Hloc_
   complex(8),dimension(:,:,:,:,:,:),allocatable :: sn,sa
   !
   Nineq=Nlat
   L=size(zeta)
-  allocate(Hloc_(Nineq,Nspin,Nspin,Norb,Norb))
   !
-  select rank(Hloc)
-  rank default;stop "REBUILD_SIGMA ERROR: Hloc has a wrong rank"
-  rank (2)
-  call assert_shape(Hloc,[Nineq*Nspin*Norb,Nineq*Nspin*Norb],'rebuild_sigma','Hloc')
-  Hloc_  = lso2nnn_reshape(Hloc,Nineq,Nspin,Norb)
-  rank (5);
-  call assert_shape(Hloc,[Nineq,Nspin,Nspin,Norb,Norb],'rebuild_sigma','Hloc')
-  Hloc_  = Hloc
-  end select
+  if(.not.allocated(Hloc_ineq))stop "ed_rebuild_gf error: Hloc_ineq not allocated. Call ed_set_Hloc first."
   !
   allocate(Sn(Nineq,Nspin,Nspin,Norb,Norb,L))
   allocate(Sa(Nineq,Nspin,Nspin,Norb,Norb,L))
   !
   do ilat = 1, Nineq
      ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
+     call ed_set_Hloc(Hloc_ineq(ilat,:,:,:,:))
      if(present(self))then
-        call rebuild_sigma_single(zeta,&
-             Hloc_(ilat,:,:,:,:),&
-             sn(ilat,:,:,:,:,:),&
-             sa(ilat,:,:,:,:,:))
+        call rebuild_sigma_single(zeta,sn(ilat,:,:,:,:,:),sa(ilat,:,:,:,:,:))
      else
-        call rebuild_sigma_single(zeta,&
-             Hloc_(ilat,:,:,:,:),&
-             sa(ilat,:,:,:,:,:))
+        call rebuild_sigma_single(zeta,sa(ilat,:,:,:,:,:))
      endif
   enddo
   call ed_reset_suffix
