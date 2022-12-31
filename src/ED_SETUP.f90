@@ -14,15 +14,8 @@ MODULE ED_SETUP
   private
 
 
-  interface set_Himpurity
-     module procedure :: set_Himpurity_so_c
-     module procedure :: set_Himpurity_nn_c
-  end interface set_Himpurity
-
-
   public :: init_ed_structure
   public :: setup_global
-  public :: set_Himpurity
 
 contains
 
@@ -165,6 +158,10 @@ contains
   end subroutine ed_setup_dimensions
 
 
+
+
+
+  
 
   !+------------------------------------------------------------------+
   !PURPOSE  : Init ED structure and calculation
@@ -389,33 +386,10 @@ contains
 
 
 
-  !+------------------------------------------------------------------+
-  !PURPOSE  : Setup Himpurity, the local part of the non-interacting Hamiltonian
-  !+------------------------------------------------------------------+
-  subroutine set_Himpurity_nn_c(hloc)
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
-#endif
-    if(allocated(impHloc))deallocate(impHloc)
-    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
-    impHloc = Hloc
-    if(ed_verbose>2)call print_hloc(impHloc)    
-  end subroutine set_Himpurity_nn_c
-
-  subroutine set_Himpurity_so_c(hloc)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
-#endif
-    if(allocated(impHloc))deallocate(impHloc)
-    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
-    impHloc = so2nn_reshape(Hloc,Nspin,Norb)
-    if(ed_verbose>2)call print_hloc(impHloc)
-  end subroutine set_Himpurity_so_c
 
 
 
+ 
 
 
 
@@ -497,8 +471,8 @@ contains
           call get_Nup(isector,Nups)
           call get_Ndw(isector,Ndws)
           if(any(Nups .ne. Ndws))then
-            call get_Sector([Ndws,Nups],Ns_Orb,jsector)
-            if (twin_mask(jsector))twin_mask(isector)=.false.
+             call get_Sector([Ndws,Nups],Ns_Orb,jsector)
+             if (twin_mask(jsector))twin_mask(isector)=.false.
           endif
        enddo
        write(LOGfile,"(A,I6,A,I9)")"Looking into ",count(twin_mask)," sectors out of ",Nsectors

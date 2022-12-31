@@ -122,23 +122,22 @@ contains
   !+-------------------------------------------------------------------+
   !PURPOSE  : READ THE INPUT FILE AND SETUP GLOBAL VARIABLES
   !+-------------------------------------------------------------------+
-  subroutine ed_read_input(INPUTunit,comm)
+  subroutine ed_read_input(INPUTunit)
 #ifdef _MPI
     USE MPI
     USE SF_MPI
 #endif
     character(len=*) :: INPUTunit
-    integer,optional :: comm
     logical          :: master=.true.,bool
     integer          :: i,iorb,rank=0
     integer          :: unit_xmu, unit_gph
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A,A)")"DEBUG ed_read_input: read input from",trim(INPUTunit)
 #endif
-#ifdef _MPI
-    if(present(comm))then
-       master=get_Master_MPI(comm)
-       rank  =get_Rank_MPI(comm)
+#ifdef _MPI    
+    if(check_MPI())then
+       master=get_Master_MPI()
+       rank  =get_Rank_MPI()
     endif
 #endif
     !
@@ -292,11 +291,11 @@ contains
     end if
 
 #ifdef _MPI
-    if(present(comm))then
+    if(check_MPI())then
        if(.not.master)then
           LOGfile=1000-rank
           open(LOGfile,file="stdOUT.rank"//str(rank)//".ed")
-          do i=1,get_Size_MPI(comm)
+          do i=1,get_Size_MPI()
              if(i==rank)write(*,"(A,I0,A,I0)")"Rank ",rank," writing to unit: ",LOGfile
           enddo
        endif

@@ -102,12 +102,6 @@ MODULE ED_BATH
   public :: get_bath_dimension
   public :: check_bath_dimension
   !
-  public :: get_bath_component_dimension
-  public :: get_bath_component
-  public :: set_bath_component
-  public :: copy_bath_component
-  !
-
   public :: break_symmetry_bath
   public :: spin_symmetrize_bath
   public :: orb_symmetrize_bath
@@ -832,220 +826,6 @@ contains
   end subroutine check_bath_component
 
 
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : Inquire the correct bath size to allocate the
-  ! the bath array in the calling program.
-  !
-  ! Get size of each dimension of the component array.
-  ! The Result is an rank 1 integer array Ndim with dimension:
-  ! 3 for get_component_size_bath
-  ! 2 for get_spin_component_size_bath & get_orb_component_size_bath
-  ! 1 for get_spin_orb_component_size_bath
-  !+-------------------------------------------------------------------+
-  function get_bath_component_dimension(type) result(Ndim)
-    character(len=1) :: type
-    integer          :: Ndim(3)
-    call  check_bath_component(type)
-    select case(bath_type)
-    case default
-       Ndim=[Nspin,Norb,Nbath]
-    case('hybrid')
-       select case(ed_mode)
-       case default
-          select case(type)
-          case('e')
-             Ndim=[Nspin,1,Nbath]
-          case('v')
-             Ndim=[Nspin,Norb,Nbath]
-          end select
-       case ("superc")
-          select case(type)
-          case('e','d')
-             Ndim=[Nspin,1,Nbath]
-          case('v')
-             Ndim=[Nspin,Norb,Nbath]
-          end select
-       case ("nonsu2")
-          select case(type)
-          case('e')
-             Ndim=[Nspin,1,Nbath]
-          case('v','u')
-             Ndim=[Nspin,Norb,Nbath]
-          end select
-       end select
-    end select
-  end function get_bath_component_dimension
-
-
-  !+-----------------------------------------------------------------------------+!
-  !PURPOSE: check that the input array hsa the correct dimensions specified
-  ! for the choice of itype and possiblty ispin and/or iorb.
-  !+-----------------------------------------------------------------------------+!
-  subroutine assert_bath_component_size(array,type,string1,string2)
-    real(8),dimension(:,:,:) :: array
-    character(len=1)         :: type
-    character(len=*)         :: string1,string2
-    integer                  :: Ndim(3)
-    Ndim = get_bath_component_dimension(type)
-    call assert_shape(Array,Ndim,reg(string1),reg(string2))
-  end subroutine assert_bath_component_size
-
-
-
-
-
-
-
-
-  !+-----------------------------------------------------------------------------+!
-  !PURPOSE: Get a specified itype,ispin,iorb component of the user bath.
-  ! The component is returned into an Array of rank D
-  ! get_full_component_bath    : return the entire itype component (D=3)
-  ! get_spin_component_bath    : return the itype component for the select ispin (D=2)
-  ! get_spin_orb_component_bath: return the itype component for the select ispin & iorb (D=1)
-  !+-----------------------------------------------------------------------------+!
-  subroutine get_bath_component(array,bath_,type)
-    real(8),dimension(:,:,:) :: array
-    real(8),dimension(:)     :: bath_
-    character(len=1)         :: type
-    logical                  :: check
-    type(effective_bath)     :: dmft_bath_
-    !
-    check= check_bath_dimension(bath_)
-    if(.not.check)stop "get_component_bath error: wrong bath dimensions"
-    call allocate_dmft_bath(dmft_bath_)
-    call set_dmft_bath(bath_,dmft_bath_)
-    call assert_bath_component_size(array,type,"get_bath_component","Array")
-    call check_bath_component(type)
-    select case(ed_mode)
-    case default
-       select case(type)
-       case('e')
-          Array = dmft_bath_%e(:,:,:)
-       case('v')
-          Array = dmft_bath_%v(:,:,:)
-       end select
-    case ("superc")
-       select case(type)
-       case('e')
-          Array = dmft_bath_%e(:,:,:)
-       case('d')
-          Array = dmft_bath_%d(:,:,:)
-       case('v')
-          Array = dmft_bath_%v(:,:,:)
-       end select
-    case ("nonsu2")
-       select case(type)
-       case('e')
-          Array = dmft_bath_%e(:,:,:)
-       case('v')
-          Array = dmft_bath_%v(:,:,:)
-       case('u')
-          Array = dmft_bath_%u(:,:,:)
-       end select
-    end select
-    call deallocate_dmft_bath(dmft_bath_)
-  end subroutine get_bath_component
-
-
-  !+-----------------------------------------------------------------------------+!
-  !PURPOSE: Set a specified itype,ispin,iorb component of the user bath.
-  !+-----------------------------------------------------------------------------+!
-  subroutine set_bath_component(array,bath_,type)
-    real(8),dimension(:,:,:) :: array
-    real(8),dimension(:)     :: bath_
-    character(len=1)         :: type
-    logical                  :: check
-    type(effective_bath)     :: dmft_bath_
-    !
-    check= check_bath_dimension(bath_)
-    if(.not.check)stop "set_component_bath error: wrong bath dimensions"
-    call allocate_dmft_bath(dmft_bath_)
-    call set_dmft_bath(bath_,dmft_bath_)
-    call assert_bath_component_size(array,type,"set_bath_component","Array")
-    call check_bath_component(type)
-    select case(ed_mode)
-    case default
-       select case(type)
-       case('e')
-          dmft_bath_%e(:,:,:) = Array
-       case('v')
-          dmft_bath_%v(:,:,:) = Array
-       end select
-    case ("superc")
-       select case(type)
-       case('e')
-          dmft_bath_%e(:,:,:) = Array
-       case('d')
-          dmft_bath_%d(:,:,:) = Array
-       case('v')
-          dmft_bath_%v(:,:,:) = Array
-       end select
-    case ("nonsu2")
-       select case(type)
-       case('e')
-          dmft_bath_%e(:,:,:) = Array
-       case('v')
-          dmft_bath_%v(:,:,:) = Array
-       case('u')
-          dmft_bath_%u(:,:,:) = Array
-       end select
-    end select
-    call get_dmft_bath(dmft_bath_,bath_)
-    call deallocate_dmft_bath(dmft_bath_)
-  end subroutine set_bath_component
-
-
-
-  !+-----------------------------------------------------------------------------+!
-  !PURPOSE: Copy a specified component of IN bath to the OUT bath.
-  !+-----------------------------------------------------------------------------+!
-  subroutine copy_bath_component(bathIN,bathOUT,type)
-    real(8),dimension(:)     :: bathIN,bathOUT
-    character(len=1)         :: type
-    logical                  :: check
-    type(effective_bath)     :: dIN,dOUT
-    !
-    check= check_bath_dimension(bathIN)
-    if(.not.check)stop "copy_component_bath error: wrong bath dimensions IN"
-    check= check_bath_dimension(bathOUT)
-    if(.not.check)stop "copy_component_bath error: wrong bath dimensions OUT"
-    call allocate_dmft_bath(dIN)
-    call allocate_dmft_bath(dOUT)
-    call set_dmft_bath(bathIN,dIN)
-    call set_dmft_bath(bathOUT,dOUT)
-    call check_bath_component(type)
-    select case(ed_mode)
-    case default
-       select case(type)
-       case('e')
-          dOUT%e(:,:,:)  = dIN%e(:,:,:)
-       case('v')
-          dOUT%v(:,:,:)  = dIN%v(:,:,:)
-       end select
-    case ("superc")
-       select case(type)
-       case('e')
-          dOUT%e(:,:,:)  = dIN%e(:,:,:)
-       case('d')
-          dOUT%d(:,:,:)  = dIN%d(:,:,:)
-       case('v')
-          dOUT%v(:,:,:)  = dIN%v(:,:,:)
-       end select
-    case ("nonsu2")
-       select case(type)
-       case('e')
-          dOUT%e(:,:,:)  = dIN%e(:,:,:)
-       case('v')
-          dOUT%v(:,:,:)  = dIN%v(:,:,:)
-       case('u')
-          dOUT%u(:,:,:)  = dIN%u(:,:,:)
-       end select
-    end select
-    call get_dmft_bath(dOUT,bathOUT)
-    call deallocate_dmft_bath(dIN)
-    call deallocate_dmft_bath(dOUT)
-  end subroutine copy_bath_component
 
 
 
@@ -1625,11 +1405,13 @@ contains
     used_=.false.;if(present(used))used_=used
     extension=".restart";if(used_)extension=".used"
     file_=str(str(Hfile)//str(ed_file_suffix)//str(extension))
-    if(present(file))file_=str(file)
+    if(present(file))file_=str(file)    
     unit_=free_unit()
-    open(unit_,file=str(file_))
-    call write_dmft_bath(dmft_bath_,unit_)
-    close(unit_)
+    if(MpiMaster)then
+       open(unit_,file=str(file_))
+       call write_dmft_bath(dmft_bath_,unit_)
+       close(unit_)
+    endif
   end subroutine save_dmft_bath
 
 
@@ -2838,3 +2620,235 @@ contains
 
 END MODULE ED_BATH
 
+
+
+
+
+
+
+
+
+
+! public :: get_bath_component_dimension
+! public :: get_bath_component
+! public :: set_bath_component
+! public :: copy_bath_component
+! !
+
+
+
+! !+-------------------------------------------------------------------+
+! !PURPOSE  : Inquire the correct bath size to allocate the
+! ! the bath array in the calling program.
+! !
+! ! Get size of each dimension of the component array.
+! ! The Result is an rank 1 integer array Ndim with dimension:
+! ! 3 for get_component_size_bath
+! ! 2 for get_spin_component_size_bath & get_orb_component_size_bath
+! ! 1 for get_spin_orb_component_size_bath
+! !+-------------------------------------------------------------------+
+! function get_bath_component_dimension(type) result(Ndim)
+!   character(len=1) :: type
+!   integer          :: Ndim(3)
+!   call  check_bath_component(type)
+!   select case(bath_type)
+!   case default
+!      Ndim=[Nspin,Norb,Nbath]
+!   case('hybrid')
+!      select case(ed_mode)
+!      case default
+!         select case(type)
+!         case('e')
+!            Ndim=[Nspin,1,Nbath]
+!         case('v')
+!            Ndim=[Nspin,Norb,Nbath]
+!         end select
+!      case ("superc")
+!         select case(type)
+!         case('e','d')
+!            Ndim=[Nspin,1,Nbath]
+!         case('v')
+!            Ndim=[Nspin,Norb,Nbath]
+!         end select
+!      case ("nonsu2")
+!         select case(type)
+!         case('e')
+!            Ndim=[Nspin,1,Nbath]
+!         case('v','u')
+!            Ndim=[Nspin,Norb,Nbath]
+!         end select
+!      end select
+!   end select
+! end function get_bath_component_dimension
+
+
+! !+-----------------------------------------------------------------------------+!
+! !PURPOSE: check that the input array hsa the correct dimensions specified
+! ! for the choice of itype and possiblty ispin and/or iorb.
+! !+-----------------------------------------------------------------------------+!
+! subroutine assert_bath_component_size(array,type,string1,string2)
+!   real(8),dimension(:,:,:) :: array
+!   character(len=1)         :: type
+!   character(len=*)         :: string1,string2
+!   integer                  :: Ndim(3)
+!   Ndim = get_bath_component_dimension(type)
+!   call assert_shape(Array,Ndim,reg(string1),reg(string2))
+! end subroutine assert_bath_component_size
+
+
+
+
+
+
+
+
+! !+-----------------------------------------------------------------------------+!
+! !PURPOSE: Get a specified itype,ispin,iorb component of the user bath.
+! ! The component is returned into an Array of rank D
+! ! get_full_component_bath    : return the entire itype component (D=3)
+! ! get_spin_component_bath    : return the itype component for the select ispin (D=2)
+! ! get_spin_orb_component_bath: return the itype component for the select ispin & iorb (D=1)
+! !+-----------------------------------------------------------------------------+!
+! subroutine get_bath_component(array,bath_,type)
+!   real(8),dimension(:,:,:) :: array
+!   real(8),dimension(:)     :: bath_
+!   character(len=1)         :: type
+!   logical                  :: check
+!   type(effective_bath)     :: dmft_bath_
+!   !
+!   check= check_bath_dimension(bath_)
+!   if(.not.check)stop "get_component_bath error: wrong bath dimensions"
+!   call allocate_dmft_bath(dmft_bath_)
+!   call set_dmft_bath(bath_,dmft_bath_)
+!   call assert_bath_component_size(array,type,"get_bath_component","Array")
+!   call check_bath_component(type)
+!   select case(ed_mode)
+!   case default
+!      select case(type)
+!      case('e')
+!         Array = dmft_bath_%e(:,:,:)
+!      case('v')
+!         Array = dmft_bath_%v(:,:,:)
+!      end select
+!   case ("superc")
+!      select case(type)
+!      case('e')
+!         Array = dmft_bath_%e(:,:,:)
+!      case('d')
+!         Array = dmft_bath_%d(:,:,:)
+!      case('v')
+!         Array = dmft_bath_%v(:,:,:)
+!      end select
+!   case ("nonsu2")
+!      select case(type)
+!      case('e')
+!         Array = dmft_bath_%e(:,:,:)
+!      case('v')
+!         Array = dmft_bath_%v(:,:,:)
+!      case('u')
+!         Array = dmft_bath_%u(:,:,:)
+!      end select
+!   end select
+!   call deallocate_dmft_bath(dmft_bath_)
+! end subroutine get_bath_component
+
+
+! !+-----------------------------------------------------------------------------+!
+! !PURPOSE: Set a specified itype,ispin,iorb component of the user bath.
+! !+-----------------------------------------------------------------------------+!
+! subroutine set_bath_component(array,bath_,type)
+!   real(8),dimension(:,:,:) :: array
+!   real(8),dimension(:)     :: bath_
+!   character(len=1)         :: type
+!   logical                  :: check
+!   type(effective_bath)     :: dmft_bath_
+!   !
+!   check= check_bath_dimension(bath_)
+!   if(.not.check)stop "set_component_bath error: wrong bath dimensions"
+!   call allocate_dmft_bath(dmft_bath_)
+!   call set_dmft_bath(bath_,dmft_bath_)
+!   call assert_bath_component_size(array,type,"set_bath_component","Array")
+!   call check_bath_component(type)
+!   select case(ed_mode)
+!   case default
+!      select case(type)
+!      case('e')
+!         dmft_bath_%e(:,:,:) = Array
+!      case('v')
+!         dmft_bath_%v(:,:,:) = Array
+!      end select
+!   case ("superc")
+!      select case(type)
+!      case('e')
+!         dmft_bath_%e(:,:,:) = Array
+!      case('d')
+!         dmft_bath_%d(:,:,:) = Array
+!      case('v')
+!         dmft_bath_%v(:,:,:) = Array
+!      end select
+!   case ("nonsu2")
+!      select case(type)
+!      case('e')
+!         dmft_bath_%e(:,:,:) = Array
+!      case('v')
+!         dmft_bath_%v(:,:,:) = Array
+!      case('u')
+!         dmft_bath_%u(:,:,:) = Array
+!      end select
+!   end select
+!   call get_dmft_bath(dmft_bath_,bath_)
+!   call deallocate_dmft_bath(dmft_bath_)
+! end subroutine set_bath_component
+
+
+
+! !+-----------------------------------------------------------------------------+!
+! !PURPOSE: Copy a specified component of IN bath to the OUT bath.
+! !+-----------------------------------------------------------------------------+!
+! subroutine copy_bath_component(bathIN,bathOUT,type)
+!   real(8),dimension(:)     :: bathIN,bathOUT
+!   character(len=1)         :: type
+!   logical                  :: check
+!   type(effective_bath)     :: dIN,dOUT
+!   !
+!   check= check_bath_dimension(bathIN)
+!   if(.not.check)stop "copy_component_bath error: wrong bath dimensions IN"
+!   check= check_bath_dimension(bathOUT)
+!   if(.not.check)stop "copy_component_bath error: wrong bath dimensions OUT"
+!   call allocate_dmft_bath(dIN)
+!   call allocate_dmft_bath(dOUT)
+!   call set_dmft_bath(bathIN,dIN)
+!   call set_dmft_bath(bathOUT,dOUT)
+!   call check_bath_component(type)
+!   select case(ed_mode)
+!   case default
+!      select case(type)
+!      case('e')
+!         dOUT%e(:,:,:)  = dIN%e(:,:,:)
+!      case('v')
+!         dOUT%v(:,:,:)  = dIN%v(:,:,:)
+!      end select
+!   case ("superc")
+!      select case(type)
+!      case('e')
+!         dOUT%e(:,:,:)  = dIN%e(:,:,:)
+!      case('d')
+!         dOUT%d(:,:,:)  = dIN%d(:,:,:)
+!      case('v')
+!         dOUT%v(:,:,:)  = dIN%v(:,:,:)
+!      end select
+!   case ("nonsu2")
+!      select case(type)
+!      case('e')
+!         dOUT%e(:,:,:)  = dIN%e(:,:,:)
+!      case('v')
+!         dOUT%v(:,:,:)  = dIN%v(:,:,:)
+!      case('u')
+!         dOUT%u(:,:,:)  = dIN%u(:,:,:)
+!      end select
+!   end select
+!   call get_dmft_bath(dOUT,bathOUT)
+!   call deallocate_dmft_bath(dIN)
+!   call deallocate_dmft_bath(dOUT)
+! end subroutine copy_bath_component
+>>>>>>> 0acb198 ("Quite a big" Update + bug fix)
