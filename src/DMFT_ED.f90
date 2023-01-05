@@ -72,20 +72,9 @@ MODULE DMFT_ED
   USE ED_IO, only: &
        ed_get_gimp            , &
        ed_get_sigma           , &
-       ed_get_sigma_matsubara , &
-       ed_get_sigma_realaxis  , &
-       ed_get_self_matsubara  , &
-       ed_get_self_realaxis   , &
-       ed_get_gimp_matsubara  , &
-       ed_get_gimp_realaxis   , &       
-       ed_get_fimp_matsubara  , &
-       ed_get_fimp_realaxis   , &
-       ed_get_g0imp_matsubara , &
-       ed_get_f0imp_matsubara , &
-       ed_get_g0imp_realaxis  , &
-       ed_get_f0imp_realaxis  , &
-       ed_get_delta_function  , &
-       ed_get_fdelta_function , &
+       ed_get_g0imp           , &
+       ed_get_g0and           , &
+       ed_get_delta           , &
        ed_get_dens            , &
        ed_get_mag             , &
        ed_get_docc            , &

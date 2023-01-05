@@ -1,65 +1,143 @@
 subroutine rebuild_sigma_single(zeta,Hloc,sigma,self)
-  complex(8),dimension(:)                                         :: zeta
-  complex(8),dimension(Nspin,Nspin,Norb,Norb)                     :: Hloc
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta))          :: Sigma
-  complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)),optional :: Self
-  integer                                                         :: i
-  logical                                                         :: check
+  complex(8),dimension(:)                     :: zeta
+  complex(8),dimension(..)                    :: Hloc
+  complex(8),dimension(..)                    :: Sigma
+  complex(8),dimension(..),optional           :: Self
+  integer                                     :: i,L
+  logical                                     :: check
+  complex(8),dimension(:,:,:,:,:),allocatable :: sn,sa
   !
   call ed_read_impGmatrix()
   !
-  call set_Himpurity(Hloc)
+  select rank(Hloc)
+  rank default;stop "REBUILD_SIGMA ERROR: Hloc has a wrong rank"
+  rank (2);call set_Himpurity(so2nn_reshape(Hloc,Nspin,Norb))
+  rank (4);call set_Himpurity(Hloc)
+  end select
+  !
   call allocate_dmft_bath(dmft_bath)
   call init_dmft_bath(dmft_bath,used=.true.)
   !
+  L = size(zeta)
+  allocate(sn(Nspin,Nspin,Norb,Norb,L))
+  allocate(sa(Nspin,Nspin,Norb,Norb,L))
   select case(ed_mode)
   case default;
-     call rebuild_sigma_normal(zeta,sigma)
+     call rebuild_sigma_normal(zeta,sn)
   case("superc");
-     if(.not.present(self))stop "rebuild_sigma_single ERROR: self not present in ed_mode=superc"
-     call rebuild_sigma_superc(zeta,sigma,self)
+     if(.not.present(self))stop "rebuild_sigma ERROR: self not present in ed_mode=superc"
+     call rebuild_sigma_superc(zeta,sn,sa)
   case("nonsu2");
-     call rebuild_sigma_nonsu2(zeta,sigma)
+     call rebuild_sigma_nonsu2(zeta,sn)
   end select
   !
   call deallocate_dmft_bath(dmft_bath)
   call deallocate_GFmatrix(impGmatrix)
+  !
+  select rank(sigma)
+  rank default; stop "rebuild_sigma ERROR: sigma has a wrong rank"
+  rank (3)
+  call assert_shape(sigma,[Nspin*Norb,Nspin*Norb,L],'rebuild_sigma','sigma')
+  sigma = nn2so_reshape(sn,Nspin,Norb,L)
+  rank (5)
+  call assert_shape(sigma,[Nspin,Nspin,Norb,Norb,L],'rebuild_sigma','sigma')
+  sigma = sn
+  end select
+  if(present(self))then
+     select rank(self)
+     rank default; stop "rebuild_sigma ERROR: self has a wrong rank"
+     rank (3)
+     call assert_shape(self,[Nspin*Norb,Nspin*Norb,L],'rebuild_sigma','self')
+     self = nn2so_reshape(sa,Nspin,Norb,L)
+     rank (5)
+     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],'rebuild_sigma','self')
+     self = sa
+     end select
+  endif
   return
 end subroutine rebuild_sigma_single
 
 
 
-subroutine rebuild_sigma_ineq(zeta,Hloc,sigma,self)
-  complex(8),dimension(:)                    :: zeta
-  complex(8),dimension(:,:,:,:,:)            :: Hloc
-  complex(8),dimension(:,:,:,:,:,:)          :: Sigma
-  complex(8),dimension(:,:,:,:,:,:),optional :: Self
-  integer                                    :: i,ilat,Nineq,L
-  logical                                    :: check
+subroutine rebuild_sigma_ineq(zeta,Hloc,Nlat,sigma,self)
+  complex(8),dimension(:)                       :: zeta
+  complex(8),dimension(..)                      :: Hloc
+  integer                                       :: Nlat
+  complex(8),dimension(..)                      :: Sigma
+  complex(8),dimension(..),optional             :: Self
+  integer                                       :: i,ilat,Nineq,L
+  logical                                       :: check
+  complex(8),dimension(:,:,:,:,:),allocatable   :: Hloc_
+  complex(8),dimension(:,:,:,:,:,:),allocatable :: sn,sa
   !
-  Nineq=size(Hloc,1)
+  Nineq=Nlat
   L=size(zeta)
-  call assert_shape(Hloc,[Nineq,Nspin,Nspin,Norb,Norb],"rebuild_sigma_ineq","hloc")
-  call assert_shape(Sigma,[Nineq,Nspin,Nspin,Norb,Norb,L],"rebuild_sigma_ineq","sigma")
-  if(present(Self))&
-       call assert_shape(Self,[Nineq,Nspin,Nspin,Norb,Norb,L],"rebuild_sigma_ineq","self")
+  allocate(Hloc_(Nineq,Nspin,Nspin,Norb,Norb))
+  !
+  select rank(Hloc)
+  rank default;stop "REBUILD_SIGMA ERROR: Hloc has a wrong rank"
+  rank (2)
+  call assert_shape(Hloc,[Nineq*Nspin*Norb,Nineq*Nspin*Norb],'rebuild_sigma','Hloc')
+  Hloc_  = lso2nnn_reshape(Hloc,Nineq,Nspin,Norb)
+  rank (5);
+  call assert_shape(Hloc,[Nineq,Nspin,Nspin,Norb,Norb],'rebuild_sigma','Hloc')
+  Hloc_  = Hloc
+  end select
+  !
+  allocate(Sn(Nineq,Nspin,Nspin,Norb,Norb,L))
+  allocate(Sa(Nineq,Nspin,Nspin,Norb,Norb,L))
   !
   do ilat = 1, Nineq
      ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
      if(present(self))then
-        call  rebuild_sigma_single(zeta,&
-             Hloc(ilat,:,:,:,:),&
-             sigma(ilat,:,:,:,:,:),&
-             self(ilat,:,:,:,:,:))
+        call rebuild_sigma_single(zeta,&
+             Hloc_(ilat,:,:,:,:),&
+             sn(ilat,:,:,:,:,:),&
+             sa(ilat,:,:,:,:,:))
      else
-        call  rebuild_sigma_single(zeta,&
-             Hloc(ilat,:,:,:,:),&
-             sigma(ilat,:,:,:,:,:))
+        call rebuild_sigma_single(zeta,&
+             Hloc_(ilat,:,:,:,:),&
+             sa(ilat,:,:,:,:,:))
      endif
   enddo
   call ed_reset_suffix
+  !
+  select rank(sigma)
+  rank default; stop "rebuild_sigma ERROR: sigma has a wrong rank"
+  rank (3)
+  call assert_shape(sigma,[Nineq*Nspin*Norb,Nineq*Nspin*Norb,L],'rebuild_sigma','sigma')
+  sigma = nnn2lso_reshape(sn,Nineq,Nspin,Norb,L)
+  rank (4)
+  call assert_shape(sigma,[Nineq,Nspin*Norb,Nspin*Norb,L],'rebuild_sigma','sigma')
+  do ilat=1,Nineq
+     sigma(ilat,:,:,:) = nn2so_reshape(sn(ilat,:,:,:,:,:),Nspin,Norb,L)
+  enddo
+  rank (6)
+  call assert_shape(sigma,[Nineq,Nspin,Nspin,Norb,Norb,L],'rebuild_sigma','sigma')
+  sigma = sn
+  end select
+  if(present(self))then
+     select rank(self)
+     rank default; stop "rebuild_sigma ERROR: self has a wrong rank"
+     rank (3)
+     call assert_shape(self,[Nineq*Nspin*Norb,Nineq*Nspin*Norb,L],'rebuild_sigma','self')
+     self = nnn2lso_reshape(sa,Nineq,Nspin,Norb,L)
+     rank (4)
+     call assert_shape(self,[Nineq,Nspin*Norb,Nspin*Norb,L],'rebuild_sigma','self')
+     do ilat=1,Nineq
+        self(ilat,:,:,:) = nn2so_reshape(sa(ilat,:,:,:,:,:),Nspin,Norb,L)
+     enddo
+     rank (6)
+     call assert_shape(self,[Nineq,Nspin,Nspin,Norb,Norb,L],'rebuild_sigma','self')
+     self = sa
+     end select
+  endif
   return
 end subroutine rebuild_sigma_ineq
+
+
+
+
 
 
 
