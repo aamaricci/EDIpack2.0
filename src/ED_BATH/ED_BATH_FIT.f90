@@ -15,6 +15,7 @@ MODULE ED_BATH_FIT
   USE ED_FIT_NORMAL
   USE ED_FIT_HYBRID
   USE ED_FIT_REPLICA
+  USE ED_FIT_GENERAL
 #ifdef _MPI
   USE MPI
   USE SF_MPI
@@ -102,8 +103,15 @@ contains
        !
     case ("replica")
        select case(ed_mode)
-       case ("normal","nonsu")
+       case ("normal","nonsu2")
           call chi2_fitgf_replica(fg,bath)
+       case default
+          stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided"
+       end select
+    case ("general")
+       select case(ed_mode)
+       case ("normal","nonsu2")
+          call chi2_fitgf_general(fg,bath)
        case default
           stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
        end select
@@ -167,6 +175,14 @@ contains
        case default
           write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
           call chi2_fitgf_replica(fg(1,:,:,:,:,:),bath)
+       end select
+    case ("general")
+       select case(ed_mode)
+       case ("superc")
+          call chi2_fitgf_general_superc(fg(:,:,:,:,:,:),bath)
+       case default
+          write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
+          call chi2_fitgf_general(fg(1,:,:,:,:,:),bath)
        end select
     end select
     !set trim_state_list to true after the first fit has been done: this 
@@ -237,8 +253,15 @@ contains
           !
        case ("replica")
           select case(ed_mode)
-          case ("normal","nonsu")
+          case ("normal","nonsu2")
              call chi2_fitgf_replica(fg,bath)
+          case default
+             stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
+          end select
+       case ("general")
+          select case(ed_mode)
+          case ("normal","nonsu2")
+             call chi2_fitgf_general(fg,bath)
           case default
              stop "chi2_fitgf ERROR: ed_mode!=normal/nonsu2 but only NORMAL component is provided" 
           end select
@@ -311,6 +334,14 @@ contains
           case default
              write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
              call chi2_fitgf_replica(fg(1,:,:,:,:,:),bath)
+          end select
+       case ("general")
+          select case(ed_mode)
+          case ("superc")
+             call chi2_fitgf_general_superc(fg(:,:,:,:,:,:),bath)
+          case default
+             write(LOGfile,"(A)") "chi2_fitgf WARNING: ed_mode=normal/nonsu2 but NORMAL & ANOMAL components provided."
+             call chi2_fitgf_general(fg(1,:,:,:,:,:),bath)
           end select
        end select
     endif

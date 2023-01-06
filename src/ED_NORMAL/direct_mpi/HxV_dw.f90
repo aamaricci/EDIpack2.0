@@ -30,7 +30,7 @@
         !
         !
         !> H_Bath: inter-orbital bath hopping contribution.
-        if(bath_type=="replica") then
+        if(bath_type=="replica".or.bath_type=="general") then
            do kp=1,Nbath
               do iorb=1,Norb
                  do jorb=1,Norb

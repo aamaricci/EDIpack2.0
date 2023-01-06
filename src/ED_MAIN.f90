@@ -171,6 +171,8 @@ contains
     Nineq = size(bath,1)
     if(bath_type=='replica' .AND. .not.allocated(Hreplica_lambda_ineq))&
          stop "ERROR ed_init_solver: replica parameters lambda not defined for all sites"
+    if(bath_type=='general' .AND. .not.allocated(Hgeneral_lambda_ineq))&
+         stop "ERROR ed_init_solver: general parameters lambda not defined for all sites"
     !
     allocate(dens_ineq(Nineq,Norb))
     allocate(docc_ineq(Nineq,Norb))
@@ -197,6 +199,7 @@ contains
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
        if(bath_type=='replica')call Hreplica_site(ilat)
+       if(bath_type=='general')call Hgeneral_site(ilat)
        !set the ilat-th lambda vector basis for the replica bath
        call ed_init_solver_single(bath(ilat,:))
     enddo
@@ -210,7 +213,7 @@ contains
     end do
     !
   end subroutine ed_init_solver_lattice
-
+  
 #ifdef _MPI
   subroutine ed_init_solver_lattice_mpi(MpiComm,bath)
     integer                :: MpiComm
@@ -243,6 +246,8 @@ contains
     Nineq = size(bath,1)
     if(bath_type=='replica'.AND..not.allocated(Hreplica_lambda_ineq))&
          stop "ERROR ed_init_solver: replica parameters lambda not defined for all sites"
+    if(bath_type=='general'.AND..not.allocated(Hgeneral_lambda_ineq))&
+         stop "ERROR ed_init_solver: general parameters lambda not defined for all sites"
     !
     allocate(dens_ineq(Nineq,Norb))
     allocate(docc_ineq(Nineq,Norb))
@@ -269,6 +274,7 @@ contains
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
        if(bath_type=='replica')call Hreplica_site(ilat)
+       if(bath_type=='general')call Hgeneral_site(ilat)
        call ed_init_solver_single(bath(ilat,:))
     enddo
     call MPI_Barrier(MpiComm,MPI_ERR)

@@ -74,7 +74,10 @@ contains
        write(LOGfile,"(A)")""
        write(LOGfile,"(A)")"Get mask(G):"
        Hmask= .true.
-       if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       if(.not.ed_all_g)then
+          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       end if
        do ispin=1,Nspin
           do iorb=1,Norb
              write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -84,7 +87,7 @@ contains
           do iorb=1,Norb
              do jorb=iorb+1,Norb
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
@@ -106,9 +109,9 @@ contains
           do ispin=1,Nspin
              do iorb=1,Norb
                 do jorb=iorb+1,Norb
-                   !if(hybrid)always T; if(replica)T iff following condition is T
+                   !if(hybrid)always T; if(replica/general)T if following condition is T
                    MaskBool=.true.   
-                   if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                    !
                    if(.not.MaskBool)cycle
                    impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
@@ -164,7 +167,10 @@ contains
     !
     if(offdiag_gf_flag)then
        Hmask= .true.
-       if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       if(.not.ed_all_g)then
+          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       endif
        do ispin=1,Nspin
           do iorb=1,Norb
              write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -174,7 +180,7 @@ contains
           do iorb=1,Norb
              do jorb=iorb+1,Norb
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
@@ -187,9 +193,9 @@ contains
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb
-                !if(hybrid)always T; if(replica)T iff following condition is T
+                !if(hybrid)always T; if(replica/general)T iff following condition is T
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 !
                 if(.not.MaskBool)cycle
                 impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
@@ -779,7 +785,7 @@ contains
        enddo
        !
        !
-    case ("hybrid","replica")   !Diagonal in spin
+    case ("hybrid","replica","general")   !Diagonal in spin
        do ispin=1,Nspin
           do i=1,Lmats
              invGimp = impGmats(ispin,ispin,:,:,i)

@@ -173,7 +173,7 @@ subroutine rebuild_sigma_normal(zeta,sigma)
         enddo
      enddo
      !
-  case ("hybrid","replica")   !Diagonal in spin
+  case ("hybrid","replica","general")   !Diagonal in spin
      do ispin=1,Nspin
         do i=1,size(zeta)
            Gmat = G(ispin,ispin,:,:,i)
@@ -233,7 +233,7 @@ subroutine rebuild_sigma_nonsu2(zeta,sigma)
         enddo
      enddo
      !
-  case ("hybrid","replica")
+  case ("hybrid","replica","general")
      do i=1,size(zeta)
         Gmat  = nn2so_reshape(G(:,:,:,:,i),Nspin,Norb)
         call inv(Gmat)

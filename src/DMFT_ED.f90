@@ -39,6 +39,8 @@ MODULE DMFT_ED
   USE ED_BATH, only:                                                    &
        ed_set_Hreplica                 => set_Hreplica                 , &
        ed_Hreplica_mask                => Hreplica_mask                , &
+       ed_set_Hgeneral                 => set_Hgeneral                 , &
+       ed_Hgeneral_mask                => Hgeneral_mask                , &
        ed_get_bath_dimension           => get_bath_dimension           , &
        ed_get_bath_component_dimension => get_bath_component_dimension , &
        ed_get_bath_component           => get_bath_component           , &

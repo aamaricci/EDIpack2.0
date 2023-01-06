@@ -64,7 +64,7 @@ contains
     logical             :: lanc_solve,Tflag,lanc_verbose,bool
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: digonalization"
+    write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: diagonalization"
 #endif
     if(state_list%status)call es_delete_espace(state_list)
     state_list=es_init_espace()

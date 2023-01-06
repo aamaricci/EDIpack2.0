@@ -45,6 +45,6 @@ MODULE ED_FIT_COMMON
   type nsymm_vector
      real(8),dimension(:),allocatable   :: element          
   end type nsymm_vector
-
+  
 
 END MODULE ED_FIT_COMMON

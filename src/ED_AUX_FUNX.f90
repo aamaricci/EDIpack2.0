@@ -227,6 +227,7 @@ contains
   ! default: |(1:Norb),([1:Nbath]_1, [1:Nbath]_2, ... ,[1:Nbath]_Norb)>_spin
   ! hybrid:  |(1:Norb),([1:Nbath])_spin
   ! replica: |(1:Norb),([1:Norb]_1, [1:Norb]_2, ...  , [1:Norb]_Nbath)>_spin
+  ! general: // same as replica
   !
   !> case (ed_total_ud):
   !   (T): Ns_Ud=1, Ns_Orb=Ns.

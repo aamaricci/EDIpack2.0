@@ -147,10 +147,10 @@ contains
     !
     !DEFAULT VALUES OF THE PARAMETERS:
     call parse_input_variable(Norb,"NORB",INPUTunit,default=1,comment="Number of impurity orbitals (max 5).")
-    call parse_input_variable(Nbath,"NBATH",INPUTunit,default=6,comment="Number of bath sites:(normal=>Nbath per orb)(hybrid=>Nbath total)(replica=>Nbath=Nreplica)")
+    call parse_input_variable(Nbath,"NBATH",INPUTunit,default=6,comment="Number of bath sites:(normal=>Nbath per orb)(hybrid=>Nbath total)(replica/general=>Nbath=Nreplica/Ngeneral)")
     call parse_input_variable(Nspin,"NSPIN",INPUTunit,default=1,comment="Number of spin degeneracy (max 2)")
     call parse_input_variable(Nph,"NPH",INPUTunit,default=0,comment="Max number of phonons allowed (cut off)")
-    call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp)")
+    call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp), general(replica++)")
     !
     allocate(Uloc(Norb))
     call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
@@ -200,7 +200,7 @@ contains
     call parse_input_variable(ed_all_G,"ED_ALL_G",INPUTunit,default=.true.,comment="flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries")
     call parse_input_variable(ed_verbose,"ED_VERBOSE",INPUTunit,default=3,comment="Verbosity level: 0=almost nothing --> 5:all. Really: all")
     call parse_input_variable(ed_hw_bath,"ed_hw_bath",INPUTunit,default=2d0,comment="half-bandwidth for the bath initialization: flat in -ed_hw_bath:ed_hw_bath")
-    call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica bath: -offset:offset")
+    call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica/general bath: -offset:offset")
 
     !
     call parse_input_variable(Lmats,"LMATS",INPUTunit,default=4096,comment="Number of Matsubara frequencies.")
@@ -254,41 +254,42 @@ contains
     call parse_input_variable(Jz_basis,"JZ_BASIS",INPUTunit,default=.false.,comment="")
     call parse_input_variable(Jz_max,"JZ_MAX",INPUTunit,default=.false.,comment="")
     call parse_input_variable(Jz_max_value,"JZ_MAX_VALUE",INPUTunit,default=1000.d0,comment="")
-
+    !
     call parse_input_variable(SectorFile,"SectorFile",INPUTunit,default="sectors",comment="File where to retrieve/store the sectors contributing to the spectrum.")
     call parse_input_variable(Hfile,"Hfile",INPUTunit,default="hamiltonian",comment="File where to retrieve/store the bath parameters.")
     call parse_input_variable(HLOCfile,"HLOCfile",INPUTunit,default="inputHLOC.in",comment="File read the input local H.")
     call parse_input_variable(LOGfile,"LOGFILE",INPUTunit,default=6,comment="LOG unit.")
 
-    !temporarily phononic couplings are only diagonal
-    !this is a sketch for a generic implementation
-    g_ph=0.d0
-    if(trim(GPHfile).eq."NONE")then
-       do iorb=1,Norb
-          g_ph(iorb,iorb)=g_ph_diag(iorb)
-       enddo
-    else
-       inquire(file=trim(GPHfile),EXIST=bool)
-       if(bool)then
-          open(free_unit(unit_gph),file=GPHfile)
+    if(nph>0)then
+       !Here the non-diagonal (non-density) phononic coupling are read
+       g_ph=0.d0
+       if(trim(GPHfile).eq."NONE")then
           do iorb=1,Norb
-             read(unit_gph,*) g_ph(iorb,:)
+             g_ph(iorb,iorb)=g_ph_diag(iorb)
           enddo
-          close(unit_gph)
-          !maybe an assert_hermitian would be globally useful
-          if(any(g_ph /= transpose(conjg(g_ph))))then
-             stop "ERROR: non hermitian phonon coupling matrix (g_ph) in input"
-          end if
        else
-          stop "GPHfile/=NONE but there is no GPHfile with the provided name"
+          inquire(file=trim(GPHfile),EXIST=bool)
+          if(bool)then
+             open(free_unit(unit_gph),file=GPHfile)
+             do iorb=1,Norb
+                read(unit_gph,*) g_ph(iorb,:)
+             enddo
+             close(unit_gph)
+             !maybe an assert_hermitian would be globally useful
+             if(any(g_ph /= transpose(conjg(g_ph))))then
+                stop "ERROR: non hermitian phonon coupling matrix (g_ph) in input"
+             end if
+          else
+             stop "GPHfile/=NONE but there is no GPHfile with the provided name"
+          endif
        endif
-    endif
-    !TO BE PUT SOMEWHERE ELSE
-    open(free_unit(unit_gph),file="GPHinput.used")
-    do iorb=1,Norb
-       write(unit_gph,*) g_ph(iorb,:)
-    enddo
-    close(unit_gph)
+       !TO BE PUT SOMEWHERE ELSE
+       open(free_unit(unit_gph),file="GPHinput.used")
+       do iorb=1,Norb
+          write(unit_gph,*) g_ph(iorb,:)
+       enddo
+       close(unit_gph)
+    end if
 
 #ifdef _MPI
     if(present(comm))then

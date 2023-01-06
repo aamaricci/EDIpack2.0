@@ -104,7 +104,7 @@ contains
           impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(iorb,:)) )
        enddo
        !
-    case ('hybrid','replica')
+    case ('hybrid','replica','general')
        !       
        !Get G^{ab}_{upup} --> saved in impG(1,1,a,b)
        do iorb=1,Norb
@@ -207,7 +207,7 @@ contains
           impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(iorb,:)) )
        enddo
        !
-    case ('hybrid','replica')
+    case ('hybrid','replica','general')
        !
        ! Get G^{ab}_{upup} = <adg_up . b_up>
        do iorb=1,Norb
@@ -1122,7 +1122,7 @@ contains
        enddo
        !
        !
-    case ("hybrid","replica")
+    case ("hybrid","replica","general")
        do i=1,Lmats
           invGimp=zero
           invGimp(1     :Norb  ,     1:Norb  ) = impGmats(ispin,ispin,:,:,i)
