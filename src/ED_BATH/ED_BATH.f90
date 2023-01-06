@@ -1438,6 +1438,7 @@ contains
           !
        end select
        close(unit)
+       !
     endif
   end subroutine init_dmft_bath
 
@@ -1596,7 +1597,7 @@ contains
              write(unit_,*)""
           enddo
        endif
-       
+
     end select
   end subroutine write_dmft_bath
 
@@ -2713,7 +2714,6 @@ contains
   !+-------------------------------------------------------------------+
   !AUXILIARY FUNCTIONS AND SUBROUTINES
   !+-------------------------------------------------------------------+
-
 
   !+-------------------------------------------------------------------+
   !PURPOSE  : Check if a matrix is the identity

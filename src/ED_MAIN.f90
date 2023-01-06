@@ -171,7 +171,6 @@ contains
     Nineq = size(bath,1)
     if(bath_type=='replica' .AND. .not.allocated(Hreplica_lambda_ineq))&
          stop "ERROR ed_init_solver: replica parameters lambda not defined for all sites"
-
     if(bath_type=='general' .AND. .not.allocated(Hgeneral_lambda_ineq))&
          stop "ERROR ed_init_solver: general parameters lambda not defined for all sites"
     !

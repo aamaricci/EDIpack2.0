@@ -254,41 +254,42 @@ contains
     call parse_input_variable(Jz_basis,"JZ_BASIS",INPUTunit,default=.false.,comment="")
     call parse_input_variable(Jz_max,"JZ_MAX",INPUTunit,default=.false.,comment="")
     call parse_input_variable(Jz_max_value,"JZ_MAX_VALUE",INPUTunit,default=1000.d0,comment="")
-
+    !
     call parse_input_variable(SectorFile,"SectorFile",INPUTunit,default="sectors",comment="File where to retrieve/store the sectors contributing to the spectrum.")
     call parse_input_variable(Hfile,"Hfile",INPUTunit,default="hamiltonian",comment="File where to retrieve/store the bath parameters.")
     call parse_input_variable(HLOCfile,"HLOCfile",INPUTunit,default="inputHLOC.in",comment="File read the input local H.")
     call parse_input_variable(LOGfile,"LOGFILE",INPUTunit,default=6,comment="LOG unit.")
 
-    !temporarily phononic couplings are only diagonal
-    !this is a sketch for a generic implementation
-    g_ph=0.d0
-    if(trim(GPHfile).eq."NONE")then
-       do iorb=1,Norb
-          g_ph(iorb,iorb)=g_ph_diag(iorb)
-       enddo
-    else
-       inquire(file=trim(GPHfile),EXIST=bool)
-       if(bool)then
-          open(free_unit(unit_gph),file=GPHfile)
+    if(nph>0)then
+       !Here the non-diagonal (non-density) phononic coupling are read
+       g_ph=0.d0
+       if(trim(GPHfile).eq."NONE")then
           do iorb=1,Norb
-             read(unit_gph,*) g_ph(iorb,:)
+             g_ph(iorb,iorb)=g_ph_diag(iorb)
           enddo
-          close(unit_gph)
-          !maybe an assert_hermitian would be globally useful
-          if(any(g_ph /= transpose(conjg(g_ph))))then
-             stop "ERROR: non hermitian phonon coupling matrix (g_ph) in input"
-          end if
        else
-          stop "GPHfile/=NONE but there is no GPHfile with the provided name"
+          inquire(file=trim(GPHfile),EXIST=bool)
+          if(bool)then
+             open(free_unit(unit_gph),file=GPHfile)
+             do iorb=1,Norb
+                read(unit_gph,*) g_ph(iorb,:)
+             enddo
+             close(unit_gph)
+             !maybe an assert_hermitian would be globally useful
+             if(any(g_ph /= transpose(conjg(g_ph))))then
+                stop "ERROR: non hermitian phonon coupling matrix (g_ph) in input"
+             end if
+          else
+             stop "GPHfile/=NONE but there is no GPHfile with the provided name"
+          endif
        endif
-    endif
-    !TO BE PUT SOMEWHERE ELSE
-    open(free_unit(unit_gph),file="GPHinput.used")
-    do iorb=1,Norb
-       write(unit_gph,*) g_ph(iorb,:)
-    enddo
-    close(unit_gph)
+       !TO BE PUT SOMEWHERE ELSE
+       open(free_unit(unit_gph),file="GPHinput.used")
+       do iorb=1,Norb
+          write(unit_gph,*) g_ph(iorb,:)
+       enddo
+       close(unit_gph)
+    end if
 
 #ifdef _MPI
     if(present(comm))then
