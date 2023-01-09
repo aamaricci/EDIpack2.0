@@ -30,10 +30,10 @@ MODULE ED_FIT_COMMON
   integer                               :: cg_iter_count=0
   logical                               :: para_
 
-  integer                               :: MPI_RANK=0
-  integer                               :: MPI_SIZE=1
-  logical                               :: MPI_MASTER=.true.
-  integer                               :: MPI_IERR
+  ! integer                               :: MPI_RANK=0
+  ! integer                               :: MPI_SIZE=1
+  ! logical                               :: MPI_MASTER=.true.
+  ! integer                               :: MPI_IERR
 
   !This contains the number of the lambda expansion
   !for each replica of the impurity

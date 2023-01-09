@@ -177,6 +177,9 @@ contains
           !
           if(MpiMaster.AND.ed_verbose>3)write(LOGfile,*)""
           call delete_Hv_sector_superc()
+#ifdef _MPI
+          if(MpiStatus)call Bcast_MPI(MpiComm,eig_values)
+#endif
           !
           !
        else

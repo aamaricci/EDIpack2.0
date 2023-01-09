@@ -164,7 +164,7 @@ contains
 
   !+------------------------------------------------------------------+
   !PURPOSE  : Setup Himpurity, the local part of the non-interacting Hamiltonian
-  !+------------------------------------------------------------------+
+    !+------------------------------------------------------------------+
   subroutine ed_set_Hloc_single(Hloc)
     complex(8),dimension(..),intent(in) :: Hloc
 #ifdef _DEBUG
@@ -177,8 +177,10 @@ contains
     select rank(Hloc)
     rank default;stop "ED_SET_HLOC ERROR: Hloc has a wrong rank. Accepted: [Nso,Nso] or [Nspin,Nspin,Norb,Norb]"
     rank (2)                      !Hloc[Nso,Nso]
+    call assert_shape(Hloc,[Nspin*Norb,Nspin*Norb],"ed_set_Hloc","Hloc")
     impHloc = so2nn_reshape(Hloc,Nspin,Norb)
     rank (4)                      !Hloc[Nspin,Nspin,Norb,Norb]
+    call assert_shape(Hloc,[Nspin,Nspin,Norb,Norb],"ed_set_Hloc","Hloc")
     impHloc = Hloc
     end select
     if(ed_verbose>2)call print_hloc(impHloc)
