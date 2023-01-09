@@ -2851,4 +2851,3 @@ END MODULE ED_BATH
 !   call deallocate_dmft_bath(dIN)
 !   call deallocate_dmft_bath(dOUT)
 ! end subroutine copy_bath_component
->>>>>>> 0acb198 ("Quite a big" Update + bug fix)
