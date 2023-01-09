@@ -208,9 +208,6 @@ contains
     call write_dmft_bath(dmft_bath)
     call save_dmft_bath(dmft_bath,used=.true.)
     !
-    print*,MpiCOmm,MpiSTATUS
-    call wait(2)
-    !
     !SOLVE THE QUANTUM IMPURITY PROBLEM:
     call diagonalize_impurity()
     if(iflag)then
