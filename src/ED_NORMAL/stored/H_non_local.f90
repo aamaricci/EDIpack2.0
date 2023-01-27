@@ -39,9 +39,9 @@
                  !
                  select case(MpiStatus)
                  case (.true.)
-                    call sp_insert_element(MpiComm,spH0nd,htmp,i,j)
+                    call sp_insert_element(MpiComm,spH0nd,htmp,j,i)
                  case (.false.)
-                    call sp_insert_element(spH0nd,htmp,i,j)
+                    call sp_insert_element(spH0nd,htmp,j,i)
                  end select
                  !
               endif
@@ -72,9 +72,9 @@
                  !
                  select case(MpiStatus)
                  case (.true.)
-                    call sp_insert_element(MpiComm,spH0nd,htmp,i,j)
+                    call sp_insert_element(MpiComm,spH0nd,htmp,j,i)
                  case (.false.)
-                    call sp_insert_element(spH0nd,htmp,i,j)
+                    call sp_insert_element(spH0nd,htmp,j,i)
                  end select
                  !
               endif

@@ -33,9 +33,9 @@
            if(Jcondition)then
               call c(jorb,mup,k1,sg1)
               call cdg(iorb,k1,k2,sg2)
-              jup = binary_search(Hsector%H(1)%map,k2)
-              jdw = idw
-              j   = jup + (jdw-1)*DimUp
+              jup  = binary_search(Hsector%H(1)%map,k2)
+              jdw  = idw
+              j    = jup + (jdw-1)*DimUp
               htmp = g_ph(iorb,jorb)*sg1*sg2
               !
               select case(MpiStatus)
@@ -59,7 +59,7 @@
               call cdg(iorb,k1,k2,sg2)
               jup  = iup
               jdw  = binary_search(Hsector%H(2)%map,k2)
-              j   = jup + (jdw-1)*DimUp
+              j    = jup + (jdw-1)*DimUp
               htmp = g_ph(iorb,jorb)*sg1*sg2
               !
               select case(MpiStatus)
@@ -76,14 +76,15 @@
      !
   enddo
 
-  ! Here we build the phononc part of the electron-phonon interaction: (b^+ + b)
+  ! Here we build the phononic part of the electron-phonon interaction: (b^+ + b)
   htmp = zero
   do iph=1,DimPh
-     if(iph < DimPh) then !bdg
+     ! N.B. here iph = n+1
+     if(iph < DimPh) then !bdg = sum_n |n+1> sqrt(n+1) <n|
         htmp = sqrt(dble(iph))
         call sp_insert_element(spH0ph_eph,htmp,iph+1,iph)
      end if
-     if(iph>1) then !b
+     if(iph > 1) then !b = sum_n |n-1> sqrt(n) <n|
         htmp = sqrt(dble(iph-1))
         call sp_insert_element(spH0ph_eph,htmp,iph-1,iph)
      end if

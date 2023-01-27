@@ -723,7 +723,7 @@ contains
                    val = spH0e_eph%row(i_el)%dvals(j_el)*&
                         spH0ph_eph%row(iph)%dvals(jj)
                    !interaction is diag from the electron point of view (coupling to the density)
-                   j = i_el + (spH0ph_eph%row(iph)%cols(jj)-1)*DimUp*MpiQdw
+                   j = spH0e_eph%row(i_el)%cols(j_el) + (spH0ph_eph%row(iph)%cols(jj)-1)*DimUp*MpiQdw
                    Hv(i) = Hv(i) + val*v(j)
                 enddo
              enddo
