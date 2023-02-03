@@ -1,4 +1,3 @@
-
 MODULE ED_FIT_GENERAL
   USE ED_FIT_COMMON
   USE SF_PAULI, only: pauli_sigma_z
