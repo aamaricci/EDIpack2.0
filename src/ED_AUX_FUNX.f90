@@ -178,10 +178,10 @@ contains
     rank default;stop "ED_SET_HLOC ERROR: Hloc has a wrong rank. Accepted: [Nso,Nso] or [Nspin,Nspin,Norb,Norb]"
     rank (2)                      !Hloc[Nso,Nso]
     call assert_shape(Hloc,[Nspin*Norb,Nspin*Norb],"ed_set_Hloc","Hloc")
-    impHloc = so2nn_reshape(Hloc,Nspin,Norb)
+    impHloc = so2nn_reshape(Hloc(1:Nspin*Norb,1:Nspin*Norb),Nspin,Norb)
     rank (4)                      !Hloc[Nspin,Nspin,Norb,Norb]
     call assert_shape(Hloc,[Nspin,Nspin,Norb,Norb],"ed_set_Hloc","Hloc")
-    impHloc = Hloc
+    impHloc = Hloc(1:Nspin,1:Nspin,1:Norb,1:Norb)
     end select
     if(ed_verbose>2)call print_hloc(impHloc)
   end subroutine ed_set_Hloc_single
@@ -203,17 +203,17 @@ contains
     !
     rank (2)
     call assert_shape(Hloc,[Nlat*Nspin*Norb,Nlat*Nspin*Norb],'ed_set_Hloc','Hloc')
-    Hloc_ineq  = lso2nnn_reshape(Hloc,Nlat,Nspin,Norb)
+    Hloc_ineq  = lso2nnn_reshape(Hloc(1:Nlat*Nspin*Norb,1:Nlat*Nspin*Norb),Nlat,Nspin,Norb)
     !
     rank (3)
     call assert_shape(Hloc,[Nlat,Nspin*Norb,Nspin*Norb],'ed_set_Hloc','Hloc')
     do ilat=1,Nlat
-       Hloc_ineq(ilat,:,:,:,:)  = so2nn_reshape(Hloc(ilat,:,:),Nspin,Norb)
+       Hloc_ineq(ilat,:,:,:,:)  = so2nn_reshape(Hloc(ilat,1:Nspin*Norb,1:Nspin*Norb),Nspin,Norb)
     enddo
     !
     rank (5)
     call assert_shape(Hloc,[Nlat,Nspin,Nspin,Norb,Norb],'ed_set_Hloc','Hloc')
-    Hloc_ineq  = Hloc
+    Hloc_ineq  = Hloc(1:Nlat,1:Nspin,1:Nspin,1:Norb,1:Norb)
     end select
   end subroutine ed_set_Hloc_lattice
 
@@ -730,7 +730,7 @@ contains
   end function index_stride_so
 
 
-
+  !>> ALL THESE CAN BE EXPRESSED IN TERMS OF +DO CONCURRENT; ENDDO
   !+-----------------------------------------------------------------------------+!
   !PURPOSE: 
   ! reshape a matrix from the [Nlso][Nlso] shape

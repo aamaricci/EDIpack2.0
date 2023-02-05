@@ -52,9 +52,9 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: fg
     integer                                          :: ispin_,Liw
     logical                                          :: fmpi_
-    !    
-#ifdef _DEBUG
+    !
     write(Logfile,"(A)")""
+#ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_normal_mpi: Start Chi**2 fit"
 #endif
     !
@@ -81,10 +81,10 @@ contains
        stop "chi2_fitgf_generic_normal error: input G has a wrong rank: accepted 3 or 5"
        rank (3)
        call assert_shape(g,[Nspin*Norb,Nspin*Norb,Lmats],"chi2_fitgf_generic_normal","g")
-       fg = so2nn_reshape(g,Nspin,Norb,Lmats)
+       fg = so2nn_reshape(g(1:Nspin*Norb,1:Nspin*Norb,1:Lmats),Nspin,Norb,Lmats)
        rank (5)
        call assert_shape(g,[Nspin,Nspin,Norb,Norb,Lmats],"chi2_fitgf_generic_normal","g")
-       fg = g
+       fg = g(1:Nspin,1:Nspin,1:Norb,1:Norb,1:Lmats)
        end select
        !
        select case(bath_type)
@@ -159,8 +159,9 @@ contains
     complex(8),dimension(2,Nspin,Nspin,Norb,Norb,Lmats) :: fg
     integer                                             :: ispin_
     logical                                             :: fmpi_
-#ifdef _DEBUG
+    !
     write(Logfile,"(A)")""
+#ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG chi2_fitgf_generic_superc: Start Chi**2 fit"
 #endif
     !
@@ -188,10 +189,10 @@ contains
        stop "chi2_fitgf_generic_superc error: input G has a wrong rank: accepted 3 or 5"
        rank (3)
        call assert_shape(g,[Nspin*Norb,Nspin*Norb,Lmats],"chi2_fitgf_generic_superc","g")
-       fg(1,:,:,:,:,:) = so2nn_reshape(g,Nspin,Norb,Lmats)
+       fg(1,:,:,:,:,:) = so2nn_reshape(g(1:Nspin*Norb,1:Nspin*Norb,1:Lmats),Nspin,Norb,Lmats)
        rank (5)
        call assert_shape(g,[Nspin,Nspin,Norb,Norb,Lmats],"chi2_fitgf_generic_superc","g")
-       fg(1,:,:,:,:,:) = g
+       fg(1,:,:,:,:,:) = g(1:Nspin,1:Nspin,1:Norb,1:Norb,1:Lmats)
        end select
        !
        select rank(f)
@@ -199,10 +200,10 @@ contains
        stop "chi2_fitgf_generic_superc error: input F has a wrong rank: accepted 3 or 5"
        rank (3)
        call assert_shape(f,[Nspin*Norb,Nspin*Norb,Lmats],"chi2_fitgf_generic_superc","f")
-       fg(2,:,:,:,:,:) = so2nn_reshape(f,Nspin,Norb,Lmats)
+       fg(2,:,:,:,:,:) = so2nn_reshape(f(1:Nspin*Norb,1:Nspin*Norb,1:Lmats),Nspin,Norb,Lmats)
        rank (5)
        call assert_shape(f,[Nspin,Nspin,Norb,Norb,Lmats],"chi2_fitgf_generic_superc","f")
-       fg(2,:,:,:,:,:) = f
+       fg(2,:,:,:,:,:) = f(1:Nspin,1:Nspin,1:Norb,1:Norb,1:Lmats)
        end select
        !       
        select case(bath_type)
@@ -278,7 +279,10 @@ contains
     !
     complex(8)               :: fg(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
     real(8)                  :: bath_tmp(size(bath,1),size(bath,2))
-    integer                  :: ilat,i,iorb,ispin_
+    integer                  :: i,ispin_
+    integer                  :: ilat
+    integer                  :: iorb,is,io
+    integer                  :: jorb,js,jo
     integer                  :: Nsites
     logical                  :: check_dim
     character(len=5)         :: tmp_suffix
@@ -286,10 +290,7 @@ contains
     integer                  :: MPI_SIZE=1
     logical                  :: MPI_MASTER=.true.
     !
-    !
-#ifdef _DEBUG
     write(Logfile,"(A)")""
-#endif
     !
     ispin_=1;if(present(ispin))ispin_=ispin
     if(ispin_>Nspin)stop "ed_fit_bath_sites error: required spin index > Nspin"
@@ -310,31 +311,33 @@ contains
        if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
     end do
     !
+    fg = zero
+    !
     select rank(g)
     rank default
     stop "chi2_fitgf_generic_normal error: input G has a wrong rank: accepted 3 or 5"
     !
     rank (3)
+    if(ed_verbose>1)write(Logfile,"(A)")"Chi**2 get G with rank:"//str(rank(g))
     call assert_shape(g,[Nsites*Nspin*Norb,Nsites*Nspin*Norb,Lmats],'chi2_fitgf_generic_normal','g')
-    fg = lso2nnn_reshape(g,Nsites,Nspin,Norb,Lmats)
+    fg = lso2nnn_reshape(g(1:Nsites*Nspin*Norb,1:Nsites*Nspin*Norb,1:Lmats),Nsites,Nspin,Norb,Lmats)
     !
     rank (4)
+    if(ed_verbose>1)write(Logfile,"(A)")"Chi**2 get G with rank:"//str(rank(g))
     call assert_shape(g,[Nsites,Nspin*Norb,Nspin*Norb,Lmats],'chi2_fitgf_generic_normal','g')
     do ilat=1,Nsites
-       fg(ilat,:,:,:,:,:)  = so2nn_reshape(g(ilat,:,:,:),Nspin,Norb,Lmats)
+       fg(ilat,:,:,:,:,:)  = so2nn_reshape(g(ilat,1:Nspin*Norb,1:Nspin*Norb,1:Lmats),Nspin,Norb,Lmats)
     enddo
     !
     rank (6)
+    if(ed_verbose>1)write(Logfile,"(A)")"Chi**2 get G with rank:"//str(rank(g))
     call assert_shape(g,[Nsites,Nspin,Nspin,Norb,Norb,Lmats],'chi2_fitgf_generic_normal','g')
-    fg = g
+    fg = g(1:Nsites,1:Nspin,1:Nspin,1:Norb,1:Norb,1:Lmats)
     end select
     !
     bath_tmp=0d0
-    !
     do ilat = 1+MPI_ID,Nsites,MPI_SIZE
-#ifdef _DEBUG
-       write(Logfile,"(A)")"DEBUG ed_fit_bath_sites_normal: Start Chi**2 fit for site:"//str(ilat)
-#endif
+       if(ed_verbose>1)write(Logfile,"(A)")"Start Chi**2 fit for site:"//str(ilat)
        bath_tmp(ilat,:)=bath(ilat,:)
        call ed_set_Hloc(Hloc_ineq(ilat,:,:,:,:))
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
@@ -359,7 +362,11 @@ contains
     !
     call ed_reset_suffix
   end subroutine chi2_fitgf_lattice_normal
+  
+  
+ 
 
+  
   subroutine chi2_fitgf_lattice_superc(g,f,bath,ispin)
     real(8),intent(inout)    :: bath(:,:)
     complex(8),dimension(..) :: g,f
@@ -375,9 +382,8 @@ contains
     integer                  :: MPI_SIZE=1
     logical                  :: MPI_MASTER=.true.
     !
-#ifdef _DEBUG
     write(Logfile,"(A)")""
-#endif
+    !
     ispin_=1;if(present(ispin))ispin_=ispin
     if(ispin_>Nspin)stop "ed_fit_bath_sites error: required spin index > Nspin"
     !
@@ -402,15 +408,17 @@ contains
     stop "chi2_fitgf_generic_superc error: input G has a wrong rank: accepted 3 or 5"
     rank (3)
     call assert_shape(g,[Nsites*Nspin*Norb,Nsites*Nspin*Norb,Lmats],'chi2_fitgf_generic_superc','g')
-    fg(1,:,:,:,:,:,:) = lso2nnn_reshape(g,Nsites,Nspin,Norb,Lmats)
+    fg(1,:,:,:,:,:,:) = lso2nnn_reshape(g(1:Nsites*Nspin*Norb,1:Nsites*Nspin*Norb,1:Lmats),Nsites,Nspin,Norb,Lmats)
+    !
     rank (4)
     call assert_shape(g,[Nsites,Nspin*Norb,Nspin*Norb,Lmats],'chi2_fitgf_generic_superc','g')
     do ilat=1,Nsites
-       fg(1,ilat,:,:,:,:,:)  = so2nn_reshape(g(ilat,:,:,:),Nspin,Norb,Lmats)
+       fg(1,ilat,:,:,:,:,:)  = so2nn_reshape(g(ilat,1:Nspin*Norb,1:Nspin*Norb,1:Lmats),Nspin,Norb,Lmats)
     enddo
+    !
     rank (6)
     call assert_shape(g,[Nsites,Nspin,Nspin,Norb,Norb,Lmats],'chi2_fitgf_generic_superc','g')
-    fg(1,:,:,:,:,:,:) = g
+    fg(1,:,:,:,:,:,:) = g(1:Nsites,1:Nspin,1:Nspin,1:Norb,1:Norb,1:Lmats)
     end select
     !
     select rank(f)
@@ -418,23 +426,23 @@ contains
     stop "chi2_fitgf_generic_superc error: input F has a wrong rank: accepted 3 or 5"
     rank (3)
     call assert_shape(f,[Nsites*Nspin*Norb,Nsites*Nspin*Norb,Lmats],'chi2_fitgf_generic_superc','f')
-    fg(2,:,:,:,:,:,:) = lso2nnn_reshape(f,Nsites,Nspin,Norb,Lmats)
+    fg(2,:,:,:,:,:,:) = lso2nnn_reshape(f(1:Nsites*Nspin*Norb,1:Nsites*Nspin*Norb,1:Lmats),Nsites,Nspin,Norb,Lmats)
+    !
     rank (4)
     call assert_shape(f,[Nsites,Nspin*Norb,Nspin*Norb,Lmats],'chi2_fitgf_generic_superc','f')
     do ilat=1,Nsites
-       fg(2,ilat,:,:,:,:,:)  = so2nn_reshape(f(ilat,:,:,:),Nspin,Norb,Lmats)
+       fg(2,ilat,:,:,:,:,:)  = so2nn_reshape(f(ilat,1:Nspin*Norb,1:Nspin*Norb,1:Lmats),Nspin,Norb,Lmats)
     enddo
+    !
     rank (6)
     call assert_shape(f,[Nsites,Nspin,Nspin,Norb,Norb,Lmats],'chi2_fitgf_generic_superc','f')
-    fg(2,:,:,:,:,:,:) = f
+    fg(2,:,:,:,:,:,:) = f(1:Nsites,1:Nspin,1:Nspin,1:Norb,1:Norb,1:Lmats)    
     end select
     !
     bath_tmp=0.d0
     !
     do ilat= 1 + MPI_ID, Nsites, MPI_SIZE
-#ifdef _DEBUG
-       write(Logfile,"(A)")"DEBUG ed_fit_bath_sites_superc: Start Chi**2 fit for site:"//str(ilat)
-#endif
+       write(Logfile,"(A)")"ed_fit_bath_sites_superc: Start Chi**2 fit for site:"//str(ilat)
        bath_tmp(ilat,:) = bath(ilat,:)
        call ed_set_Hloc(Hloc_ineq(ilat,:,:,:,:))
        ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
@@ -465,8 +473,7 @@ contains
 
 
 
-  
-  
+
 end MODULE ED_BATH_FIT
 
 
