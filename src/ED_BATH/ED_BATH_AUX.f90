@@ -49,15 +49,20 @@ contains
 
   !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
   function Hreplica_build(lambdavec) result(H)
-    real(8),dimension(:)                                      :: lambdavec ![Nsym]
+    real(8),dimension(:),optional                             :: lambdavec ![Nsym]
+    real(8),dimension(:),allocatable                          :: lambda
     integer                                                   :: isym
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
     !
     if(.not.Hreplica_status)STOP "ERROR Hreplica_build: Hreplica_basis is not setup"
-    if(size(lambdavec)/=size(Hreplica_basis)) STOP "ERROR Hreplica_build: Wrong coefficient vector size"
+    allocate(lambda(size(Hreplica_basis)));lambda=1d0
+    if(present(lambdavec))then
+       if(size(lambdavec)/=size(Hreplica_basis)) STOP "ERROR Hreplica_build: Wrong coefficient vector size"
+       lambda = lambdavec
+    endif
     H=zero
-    do isym=1,size(lambdavec)
-       H=H+lambdavec(isym)*Hreplica_basis(isym)%O
+    do isym=1,size(lambda)
+       H=H+lambda(isym)*Hreplica_basis(isym)%O
     enddo
   end function Hreplica_build
 
@@ -120,17 +125,23 @@ contains
 
   !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
   function Hgeneral_build(lambdavec) result(H)
-    real(8),dimension(:)                                      :: lambdavec ![Nsym]
+    real(8),dimension(:),optional                             :: lambdavec ![Nsym]
+    real(8),dimension(:),allocatable                          :: lambda
     integer                                                   :: isym
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
     !
     if(.not.Hgeneral_status)STOP "ERROR Hgeneral_build: Hgeneral_basis is not setup"
-    if(size(lambdavec)/=size(Hgeneral_basis)) STOP "ERROR Hgeneral_build: Wrong coefficient vector size"
+    allocate(lambda(size(Hreplica_basis)));lambda=1d0
+    if(present(lambdavec))then
+       if(size(lambdavec)/=size(Hgeneral_basis)) STOP "ERROR Hgeneral_build: Wrong coefficient vector size"
+       lambda = lambdavec
+    endif
     H=zero
     do isym=1,size(lambdavec)
        H=H+lambdavec(isym)*Hgeneral_basis(isym)%O
     enddo
   end function Hgeneral_build
+
 
 
 
@@ -369,6 +380,7 @@ contains
     bool   = check_herm(A,2*N,error_) !this checks also for F = A_12, s.t. A_21=herm(A_12)
     bool   = bool.AND.( all(abs(h22 + conjg(h11))<error_) )
   end function check_nambu
+
 
 
 

@@ -77,19 +77,16 @@ contains
        if(present(H_nn))then    !User defined H_nn
           H=H_nn
        elseif(Hreplica_status)then !User defined Hreplica_basis
-          H=Hreplica_build(Hreplica_lambda(Nbath,:))
+          H=Hreplica_build()!we build with all lambda set to one as we only need to count non-zero elements!Hreplica_lambda(Nbath,:))
        else                        !Error:
           deallocate(H)
           stop "ERROR get_bath_dimension_direct: ed_mode=replica neither H_nn present nor Hreplica_basis defined"
        endif
        !
        !Check Hermiticity:
-       ! do ispin=1,Nspin
-       !    do iorb=1,Norb
-       !       if(abs(dimag(H(ispin,ispin,iorb,iorb))).gt.1d-6)stop "H is not Hermitian"
-       !    enddo
-       ! enddo
-       if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
+       ! if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
+      
+       if( .not. check_herm( nn2so_reshape(H,Nnambu*Nspin,Norb),Nnambu*Nspin*Norb) )stop "H is not Hermitian"
        !
        !Re/Im off-diagonal non-vanishing elements
        ndx=0
@@ -116,19 +113,15 @@ contains
        if(present(H_nn))then    !User defined H_nn
           H=H_nn
        elseif(Hgeneral_status)then !User defined Hgeneral_basis
-          H=Hgeneral_build(Hgeneral_lambda(Nbath,:))
+          H=Hgeneral_build()!Hgeneral_lambda(Nbath,:))!see above
        else                        !Error:
           deallocate(H)
           stop "ERROR get_bath_dimension_direct: ed_mode=general neither H_nn present nor Hgeneral_basis defined"
        endif
        !
        !Check Hermiticity:
-       ! do ispin=1,Nspin
-       !    do iorb=1,Norb
-       !       if(abs(dimag(H(ispin,ispin,iorb,iorb))).gt.1d-6)stop "H is not Hermitian"
-       !    enddo
-       ! enddo
-       if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
+       ! if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
+       if( .not. check_herm( nn2so_reshape(H,Nnambu*Nspin,Norb),Nnambu*Nspin*Norb) )stop "H is not Hermitian"
        !
        !Re/Im off-diagonal non-vanishing elements
        ndx=0
