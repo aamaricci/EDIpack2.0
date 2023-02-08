@@ -18,11 +18,11 @@
         htmp = htmp + g_ph(iorb,iorb)*(nup(iorb)+ndw(iorb) - 1.d0) !electronin part
      enddo
      !
-     if( iph<DimPh )then
+     if( iph<DimPh )then !bdg
         j     = i_el + (iph  )*DimUp*DimDw
         Hv(j) = Hv(j) + htmp*sqrt(dble(iph))*vin(i)
      endif
-     if(iph>1) then  !creation of a phonon
+     if(iph>1) then  !b
         j     = i_el + (iph-2)*DimUp*DimDw
         Hv(j) = Hv(j) + htmp*sqrt(dble(iph-1))*vin(i)
      endif
@@ -42,11 +42,11 @@
               htmp = g_ph(iorb,jorb)*sg1*sg2
               !
               if(iph<DimPh)then !bdg
-                 j     = jup + (jdw-1)*dimUp + (iph)*DimUp*MpiQdw
+                 j     = jup + (jdw-1)*dimUp + (iph)*DimUp*DimDw
                  hv(j) = hv(j) + htmp*sqrt(dble(iph))*vin(i)
               endif
               if(iph>1)then !b
-                 j     = jup + (jdw-1)*dimUp + (iph-2)*DimUp*MpiQdw
+                 j     = jup + (jdw-1)*dimUp + (iph-2)*DimUp*DimDw
                  hv(j) = hv(j) + htmp*sqrt(dble(iph-1))*vin(i)
               endif
            endif
@@ -60,18 +60,18 @@
                 (g_ph(iorb,jorb)/=zero) .AND. &
                 (Ndw(jorb)==1) .AND. (Ndw(iorb)==0)
            if(Jcondition)then
-              call c(jorb,mup,k1,sg1)
+              call c(jorb,mdw,k1,sg1)
               call cdg(iorb,k1,k2,sg2)
               jdw = binary_search(Hsector%H(2)%map,k2)
               jup  = iup
               htmp = g_ph(iorb,jorb)*sg1*sg2
               !
               if(iph<DimPh)then !bdg
-                 j     = jup + (jdw-1)*dimUp + (iph)*DimUp*MpiQdw
+                 j     = jup + (jdw-1)*dimUp + (iph)*DimUp*DimDw
                  hv(j) = hv(j) + htmp*sqrt(dble(iph))*vin(i)
               endif
               if(iph>1)then !b
-                 j     = jup + (jdw-1)*dimUp + (iph-2)*DimUp*MpiQdw
+                 j     = jup + (jdw-1)*dimUp + (iph-2)*DimUp*DimDw
                  hv(j) = hv(j) + htmp*sqrt(dble(iph-1))*vin(i)
               endif
            endif
