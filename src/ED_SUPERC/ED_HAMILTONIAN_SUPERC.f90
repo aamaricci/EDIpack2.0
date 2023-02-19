@@ -224,29 +224,6 @@ contains
     allocate(alanc(Hsector%Nlanc),blanc(Hsector%Nlanc))
     alanc=0d0 ; blanc=0d0
     !
-    !DELETE
-    INQUIRE(FILE="Hv.dat", EXIST=existo)
-    if(.not.existo)then
-       Lvvinit=size(vvinit,1)
-       allocate(dellete(lvvinit),indel(lvvinit))
-       indel=vvinit
-       print*,"spHtimesV"
-       call spHtimesV_cc(Lvvinit,indel,dellete)
-       open(19,file="Hv.dat")
-       do iii=1,Lvvinit
-          write(19,*) dellete(iii)
-       enddo
-       close(19)
-       deallocate(dellete,indel)
-    endif
-    INQUIRE(FILE="GS.dat", EXIST=existo)
-    if(.not.existo)then
-       open(19,file="GS.dat")
-       do iii=1,Lvvinit
-          write(19,*) vvinit(iii)
-       enddo
-       close(19)
-    endif
     !
     if(norm2/=0d0)then
 #ifdef _MPI

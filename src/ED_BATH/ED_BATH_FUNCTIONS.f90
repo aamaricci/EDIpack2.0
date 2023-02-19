@@ -469,6 +469,7 @@ contains
     axis_="mats";if(present(axis))axis_=str(axis)
     !
     G0and = zero
+    Nso=Nspin*Norb
     !
     L=size(x)
     !
@@ -768,6 +769,7 @@ contains
     axis_="mats";if(present(axis))axis_=str(axis)
     !
     G0and = zero
+    Nso = Nspin*Norb
     !
     L=size(x)
     !
