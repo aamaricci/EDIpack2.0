@@ -37,7 +37,7 @@
  ED_PRINT_G=T                                  !flag to print impurity Greens function
  ED_PRINT_G0=T                                 !flag to print non-interacting impurity Greens function
  ED_ALL_G=T                                    !flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries
- ED_VERBOSE=3                                  !Verbosity level: 0=almost nothing --> 5:all. Really: all
+ ED_VERBOSE=1                                  !Verbosity level: 0=almost nothing --> 5:all. Really: all
  ED_HW_BATH=2.000000000                        !half-bandwidth for the bath initialization: flat in -ed_hw_bath:ed_hw_bath
  ED_OFFSET_BATH=1.000000000E-01                !offset for the initialization of diagonal terms in replica/general bath: -offset:offset
  LMATS=4096                                    !Number of Matsubara frequencies.

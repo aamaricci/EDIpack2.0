@@ -193,7 +193,6 @@ contains
                kronecker_product(Htmp_eph_ph,Htmp_eph_e)
           deallocate(Htmp_ph,Htmp_eph_e,Htmp_eph_ph)
        else
-          print*,size(Hmat),size(Htmp_e)
           Hmat = Htmp_e
        endif
        !
