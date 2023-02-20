@@ -1,0 +1,56 @@
+name: CI LIB_DMFT_ED test workflow 
+
+on: push
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+  test-QcmP:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-11]
+
+    steps:
+
+#********* SETUP PART **********
+
+# Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@main
+
+# QcmPlab setup
+      - uses: QcmPlab/TestSetup@master
+        with:
+          pack-type: open
+
+
+
+#********* BUILD PART **********
+
+# Build SciFortran
+      - name: Cloning SciFortran
+        run: git clone https://github.com/QcmPlab/SciFortran.git scifor
+      - name: Install SciFortran
+        run: bin/ci_setup_scifor.sh
+
+
+
+#******** TESTING PART ********
+
+# Testing
+      - name: Building tests
+        run:  |
+          source ~/.scifor_config_user
+          export PKG_CONFIG_PATH=~/.pkgconfig.d
+          export GLOB_INC=$( pkg-config --cflags scifor)
+          export GLOB_LIB=$( pkg-config --libs   scifor | sed  "s/;/ /g"  | sed 's/\\/  /g' )
+          cd test
+          make all
+
+      - name: Testing...
+        run: |
+          cd test
+          make test
