@@ -43,7 +43,7 @@ subroutine ed_get_sigma_site(self,axis,type)
         self = nn2so_reshape(impSAmats,Nspin,Norb,Lmats)
         rank (5)
         call assert_shape(self,[Nspin,Nspin,Norb,Norb,Lmats],'ed_get_sigma','self')
-        self = impSmats
+        self = impSAmats
         end select
      case('r','R')
         select rank(self)
