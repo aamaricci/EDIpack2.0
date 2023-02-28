@@ -1,5 +1,5 @@
 FC=mpif90
-FFLAG = -O2 -ffree-line-length-none
+FFLAG = -O2 -ffree-line-length-none -coverage
 FPPMPI=-cpp -D_MPI
 FFLAGS= ${FFLAG} ${FPPMPI}
 

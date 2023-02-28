@@ -23,7 +23,7 @@ DFLAG=-p -O0 -g -fpe0 -warn -warn errors -debug extended -traceback -check all,n
 FPPFLAG =-fpp
 endif
 ifeq ($(PLAT),gnu)
-FFLAG = -O2 -ffree-line-length-none
+FFLAG = -O2 -ffree-line-length-none -coverage
 DFLAG = -O2 -p -g -fimplicit-none -Wsurprising  -Waliasing -fwhole-file -fcheck=all -pedantic -fbacktrace -ffree-line-length-none
 OFLAG = -O3 -ffast-math -march=native -funroll-loops -ffree-line-length-none
 FPPFLAG =-cpp -D_MPI
