@@ -3,6 +3,7 @@
 [![TestSuite](https://img.shields.io/github/actions/workflow/status/QcmPlab/LIB_DMFT_ED/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/QcmPlab/LIB_DMFT_ED/actions/workflows/PushWorkflow.yml) 
 
 <!-- TO BE SETUP ASAP
+[![Coverage]()]()
 [![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://qcmplab.github.io/DMFT_ED)
 -->
 A serial/parallel Lanczos based method for the solution of single-site Quantum Impurity problems, with a special application as Dynamical Mean-Field Theory solver. 
