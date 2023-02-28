@@ -147,7 +147,7 @@ program ed_normal_normal
      read(unit_,*) iw, Smats11mom_(i)
   end do
   close(unit_)
-  call assert(Smats11mom,Smats11mom_,"Sigma_matsubara_l11(:)",tol=1.0d-8)
+  call assert(Smats11mom/Smats11mom_,dble(ones(Nmomenta)),"Sigma_matsubara_l11(:)",tol=1.0d-8)
   
   
   call finalize_MPI()
