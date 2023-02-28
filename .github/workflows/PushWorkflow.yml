@@ -68,23 +68,23 @@ jobs:
           cd LIB_DMFT_ED/test
           make test
 
-      - name: Install LCOV
-        if: contains( matrix.os, 'ubuntu')
-        run: |
-          sudo apt-get install lcov
+      # - name: Install LCOV
+      #   if: contains( matrix.os, 'ubuntu')
+      #   run: |
+      #     sudo apt-get install lcov
 
-      - name: Create coverage report
-        if: contains( matrix.os, 'ubuntu')
-        run: |
-          mkdir -p ${{ env.COV_DIR }}
-          lcov --capture --initial --base-directory . --directory test/ --output-file ${{ env.COV_DIR }}/coverage.base
-          lcov --capture --base-directory . --directory test/ --output-file ${{ env.COV_DIR }}/coverage.capture
-          lcov --add-tracefile ${{ env.COV_DIR }}/coverage.base --add-tracefile ${{ env.COV_DIR }}/coverage.capture --output-file ${{ env.COV_DIR }}/coverage.info
-        env:
-          COV_DIR: test/coverage
+      # - name: Create coverage report
+      #   if: contains( matrix.os, 'ubuntu')
+      #   run: |
+      #     mkdir -p ${{ env.COV_DIR }}
+      #     lcov --capture --initial --base-directory . --directory test/ --output-file ${{ env.COV_DIR }}/coverage.base
+      #     lcov --capture --base-directory . --directory test/ --output-file ${{ env.COV_DIR }}/coverage.capture
+      #     lcov --add-tracefile ${{ env.COV_DIR }}/coverage.base --add-tracefile ${{ env.COV_DIR }}/coverage.capture --output-file ${{ env.COV_DIR }}/coverage.info
+      #   env:
+      #     COV_DIR: test/coverage
 
-      - name: Upload coverage report to CODECOV
-        if: contains( matrix.os, 'ubuntu')
-        uses: codecov/codecov-action@v3
-        with:
-          files: test/coverage/coverage.info
+      # - name: Upload coverage report to CODECOV
+      #   if: contains( matrix.os, 'ubuntu')
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     files: test/coverage/coverage.info

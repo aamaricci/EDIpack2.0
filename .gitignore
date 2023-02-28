@@ -4,6 +4,8 @@ cmake_install.cmake
 *.inc
 *.mod
 *.o
+*.gcda
+*.gcno
 test/bin
 build*
 .archive/
