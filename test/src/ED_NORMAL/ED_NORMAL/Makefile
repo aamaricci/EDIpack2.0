@@ -9,13 +9,6 @@ PLAT=gnu
 TSTBIN=../../../bin/NORMAL/NORMAL
 OBJS=../../ASSERTING.o
 
-define colorecho	
-	@tput setaf 6
-	@tput bold
-	@echo $1
-	@tput sgr0
-endef
-
 
 #NO NEED TO CHANGE DOWN HERE, only expert mode.
 #########################################################################
@@ -36,20 +29,13 @@ OFLAG = -O3 -ffast-math -march=native -funroll-loops -ffree-line-length-none
 FPPFLAG =-cpp -D_MPI
 endif
 
-
-##$ REVISION SOFTWARE VARIABLES
-#REV=$(shell git rev-parse HEAD)
-#REV=$(shell git rev-parse HEAD)
-#VER = 'character(len=41),parameter :: revision = "$(REV)"' > revision.inc
-
-
 ##$ Extends the implicit support of the Makefile to .f90 files
 .SUFFIXES: .f90 .o
 
 all: FLAG:=${FFLAG} ${FPPFLAG}
 all:
 	@echo ""
-	$(call colorecho,"compiling $(EXE).f90 ")
+	@echo "compiling $(EXE).f90 "
 	@echo ""
 	$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}
 	@cp *.check $(TSTBIN)/
@@ -59,7 +45,7 @@ all:
 debug: FLAG:=${DFLAG} ${FPPFLAG}
 debug:
 	@echo ""
-	$(call colorecho,"compiling $(EXE).f90 ")
+	@echo "compiling $(EXE).f90 "
 	@echo ""
 	$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}
 	@cp *.check $(TSTBIN)/

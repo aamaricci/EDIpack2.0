@@ -15,13 +15,17 @@ all: $(OBJS) NORMAL REPLICA GENERAL # HYBRID
 
 
 NORMAL REPLICA GENERAL:
+	@echo " pre $@ comp"
 	make -C ./ED_$@
+	@echo "post $@ comp"
 
 #HYBRID:
 #	make -C ./ED_$@
 
 .f90.o:
+	@echo "pre assert comp" #delete
 	$(FC) $(FFLAGS) -c $< ${GLOB_INC}
+	@echo "post assert comp" #delete
 
 clean:
 	rm -rf *.mod *.o 

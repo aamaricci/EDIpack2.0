@@ -5,12 +5,12 @@ program ed_replica_superc
   USE SF_MPI
   USE ASSERTING
   implicit none
-  integer                                     :: i,iw,jo,js,Nso,Nson,Nsymm,Mnambu
+  integer                                     :: i,iw,jo,js,Nso,Nson,Nsymm,Mnambu, Nmomenta
   integer                                     :: unit,unit_
   real(8)                                     :: w,Re,Im
   !Bath:
   integer                                     :: Nb,iorb,jorb,ispin,jspin,inso,print_mode
-  real(8),allocatable                         :: Bath(:)
+  real(8),allocatable                         :: Bath(:),Wlist(:)
   !GFs and Sigma:
   complex(8),allocatable                      :: Weiss(:,:,:,:,:,:)
   complex(8),allocatable                      :: Smats(:,:,:,:,:,:)
@@ -21,13 +21,9 @@ program ed_replica_superc
   real(8)                                     :: Delta
   character(len=16)                           :: finput
   !Replica variables:
-  real(8),allocatable                         :: dens(:),docc(:),phisc(:),energy(:),imp(:)
-  complex(8),allocatable                      :: Smats11(:), Smats12(:)
-  complex(8),allocatable                      :: ASmats11(:), ASmats12(:)
+  real(8),allocatable                         :: dens(:),docc(:),phisc(:),energy(:),imp(:), Smats11mom(:), ASmats11mom(:), ASmats12mom(:)
   !CHECK variables
-  real(8),allocatable                         :: dens_(:),docc_(:),phisc_(:),energy_(:),imp_(:)
-  complex(8),allocatable                      :: Smats11_(:),Smats12_(:)
-  complex(8),allocatable                      :: ASmats11_(:),ASmats12_(:)
+  real(8),allocatable                         :: dens_(:),docc_(:),phisc_(:),energy_(:),imp_(:), Smats11mom_(:), ASmats11mom_(:),ASmats12mom_(:)
   !
   complex(8),dimension(4,4)                   :: GammaN,GammaPhiAA,GammaPhiAB
   real(8),dimension(:,:),allocatable          :: lambdasym_vector
@@ -58,6 +54,7 @@ program ed_replica_superc
   Mnambu=2
   Nso=Nspin*Norb
   Nson=Nso*Mnambu
+  Nmomenta=4
   !Allocate Weiss Field:
   allocate(Weiss(2,Nspin,Nspin,Norb,Norb,Lmats))
   allocate(Smats(2,Nspin,Nspin,Norb,Norb,Lmats))
@@ -121,10 +118,13 @@ program ed_replica_superc
   allocate(phisc(4),phisc_(4))
   allocate(energy(8),energy_(8))
   allocate(imp(4),imp_(4))
-  allocate(Smats11(size(Smats,6)),Smats11_(size(Smats,6)))
-  allocate(Smats12(size(Smats,6)),Smats12_(size(Smats,6)))
-  allocate(ASmats11(size(Smats,6)),ASmats11_(size(Smats,6)))
-  allocate(ASmats12(size(Smats,6)),ASmats12_(size(Smats,6)))
+  allocate(Wlist(size(Smats,6)))
+  allocate(Smats11mom(Nmomenta ),Smats11mom_(Nmomenta))
+  allocate(ASmats11mom(Nmomenta),ASmats11mom_(Nmomenta))
+  allocate(ASmats12mom(Nmomenta),ASmats12mom_(Nmomenta))
+  write(*,*) ""
+  write(*,*) "ED_MODE = SUPERC   |   BATH_TYPE = REPLICA"
+  write(*,*) "Checking..."
   ! density
   unit =free_unit()
   unit_=free_unit()
@@ -134,82 +134,88 @@ program ed_replica_superc
   open(unit_,file="dens_last.check")
   read(unit_,*) dens_(:)
   close(unit_)
-  call assert(dens,dens_,"REPLICA_SUPERC dens(:)")
-  
+  call assert(dens,dens_,"dens(:)")
+  !double occupancy
   open(unit,file="docc_last.ed")
   read(unit,*) docc(:)
   close(unit)
   open(unit_,file="docc_last.check")
   read(unit_,*) docc_(:)
   close(unit_)
-  call assert(docc,docc_,"REPLICA_SUPERC docc(:)")
-  
+  call assert(docc,docc_,"docc(:)")
+  ! Superc Order Parameters
   open(unit,file="phisc_last.ed")
   read(unit,*) phisc(:)
   close(unit)
   open(unit_,file="phisc_last.check")
   read(unit_,*) phisc_(:)
   close(unit_)
-  call assert(phisc,phisc_,"REPLICA_SUPERC phisc(:)")
-
+  call assert(phisc,phisc_,"phisc(:)")
+  ! Energies
   open(unit,file="energy_last.ed")
   read(unit,*) energy(:)
   close(unit)
   open(unit_,file="energy_last.check")
   read(unit_,*) energy_(:)
   close(unit_)
-  call assert(energy,energy_,"REPLICA_SUPERC energy(:)")
-  
+  call assert(energy,energy_,"energy(:)")
+  !impurity
   open(unit,file="imp_last.ed")
   read(unit,*) imp(:)
   close(unit)
   open(unit_,file="imp_last.check")
   read(unit_,*) imp_(:)
   close(unit_)
-  call assert(imp,imp_,"REPLICA_SUPERC imp(:)")
-  
+  call assert(imp,imp_,"imp(:)")
+  !Self-Energies
   open(unit,file="impSigma_l11_s1_iw.ed")
   do iw=1,size(Smats,6)
-     read(unit,*) w, Im, Re
-     Smats11(iw) = Re+xi*Im
+     read(unit,*) Wlist(iw), Im, Re
   end do
   close(unit)
-  open(unit_,file="impSigma_l11_s1_iw.check")
-  do iw=1,size(Smats,6)
-     read(unit_,*) w, Im, Re
-     Smats11_(iw) = Re+xi*Im
+
+  ! Get momenta
+  do i=1,Nmomenta
+     call compute_momentum(Wlist,Smats(1,1,1,1,1,:),i,Smats11mom(i))
+     call compute_momentum(Wlist,Smats(2,1,1,1,1,:),i,ASmats11mom(i))
+     call compute_momentum(Wlist,Smats(2,1,1,1,2,:),i,ASmats12mom(i))
+  enddo
+  ! Write new momenta
+  open(unit_,file="impSigma_l11_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, Smats11mom(i)
+  enddo
+  close(unit_)
+  open(unit_,file="impSelf_l11_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, ASmats11mom(i)
+  enddo
+  close(unit_)
+  open(unit_,file="impSelf_l12_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, ASmats12mom(i)
+  enddo
+  close(unit_)
+  !Read check momenta
+  open(unit_,file="impSigma_l11_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, Smats11mom_(i)
   end do
   close(unit_)
-  call assert(Smats11,Smats11_,"REPLICA_SUPERC Smats11(:)",tol=1.0d-8)
-
-  open(unit,file="impSelf_l11_s1_iw.ed")
-  do iw=1,size(Smats,6)
-     read(unit,*) w, Im, Re
-     ASmats11(iw) = Re+xi*Im
-  end do
-  close(unit)
-  open(unit_,file="impSelf_l11_s1_iw.check")
-  do iw=1,size(Smats,6)
-     read(unit_,*) w, Im, Re
-     ASmats11_(iw) = Re+xi*Im
+  open(unit_,file="impSelf_l11_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, ASmats11mom_(i)
   end do
   close(unit_)
-  call assert(ASmats11,ASmats11_,"REPLICA_SUPERC Smats11(:)",tol=1.0d-8)
-
-  open(unit,file="impSelf_l12_s1_iw.ed")
-  do iw=1,size(Smats,6)
-     read(unit,*) w, Im, Re
-     ASmats12(iw) = Re+xi*Im
-  end do
-  close(unit)
-  open(unit_,file="impSelf_l12_s1_iw.check")
-  do iw=1,size(Smats,6)
-     read(unit_,*) w, Im, Re
-     ASmats12_(iw) = Re+xi*Im
+  open(unit_,file="impSelf_l12_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, ASmats12mom_(i)
   end do
   close(unit_)
-  call assert(ASmats12,ASmats12_,"REPLICA_SUPERC Smats12(:)",tol=1.0d-8)
-
+  call assert(Smats11mom,Smats11mom_,"Sigma_matsubara_l11(:)",tol=1.0d-8)
+  call assert(ASmats11mom,ASmats11mom_,"Self_matsubara_l11(:)",tol=1.0d-8)
+  call assert(ASmats12mom,ASmats12mom_,"Self_matsubara_l12(:)",tol=1.0d-8)
+    
   call finalize_MPI()
 
 
@@ -260,6 +266,25 @@ contains
     enddo
   end function j2so
 
+  ! Subroutine to compute momenta
+  ! 
+  ! ( sum_w abs(F(w))*w**n ) / ( sum_w abs(F(w)) )
+  subroutine compute_momentum(x,Fx,n,momentum)
+    real(8)   ,dimension(:),intent(in)       :: x
+    complex(8),dimension(:),intent(in)       :: Fx
+    integer   ,intent(in)                    :: n
+    real(8)   ,intent(out)                   :: momentum
+    !
+    integer                                  :: iw
+    real(8)                                  :: num,den
+    num=0.0;den=0.0
+    do iw=1,size(x,1)
+       num = num + abs(Fx(iw))*x(iw)**n
+       den = den + abs(Fx(iw))
+    enddo
+    momentum=num/den
+  end subroutine compute_momentum
+    
 end program ed_replica_superc
 
 

@@ -5,12 +5,12 @@ program ed_normal_normal
   USE SF_MPI
   USE ASSERTING
   implicit none
-  integer                                     :: i,iw,jo,js,Nso
+  integer                                     :: i,iw,jo,js,Nso,Nmomenta
   integer                                     :: unit,unit_
   real(8)                                     :: w, Im, Re
   !Bath:
   integer                                     :: Nb,iorb,jorb,ispin,jspin,inso,print_mode
-  real(8),allocatable                         :: Bath(:)
+  real(8),allocatable                         :: Bath(:),Wlist(:)
   !GFs and Sigma:
   complex(8),allocatable                      :: Weiss(:,:,:,:,:,:)
   complex(8),allocatable                      :: Smats(:,:,:,:,:,:)
@@ -21,11 +21,9 @@ program ed_normal_normal
   real(8)                                     :: Delta
   character(len=16)                           :: finput
   !NORMAL variables:
-  real(8),allocatable                         :: dens(:), docc(:), energy(:), phisc(:), imp(:)
-  complex(8),allocatable                      :: Smats11(:), Asmats11(:)
+  real(8),allocatable                         :: dens(:), docc(:), energy(:), phisc(:), imp(:), Smats11mom(:), ASmats11mom(:)
   !CHECK variables:
-  real(8),allocatable                         :: dens_(:),docc_(:),energy_(:),phisc_(:),imp_(:)
-  complex(8),allocatable                      :: Smats11_(:),ASmats11_(:)
+  real(8),allocatable                         :: dens_(:),docc_(:),energy_(:),phisc_(:),imp_(:), Smats11mom_(:),ASmats11mom_(:)
   !
   !MPI Vars:
   integer                                     :: irank,comm,rank,size2,ierr
@@ -51,6 +49,7 @@ program ed_normal_normal
   if(Norb/=2)stop "Wrong setup from input file: Norb!=2"
   if(Nspin/=1 )stop "Wrong setup from input file: Nspin/=1"
   Nso=Nspin*Norb
+  Nmomenta=4
   !Allocate Weiss Field:
   allocate(Weiss(2,Nspin,Nspin,Norb,Norb,Lmats))
   allocate(Smats(2,Nspin,Nspin,Norb,Norb,Lmats))
@@ -89,8 +88,12 @@ program ed_normal_normal
   allocate(energy(8),energy_(8))
   allocate(phisc(4),phisc_(4))
   allocate(imp(4),imp_(4))
-  allocate(Smats11(size(Smats,6)),Smats11_(size(Smats,6)))
-  allocate(ASmats11(size(Smats,6)),ASmats11_(size(Smats,6)))
+  allocate(Wlist(size(Smats,6)))
+  allocate(Smats11mom(Nmomenta) , Smats11mom_(Nmomenta))
+  allocate(ASmats11mom(Nmomenta),ASmats11mom_(Nmomenta))
+  write(*,*) ""
+  write(*,*) "ED_MODE = SUPERC   |   BATH_TYPE = NORMAL"
+  write(*,*) "Checking..."
   ! density
   unit =free_unit()
   unit_=free_unit()
@@ -100,68 +103,73 @@ program ed_normal_normal
   open(unit_,file="dens_last.check")
   read(unit_,*) dens_(:)
   close(unit_)
-  call assert(dens,dens_,"NORMAL_SUPERC dens(:)")
-
+  call assert(dens,dens_,"dens(:)")
+  !Double Occupancy
   open(unit,file="docc_last.ed")
   read(unit,*) docc(:)
   close(unit)
   open(unit_,file="docc_last.check")
   read(unit_,*) docc_(:)
   close(unit_)
-  call assert(docc,docc_,"NORMAL_SUPERC docc(:)")
-
+  call assert(docc,docc_,"docc(:)")
+  !Energies
   open(unit,file="energy_last.ed")
   read(unit,*) energy(:)
   close(unit)
   open(unit_,file="energy_last.check")
   read(unit_,*) energy_(:)
   close(unit_)
-  call assert(energy,energy_,"NORMAL_SUPERC energy(:)")
-
+  call assert(energy,energy_,"energy(:)")
+  !impurity
   open(unit,file="imp_last.ed")
   read(unit,*) imp(:)
   close(unit)
   open(unit_,file="imp_last.check")
   read(unit_,*) imp_(:)
   close(unit_)
-  call assert(imp,imp_,"NORMAL_SUPERC imp(:)")
-
+  call assert(imp,imp_,"imp(:)")
+  !Superc Order Parameters
   open(unit,file="phisc_last.ed")
   read(unit,*) phisc(:)
   close(unit)
   open(unit_,file="phisc_last.check")
   read(unit_,*) phisc_(:)
   close(unit_)
-  call assert(phisc,phisc_,"NORMAL_SUPERC phisc(:)")
-
+  call assert(phisc,phisc_,"phisc(:)")
+  !Self-Energies
   open(unit,file="impSigma_l11_s1_iw.ed")
   do iw=1,size(Smats,6)
-     read(unit,*) w, Im, Re
-     Smats11(iw)=Re+xi*Im
+     read(unit,*) Wlist(iw), Im, Re
   enddo
-  close(unit)
-  open(unit_,file="impSigma_l11_s1_iw.check")
-  do iw=1,size(Smats,6)
-     read(unit_,*) w, Im, Re
-     Smats11_(iw)=Re+xi*Im
+  ! Get momenta
+  do i=1,Nmomenta
+     call compute_momentum(Wlist,Smats(1,1,1,1,1,:),i,Smats11mom(i))
+     call compute_momentum(Wlist,Smats(2,1,1,1,1,:),i,ASmats11mom(i))
+  enddo
+  ! Write new momenta
+  open(unit_,file="impSigma_l11_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, Smats11mom(i)
+  enddo
+  close(unit_)
+  open(unit_,file="impSelf_l11_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, ASmats11mom(i)
+  enddo
+  close(unit_)
+  !Read check momenta
+  open(unit_,file="impSigma_l11_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, Smats11mom_(i)
+  end do
+  open(unit_,file="impSelf_l11_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, ASmats11mom_(i)
   end do
   close(unit_)
-  call assert(Smats11,Smats11_,"NORMAL_SUPERC Smats11(:)",tol=1.0d-8)
-
-  open(unit,file="impSelf_l11_s1_iw.ed")
-  do iw=1,size(Smats,6)
-     read(unit,*) w, Im, Re
-     ASmats11(iw)=Re+xi*Im
-  enddo
-  close(unit)
-  open(unit_,file="impSelf_l11_s1_iw.check")
-  do iw=1,size(Smats,6)
-     read(unit_,*) w, Im, Re
-     ASmats11_(iw)=Re+xi*Im
-  end do
-  close(unit_)
-  call assert(ASmats11,ASmats11_,"NORMAL_SUPERC ASmats11(:)",tol=1.0d-8)
-
+  call assert(Smats11mom, Smats11mom_, "Sigma_matsubara_l11(:)",tol=1.0d-8)
+  call assert(ASmats11mom,ASmats11mom_, "Self_matsubara_l11(:)",tol=1.0d-8)
+  
   
   call finalize_MPI()
 
@@ -212,6 +220,27 @@ contains
        enddo
     enddo
   end function j2so
+  
+  ! Subroutine to compute momenta
+  ! 
+  ! ( sum_w abs(F(w))*w**n ) / ( sum_w abs(F(w)) )
+  subroutine compute_momentum(x,Fx,n,momentum)
+    real(8)   ,dimension(:),intent(in)       :: x
+    complex(8),dimension(:),intent(in)       :: Fx
+    integer   ,intent(in)                    :: n
+    real(8)   ,intent(out)                   :: momentum
+    !
+    integer                                  :: iw
+    real(8)                                  :: num,den
+    num=0.0;den=0.0
+    do iw=1,size(x,1)
+       num = num + abs(Fx(iw))*x(iw)**n
+       den = den + abs(Fx(iw))
+    enddo
+    momentum=num/den
+  end subroutine compute_momentum
+    
+    
 
 end program ed_normal_normal
 

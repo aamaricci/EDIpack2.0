@@ -5,12 +5,12 @@ program ed_replica_normal
   USE SF_MPI
   USE ASSERTING
   implicit none
-  integer                                     :: i,iw,jo,js,Nso,Nsymm
+  integer                                     :: i,iw,jo,js,Nso,Nsymm,Nmomenta
   integer                                     :: unit,unit_
   real(8)                                     :: w,Re,Im
   !Bath:
   integer                                     :: Nb,iorb,jorb,ispin,jspin,inso,print_mode
-  real(8),allocatable                         :: Bath(:)
+  real(8),allocatable                         :: Bath(:),Wlist(:)
   !GFs and Sigma:
   complex(8),allocatable                      :: Weiss(:,:,:,:,:,:)
   complex(8),allocatable                      :: Smats(:,:,:,:,:)
@@ -21,11 +21,9 @@ program ed_replica_normal
   real(8)                                     :: Delta
   character(len=16)                           :: finput
   !Replica variables:
-  real(8),allocatable                         :: dens(:),docc(:),exciton(:),energy(:),imp(:)
-  complex(8),allocatable                      :: Smats11(:), Smats12(:)
+  real(8),allocatable                         :: dens(:),docc(:),exciton(:),energy(:),imp(:),Smats11mom(:),Smats12mom(:)
   !CHECK variables
-  real(8),allocatable                         :: dens_(:),docc_(:),exciton_(:),energy_(:),imp_(:)
-  complex(8),allocatable                      :: Smats11_(:),Smats12_(:)
+  real(8),allocatable                         :: dens_(:),docc_(:),exciton_(:),energy_(:),imp_(:),Smats11mom_(:),Smats12mom_(:)
   !
   complex(8),dimension(4,4)                   :: GammaN,GammaE0
   real(8),dimension(:,:),allocatable          :: lambdasym_vector
@@ -53,6 +51,7 @@ program ed_replica_normal
   if(Norb/=2)stop "Wrong setup from input file: Norb!=2"
   if(Nspin/=1 )stop "Wrong setup from input file: Nspin/=1"
   Nso=Nspin*Norb
+  Nmomenta=4
   !Allocate Weiss Field:
   allocate(Weiss(1,Nspin,Nspin,Norb,Norb,Lmats))
   allocate(Smats(Nspin,Nspin,Norb,Norb,Lmats))
@@ -109,8 +108,12 @@ program ed_replica_normal
   allocate(exciton(2),exciton_(2))
   allocate(energy(8),energy_(8))
   allocate(imp(4),imp_(4))
-  allocate(Smats11(size(Smats,1)),Smats11_(size(Smats,1)))
-  allocate(Smats12(size(Smats,1)),Smats12_(size(Smats,1)))
+  allocate(Wlist(size(Smats,5)))
+  allocate(Smats11mom(Nmomenta),Smats11mom_(Nmomenta))
+  allocate(Smats12mom(Nmomenta),Smats12mom_(Nmomenta))
+  write(*,*) ""
+  write(*,*) "ED_MODE = NORMAL   |   BATH_TYPE = REPLICA"
+  write(*,*) "Checking..."
   ! density
   unit =free_unit()
   unit_=free_unit()
@@ -120,68 +123,78 @@ program ed_replica_normal
   open(unit_,file="dens_last.check")
   read(unit_,*) dens_(:)
   close(unit_)
-  call assert(dens,dens_,"REPLICA_NORMAL dens(:)")
-  
+  call assert(dens,dens_,"dens(:)")
+  !double occupancy
   open(unit,file="docc_last.ed")
   read(unit,*) docc(:)
   close(unit)
   open(unit_,file="docc_last.check")
   read(unit_,*) docc_(:)
   close(unit_)
-  call assert(docc,docc_,"REPLICA_NORMAL docc(:)")
-  
+  call assert(docc,docc_,"docc(:)")
+  !exciton order parameters
   open(unit,file="exciton_last.ed")
   read(unit,*) exciton(:)
   close(unit)
   open(unit_,file="exciton_last.check")
   read(unit_,*) exciton_(:)
   close(unit_)
-  call assert(exciton,exciton_,"REPLICA_NORMAL exciton(:)")
-
+  call assert(exciton,exciton_,"exciton(:)")
+  !energies
   open(unit,file="energy_last.ed")
   read(unit,*) energy(:)
   close(unit)
   open(unit_,file="energy_last.check")
   read(unit_,*) energy_(:)
   close(unit_)
-  call assert(energy,energy_,"REPLICA_NORMAL energy(:)")
-  
+  call assert(energy,energy_,"energy(:)")
+  !impurity
   open(unit,file="imp_last.ed")
   read(unit,*) imp(:)
   close(unit)
   open(unit_,file="imp_last.check")
   read(unit_,*) imp_(:)
   close(unit_)
-  call assert(imp,imp_,"REPLICA_NORMAL imp(:)")
-  
+  call assert(imp,imp_,"imp(:)")
+  !Self-Energies
   open(unit,file="impSigma_l11_s1_iw.ed")
-  do iw=1,size(Smats,1)
-     read(unit,*) w, Im, Re
-     Smats11(iw) = Re+xi*Im
+  do iw=1,size(Smats,5)
+     read(unit,*) Wlist(iw), Im, Re
   end do
   close(unit)
-  open(unit_,file="impSigma_l11_s1_iw.check")
-  do iw=1,size(Smats,1)
-     read(unit_,*) w, Im, Re
-     Smats11_(iw) = Re+xi*Im
-  end do
-  close(unit_)
-  call assert(Smats11,Smats11_,"REPLICA_NORMAL Smats11(:)",tol=1.0d-8)
 
-  open(unit,file="impSigma_l12_s1_iw.ed")
-  do iw=1,size(Smats,1)
-     read(unit,*) w, Im, Re
-     Smats12(iw) = Re+xi*Im
-  end do
-  close(unit)
-  open(unit_,file="impSigma_l12_s1_iw.check")
-  do iw=1,size(Smats,1)
-     read(unit_,*) w, Im, Re
-     Smats12_(iw) = Re+xi*Im
+  ! Get momenta
+  do i=1,Nmomenta
+     call compute_momentum(Wlist,Smats(1,1,1,1,:),i,Smats11mom(i))
+     call compute_momentum(Wlist,Smats(1,1,1,2,:),i,Smats12mom(i))
+  enddo
+  ! Write new momenta
+  open(unit_,file="impSigma_l11_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, Smats11mom(i)
+  enddo
+  close(unit_)
+  open(unit_,file="impSigma_l12_s1_iw.momenta.new")
+  do i=1,Nmomenta
+     write(unit_,*) i, Smats12mom(i)
+  enddo
+  close(unit_)
+  !Read check momenta
+  open(unit_,file="impSigma_l11_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, Smats11mom_(i)
   end do
   close(unit_)
-  call assert(Smats12,Smats12_,"REPLICA_NORMAL Smats12(:)",tol=1.0d-8)
+  open(unit_,file="impSigma_l12_s1_iw.momenta.check")
+  do i=1,Nmomenta
+     read(unit_,*) iw, Smats12mom_(i)
+  end do
+  close(unit_)
+  call assert(Smats11mom,Smats11mom_,"Sigma_matsubara_l11(:)",tol=1.0d-8)
+  call assert(Smats12mom,Smats12mom_,"Sigma_matsubara_l12(:)",tol=1.0d-8)
   
+  
+
   call finalize_MPI()
 
 
@@ -232,6 +245,26 @@ contains
     enddo
   end function j2so
 
+  ! Subroutine to compute momenta
+  ! 
+  ! ( sum_w abs(F(w))*w**n ) / ( sum_w abs(F(w)) )
+  subroutine compute_momentum(x,Fx,n,momentum)
+    real(8)   ,dimension(:),intent(in)       :: x
+    complex(8),dimension(:),intent(in)       :: Fx
+    integer   ,intent(in)                    :: n
+    real(8)   ,intent(out)                   :: momentum
+    !
+    integer                                  :: iw
+    real(8)                                  :: num,den
+    !
+    num=0.0;    den=0.0
+    do iw=1,size(x,1)
+       num = num + (abs(Fx(iw)) )*x(iw)**n
+       den = den + (abs(Fx(iw)) )
+    enddo
+    momentum=num/den
+  end subroutine compute_momentum
+    
 end program ed_replica_normal
 
 

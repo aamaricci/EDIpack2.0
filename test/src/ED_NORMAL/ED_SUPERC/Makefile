@@ -9,14 +9,6 @@ PLAT=gnu
 TSTBIN=../../../bin/NORMAL/SUPERC
 OBJS=../../ASSERTING.o
 
-define colorecho	
-	@tput setaf 6
-	@tput bold
-	@echo $1
-	@tput sgr0
-endef
-
-
 #NO NEED TO CHANGE DOWN HERE, only expert mode.
 #########################################################################
 GLOB_INC:=$(shell pkg-config --cflags dmft_ed scifor)
@@ -49,7 +41,7 @@ endif
 all: FLAG:=${FFLAG} ${FPPFLAG}
 all:
 	@echo ""
-	$(call colorecho,"compiling $(EXE).f90 ")
+	@echo "compiling $(EXE).f90 "
 	@echo ""
 	$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}
 	@cp *.check $(TSTBIN)/
@@ -59,7 +51,7 @@ all:
 debug: FLAG:=${DFLAG} ${FPPFLAG}
 debug:
 	@echo ""
-	$(call colorecho,"compiling $(EXE).f90 ")
+	@echo "compiling $(EXE).f90 "
 	@echo ""
 	$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}
 	@cp *.check $(TSTBIN)/
