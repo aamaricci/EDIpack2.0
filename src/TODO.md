@@ -8,6 +8,6 @@
 
 - [x] Extend **superc** to use *replica* bath type
 
-- [ ] Extend replica case to orbital-dependent hybridization V_k
+- [x] Extend replica case to orbital-dependent hybridization V_k => `bath_type=general`
 
 - [ ] Extend ED_SECTOR=T to **superc** mode

@@ -17,7 +17,7 @@ GLOB_LIB:=$(shell pkg-config --libs   dmft_ed scifor | sed  "s/;/ /g"  | sed 's/
 
 
 ifeq ($(PLAT),intel)
-FFLAG=-O2 -ftz
+FFLAG=-O2 -ftz -coverage
 OFLAG=-O3 -ftz
 DFLAG=-p -O0 -g -fpe0 -warn -warn errors -debug extended -traceback -check all,noarg_temp_created
 FPPFLAG =-fpp

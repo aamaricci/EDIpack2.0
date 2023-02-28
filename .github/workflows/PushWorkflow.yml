@@ -67,3 +67,28 @@ jobs:
         run: |
           cd LIB_DMFT_ED/test
           make test
+
+      - name: Install LCOV or alternatives
+      if: contains( matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get install lcov
+        sudo update-alternatives \
+           --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.gcc_v }} 100 \
+           --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${{ matrix.gcc_v }} \
+           --slave /usr/bin/gcov gcov /usr/bin/gcov-${{ matrix.gcc_v }}
+
+      - name: Create coverage report
+      if: contains( matrix.os, 'ubuntu')
+      run: |
+        mkdir -p ${{ env.COV_DIR }}
+        lcov --capture --initial --base-directory . --directory test/ --output-file ${{ env.COV_DIR }}/coverage.base
+        lcov --capture --base-directory . --directory test/ --output-file ${{ env.COV_DIR }}/coverage.capture
+        lcov --add-tracefile ${{ env.COV_DIR }}/coverage.base --add-tracefile ${{ env.COV_DIR }}/coverage.capture --output-file ${{ env.COV_DIR }}/coverage.info
+      env:
+        COV_DIR: test/coverage
+
+      - name: Upload coverage report to CODECOV
+      if: contains( matrix.os, 'ubuntu')
+      uses: codecov/codecov-action@v3
+      with:
+        files: test/coverage/coverage.info
