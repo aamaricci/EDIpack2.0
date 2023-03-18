@@ -181,7 +181,7 @@ contains
     impHloc = so2nn_reshape(Hloc(1:Nspin*Norb,1:Nspin*Norb),Nspin,Norb)
     rank (4)                      !Hloc[Nspin,Nspin,Norb,Norb]
     call assert_shape(Hloc,[Nspin,Nspin,Norb,Norb],"ed_set_Hloc","Hloc")
-    impHloc = Hloc(1:Nspin,1:Nspin,1:Norb,1:Norb)
+    impHloc = Hloc
     end select
     if(ed_verbose>2)call print_hloc(impHloc)
   end subroutine ed_set_Hloc_single
@@ -213,7 +213,7 @@ contains
     !
     rank (5)
     call assert_shape(Hloc,[Nlat,Nspin,Nspin,Norb,Norb],'ed_set_Hloc','Hloc')
-    Hloc_ineq  = Hloc(1:Nlat,1:Nspin,1:Nspin,1:Norb,1:Norb)
+    Hloc_ineq  = Hloc
     end select
   end subroutine ed_set_Hloc_lattice
 
