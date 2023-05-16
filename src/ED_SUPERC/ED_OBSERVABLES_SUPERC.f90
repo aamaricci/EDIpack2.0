@@ -183,12 +183,12 @@ contains
              !<X> and <X^2> with X=(b+bdg)/sqrt(2)
              if(iph<DimPh)then
                 j= i_el + (iph)*sectorI%DimEl
-                X_ph = X_ph + sqrt(2.d0*dble(iph))*(state_dvec(i)*state_dvec(j))*peso
+                X_ph = X_ph + sqrt(2.d0*dble(iph))*real(state_cvec(i)*conjg(state_cvec(j)))*peso
              end if
              X2_ph = X2_ph + 0.5d0*(1+2*(iph-1))*gs_weight
              if(iph<DimPh-1)then
                 j= i_el + (iph+1)*sectorI%DimEl
-                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*(state_dvec(i)*state_dvec(j))*peso
+                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*real(state_cvec(i)*conjg(state_cvec(j)))*peso
              end if
              !compute the lattice probability distribution function
              if(Dimph>1 .AND. iph==1) then
