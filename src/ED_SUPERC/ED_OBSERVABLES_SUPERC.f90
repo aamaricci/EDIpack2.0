@@ -35,6 +35,7 @@ MODULE ED_OBSERVABLES_SUPERC
   real(8),dimension(:),allocatable    :: pdf_ph
   real(8),dimension(:,:),allocatable  :: pdf_part
   real(8)                             :: dens_ph
+  real(8)                             :: X_ph, X2_ph
   real(8)                             :: w_ph
   !
   integer                             :: iorb,jorb,istate
@@ -103,6 +104,8 @@ contains
     s2tot   = 0.d0
     Prob    = 0.d0
     prob_ph = 0.d0
+    X_ph = 0.d0
+    X2_ph = 0.d0
     dens_ph = 0.d0
     pdf_ph  = 0.d0
     pdf_part= 0.d0
@@ -177,6 +180,16 @@ contains
              prob_ph(iph) = prob_ph(iph) + gs_weight
              dens_ph = dens_ph + (iph-1)*gs_weight
              !
+             !<X> and <X^2> with X=(b+bdg)/sqrt(2)
+             if(iph<DimPh)then
+                j= i_el + (iph)*sectorI%DimEl
+                X_ph = X_ph + sqrt(2.d0*dble(iph))*(state_dvec(i)*state_dvec(j))*peso
+             end if
+             X2_ph = X2_ph + 0.5d0*(1+2*(iph-1))*gs_weight
+             if(iph<DimPh-1)then
+                j= i_el + (iph+1)*sectorI%DimEl
+                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*(state_dvec(i)*state_dvec(j))*peso
+             end if
              !compute the lattice probability distribution function
              if(Dimph>1 .AND. iph==1) then
                 val = 1
@@ -594,7 +607,7 @@ contains
     write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(jorb-1)*Norb))//"phisc_"//reg(txtfy(iorb)),iorb=1,Norb),jorb=1,Norb)
     write(unit,"(A1,90(A10,6X))") "# *****"
     write(unit,"(A1,90(A10,6X))") "# imp_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ", "1s2tot", "2egs", "3nph", "4w_ph"
+    write(unit,"(A1,90(A10,6X))") "# ", "1s2tot", "2egs", "3nph", "4w_ph", "5X_ph", "6X2_ph"
     close(unit)
     
     unit = free_unit()
@@ -690,7 +703,7 @@ contains
     !
     unit = free_unit()
     open(unit,file="imp_all.ed",position='append')
-    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
+    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph, X_ph, X2_ph
     close(unit)
     !
     !LAST OBSERVABLES
@@ -746,7 +759,7 @@ contains
     !
     unit = free_unit()
     open(unit,file="imp_last.ed")
-    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph
+    write(unit,"(90(F15.9,1X))") s2tot, egs, dens_ph, w_ph, X_ph, X2_ph
     close(unit)
     !
     !PARAMETERS

@@ -25,6 +25,7 @@ MODULE ED_INPUT_VARS
   complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
   real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
   real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
+  real(8)              :: A_ph                !A_ph: phonon field coupled to displacement operator (constant)
   !
   integer              :: Nsuccess            !# of repeated success to fall below convergence threshold  
   real(8)              :: dmft_error          !dmft convergence threshold
@@ -171,6 +172,7 @@ contains
     allocate(g_ph_diag(Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
     call parse_input_variable(g_ph_diag,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling density constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
+    call parse_input_variable(A_ph,"A_PH",INPUTunit,default=0.d0,comment="Forcing field coupled to phonon's displacement operator")
     call parse_input_variable(GPHfile,"GPHfile",INPUTunit,default="NONE",comment="File of Phonon couplings. Put NONE to use only density couplings.")
 
     allocate(spin_field_x(Norb))
