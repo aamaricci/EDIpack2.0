@@ -330,6 +330,31 @@ contains
     call substring_delete(Hfile,".ed")
   end subroutine ed_read_input
 
+  subroutine ed_update_input(name,vals)
+    character(len=*)      :: name
+    real(8),dimension(:)  :: vals
+    select case (name)
+    case default
+       stop "WRONG NAME ON ED_UPDATE_INPUT"
+    case ("EXC_FIELD")
+       if(size(vals)/=4)stop "WRONG SIZE IN ED_UPDATE_EXC_FIELD"
+       exc_field=vals
+    case ("PAIR_FIELD")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_PAIR_FIELD"
+       pair_field=vals
+    case ("SPIN_FIELD_X")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_X"
+       spin_field_x=vals
+    case ("SPIN_FIELD_Y")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_Y"
+       spin_field_y=vals
+    case ("SPIN_FIELD_Z")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_Z"
+       spin_field_z=vals
+    end select
+    
+  end subroutine ed_update_input
+
 
 
 
