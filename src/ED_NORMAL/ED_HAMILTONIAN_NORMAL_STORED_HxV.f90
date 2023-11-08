@@ -560,6 +560,7 @@ contains
     !
     Hv=0d0
     !
+
     do i = 1,Nloc
        i_el = mod(i-1,DimUp*DimDw) + 1
        !

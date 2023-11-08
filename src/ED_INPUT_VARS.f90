@@ -25,6 +25,7 @@ MODULE ED_INPUT_VARS
   complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
   real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
   real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
+  real(8)              :: A_ph                !A_ph: phonon field coupled to displacement operator (constant)
   !
   integer              :: Nsuccess            !# of repeated success to fall below convergence threshold  
   real(8)              :: dmft_error          !dmft convergence threshold
@@ -171,6 +172,7 @@ contains
     allocate(g_ph_diag(Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
     call parse_input_variable(g_ph_diag,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling density constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
+    call parse_input_variable(A_ph,"A_PH",INPUTunit,default=0.d0,comment="Forcing field coupled to phonon's displacement operator")
     call parse_input_variable(GPHfile,"GPHfile",INPUTunit,default="NONE",comment="File of Phonon couplings. Put NONE to use only density couplings.")
 
     allocate(spin_field_x(Norb))
@@ -327,6 +329,31 @@ contains
     call substring_delete(Hfile,".restart")
     call substring_delete(Hfile,".ed")
   end subroutine ed_read_input
+
+  subroutine ed_update_input(name,vals)
+    character(len=*)      :: name
+    real(8),dimension(:)  :: vals
+    select case (name)
+    case default
+       stop "WRONG NAME ON ED_UPDATE_INPUT"
+    case ("EXC_FIELD")
+       if(size(vals)/=4)stop "WRONG SIZE IN ED_UPDATE_EXC_FIELD"
+       exc_field=vals
+    case ("PAIR_FIELD")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_PAIR_FIELD"
+       pair_field=vals
+    case ("SPIN_FIELD_X")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_X"
+       spin_field_x=vals
+    case ("SPIN_FIELD_Y")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_Y"
+       spin_field_y=vals
+    case ("SPIN_FIELD_Z")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_Z"
+       spin_field_z=vals
+    end select
+    
+  end subroutine ed_update_input
 
 
 

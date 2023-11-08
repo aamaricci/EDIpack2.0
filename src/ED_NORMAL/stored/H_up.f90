@@ -85,14 +85,14 @@
      !F_z. T^z_ab :=   F_z . C^+_{a,up}C_{b,up}
      if(any(exc_field/=0d0))then
         do iorb=1,Norb
-           do jorb=iorb+1,Norb
+           do jorb=1,Norb
               Jcondition = (Nup(jorb)==1) .AND. (Nup(iorb)==0)
               if (Jcondition) then
                  call c(jorb,mup,k1,sg1)
                  call cdg(iorb,k1,k2,sg2)
                  iup = binary_search(Hsector%H(1)%map,k2)
                  !
-                 htmp = exc_field(1)*sg1*sg2                 
+                 htmp = exc_field(1)*sg1*sg2
                  call sp_insert_element(spH0ups(1),htmp,iup,jup)
                  !
                  htmp = exc_field(4)*sg1*sg2

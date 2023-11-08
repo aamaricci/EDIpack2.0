@@ -1,6 +1,7 @@
 MODULE DMFT_ED
   USE ED_INPUT_VARS  , only: &
        ed_read_input , &
+       ed_update_input,&
        Norb          , &
        Nspin         , &
        Nbath         , &
