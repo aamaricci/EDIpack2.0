@@ -4,7 +4,7 @@ includedir=${prefix}/include
 libdir=${prefix}/lib
 
 Name: dmft_ed
-Description: The DMFT_ED library
+Description: The EDIpack2.0 library
 Cflags: -I${includedir}
 Libs: -L${libdir} -ldmft_ed
 Version:@VERSION@

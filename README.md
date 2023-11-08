@@ -1,15 +1,16 @@
-#   Exact Diagonalization for Quantum Impurity problems
+# EDIpack2.0: Massively parallel Exact Diagonalization for generic Quantum Impurity problems
 
-[![TestSuite](https://img.shields.io/github/actions/workflow/status/QcmPlab/LIB_DMFT_ED/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/QcmPlab/LIB_DMFT_ED/actions/workflows/PushWorkflow.yml) 
+[![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/DMFT_ED/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/DMFT_ED/actions/workflows/PushWorkflow.yml) 
 
 <!-- TO BE SETUP ASAP
 [![Coverage]()]()
 [![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://qcmplab.github.io/DMFT_ED)
 -->
-A serial/parallel Lanczos based method for the solution of single-site Quantum Impurity problems, with a special application as Dynamical Mean-Field Theory solver. 
-
-This library provides a simple, yet generic, interface to the solution of single-site, multi-orbital quantum impurity models with a finite, discrete electronic bath. The solution is obtained in either for *normal*, *superconducting* (s-wave) or *Sz-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases. The code works at zero and  low temperatures.   
-
+A suitable extension of ![EDIpack](https://github.com/aamaricci/EDIpack): a  Lanczos based method 
+for the solution of generic Quantum Impurity problems,  exploiting distributed memory MPI parallelisation.
+This updated version, aims to solve single-site, multi-orbital models, in either  *normal*, *superconducting* (s-wave) or *Spin-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases, including electron-phonons coupling. The code works at zero and low temperatures.   
+ 
+See [j.cpc.2021.108261](https://doi.org/10.1016/j.cpc.2021.108261) for further information about the underlying algorithms. Yet, suitable modifications have been developed to address the Superconducting and non-SU(2) channels.  
 
 
 ### Dependencies
@@ -25,13 +26,14 @@ The code is based on:
 
 ### Installation
 
-Installation is  available using CMake. In the current v0.0.1 API are only provided in Fortran.   
+Installation is available using CMake. In the current v0.0.1 API are only provided in Fortran. In a future release Python and C/C++ API will be included.  
+The software gives acces to the static library `libdmft_ed.a` and the related modules `DMFT_ED`
 
 Clone the repo:
 
-`git clone https://github.com/aamaricci/lib_dmft_ed scifor`
+`git clone https://github.com/aamaricci/EDIpack2.0`
 
-And from the repository directory (`cd lib_dmft_ed`) make a standard out-of-source CMake compilation:
+And from the repository directory (`cd EDIpack2.0`) make a standard out-of-source CMake compilation:
 
 `mkdir build`
 `cd build`
@@ -65,19 +67,12 @@ adriano DOT amaricci @ gmail DOT com
 --
 
 ***LICENSE***  
-Copyright 2020- (C) Adriano Amaricci, Lorenzo Crippa, Alberto Scazzola, Gabriele Bellomia, Samuele Giuli, Giacomo Mazza, Francesco Petocchi, Luca de Medici and Massimo Capone. 
+Copyright 2020- (C) Adriano Amaricci, Lorenzo Crippa, Alberto Scazzola, Gabriele Bellomia, Samuele Giuli, Giacomo Mazza, Francesco Petocchi
 
 The software is provided with no license, as such it is protected by copyright.
 The software is provided as it is and can be read and copied, in agreement with 
 the Terms of Service of GITHUB. Use of the code is constrained to author agreement.   
 
-<!--This program is free software: you can redistribute it and/or modify-->
-<!--it under the terms of the GNU General Public License as published by-->
-<!--the Free Software Foundation, either version 3 of the License, or-->
-<!--(at your option) any later version.-->
-
-<!--You should have received a copy of the GNU General Public License-->
-<!--along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of

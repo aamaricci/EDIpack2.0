@@ -1,4 +1,4 @@
-name: CI LIB_DMFT_ED test workflow 
+name: CI DMFT_ED test workflow 
 
 on: push
 
@@ -32,14 +32,14 @@ jobs:
 
 # Build SciFortran
       - name: Cloning SciFortran
-        run: git clone https://github.com/QcmPlab/SciFortran.git scifor
+        run: git clone https://github.com/aamaricci/SciFortran.git scifor
       - name: Install SciFortran
         run: scifor/bin/ci_setup_scifor.sh
 
 # Build LIB_DMFT_ED
-      - name: Cloning LIB_DMFT_ED
-        run: git clone https://github.com/QcmPlab/LIB_DMFT_ED.git LIB_DMFT_ED
-      - name: Install LIB_DMFT_ED
+      - name: Cloning DMFT_ED
+        run: git clone https://github.com/aamaricci/DMFT_ED.git DMFT_ED
+      - name: Install DMFT_ED
         run: |
           source ~/.scifor_config_user
           export PKG_CONFIG_PATH=~/.pkgconfig.d

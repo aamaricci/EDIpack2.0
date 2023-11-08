@@ -2,7 +2,7 @@
 #Errors
 set -e
 
-cd LIB_DMFT_ED
+cd EDIpack2.0
 mkdir build
 cd build
 
@@ -16,5 +16,5 @@ echo "make install"
 make install
 
 echo "source ~/opt/dmft_ed/gnu/*/bin/dmft_ed_config_user.sh" >> ~/.dmft_ed_config_user
-echo -e "\e[32m LIB_DMFT_ED installed and sourced \e[0m"
+echo -e "\e[32m EDIpack2.0 installed and sourced \e[0m"
 
