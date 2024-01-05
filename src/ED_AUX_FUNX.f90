@@ -10,25 +10,38 @@ MODULE ED_AUX_FUNX
   implicit none
   private
 
+  !> ED SET HLOC
+  interface ed_set_Hloc
+     module procedure :: ed_set_Hloc_single
+     module procedure :: ed_set_Hloc_lattice
+  end interface ed_set_Hloc
 
   interface lso2nnn_reshape
      module procedure d_nlso2nnn
      module procedure c_nlso2nnn
+     module procedure d_nlso2nnn_l
+     module procedure c_nlso2nnn_l
   end interface lso2nnn_reshape
 
   interface so2nn_reshape
      module procedure d_nso2nn
      module procedure c_nso2nn
+     module procedure d_nso2nn_l
+     module procedure c_nso2nn_l
   end interface so2nn_reshape
 
   interface nnn2lso_reshape
      module procedure d_nnn2nlso
      module procedure c_nnn2nlso
+     module procedure d_nnn2nlso_l
+     module procedure c_nnn2nlso_l
   end interface nnn2lso_reshape
 
   interface nn2so_reshape
      module procedure d_nn2nso
      module procedure c_nn2nso
+     module procedure d_nn2nso_l
+     module procedure c_nn2nso_l
   end interface nn2so_reshape
 
   interface print_state_vector
@@ -62,6 +75,8 @@ MODULE ED_AUX_FUNX
   ! #endif
 
 
+  !SET local Impurity Hamiltonian (excluded the interaction part)
+  public :: ed_set_Hloc
   !FERMIONIC OPERATORS IN BITWISE OPERATIONS
   public :: c,cdg
   !AUX BIT OPERATIONS
@@ -76,18 +91,10 @@ MODULE ED_AUX_FUNX
   public :: so2nn_reshape
   public :: nnn2lso_reshape
   public :: nn2so_reshape
-  public :: so2os_reshape
-  public :: os2so_reshape
+
   !SEARCH CHEMICAL POTENTIAL, this should go into DMFT_TOOLS I GUESS
   public :: ed_search_variable
   public :: search_chemical_potential
-  !SOC RELATED STUFF
-  public :: SOC_jz_symmetrize
-  public :: atomic_SOC
-  public :: atomic_SOC_rotation
-  public :: orbital_Lz_rotation_NorbNspin
-  public :: orbital_Lz_rotation_Norb
-  public :: atomic_j
   !ALLOCATE/DEALLOCATE GRIDS
   public :: allocate_grids
   public :: deallocate_grids
@@ -98,6 +105,8 @@ MODULE ED_AUX_FUNX
   !SET/RESET GLOBAL FILE SUFFIX
   public :: ed_set_suffix
   public :: ed_reset_suffix
+
+
   !MPI PROCEDURES
 #ifdef _MPI
   interface scatter_vector_MPI
@@ -145,6 +154,69 @@ contains
     character(len=*) :: indx
     ed_file_suffix=reg(ineq_site_suffix)//str(indx)
   end subroutine ed_set_suffix_c
+
+
+  !##################################################################
+  !##################################################################
+  !##################################################################
+  !##################################################################
+
+
+  !+------------------------------------------------------------------+
+  !PURPOSE  : Setup Himpurity, the local part of the non-interacting Hamiltonian
+    !+------------------------------------------------------------------+
+  subroutine ed_set_Hloc_single(Hloc)
+    complex(8),dimension(..),intent(in) :: Hloc
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_set_Hloc: set impHloc"
+#endif
+    !
+    if(allocated(impHloc))deallocate(impHloc)
+    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
+    !
+    select rank(Hloc)
+    rank default;stop "ED_SET_HLOC ERROR: Hloc has a wrong rank. Accepted: [Nso,Nso] or [Nspin,Nspin,Norb,Norb]"
+    rank (2)                      !Hloc[Nso,Nso]
+    call assert_shape(Hloc,[Nspin*Norb,Nspin*Norb],"ed_set_Hloc","Hloc")
+    impHloc = so2nn_reshape(Hloc(1:Nspin*Norb,1:Nspin*Norb),Nspin,Norb)
+    rank (4)                      !Hloc[Nspin,Nspin,Norb,Norb]
+    call assert_shape(Hloc,[Nspin,Nspin,Norb,Norb],"ed_set_Hloc","Hloc")
+    impHloc = Hloc
+    end select
+    if(ed_verbose>2)call print_hloc(impHloc)
+  end subroutine ed_set_Hloc_single
+
+
+  subroutine ed_set_Hloc_lattice(Hloc,Nlat)
+    complex(8),dimension(..),intent(in) :: Hloc
+    integer                             :: Nlat,ilat
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG ed_set_Hloc: set impHloc"
+#endif
+    !
+    if(allocated(Hloc_ineq))deallocate(Hloc_ineq)
+    allocate(Hloc_ineq(Nlat,Nspin,Nspin,Norb,Norb));Hloc_ineq=zero
+    !
+    select rank(Hloc)
+    rank default;
+    stop "ED_SET_HLOC ERROR: Hloc has a wrong rank. [Nlso,Nlso],[Nlat,Nso,Nso],[Nlat,Nspin,Nspin,Norb,Norb]"
+    !
+    rank (2)
+    call assert_shape(Hloc,[Nlat*Nspin*Norb,Nlat*Nspin*Norb],'ed_set_Hloc','Hloc')
+    Hloc_ineq  = lso2nnn_reshape(Hloc(1:Nlat*Nspin*Norb,1:Nlat*Nspin*Norb),Nlat,Nspin,Norb)
+    !
+    rank (3)
+    call assert_shape(Hloc,[Nlat,Nspin*Norb,Nspin*Norb],'ed_set_Hloc','Hloc')
+    do ilat=1,Nlat
+       Hloc_ineq(ilat,:,:,:,:)  = so2nn_reshape(Hloc(ilat,1:Nspin*Norb,1:Nspin*Norb),Nspin,Norb)
+    enddo
+    !
+    rank (5)
+    call assert_shape(Hloc,[Nlat,Nspin,Nspin,Norb,Norb],'ed_set_Hloc','Hloc')
+    Hloc_ineq  = Hloc
+    end select
+  end subroutine ed_set_Hloc_lattice
+
 
 
 
@@ -219,6 +291,7 @@ contains
   ! default: |(1:Norb),([1:Nbath]_1, [1:Nbath]_2, ... ,[1:Nbath]_Norb)>_spin
   ! hybrid:  |(1:Norb),([1:Nbath])>_spin
   ! replica: |(1:Norb),([1:Norb]_1, [1:Norb]_2, ...  , [1:Norb]_Nbath)>_spin
+  ! general: // same as replica
   !
   !> case (ed_total_ud):
   !   (T): Ns_Ud=1, Ns_Orb=Ns.
@@ -657,7 +730,7 @@ contains
   end function index_stride_so
 
 
-
+  !>> ALL THESE CAN BE EXPRESSED IN TERMS OF +DO CONCURRENT; ENDDO
   !+-----------------------------------------------------------------------------+!
   !PURPOSE: 
   ! reshape a matrix from the [Nlso][Nlso] shape
@@ -844,57 +917,201 @@ contains
 
 
 
-  function so2os_reshape(fg,Nspin,Norb) result(g)
-    integer                                     :: Nspin,Norb
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: fg
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: g
-    integer                                     :: iorb,jorb,ispin,jspin
-    integer                                     :: io1,jo1,io2,jo2
-    g = zero
-    do ispin=1,Nspin
-       do jspin=1,Nspin
-          do iorb=1,Norb
-             do jorb=1,Norb
-                !O-index
-                io1 = iorb + (ispin-1)*Norb
-                jo1 = jorb + (jspin-1)*Norb
-                !I-index
-                io2 = ispin + (iorb-1)*Nspin
-                jo2 = jspin + (jorb-1)*Nspin
-                !switch
-                g(io1,jo1)  = fg(io2,jo2)
-                !
-             enddo
-          enddo
-       enddo
-    enddo
-  end function so2os_reshape
 
-  function os2so_reshape(fg,Nspin,Norb) result(g)
-    integer                                     :: Nspin,Norb
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: fg
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: g
-    integer                                     :: iorb,jorb,ispin,jspin
-    integer                                     :: io1,jo1,io2,jo2
-    g = zero
-    do ispin=1,Nspin
-       do jspin=1,Nspin
-          do iorb=1,Norb
-             do jorb=1,Norb
-                !O-index
-                io1 = ispin + (iorb-1)*Nspin
-                jo1 = jspin + (jorb-1)*Nspin
-                !I-index
-                io2 = iorb + (ispin-1)*Norb
-                jo2 = jorb + (jspin-1)*Norb
-                !switch
-                g(io1,jo1)  = fg(io2,jo2)
-                !
+
+
+  !+-----------------------------------------------------------------------------+!
+  !PURPOSE: 
+  ! reshape a matrix 
+  ! _nlso2nnn : from [Nlso][Nlso][L] to [Nlat][Nspin][Nspin][Norb][Norb][L]  !
+  ! _nso2nn   : from [Nso][Nso][L]   to [Nspin][Nspin][Norb][Norb][L]
+  !+-----------------------------------------------------------------------------+!
+  function d_nlso2nnn_l(Hlso,Nlat,Nspin,Norb,L) result(Hnnn)
+    integer                                              :: Nlat,Nspin,Norb,L
+    real(8),dimension(Nlat*Nspin*Norb,Nlat*Nspin*Norb,L) :: Hlso
+    real(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,L)      :: Hnnn
+    integer                                              :: iorb,ispin,ilat,is
+    integer                                              :: jorb,jspin,js
+    Hnnn=zero
+    do ilat=1,Nlat
+       do ispin=1,Nspin
+          do jspin=1,Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   is = iorb + (ispin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   js = jorb + (jspin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   Hnnn(ilat,ispin,jspin,iorb,jorb,:) = Hlso(is,js,:)
+                enddo
              enddo
           enddo
        enddo
     enddo
-  end function os2so_reshape
+  end function d_nlso2nnn_l
+  function c_nlso2nnn_l(Hlso,Nlat,Nspin,Norb,L) result(Hnnn)
+    integer                                                 :: Nlat,Nspin,Norb,L
+    complex(8),dimension(Nlat*Nspin*Norb,Nlat*Nspin*Norb,L) :: Hlso
+    complex(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,L)      :: Hnnn
+    integer                                                 :: iorb,ispin,ilat,is
+    integer                                                 :: jorb,jspin,js
+    Hnnn=zero
+    do ilat=1,Nlat
+       do ispin=1,Nspin
+          do jspin=1,Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   is = iorb + (ispin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   js = jorb + (jspin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   Hnnn(ilat,ispin,jspin,iorb,jorb,:) = Hlso(is,js,:)
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+  end function c_nlso2nnn_l
+
+  function d_nso2nn_l(Hso,Nspin,Norb,L) result(Hnn)
+    integer                                    :: Nspin,Norb,L
+    real(8),dimension(Nspin*Norb,Nspin*Norb,L) :: Hso
+    real(8),dimension(Nspin,Nspin,Norb,Norb,L) :: Hnn
+    integer                                    :: iorb,ispin,is
+    integer                                    :: jorb,jspin,js
+    Hnn=zero
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          do iorb=1,Norb
+             do jorb=1,Norb
+                is = iorb + (ispin-1)*Norb  !spin-orbit stride
+                js = jorb + (jspin-1)*Norb  !spin-orbit stride
+                Hnn(ispin,jspin,iorb,jorb,:) = Hso(is,js,:)
+             enddo
+          enddo
+       enddo
+    enddo
+  end function d_nso2nn_l
+  function c_nso2nn_l(Hso,Nspin,Norb,L) result(Hnn)
+    integer                                       :: Nspin,Norb,L
+    complex(8),dimension(Nspin*Norb,Nspin*Norb,L) :: Hso
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,L) :: Hnn
+    integer                                       :: iorb,ispin,is
+    integer                                       :: jorb,jspin,js
+    Hnn=zero
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          do iorb=1,Norb
+             do jorb=1,Norb
+                is = iorb + (ispin-1)*Norb  !spin-orbit stride
+                js = jorb + (jspin-1)*Norb  !spin-orbit stride
+                Hnn(ispin,jspin,iorb,jorb,:) = Hso(is,js,:)
+             enddo
+          enddo
+       enddo
+    enddo
+  end function c_nso2nn_l
+
+
+
+
+  !+-----------------------------------------------------------------------------+!
+  !PURPOSE: 
+  ! reshape a matrix from the [Nlat][Nspin][Nspin][Norb][Norb] shape
+  ! from/to the [Nlso][Nlso] shape.
+  ! _nnn2nlso : from [Nlat][Nspin][Nspin][Norb][Norb] to [Nlso][Nlso]
+  ! _nn2nso   : from [Nspin][Nspin][Norb][Norb]       to [Nso][Nso]
+  !+-----------------------------------------------------------------------------+!
+  function d_nnn2nlso_l(Hnnn,Nlat,Nspin,Norb,L) result(Hlso)
+    integer                                              :: Nlat,Nspin,Norb,L
+    real(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,L)      :: Hnnn
+    real(8),dimension(Nlat*Nspin*Norb,Nlat*Nspin*Norb,L) :: Hlso
+    integer                                              :: iorb,ispin,ilat,is
+    integer                                              :: jorb,jspin,js
+    Hlso=zero
+    do ilat=1,Nlat
+       do ispin=1,Nspin
+          do jspin=1,Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   is = iorb + (ispin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   js = jorb + (jspin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   Hlso(is,js,:) = Hnnn(ilat,ispin,jspin,iorb,jorb,:)
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+  end function d_nnn2nlso_l
+
+  function c_nnn2nlso_l(Hnnn,Nlat,Nspin,Norb,L) result(Hlso)
+    integer                                                 :: Nlat,Nspin,Norb,L
+    complex(8),dimension(Nlat,Nspin,Nspin,Norb,Norb,L)      :: Hnnn
+    complex(8),dimension(Nlat*Nspin*Norb,Nlat*Nspin*Norb,L) :: Hlso
+    integer                                                 :: iorb,ispin,ilat,is
+    integer                                                 :: jorb,jspin,js
+    Hlso=zero
+    do ilat=1,Nlat
+       do ispin=1,Nspin
+          do jspin=1,Nspin
+             do iorb=1,Norb
+                do jorb=1,Norb
+                   is = iorb + (ispin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   js = jorb + (jspin-1)*Norb + (ilat-1)*Norb*Nspin !lattice-spin-orbit stride
+                   Hlso(is,js,:) = Hnnn(ilat,ispin,jspin,iorb,jorb,:)
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+  end function c_nnn2nlso_l
+
+  function d_nn2nso_l(Hnn,Nspin,Norb,L) result(Hso)
+    integer                                    :: Nspin,Norb,L
+    real(8),dimension(Nspin,Nspin,Norb,Norb,L) :: Hnn
+    real(8),dimension(Nspin*Norb,Nspin*Norb,L) :: Hso
+    integer                                    :: iorb,ispin,is
+    integer                                    :: jorb,jspin,js
+    Hso=zero
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          do iorb=1,Norb
+             do jorb=1,Norb
+                is = iorb + (ispin-1)*Norb  !spin-orbit stride
+                js = jorb + (jspin-1)*Norb  !spin-orbit stride
+                Hso(is,js,:) = Hnn(ispin,jspin,iorb,jorb,:)
+             enddo
+          enddo
+       enddo
+    enddo
+  end function d_nn2nso_l
+
+  function c_nn2nso_l(Hnn,Nspin,Norb,L) result(Hso)
+    integer                                       :: Nspin,Norb,L
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,L) :: Hnn
+    complex(8),dimension(Nspin*Norb,Nspin*Norb,L) :: Hso
+    integer                                       :: iorb,ispin,is
+    integer                                       :: jorb,jspin,js
+    Hso=zero
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          do iorb=1,Norb
+             do jorb=1,Norb
+                is = iorb + (ispin-1)*Norb  !spin-orbit stride
+                js = jorb + (jspin-1)*Norb  !spin-orbit stride
+                Hso(is,js,:) = Hnn(ispin,jspin,iorb,jorb,:)
+             enddo
+          enddo
+       enddo
+    enddo
+  end function c_nn2nso_l
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1011,8 +1228,15 @@ contains
        delta_v = var-var_old
        if(count>1)chich = delta_v/(delta_n+1d-10) !1d-4*nerr)  !((ntmp-nold)/(var-var_old))**-1
        !
-       !Add here controls on chich: not to be too small....
-       if(chich>10d0)chich=2d0*chich/abs(chich) !do nothing?
+       !Add here controls on chich: not to be too large nor too small....
+       if(abs(chich)>10d0) chich=2d0*chich/abs(chich) !do nothing?
+       if(abs(chich)<1d-8.AND.abs(ndiff)>nerr) then
+          if(chich<0.d0) then
+             chich=-1d-1
+          else
+             chich=1.d-1
+          endif
+       endif
        !
        chi_shift = ndiff*chich
        !
@@ -1099,15 +1323,15 @@ contains
     !
     if(master)then
        !
-       if(count==0)then
-          inquire(file="var.restart",EXIST=bool)
-          if(bool)then
-             open(free_unit(unit),file="var.restart")
-             read(unit,*)var,ndelta
-             ndelta=abs(ndelta)*ncoeff
-             close(unit)
-          endif
-       endif
+       !if(count==0)then
+       !   inquire(file="var.restart",EXIST=bool)
+       !   if(bool)then
+       !      open(free_unit(unit),file="var.restart")
+       !      read(unit,*)var,ndelta
+       !      ndelta=abs(ndelta)*ncoeff
+       !      close(unit)
+       !   endif
+       !endif
        !
        ndiff=ntmp-nread
        nratio = 0.5d0;!nratio = 1.d0/(6.d0/11.d0*pi)
@@ -1201,9 +1425,8 @@ contains
        !
        write(LOGfile,"(A,I5)")"count= ",count
        write(LOGfile,"(A,L2)")"Converged=",converged
-       print*,""
        !
-       open(free_unit(unit),file="var.restart")
+       open(free_unit(unit),file="xmu.restart")
        write(unit,*)var,ndelta
        close(unit)
        !
@@ -1228,218 +1451,6 @@ contains
 
 
 
-  subroutine SOC_jz_symmetrize(funct,mask)
-    !passed
-    complex(8),allocatable,intent(inout)         ::  funct(:,:,:,:,:)
-    logical(8),allocatable,intent(in)            ::  mask(:,:,:,:,:)
-    complex(8),allocatable                       ::  funct_in(:,:,:),funct_out(:,:,:)
-    complex(8),allocatable                       ::  a_funct(:),b_funct(:)
-    integer                                      ::  ispin,io
-    integer                                      ::  ifreq,Lfreq
-    logical(8)                                   ::  boolmask
-    complex(8),allocatable                       ::  U(:,:),Udag(:,:)
-    if(size(funct,dim=1)/=Nspin)stop "wrong size 1 in SOC symmetrize input f"
-    if(size(funct,dim=2)/=Nspin)stop "wrong size 2 in SOC symmetrize input f"
-    if(size(funct,dim=3)/=Norb) stop "wrong size 3 in SOC symmetrize input f"
-    if(size(funct,dim=4)/=Norb) stop "wrong size 4 in SOC symmetrize input f"
-    Lfreq=size(funct,dim=5)
-    allocate(funct_in(Nspin*Norb,Nspin*Norb,Lfreq)); funct_in=zero
-    allocate(funct_out(Nspin*Norb,Nspin*Norb,Lfreq));funct_out=zero
-    allocate(U(Nspin*Norb,Nspin*Norb));U=zero
-    allocate(Udag(Nspin*Norb,Nspin*Norb));Udag=zero
-    allocate(a_funct(Lfreq));a_funct=zero
-    allocate(b_funct(Lfreq));b_funct=zero
-    !
-    !function intake
-    do ifreq=1,Lfreq
-       funct_in(:,:,ifreq)=nn2so_reshape(funct(:,:,:,:,ifreq),Nspin,Norb)
-    enddo
-    !
-    !function diagonalization
-    if(Jz_basis)then
-       U=matmul(transpose(conjg(orbital_Lz_rotation_NorbNspin())),atomic_SOC_rotation())
-       Udag=transpose(conjg(U))
-    else
-       U=atomic_SOC_rotation()
-       Udag=transpose(conjg(U))
-    endif
-    !
-    do ifreq=1,Lfreq
-       funct_out(:,:,ifreq)=matmul(Udag,matmul(funct_in(:,:,ifreq),U))
-    enddo
-    !
-    !function symmetrization in the rotated basis
-    do io=1,2
-       a_funct(:)=a_funct(:)+funct_out(io,io,:)
-    enddo
-    a_funct = a_funct/2.d0
-    do io=3,6
-       b_funct(:)=b_funct(:)+funct_out(io,io,:)
-    enddo
-    b_funct = b_funct/4.d0
-    !
-    boolmask = .false.
-    if(Jz_basis)then
-       boolmask = (.not.mask(1,2,3,2,1)).and.(.not.mask(1,2,3,2,2))
-    else
-       boolmask = (.not.mask(1,2,3,1,1)).and.(.not.mask(1,2,3,1,2))
-    endif
-    if(boolmask)then
-       a_funct = ( a_funct + b_funct ) / 2.d0
-       b_funct = a_funct
-    endif
-    !
-    funct_out=zero
-    do io=1,2
-       funct_out(io,io,:)=a_funct(:)
-    enddo
-    do io=3,6
-       funct_out(io,io,:)=b_funct(:)
-    enddo
-    !
-    !function rotation in the non-diagonal basis
-    funct_in=zero
-    do ifreq=1,Lfreq
-       funct_in(:,:,ifreq)=matmul(U,matmul(funct_out(:,:,ifreq),Udag))
-    enddo
-    !
-    !founction out
-    funct=zero
-    do ifreq=1,Lfreq
-       funct(:,:,:,:,ifreq)=so2nn_reshape(funct_in(:,:,ifreq),Nspin,Norb)
-    enddo
-  end subroutine SOC_jz_symmetrize
-
-
-
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : Atomic SOC and j vector components
-  !+-------------------------------------------------------------------+
-  function atomic_SOC() result (LS)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)  :: LS,LS_
-    integer                                      :: i,j
-    LS_=zero;LS=zero
-    LS_(1:2,3:4) = +Xi * pauli_z / 2.
-    LS_(1:2,5:6) = -Xi * pauli_y / 2.
-    LS_(3:4,5:6) = +Xi * pauli_x / 2.
-    !hermiticity
-    do i=1,Nspin*Norb
-       do j=1,Nspin*Norb
-          LS_(j,i)=conjg(LS_(i,j))
-       enddo
-    enddo
-    LS=so2os_reshape(LS_,Nspin,Norb)
-  end function atomic_SOC
-
-  function atomic_SOC_rotation() result (LS_rot)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)  :: LS_rot,LS_rot_
-    integer                                      :: i,j
-    LS_rot_=zero;LS_rot=zero
-    !
-    ! {a,Sz}-->{J}
-    !
-    ![Norb*Norb]*Nspin notation
-    !J=1/2 jz=-1/2
-    LS_rot_(1,1)=+1.d0
-    LS_rot_(2,1)=-Xi
-    LS_rot_(6,1)=-1.d0
-    LS_rot_(:,1)=LS_rot_(:,1)/sqrt(3.)
-    !J=1/2 jz=+1/2
-    LS_rot_(4,2)=+1.d0
-    LS_rot_(5,2)=+Xi
-    LS_rot_(3,2)=+1.d0
-    LS_rot_(:,2)=LS_rot_(:,2)/sqrt(3.)
-    !J=3/2 jz=-3/2
-    LS_rot_(4,3)=+1.d0
-    LS_rot_(5,3)=-Xi
-    LS_rot_(:,3)=LS_rot_(:,3)/sqrt(2.)
-    !J=3/2 jz=+3/2
-    LS_rot_(1,4)=-1.d0
-    LS_rot_(2,4)=-Xi
-    LS_rot_(:,4)=LS_rot_(:,4)/sqrt(2.)
-    !J=3/2 jz=-1/2
-    LS_rot_(1,5)=+1.d0
-    LS_rot_(2,5)=-Xi
-    LS_rot_(6,5)=+2.d0
-    LS_rot_(:,5)=LS_rot_(:,5)/sqrt(6.)
-    !J=3/2 jz=+1/2
-    LS_rot_(4,6)=-1.d0
-    LS_rot_(5,6)=-Xi
-    LS_rot_(3,6)=+2.d0
-    LS_rot_(:,6)=LS_rot_(:,6)/sqrt(6.)
-    !
-    LS_rot=LS_rot_
-    !
-  end function atomic_SOC_rotation
-
-  function orbital_Lz_rotation_Norb() result (U_rot)
-    complex(8),dimension(Norb,Norb)              :: U_rot,U_rot_
-    integer                                      :: i,j
-    U_rot=zero;U_rot_=zero
-    !
-    ! {a}-->{Lz}
-    !
-    ![Norb*Norb] notation
-    U_rot_(1,1)=-Xi/sqrt(2.)
-    U_rot_(2,2)=+1.d0/sqrt(2.)
-    U_rot_(3,3)=+Xi
-    U_rot_(1,2)=-Xi/sqrt(2.)
-    U_rot_(2,1)=-1.d0/sqrt(2.)
-    !
-    U_rot=U_rot_
-    !
-  end function orbital_Lz_rotation_Norb
-
-  function orbital_Lz_rotation_NorbNspin() result (U_rot)
-    complex(8),dimension(Norb,Norb)              :: U_rot_
-    complex(8),dimension(Norb*Nspin,Norb*Nspin)  :: U_rot
-    integer                                      :: i,j
-    U_rot=zero;U_rot_=zero
-    !
-    ! {a,Sz}-->{Lz,Sz}
-    !
-    ![Norb*Norb]*Nspin notation
-    U_rot_(1,1)=-Xi/sqrt(2.)
-    U_rot_(2,2)=+1.d0/sqrt(2.)
-    U_rot_(3,3)=+Xi
-    U_rot_(1,2)=-Xi/sqrt(2.)
-    U_rot_(2,1)=-1.d0/sqrt(2.)
-    !
-    U_rot(1:Norb,1:Norb)=U_rot_
-    U_rot(1+Norb:2*Norb,1+Norb:2*Norb)=U_rot_
-    !
-  end function orbital_Lz_rotation_NorbNspin
-
-  function atomic_j(component) result (ja)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)  :: ja,ja_
-    character(len=1)                             :: component
-    integer                                      :: i,j
-    ja_=zero;ja=zero
-    if    (component=="x")then
-       ja_(1:2,1:2) = pauli_x / 2.
-       ja_(3:4,3:4) = pauli_x / 2.
-       ja_(5:6,5:6) = pauli_x / 2.
-       ja_(3:4,5:6) = -Xi * eye(2)
-    elseif(component=="y")then
-       ja_(1:2,1:2) = pauli_y / 2.
-       ja_(3:4,3:4) = pauli_y / 2.
-       ja_(5:6,5:6) = pauli_y / 2.
-       ja_(1:2,5:6) = +Xi * eye(2)
-    elseif(component=="z")then
-       ja_(1:2,1:2) = pauli_z / 2.
-       ja_(3:4,3:4) = pauli_z / 2.
-       ja_(5:6,5:6) = pauli_z / 2.
-       ja_(1:2,3:4) = -Xi * eye(2)
-    endif
-    !hermiticity
-    do i=1,Nspin*Norb
-       do j=1,Nspin*Norb
-          ja_(j,i)=conjg(ja_(i,j))
-       enddo
-    enddo
-    ja=so2os_reshape(ja_,Nspin,Norb)
-  end function atomic_j
 
 
 
@@ -1452,10 +1463,10 @@ contains
   !PURPOSE  : Print Hloc
   !+------------------------------------------------------------------+
   subroutine print_Hloc_nn_c(hloc,file)
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
-    character(len=*),optional                   :: file
-    integer                                     :: iorb,jorb,ispin,jspin,Nso,unit
-    character(len=32)                           :: fmt
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: hloc
+    character(len=*),optional                                 :: file
+    integer                                                   :: iorb,jorb,ispin,jspin,Nso,unit
+    character(len=32)                                         :: fmt
     !
     unit=LOGfile
     !
@@ -1464,14 +1475,14 @@ contains
        write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
     endif
     !
-    do ispin=1,Nspin
+    do ispin=1,Nnambu*Nspin
        do iorb=1,Norb
           write(unit,"(100(A1,F8.4,A1,F8.4,A1,2x))")&
                (&
                (&
                '(',dreal(Hloc(ispin,jspin,iorb,jorb)),',',dimag(Hloc(ispin,jspin,iorb,jorb)),')',&
                jorb =1,Norb),&
-               jspin=1,Nspin)
+               jspin=1,Nnambu*Nspin)
        enddo
     enddo
     write(unit,*)""
@@ -1480,7 +1491,7 @@ contains
   end subroutine print_Hloc_nn_c
 
   subroutine print_Hloc_so_c(hloc,file)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: hloc
     character(len=*),optional                   :: file
     integer                                     :: is,js,Nso,unit
     character(len=32)                           :: fmt
@@ -1492,7 +1503,7 @@ contains
        write(LOGfile,"(A)")"print_Hloc on file :"//reg(file)
     endif
     !
-    Nso = Nspin*Norb
+    Nso = Nnambu*Nspin*Norb
     do is=1,Nso
        write(unit,"(20(A1,F8.4,A1,F8.4,A1,2x))")&
             ('(',dreal(Hloc(is,js)),',',dimag(Hloc(is,js)),')',js =1,Nso)

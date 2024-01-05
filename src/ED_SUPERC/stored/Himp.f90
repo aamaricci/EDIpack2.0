@@ -48,7 +48,7 @@
               end select
               !
            endif
-           !DW
+           !DW: 
            Jcondition = &
                 (impHloc(Nspin,Nspin,iorb,jorb)/=zero) .AND. &
                 (ib(jorb+Ns)==1)                       .AND. &

@@ -10,7 +10,6 @@ MODULE ED_FIT_COMMON
   USE ED_VARS_GLOBAL  
   USE ED_AUX_FUNX
   USE ED_BATH
-  USE ED_BATH_FUNCTIONS
 #ifdef _MPI
   USE MPI
   USE SF_MPI
@@ -24,16 +23,16 @@ MODULE ED_FIT_COMMON
   complex(8),dimension(:,:),allocatable :: Fdelta
   real(8),dimension(:),allocatable      :: Xdelta,Wdelta
   integer                               :: totNorb,totNspin,totNso
-  integer,dimension(:),allocatable      :: getIorb,getJorb,getIspin,getJspin
+  integer,dimension(:),allocatable      :: getIorb,getJorb,getIspin,getJspin,getInambu
   integer                               :: Orb_indx,Spin_indx,Spin_mask
   type(effective_bath)                  :: chi2_bath
   integer                               :: cg_iter_count=0
   logical                               :: para_
 
-  integer                               :: MPI_RANK=0
-  integer                               :: MPI_SIZE=1
-  logical                               :: MPI_MASTER=.true.
-  integer                               :: MPI_IERR
+  ! integer                               :: MPI_RANK=0
+  ! integer                               :: MPI_SIZE=1
+  ! logical                               :: MPI_MASTER=.true.
+  ! integer                               :: MPI_IERR
 
   !This contains the number of the lambda expansion
   !for each replica of the impurity
@@ -45,6 +44,6 @@ MODULE ED_FIT_COMMON
   type nsymm_vector
      real(8),dimension(:),allocatable   :: element          
   end type nsymm_vector
-
+  
 
 END MODULE ED_FIT_COMMON

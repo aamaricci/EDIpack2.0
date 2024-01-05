@@ -7,7 +7,6 @@ MODULE ED_CHI_PAIR
   USE ED_VARS_GLOBAL
   USE ED_EIGENSPACE
   USE ED_BATH
-  USE ED_BATH_FUNCTIONS
   USE ED_SETUP
   USE ED_SECTOR
   USE ED_HAMILTONIAN_NORMAL
@@ -19,17 +18,17 @@ MODULE ED_CHI_PAIR
 
   public :: build_chi_pair_normal
 
-  integer                      :: istate,iorb,jorb,ispin,jspin
-  integer                      :: isector,jsector,ksector
-  real(8),allocatable          :: vvinit(:),vvinit_tmp(:)
-  real(8),allocatable          :: alfa_(:),beta_(:)
-  integer                      :: ialfa
-  integer                      :: jalfa
-  integer                      :: ipos,jpos
-  integer                      :: i,j,k
-  real(8)                      :: sgn,norm2
-  real(8),dimension(:),pointer :: state_dvec
-  real(8)                      :: state_e
+  integer                          :: istate,iorb,jorb,ispin,jspin
+  integer                          :: isector,jsector,ksector
+  real(8),allocatable              :: vvinit(:),vvinit_tmp(:)
+  real(8),allocatable              :: alfa_(:),beta_(:)
+  integer                          :: ialfa
+  integer                          :: jalfa
+  integer                          :: ipos,jpos
+  integer                          :: i,j,k
+  real(8)                          :: sgn,norm2
+  real(8),dimension(:),allocatable :: state_dvec
+  real(8)                          :: state_e
 
 contains
 
@@ -118,12 +117,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        ksector = getCsector(ialfa,2,isector)
@@ -164,16 +163,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        endif
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -212,12 +202,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec)
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec)
 #endif
        !
        !
@@ -271,16 +261,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        endif
-       !
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return

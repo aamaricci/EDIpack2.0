@@ -8,7 +8,6 @@ MODULE ED_GF_NORMAL
   USE ED_AUX_FUNX
   USE ED_EIGENSPACE
   USE ED_BATH
-  USE ED_BATH_FUNCTIONS
   USE ED_SETUP
   USE ED_SECTOR
   USE ED_HAMILTONIAN_NORMAL
@@ -21,20 +20,20 @@ MODULE ED_GF_NORMAL
   public :: build_sigma_normal
 
 
-  integer                               :: istate
-  integer                               :: isector,jsector
-  integer                               :: idim,idimUP,idimDW
+  integer                          :: istate
+  integer                          :: isector,jsector
+  integer                          :: idim,idimUP,idimDW
   !
-  integer                               :: ialfa,jalfa
-  integer                               :: ipos,jpos
-  integer                               :: i,j,m
-  integer                               :: iph,i_el
-  real(8)                               :: sgn,norm2
+  integer                          :: ialfa,jalfa
+  integer                          :: ipos,jpos
+  integer                          :: i,j,m
+  integer                          :: iph,i_el
+  real(8)                          :: sgn,norm2
   !
-  real(8),allocatable                   :: vvinit(:)
-  real(8),allocatable                   :: alfa_(:),beta_(:)
-  real(8),dimension(:),pointer          :: state_dvec
-  real(8)                               :: state_e
+  real(8),allocatable              :: vvinit(:)
+  real(8),allocatable              :: alfa_(:),beta_(:)
+  real(8),dimension(:),allocatable :: state_dvec
+  real(8)                          :: state_e
 
 
 
@@ -74,7 +73,10 @@ contains
        write(LOGfile,"(A)")""
        write(LOGfile,"(A)")"Get mask(G):"
        Hmask= .true.
-       if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       if(.not.ed_all_g)then
+          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       end if
        do ispin=1,Nspin
           do iorb=1,Norb
              write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -84,7 +86,7 @@ contains
           do iorb=1,Norb
              do jorb=iorb+1,Norb
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
@@ -106,9 +108,9 @@ contains
           do ispin=1,Nspin
              do iorb=1,Norb
                 do jorb=iorb+1,Norb
-                   !if(hybrid)always T; if(replica)T iff following condition is T
+                   !if(hybrid)always T; if(replica/general)T if following condition is T
                    MaskBool=.true.   
-                   if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                    !
                    if(.not.MaskBool)cycle
                    impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
@@ -164,7 +166,10 @@ contains
     !
     if(offdiag_gf_flag)then
        Hmask= .true.
-       if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       if(.not.ed_all_g)then
+          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       endif
        do ispin=1,Nspin
           do iorb=1,Norb
              write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -174,7 +179,7 @@ contains
           do iorb=1,Norb
              do jorb=iorb+1,Norb
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
@@ -187,9 +192,9 @@ contains
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb
-                !if(hybrid)always T; if(replica)T iff following condition is T
+                !if(hybrid)always T; if(replica/general)T iff following condition is T
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 !
                 if(.not.MaskBool)cycle
                 impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
@@ -242,12 +247,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate) 
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        if(MpiMaster)then
@@ -309,15 +314,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -353,13 +350,14 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
+
        !
        if(MpiMaster)then
           call build_sector(isector,sectorI)
@@ -434,15 +432,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
        !
     enddo
     return
@@ -555,12 +545,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_dvec => es_return_dvector(MpiComm,state_list,istate)
+          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
        else
-          state_dvec => es_return_dvector(state_list,istate)
+          call es_return_dvector(state_list,istate,state_dvec) 
        endif
 #else
-       state_dvec => es_return_dvector(state_list,istate)
+       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        call get_Nup(isector,Nups)
@@ -575,7 +565,7 @@ contains
        iDimDw = product(iDimDws)
        !
        if(MpiMaster)then
-          if(ed_verbose==3)write(LOGfile,"(A20,I12)")'Apply x',isector
+          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
           !
           allocate(vvinit(idim));vvinit=0d0
           !
@@ -603,15 +593,7 @@ contains
        call add_to_lanczos_phonon(norm2,state_e,alfa_,beta_,istate)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_dvec))deallocate(state_dvec)
-       else
-          if(associated(state_dvec))nullify(state_dvec)
-       endif
-#else
-       if(associated(state_dvec))nullify(state_dvec)
-#endif
+       if(allocated(state_dvec))deallocate(state_dvec)
     enddo
     return
   end subroutine lanc_build_gf_phonon_main
@@ -802,7 +784,7 @@ contains
        enddo
        !
        !
-    case ("hybrid","replica")   !Diagonal in spin
+    case ("hybrid","replica","general")   !Diagonal in spin
        do ispin=1,Nspin
           do i=1,Lmats
              invGimp = impGmats(ispin,ispin,:,:,i)

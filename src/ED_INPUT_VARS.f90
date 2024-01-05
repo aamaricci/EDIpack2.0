@@ -1,7 +1,7 @@
 MODULE ED_INPUT_VARS
   USE SF_VERSION
   USE SF_PARSE_INPUT
-  USE SF_IOTOOLS, only:str
+  USE SF_IOTOOLS, only:str,free_unit
   USE ED_VERSION
   implicit none
 
@@ -13,7 +13,7 @@ MODULE ED_INPUT_VARS
   integer              :: Nspin               !Nspin=# spin degeneracy (max 2)
   integer              :: nloop               !max dmft loop variables
   integer              :: Nph                 !max number of phonons allowed (cut off)
-  real(8),dimension(5) :: Uloc                !local interactions
+  real(8),allocatable  :: Uloc(:)             !local interactions
   real(8)              :: Ust                 !intra-orbitals interactions
   real(8)              :: Jh                  !J_Hund: Hunds' coupling constant 
   real(8)              :: Jx                  !J_X: coupling constant for the spin-eXchange interaction term
@@ -22,8 +22,10 @@ MODULE ED_INPUT_VARS
   real(8)              :: beta                !inverse temperature
   !
   integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
-  real(8),dimension(5) :: g_ph                !g_ph: electron-phonon coupling constant
+  complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
+  real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
   real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
+  real(8)              :: A_ph                !A_ph: phonon field coupled to displacement operator (constant)
   !
   integer              :: Nsuccess            !# of repeated success to fall below convergence threshold  
   real(8)              :: dmft_error          !dmft convergence threshold
@@ -36,11 +38,11 @@ MODULE ED_INPUT_VARS
   real(8)              :: deltasc             !breaking symmetry field
   real(8)              :: sb_field            !symmetry breaking field
   !
-  real(8),dimension(5) :: spin_field_x        !magnetic field per orbital coupling to X-spin component
-  real(8),dimension(5) :: spin_field_y        !magnetic field per orbital coupling to Y-spin component
-  real(8),dimension(5) :: spin_field_z        !magnetic field per orbital coupling to Z-spin component
+  real(8),allocatable  :: spin_field_x(:)        !magnetic field per orbital coupling to X-spin component
+  real(8),allocatable  :: spin_field_y(:)        !magnetic field per orbital coupling to Y-spin component
+  real(8),allocatable  :: spin_field_z(:)        !magnetic field per orbital coupling to Z-spin component
+  real(8),allocatable  :: pair_field(:)          !pair field per orbital coupling to s-wave order parameter component
   real(8),dimension(4) :: exc_field           !external field coupling to exciton order parameter
-  real(8),dimension(5) :: pair_field          !pair field per orbital coupling to s-wave order parameter component
   !
   logical              :: chispin_flag        !evaluate spin susceptibility
   logical              :: chidens_flag        !evaluate dens susceptibility
@@ -83,7 +85,7 @@ MODULE ED_INPUT_VARS
   real(8)              :: cg_Ftol             !Tolerance in the cg fit
   integer              :: cg_stop             !fit stop condition:0-3, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).
   integer              :: cg_Weight           !CGfit mode 0=1, 1=1/n , 2=1/w_n weight
-  integer              :: cg_pow              !fit power for the calculation of the Chi distance function as |G0 - G0and|**cg_pow
+  integer              :: cg_pow              !fit power to generalize the distance as |G0 - G0and|**cg_pow
   logical              :: cg_minimize_ver     !flag to pick old (Krauth) or new (Lichtenstein) version of the minimize CG routine
   real(8)              :: cg_minimize_hh      !unknown parameter used in the CG minimize procedure.  
   !
@@ -109,7 +111,7 @@ MODULE ED_INPUT_VARS
 
   !LOG AND Hamiltonian UNITS
   !=========================================================
-  character(len=100)   :: Hfile,HLOCfile,SectorFile
+  character(len=100)   :: Hfile,HLOCfile,SectorFile,GPHfile
   integer,save         :: LOGfile
 
   !THIS IS JUST A RELOCATED GLOBAL VARIABLE
@@ -122,22 +124,22 @@ contains
   !+-------------------------------------------------------------------+
   !PURPOSE  : READ THE INPUT FILE AND SETUP GLOBAL VARIABLES
   !+-------------------------------------------------------------------+
-  subroutine ed_read_input(INPUTunit,comm)
+  subroutine ed_read_input(INPUTunit)
 #ifdef _MPI
     USE MPI
     USE SF_MPI
 #endif
     character(len=*) :: INPUTunit
-    integer,optional :: comm
-    logical          :: master=.true.
-    integer          :: i,rank=0
+    logical          :: master=.true.,bool
+    integer          :: i,iorb,rank=0
+    integer          :: unit_xmu, unit_gph
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A,A)")"DEBUG ed_read_input: read input from",trim(INPUTunit)
 #endif
-#ifdef _MPI
-    if(present(comm))then
-       master=get_Master_MPI(comm)
-       rank  =get_Rank_MPI(comm)
+#ifdef _MPI    
+    if(check_MPI())then
+       master=get_Master_MPI()
+       rank  =get_Rank_MPI()
     endif
 #endif
     !
@@ -146,12 +148,13 @@ contains
     !
     !DEFAULT VALUES OF THE PARAMETERS:
     call parse_input_variable(Norb,"NORB",INPUTunit,default=1,comment="Number of impurity orbitals (max 5).")
-    call parse_input_variable(Nbath,"NBATH",INPUTunit,default=6,comment="Number of bath sites:(normal=>Nbath per orb)(hybrid=>Nbath total)(replica=>Nbath=Nreplica)")
+    call parse_input_variable(Nbath,"NBATH",INPUTunit,default=6,comment="Number of bath sites:(normal=>Nbath per orb)(hybrid=>Nbath total)(replica/general=>Nbath=Nreplica/Ngeneral)")
     call parse_input_variable(Nspin,"NSPIN",INPUTunit,default=1,comment="Number of spin degeneracy (max 2)")
     call parse_input_variable(Nph,"NPH",INPUTunit,default=0,comment="Max number of phonons allowed (cut off)")
-    call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp)")
+    call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp), general(replica++)")
     !
-    call parse_input_variable(uloc,"ULOC",INPUTunit,default=[2d0,0d0,0d0,0d0,0d0],comment="Values of the local interaction per orbital (max 5)")
+    allocate(Uloc(Norb))
+    call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
     call parse_input_variable(ust,"UST",INPUTunit,default=0.d0,comment="Value of the inter-orbital interaction term")
     call parse_input_variable(Jh,"JH",INPUTunit,default=0.d0,comment="Hunds coupling")
     call parse_input_variable(Jx,"JX",INPUTunit,default=0.d0,comment="S-E coupling")
@@ -165,17 +168,26 @@ contains
 
     call parse_input_variable(beta,"BETA",INPUTunit,default=1000.d0,comment="Inverse temperature, at T=0 is used as a IR cut-off.")
     call parse_input_variable(xmu,"XMU",INPUTunit,default=0.d0,comment="Chemical potential. If HFMODE=T, xmu=0 indicates half-filling condition.")
-    call parse_input_variable(g_ph,"G_PH",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="Electron-phonon coupling constant")
+
+    allocate(g_ph(Norb,Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
+    allocate(g_ph_diag(Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
+    call parse_input_variable(g_ph_diag,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling density constant")
     call parse_input_variable(w0_ph,"W0_PH",INPUTunit,default=0.d0,comment="Phonon frequency")
+    call parse_input_variable(A_ph,"A_PH",INPUTunit,default=0.d0,comment="Forcing field coupled to phonon's displacement operator")
+    call parse_input_variable(GPHfile,"GPHfile",INPUTunit,default="NONE",comment="File of Phonon couplings. Put NONE to use only density couplings.")
 
-    call parse_input_variable(spin_field_x,"SPIN_FIELD_X",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to X-spin component")
-    call parse_input_variable(spin_field_y,"SPIN_FIELD_Y",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Y-spin component")
-    call parse_input_variable(spin_field_z,"SPIN_FIELD_Z",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="magnetic field per orbital coupling to Z-spin component")
+    allocate(spin_field_x(Norb))
+    allocate(spin_field_y(Norb))
+    allocate(spin_field_z(Norb))
+    allocate(pair_field(Norb))
+    call parse_input_variable(spin_field_x,"SPIN_FIELD_X",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="magnetic field per orbital coupling to X-spin component")
+    call parse_input_variable(spin_field_y,"SPIN_FIELD_Y",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="magnetic field per orbital coupling to Y-spin component")
+    call parse_input_variable(spin_field_z,"SPIN_FIELD_Z",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="magnetic field per orbital coupling to Z-spin component")
     call parse_input_variable(exc_field,"EXC_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0],comment="external field coupling to exciton order parameters")
-    call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=[0d0,0d0,0d0,0d0,0d0],comment="pair field per orbital coupling to s-wave order parameter component")
+    call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="pair field per orbital coupling to s-wave order parameter component")
 
 
-    call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !
+    call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !    
     call parse_input_variable(ed_diag_type,"ED_DIAG_TYPE",INPUTunit,default="lanc",comment="flag to select the diagonalization type: 'lanc' for Lanczos/Davidson, 'full' for Full diagonalization method")
     call parse_input_variable(ed_finite_temp,"ED_FINITE_TEMP",INPUTunit,default=.false.,comment="flag to select finite temperature method. note that if T then lanc_nstates_total must be > 1")
     call parse_input_variable(ed_twin,"ED_TWIN",INPUTunit,default=.false.,comment="flag to reduce (T) or not (F,default) the number of visited sector using twin symmetry.")
@@ -189,10 +201,10 @@ contains
     call parse_input_variable(ed_print_G0,"ED_PRINT_G0",INPUTunit,default=.true.,comment="flag to print non-interacting impurity Greens function")
     call parse_input_variable(ed_all_G,"ED_ALL_G",INPUTunit,default=.true.,comment="flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries")
     call parse_input_variable(ed_verbose,"ED_VERBOSE",INPUTunit,default=3,comment="Verbosity level: 0=almost nothing --> 5:all. Really: all")
-    call parse_input_variable(ed_hw_bath,"ed_hw_bath",INPUTunit,default=2d0,comment="half-bandwidth for the bath initialization: flat in -hwband:hwband")
-    call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica bath: -offset:offset")
     call parse_input_variable(ed_get_dm,"ED_GET_DM",INPUTunit,default=.false.,comment="flag to evaluate the impurity density matrix \rho_IMP = Tr_BATH(\rho))")
-      
+    call parse_input_variable(ed_hw_bath,"ed_hw_bath",INPUTunit,default=2d0,comment="half-bandwidth for the bath initialization: flat in -ed_hw_bath:ed_hw_bath")
+    call parse_input_variable(ed_offset_bath,"ed_offset_bath",INPUTunit,default=1d-1,comment="offset for the initialization of diagonal terms in replica/general bath: -offset:offset")
+
     !
     call parse_input_variable(Lmats,"LMATS",INPUTunit,default=4096,comment="Number of Matsubara frequencies.")
     call parse_input_variable(Lreal,"LREAL",INPUTunit,default=5000,comment="Number of real-axis frequencies.")
@@ -231,33 +243,63 @@ contains
     call parse_input_variable(lanc_tolerance,"LANC_TOLERANCE",INPUTunit,default=1d-18,comment="Tolerance for the Lanczos iterations as used in Arpack and plain lanczos.")
     call parse_input_variable(lanc_dim_threshold,"LANC_DIM_THRESHOLD",INPUTunit,default=1024,comment="Min dimension threshold to use Lanczos determination of the spectrum rather than Lapack based exact diagonalization.")
     !
-    call parse_input_variable(cg_method,"CG_METHOD",INPUTunit,default=0,comment="Conjugate-Gradient method: 0=NR, 1=minimize.")
+    call parse_input_variable(cg_method,"CG_METHOD",INPUTunit,default=0,comment="Conjugate-Gradient method: 0=NumericalRecipes, 1=minimize.")
     call parse_input_variable(cg_grad,"CG_GRAD",INPUTunit,default=0,comment="Gradient evaluation method: 0=analytic (default), 1=numeric.")
     call parse_input_variable(cg_ftol,"CG_FTOL",INPUTunit,default=0.00001d0,comment="Conjugate-Gradient tolerance.")
-    call parse_input_variable(cg_stop,"CG_STOP",INPUTunit,default=0,comment="Conjugate-Gradient stopping condition: 0-3, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).")
+    call parse_input_variable(cg_stop,"CG_STOP",INPUTunit,default=0,comment="Conjugate-Gradient stopping condition: 0-2, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).")
     call parse_input_variable(cg_niter,"CG_NITER",INPUTunit,default=500,comment="Max. number of Conjugate-Gradient iterations.")
     call parse_input_variable(cg_weight,"CG_WEIGHT",INPUTunit,default=1,comment="Conjugate-Gradient weight form: 1=1.0, 2=1/n , 3=1/w_n.")
     call parse_input_variable(cg_scheme,"CG_SCHEME",INPUTunit,default='weiss',comment="Conjugate-Gradient fit scheme: delta or weiss.")
-    call parse_input_variable(cg_pow,"CG_POW",INPUTunit,default=2,comment="Fit power for the calculation of the Chi distance function as 1/L*|G0 - G0and|**cg_pow ")
+    call parse_input_variable(cg_pow,"CG_POW",INPUTunit,default=2,comment="Fit power for the calculation of the generalized distance as |G0 - G0and|**cg_pow")
     call parse_input_variable(cg_minimize_ver,"CG_MINIMIZE_VER",INPUTunit,default=.false.,comment="Flag to pick old/.false. (Krauth) or new/.true. (Lichtenstein) version of the minimize CG routine")
     call parse_input_variable(cg_minimize_hh,"CG_MINIMIZE_HH",INPUTunit,default=1d-4,comment="Unknown parameter used in the CG minimize procedure.")
     !
     call parse_input_variable(Jz_basis,"JZ_BASIS",INPUTunit,default=.false.,comment="")
     call parse_input_variable(Jz_max,"JZ_MAX",INPUTunit,default=.false.,comment="")
     call parse_input_variable(Jz_max_value,"JZ_MAX_VALUE",INPUTunit,default=1000.d0,comment="")
-
+    !
     call parse_input_variable(SectorFile,"SectorFile",INPUTunit,default="sectors",comment="File where to retrieve/store the sectors contributing to the spectrum.")
     call parse_input_variable(Hfile,"Hfile",INPUTunit,default="hamiltonian",comment="File where to retrieve/store the bath parameters.")
     call parse_input_variable(HLOCfile,"HLOCfile",INPUTunit,default="inputHLOC.in",comment="File read the input local H.")
     call parse_input_variable(LOGfile,"LOGFILE",INPUTunit,default=6,comment="LOG unit.")
 
+    if(nph>0)then
+       !Here the non-diagonal (non-density) phononic coupling are read
+       g_ph=0.d0
+       if(trim(GPHfile).eq."NONE")then
+          do iorb=1,Norb
+             g_ph(iorb,iorb)=g_ph_diag(iorb)
+          enddo
+       else
+          inquire(file=trim(GPHfile),EXIST=bool)
+          if(bool)then
+             open(free_unit(unit_gph),file=GPHfile)
+             do iorb=1,Norb
+                read(unit_gph,*) g_ph(iorb,:)
+             enddo
+             close(unit_gph)
+             !maybe an assert_hermitian would be globally useful
+             if(any(g_ph /= transpose(conjg(g_ph))))then
+                stop "ERROR: non hermitian phonon coupling matrix (g_ph) in input"
+             end if
+          else
+             stop "GPHfile/=NONE but there is no GPHfile with the provided name"
+          endif
+       endif
+       !TO BE PUT SOMEWHERE ELSE
+       open(free_unit(unit_gph),file="GPHinput.used")
+       do iorb=1,Norb
+          write(unit_gph,*) g_ph(iorb,:)
+       enddo
+       close(unit_gph)
+    end if
 
 #ifdef _MPI
-    if(present(comm))then
+    if(check_MPI())then
        if(.not.master)then
           LOGfile=1000-rank
           open(LOGfile,file="stdOUT.rank"//str(rank)//".ed")
-          do i=1,get_Size_MPI(comm)
+          do i=1,get_Size_MPI()
              if(i==rank)write(*,"(A,I0,A,I0)")"Rank ",rank," writing to unit: ",LOGfile
           enddo
        endif
@@ -270,7 +312,18 @@ contains
        call print_input()
        call save_input(INPUTunit)
        call scifor_version()
-       call code_version(version)
+       !call code_version(version)
+    endif
+    !
+    if(nread .ne. 0d0) then
+       inquire(file="xmu.restart",EXIST=bool)
+       if(bool)then
+          open(free_unit(unit_xmu),file="xmu.restart")
+          read(unit_xmu,*)xmu,ndelta
+          ndelta=abs(ndelta)*ncoeff
+          close(unit_xmu)
+          write(*,"(A,F9.7,A)")"Adjusting XMU to ",xmu," as per provided xmu.restart "
+       endif
     endif
     !Act on the input variable only after printing.
     !In the new parser variables are hard-linked into the list:
@@ -278,6 +331,31 @@ contains
     call substring_delete(Hfile,".restart")
     call substring_delete(Hfile,".ed")
   end subroutine ed_read_input
+
+  subroutine ed_update_input(name,vals)
+    character(len=*)      :: name
+    real(8),dimension(:)  :: vals
+    select case (name)
+    case default
+       stop "WRONG NAME ON ED_UPDATE_INPUT"
+    case ("EXC_FIELD")
+       if(size(vals)/=4)stop "WRONG SIZE IN ED_UPDATE_EXC_FIELD"
+       exc_field=vals
+    case ("PAIR_FIELD")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_PAIR_FIELD"
+       pair_field=vals
+    case ("SPIN_FIELD_X")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_X"
+       spin_field_x=vals
+    case ("SPIN_FIELD_Y")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_Y"
+       spin_field_y=vals
+    case ("SPIN_FIELD_Z")
+       if(size(vals)/=Norb)stop "WRONG SIZE IN ED_UPDATE_SPIN_FIELD_Z"
+       spin_field_z=vals
+    end select
+    
+  end subroutine ed_update_input
 
 
 

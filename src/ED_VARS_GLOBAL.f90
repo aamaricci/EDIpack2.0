@@ -12,11 +12,12 @@ MODULE ED_VARS_GLOBAL
 
   !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type H_operator
-     complex(8),dimension(:,:,:,:),allocatable :: O      !Replica hamilt
+     complex(8),dimension(:,:,:,:),allocatable :: O !Replica/General hamiltonian
   end type H_operator
 
   type effective_bath_component
      real(8)                                   :: v
+     real(8),dimension(:),allocatable          :: vg
      real(8),dimension(:),allocatable          :: lambda ![Nsym]
   end type effective_bath_component
 
@@ -25,12 +26,12 @@ MODULE ED_VARS_GLOBAL
      real(8),dimension(:,:,:),allocatable      :: e !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
      real(8),dimension(:,:,:),allocatable      :: v !spin-keep hyb. [Nspin][Norb][Nbath]
      !superc
-     real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
+     real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
      !nonsu2
      real(8),dimension(:,:,:),allocatable      :: u !spin-flip hyb. [Nspin][Norb][Nbath]
-     !replica
+     !replica/general
      integer                                                 :: Nbasis  !H Basis dimension     
-     type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica bath components, V included
+     type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica/General bath components, V included
      !
      logical                                                 :: status=.false.
   end type effective_bath
@@ -197,11 +198,20 @@ MODULE ED_VARS_GLOBAL
   !=========================================================
   type(effective_bath)                               :: dmft_bath
 
-  !Replica bath basis set
+
+  !Global Nambu factor for SC calculations (Nspin=1 but this index is 2 to
+  !correctly allocate  Nambu arrays of dim 2*Norb) 
   !=========================================================
-  type(H_operator),dimension(:),allocatable          :: Hreplica_basis
-  real(8),dimension(:),allocatable                   :: Hreplica_lambda
+  integer                                            :: Nnambu=1
+  !Replica/General bath basis set
+  !=========================================================
+  type(H_operator),dimension(:),allocatable          :: Hreplica_basis   ![Nsym]
+  real(8),dimension(:,:),allocatable                 :: Hreplica_lambda  ![Nbath,Nsym]
   logical                                            :: Hreplica_status=.false.
+  !
+  type(H_operator),dimension(:),allocatable          :: Hgeneral_basis   ![Nsym]
+  real(8),dimension(:,:),allocatable                 :: Hgeneral_lambda  ![Nbath,Nsym]
+  logical                                            :: Hgeneral_status=.false.
 
   !local part of the Hamiltonian
   !=========================================================
@@ -334,7 +344,8 @@ MODULE ED_VARS_GLOBAL
 
 
   !--------------- LATTICE WRAP VARIABLES -----------------!
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Smats_ineq,Sreal_ineq          ![Nlat][Nspin][Nspin][Norb][Norb][L]
+  complex(8),dimension(:,:,:,:,:),allocatable        :: Hloc_ineq
+  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Smats_ineq,Sreal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: SAmats_ineq,SAreal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Gmats_ineq,Greal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Fmats_ineq,Freal_ineq
@@ -350,8 +361,11 @@ MODULE ED_VARS_GLOBAL
   real(8),dimension(:,:),allocatable,save            :: dd_ineq,e_ineq
   integer,allocatable,dimension(:,:)                 :: neigen_sector_ineq
   integer,allocatable,dimension(:)                   :: neigen_total_ineq
-  real(8),dimension(:,:),allocatable                 :: Hreplica_lambda_ineq
+  real(8),dimension(:,:,:),allocatable               :: Hreplica_lambda_ineq ![Nineq,Nbath,Nsym]
+  real(8),dimension(:,:,:),allocatable               :: Hgeneral_lambda_ineq ![Nineq,Nbath,Nsym]
 
+
+  
   !File suffixes for printing fine tuning.
   !=========================================================
   character(len=32)                                  :: ed_file_suffix=""       !suffix string attached to the output files.
@@ -395,13 +409,13 @@ contains
 
 
   !=========================================================
-  subroutine ed_set_MpiComm(comm)
+  subroutine ed_set_MpiComm()
 #ifdef _MPI
-    integer :: comm,ierr
+    integer :: ierr
     ! call MPI_Comm_dup(Comm,MpiComm_Global,ierr)
     ! call MPI_Comm_dup(Comm,MpiComm,ierr)
-    MpiComm_Global = comm
-    MpiComm        = comm
+    MpiComm_Global = MPI_COMM_WORLD
+    MpiComm        = MPI_COMM_WORLD
     call Mpi_Comm_group(MpiComm_Global,MpiGroup_Global,ierr)
     MpiStatus      = .true.
     MpiSize        = get_Size_MPI(MpiComm_Global)
@@ -410,13 +424,10 @@ contains
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG ed_set_MpiComm: setting MPI comm"
 #endif
-#else
-    integer,optional :: comm
 #endif
   end subroutine ed_set_MpiComm
 
   subroutine ed_del_MpiComm()
-
 #ifdef _MPI    
     MpiComm_Global = MPI_UNDEFINED
     MpiComm        = MPI_UNDEFINED
