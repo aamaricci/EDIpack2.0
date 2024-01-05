@@ -56,34 +56,6 @@ MODULE ED_VARS_GLOBAL
 
 
 
-  !---------------- SECTOR-TO-FOCK SPACE STRUCTURE -------------------!
-  type sector_map
-     integer,dimension(:),allocatable          :: map
-     logical                                   :: status=.false.
-  end type sector_map
-
-  type sector
-     integer                                   :: index       !
-     type(sector_map),dimension(:),allocatable :: H
-     integer,dimension(:),allocatable          :: DimUps
-     integer,dimension(:),allocatable          :: DimDws
-     integer                                   :: DimUp
-     integer                                   :: DimDw
-     integer                                   :: DimEl
-     integer                                   :: DimPh
-     integer                                   :: Dim
-     integer,dimension(:),allocatable          :: Nups
-     integer,dimension(:),allocatable          :: Ndws
-     integer                                   :: Nup
-     integer                                   :: Ndw
-     integer                                   :: Sz
-     integer                                   :: Ntot,twoJz
-     integer                                   :: Nlanc
-     logical                                   :: status=.false.
-  end type sector
-
-
-
   !-------------- GMATRIX FOR FAST EVALUATION OF GF ------------------!
   !The contributions to the GF Kallen-Lehmann sum are stored as
   !GF_{ab,sr}%state%channel%{w,e}.
