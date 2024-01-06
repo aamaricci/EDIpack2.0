@@ -74,6 +74,11 @@ contains
       integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
       integer,dimension(Ns)           :: IbUp,IbDw  ![Ns]
       integer,dimension(Ns)           :: JbUp,JbDw  ![Ns]
+      integer                         :: IimpUp,IimpDw,JimpUp,JimpDw
+      integer                         :: IbathUp,IbathDw,bUP,bDW
+      integer                         :: io,jo
+      integer                         :: lenBATHup,lenBATHdw
+      integer,allocatable             :: BATHup(:),BATHdw(:)
       real(8),dimension(Norb)         :: nup,ndw,Sz,nt
       real(8),dimension(Norb,Norb)    :: theta_upup,theta_dwdw
       !
@@ -428,40 +433,95 @@ contains
          peso = peso/zeta_function
          !
          if(MpiMaster)then
-            call build_sector(isector,sectorI)
+            call build_sector(isector,sectorI,itrace=.true.)
             !
-            do i=1,sectorI%Dim
-               call build_op_Ns(i,IbUp,IbDw,sectorI)
-               Iimp = bjoin([IbUp(1:Norb),IbDw(1:Norb)],2*Norb) + 1
-#ifdef _DEBUG
-               if(ed_verbose>4)write(Logfile,"(A)")&
-                  "DEBUG observables_normal: get imp_DM j-contribution "//str(i)//" of "//str(sectorI%Dim)
-#endif
-               ! >> Full calculation: WAY TOO SLOW <<
-               Ibath= bjoin([IbUp(Norb+1:),IbDw(Norb+1:)],2*(Ns-Norb)) + 1
-               do j=1,sectorI%Dim
-                  call build_op_Ns(j,JbUp,JbDw,sectorI)
-                  Jimp = bjoin([JbUp(1:Norb),JbDw(1:Norb)],2*Norb) + 1
-                  Jbath= bjoin([JbUp(Norb+1:),JbDw(Norb+1:)],2*(Ns-Norb)) + 1
-                  if(Jbath/=Ibath)cycle
-                  impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
-                     state_dvec(i)*state_dvec(j)*peso
+            do IimpUp=0,2**Norb-1
+               do JimpUp=0,2**Norb-1
+                  !
+                  !Finding the unique bath states connecting IimpUp and JimpUp -> BATHup(:)
+                  call sp_return_intersection(sectorI%H(1)%sp,IimpUp,JimpUp,BATHup,lenBATHup)
+                  if(lenBATHup==0)cycle  !there are no bath states intersecting IimpUp,JimpUp
+                  !
+                  do IimpDw=0,2**Norb-1
+                     do JimpDw=0,2**Norb-1
+                        !
+                        !Finding the unique bath states connecting IimpDw and JimpDw -> BATHdw(:)
+                        call sp_return_intersection(sectorI%H(2)%sp,IimpDw,JimpDw,BATHdw,lenBATHdw)
+                        if(lenBATHdw==0)cycle  !there are no bath states intersecting IimpDw,JimpDw
+                        !
+                        !=== >>> TRACE over bath states <<< =================================================
+                        do bUP=1,lenBATHup
+                           IbathUp = BATHup(bUP)
+                           do bDW=1,lenBATHdw
+                              IbathDw = BATHdw(bDW)
+                              !-----------------------------------------------------
+                              !Allowed spin Fock space Istates:
+                              !Iup = IimpUp +  2^Norb * IbathUp
+                              !Idw = IimpDw +  2^Norb * IbathDw
+                              !
+                              !Corresponding sector indices per spin:
+                              iUP= binary_search(sectorI%H(1)%map,IimpUp + 2**Norb*IbathUp)
+                              iDW= binary_search(sectorI%H(2)%map,IimpDw + 2**Norb*IbathDw)
+                              !
+                              !Global sector index:
+                              i  = iUP + (iDW-1)*sectorI%DimUp
+                              !-----------------------------------------------------
+                              !Allowed spin Fock space Jstates:
+                              !Jup = JimpUp +  2^Norb * IbathUp
+                              !Jdw = JimpDw +  2^Norb * IbathDw
+                              !
+                              !Corresponding sector jndices per spin:
+                              jUP= binary_search(sectorI%H(1)%map,JimpUp + 2**Norb*IbathUp)
+                              jDW= binary_search(sectorI%H(2)%map,JimpDw + 2**Norb*IbathDw)
+                              !
+                              !Global sector jndex:
+                              j  = jUP + (jDW-1)*sectorI%DimUp
+                              !-----------------------------------------------------
+                              !Final [Up,Dw] composition for the impurity:
+                              io = (IimpUp + 2**Norb*IimpDw) + 1
+                              jo = (JimpUp + 2**Norb*JimpDw) + 1
+                              !-----------------------------------------------------------------
+                              !(i,j)_th contribution to the (io,jo)_th element of \rho_IMP
+                              impurity_density_matrix(io,jo) = impurity_density_matrix(io,jo) + &
+                                 state_dvec(i)*state_dvec(j)*peso
+                              !-----------------------------------------------------------------
+                           enddo
+                        enddo !=============================================================================
+                        !
+                     enddo
+                  enddo
+                  !
                enddo
-               !
-               !    > To speed up things we may want to avoid the whole (i,j)=1,sectorI%DIM spanning,
-               !      generating instead the impurity and bath bit configurations separately.
-               !      This way we could just directly fix (Iimp,Jimp) and span with a _*single*_
-               !      cycle Ibath, so to take the trace. But we need to reason about 1. how to restrict
-               !      the generated bath configurations to the given sector (may be cumbersome, and
-               !      not necessarily faster than what we have) and 2. how to rebuild the global (i,j),
-               !      in order to select the appropriate state_dvec elements.
-               !
-               ! >> Diagonal by construction: NOT GENERAL <<
-               !j=i
-               !Jimp=Iimp
-               !impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
-               !     state_dvec(i)*state_dvec(j)*peso
             enddo
+            !
+            ! >> Full calculation: WAY TOO SLOW <<
+            ! do i=1,sectorI%Dim
+            !    call build_op_Ns(i,IbUp,IbDw,sectorI)
+            !    Iimp = bjoin([IbUp(1:Norb),IbDw(1:Norb)],2*Norb) + 1
+            !    Ibath= bjoin([IbUp(Norb+1:),IbDw(Norb+1:)],2*(Ns-Norb)) + 1
+            !    do j=1,sectorI%Dim
+            !       call build_op_Ns(j,JbUp,JbDw,sectorI)
+            !       Jimp = bjoin([JbUp(1:Norb),JbDw(1:Norb)],2*Norb) + 1
+            !       Jbath= bjoin([JbUp(Norb+1:),JbDw(Norb+1:)],2*(Ns-Norb)) + 1
+            !       if(Jbath/=Ibath)cycle
+            !       impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
+            !          state_dvec(i)*state_dvec(j)*peso
+            !    enddo
+            !    !
+            !    !    > To speed up things we may want to avoid the whole (i,j)=1,sectorI%DIM spanning,
+            !    !      generating instead the impurity and bath bit configurations separately.
+            !    !      This way we could just directly fix (Iimp,Jimp) and span with a _*single*_
+            !    !      cycle Ibath, so to take the trace. But we need to reason about 1. how to restrict
+            !    !      the generated bath configurations to the given sector (may be cumbersome, and
+            !    !      not necessarily faster than what we have) and 2. how to rebuild the global (i,j),
+            !    !      in order to select the appropriate state_dvec elements.
+            !    !
+            !    ! >> Diagonal by construction: NOT GENERAL <<
+            !    !j=i
+            !    !Jimp=Iimp
+            !    !impurity_density_matrix(Iimp,Jimp) = impurity_density_matrix(Iimp,Jimp) + &
+            !    !     state_dvec(i)*state_dvec(j)*peso
+            ! enddo
             call delete_sector(sectorI)
          endif
          !

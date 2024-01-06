@@ -117,6 +117,12 @@ MODULE ED_SECTOR
    public :: sp_print_map
    public :: sector, sector_map
 
+   interface add_to
+      module procedure :: add_to_I
+      module procedure :: add_to_D
+      module procedure :: add_to_Z
+   end interface add_to
+
 
 
 
@@ -1111,7 +1117,74 @@ contains
       nchoos = int(xh + 0.5d0)
    end function binomial
 
+   subroutine add_to_I(vec,val)
+      integer,dimension(:),allocatable,intent(inout) :: vec
+      integer,intent(in)                             :: val
+      integer,dimension(:),allocatable               :: tmp
+      integer                                        :: n
+      !
+      if (allocated(vec)) then
+         n = size(vec)
+         allocate(tmp(n+1))
+         tmp(:n) = vec
+         call move_alloc(tmp,vec)
+         n = n + 1
+      else
+         n = 1
+         allocate(vec(n))
+      end if
+      !
+      !Put val as last entry:
+      vec(n) = val
+      !
+      if(allocated(tmp))deallocate(tmp)
+   end subroutine add_to_I
 
+   subroutine add_to_D(vec,val)
+      real(8),dimension(:),allocatable,intent(inout) :: vec
+      real(8),intent(in)                             :: val
+      real(8),dimension(:),allocatable               :: tmp
+      integer                                        :: n
+      !
+      if (allocated(vec)) then
+         n = size(vec)
+         allocate(tmp(n+1))
+         tmp(:n) = vec
+         call move_alloc(tmp,vec)
+         n = n + 1
+      else
+         n = 1
+         allocate(vec(n))
+      end if
+      !
+      !Put val as last entry:
+      vec(n) = val
+      !
+      if(allocated(tmp))deallocate(tmp)
+   end subroutine add_to_D
+
+   subroutine add_to_Z(vec,val)
+      complex(8),dimension(:),allocatable,intent(inout) :: vec
+      complex(8),intent(in)                             :: val
+      complex(8),dimension(:),allocatable               :: tmp
+      integer                                           :: n
+      !
+      if (allocated(vec)) then
+         n = size(vec)
+         allocate(tmp(n+1))
+         tmp(:n) = vec
+         call move_alloc(tmp,vec)
+         n = n + 1
+      else
+         n = 1
+         allocate(vec(n))
+      end if
+      !
+      !Put val as last entry:
+      vec(n) = val
+      !
+      if(allocated(tmp))deallocate(tmp)
+   end subroutine add_to_Z
 
 end MODULE ED_SECTOR
 
