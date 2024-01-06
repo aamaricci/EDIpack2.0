@@ -212,7 +212,11 @@ contains
          self%DimPh = Nph+1
          self%DimEl = getDim(isector)/(Nph+1)
          self%Dim   = self%DimEl*self%DimPh
-         call map_allocate(self%H,[self%DimEl])
+         if(itrace_)then
+            call map_allocate(self%H,[self%Dim],2*impDIM)
+         else
+            call map_allocate(self%H,[self%Dim])
+         endif
          imap=0
          do idw=0,2**Ns-1
             ndw_= popcnt(idw)
@@ -222,6 +226,10 @@ contains
                if(sz_ == self%Sz)then
                   imap=imap+1
                   self%H(1)%map(imap) = iup + idw*2**Ns
+                  if(.not.itrace_)cycle
+                  iIMP  = ibits(iup,0,Norb) + ibits(idw,0,Norb)*2**Norb
+                  iBATH = ibits(iup,Norb,Norb*Nbath) + ibits(idw,Norb,Norb*Nbath)*2**Norb
+                  call sp_insert_state(self%H(1)%sp,iIMP,iBATH,imap)
                endif
             enddo
          enddo
@@ -238,7 +246,11 @@ contains
             self%DimPh = Nph+1
             self%Dim   = self%DimEl*self%DimPh
             self%twoJz = gettwoJz(isector)
-            call map_allocate(self%H,[self%Dim])
+            if(itrace_)then
+               call map_allocate(self%H,[self%Dim],2*impDIM)
+            else
+               call map_allocate(self%H,[self%Dim])
+            endif
             imap=0
             do idw=0,2**Ns-1
                ndw_= popcnt(idw)
@@ -258,6 +270,10 @@ contains
                   if(self%Ntot == nt_  .AND. self%twoJz==(twoSz_+twoLz_) )then
                      imap=imap+1
                      self%H(1)%map(imap) = iup + idw*2**Ns
+                     if(.not.itrace_)cycle
+                     iIMP  = ibits(iup,0,Norb) + ibits(idw,0,Norb)*2**Norb
+                     iBATH = ibits(iup,Norb,Norb*Nbath) + ibits(idw,Norb,Norb*Nbath)*2**Norb
+                     call sp_insert_state(self%H(1)%sp,iIMP,iBATH,imap)
                   endif
                enddo
             enddo
@@ -270,7 +286,11 @@ contains
             self%DimEl = getDim(isector)
             self%DimPh = Nph+1
             self%Dim   = self%DimEl*self%DimPh
-            call map_allocate(self%H,[self%Dim])
+            if(itrace_)then
+               call map_allocate(self%H,[self%Dim],2*impDIM)
+            else
+               call map_allocate(self%H,[self%Dim])
+            endif
             imap=0
             do idw=0,2**Ns-1
                ndw_= popcnt(idw)
@@ -280,6 +300,10 @@ contains
                   if(nt_ == self%Ntot)then
                      imap=imap+1
                      self%H(1)%map(imap) = iup + idw*2**Ns
+                     if(.not.itrace_)cycle
+                     iIMP  = ibits(iup,0,Norb) + ibits(idw,0,Norb)*2**Norb
+                     iBATH = ibits(iup,Norb,Norb*Nbath) + ibits(idw,Norb,Norb*Nbath)*2**Norb
+                     call sp_insert_state(self%H(1)%sp,iIMP,iBATH,imap)
                   endif
                enddo
             enddo
