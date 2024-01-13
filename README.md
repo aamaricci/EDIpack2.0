@@ -1,12 +1,12 @@
 # EDIpack2.0: Massively parallel Exact Diagonalization for generic Quantum Impurity problems
 
-[![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/DMFT_ED/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/DMFT_ED/actions/workflows/PushWorkflow.yml) 
+[![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/EDIpack2.0/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/EDIpack2/actions/workflows/PushWorkflow.yml) 
 
 <!-- TO BE SETUP ASAP
 [![Coverage]()]()
 [![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://qcmplab.github.io/DMFT_ED)
 -->
-A suitable extension of ![EDIpack](https://github.com/aamaricci/EDIpack): a  Lanczos based method 
+A suitable extension of [EDIpack](https://github.com/aamaricci/EDIpack): a  Lanczos based method 
 for the solution of generic Quantum Impurity problems,  exploiting distributed memory MPI parallelisation.
 This updated version, aims to solve single-site, multi-orbital models, in either  *normal*, *superconducting* (s-wave) or *Spin-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases, including electron-phonons coupling. The code works at zero and low temperatures.   
  
@@ -27,13 +27,13 @@ The code is based on:
 ### Installation
 
 Installation is available using CMake. In the current v0.0.1 API are only provided in Fortran. In a future release Python and C/C++ API will be included.  
-The software gives acces to the static library `libdmft_ed.a` and the related modules `DMFT_ED`
+The software gives acces to the static library `libedipack2.a` and the related modules `EDIPACK2`
 
 Clone the repo:
 
-`git clone https://github.com/aamaricci/EDIpack2.0`
+`git clone https://github.com/aamaricci/EDIpack2.0 EDIpack2`
 
-And from the repository directory (`cd EDIpack2.0`) make a standard out-of-source CMake compilation:
+And from the repository directory (`cd EDIpack2`) make a standard out-of-source CMake compilation:
 
 `mkdir build`
 `cd build`
@@ -45,14 +45,14 @@ And from the repository directory (`cd EDIpack2.0`) make a standard out-of-sourc
 Please follow the instructions on the screen to complete installation on your environment.  
 The library can be loaded using one of the following, automatically generated, files :  
 
-* pkg-config file in `~/.pkg-config.d/dmft_ed.pc`  
-* environment module file `~/.modules.d/dmft_ed/<PLAT>`  
+* pkg-config file in `~/.pkg-config.d/EDIpack2.pc`  
+* environment module file `~/.modules.d/EDIpack2/<PLAT>`  
 * homebrew `bash` script `<PREFIX>/bin/configvars.sh`
 
 
 The `CMake` compilation can be controlled using the following additional variables, default values between `< >`:   
 
-* `-DPREFIX=prefix directory <~/opt/dmft_ed/VERSION/PLAT/[GIT_BRANCH]>` 
+* `-DPREFIX=prefix directory <~/opt/EDIpack2/VERSION/PLAT/[GIT_BRANCH]>` 
 
 * `-DUSE_MPI=<yes>/no`  
 

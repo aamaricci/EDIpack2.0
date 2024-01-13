@@ -1,6 +1,6 @@
 MODULE ED_FIT_GENERAL
   USE ED_FIT_COMMON
-  USE SF_PAULI, only: pauli_sigma_z
+  USE SF_SPIN, only: pauli_sigma_z
   USE SF_LINALG, only: kron, diag
 
   implicit none
