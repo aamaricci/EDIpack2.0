@@ -36,16 +36,16 @@ jobs:
       - name: Install SciFortran
         run: scifor/bin/ci_setup_scifor.sh
 
-# Build LIB_DMFT_ED
-      - name: Cloning DMFT_ED
-        run: git clone https://github.com/aamaricci/DMFT_ED.git DMFT_ED
-      - name: Install DMFT_ED
+# Build EDIpack2
+      - name: Cloning EDIpack2
+        run: git clone https://github.com/aamaricci/EDIpack2.0 EDIpack2
+      - name: Install EDIpack2
         run: |
           source ~/.scifor_config_user
           export PKG_CONFIG_PATH=~/.pkgconfig.d
           export GLOB_INC=$( pkg-config --cflags scifor )
           export GLOB_LIB=$( pkg-config --libs   scifor  | sed  "s/;/ /g"  | sed 's/\\/  /g' )
-          LIB_DMFT_ED/bin/ci_setup_dmft_ed.sh
+          EDIpack2/bin/ci_setup_dmft_ed.sh
 
 
 
@@ -59,13 +59,13 @@ jobs:
           export PKG_CONFIG_PATH=~/.pkgconfig.d
           export GLOB_INC=$( pkg-config --cflags scifor dmft_ed)
           export GLOB_LIB=$( pkg-config --libs   scifor dmft_ed | sed  "s/;/ /g"  | sed 's/\\/  /g' )
-          cd LIB_DMFT_ED/test
+          cd EDIpack2/test
           export TERM=xterm
           make all
 
       - name: Testing...
         run: |
-          cd LIB_DMFT_ED/test
+          cd EDIpack2/test
           make test
 
       # - name: Install LCOV
