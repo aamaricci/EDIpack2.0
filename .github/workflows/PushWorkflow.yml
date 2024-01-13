@@ -1,4 +1,4 @@
-name: CI DMFT_ED test workflow 
+name: CI EDIpack2 test workflow 
 
 on: push
 
@@ -7,7 +7,7 @@ defaults:
     shell: bash -l {0}
 
 jobs:
-  test-QcmP:
+  test-EDIpack2:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -38,7 +38,7 @@ jobs:
 
 # Build EDIpack2
       - name: Cloning EDIpack2
-        run: git clone https://github.com/aamaricci/EDIpack2.0 EDIpack2
+        run: git clone https://github.com/aamaricci/EDIpack2.0.git EDIpack2
       - name: Install EDIpack2
         run: |
           source ~/.scifor_config_user

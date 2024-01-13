@@ -14,7 +14,7 @@ proc ModulesHelp { } {
 module-whatis "EDIpack2.0 library in Fortran"
 
 
-setenv       DMFT_ED_ROOT  		 $root
+setenv       EDIPACK2_ROOT  		 $root
 setenv	     FC			 $compiler
 setenv	     F90		 $compiler
 prepend-path LD_LIBRARY_PATH    "$root/lib"

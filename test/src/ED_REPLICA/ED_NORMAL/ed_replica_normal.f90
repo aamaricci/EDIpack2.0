@@ -1,5 +1,5 @@
 program ed_replica_normal
-  USE DMFT_ED
+  USE EDIPACK2
   USE SCIFOR
   USE MPI
   USE SF_MPI
