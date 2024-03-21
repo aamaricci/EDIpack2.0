@@ -462,7 +462,7 @@ contains
                "Vbk_l"//reg(str(iorb))//"_s"//reg(str(ispin)),&
                iorb=1,Norb), ispin=1,Nspin)
           do i=1,Nbath
-             write(unit,"(90(ES21.12,1X))")((&
+             write(unit_,"(90(ES21.12,1X))")((&
                   dmft_bath_%e(ispin,iorb,i),&
                   dmft_bath_%v(ispin,iorb,i),&
                   dmft_bath_%u(ispin,iorb,i),&
