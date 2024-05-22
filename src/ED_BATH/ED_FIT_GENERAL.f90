@@ -208,7 +208,7 @@ contains
     !
     call get_dmft_bath(dmft_bath,bath_)                ! ***  dmft_bath --> bath_ ***    (bath in output)
     call deallocate_dmft_bath(dmft_bath)
-    deallocate(Gdelta,Xdelta,Wdelta)
+    deallocate(FGmatrix,Gdelta,Xdelta,Wdelta)
     deallocate(getIspin,getJspin)
     deallocate(getIorb,getJorb)
     deallocate(array_bath)
