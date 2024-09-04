@@ -3,40 +3,47 @@ MODULE ED_INPUT_VARS
   USE SF_PARSE_INPUT
   USE SF_IOTOOLS, only:str,free_unit
   USE ED_VERSION
+  use iso_c_binding
   implicit none
 
 
   !input variables
   !=========================================================
-  integer              :: Nbath               !Nbath=# of bath sites (per orbital or not depending on bath_type)
-  integer              :: Norb                !Norb =# of impurity orbitals
-  integer              :: Nspin               !Nspin=# spin degeneracy (max 2)
-  integer              :: nloop               !max dmft loop variables
-  integer              :: Nph                 !max number of phonons allowed (cut off)
-  real(8),allocatable  :: Uloc(:)             !local interactions
-  real(8)              :: Ust                 !intra-orbitals interactions
-  real(8)              :: Jh                  !J_Hund: Hunds' coupling constant 
-  real(8)              :: Jx                  !J_X: coupling constant for the spin-eXchange interaction term
-  real(8)              :: Jp                  !J_P: coupling constant for the Pair-hopping interaction term 
-  real(8)              :: xmu                 !chemical potential
-  real(8)              :: beta                !inverse temperature
+  integer(c_int), bind(c, name="Nbath")                              :: Nbath               !Nbath=# of bath sites (per orbital or not depending on bath_type)
+  integer(c_int), bind(c, name="Norb")                               :: Norb                !Norb =# of impurity orbitals
+  integer(c_int), bind(c, name="Nspin")                              :: Nspin               !Nspin=# spin degeneracy (max 2)
+
+  integer(c_int), bind(c, name="Nloop")                              :: Nloop               !max dmft loop variables
+  integer(c_int), bind(c, name="Nph")                                :: Nph                 !max number of phonons allowed (cut off)
+  real(c_double),dimension(5),bind(c, name="Uloc")                   :: Uloc                !local interactions
+  real(c_double),bind(c, name="Ust")                                 :: Ust                 !intra-orbitals interactions
+  real(c_double),bind(c, name="Jh")                                  :: Jh                  !J_Hund: Hunds' coupling constant 
+  real(c_double),bind(c, name="Jx")                                  :: Jx                  !J_X: coupling constant for the spin-eXchange interaction term
+  real(c_double),bind(c, name="Jp")                                  :: Jp                  !J_P: coupling constant for the Pair-hopping interaction term 
+  real(c_double),bind(c, name="xmu")                                 :: xmu                 !chemical potential
+  real(c_double),bind(c, name="beta")                                :: beta                !inverse temperature
   !
-  integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
-  complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
-  real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
-  real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
-  real(8)              :: A_ph                !A_ph: phonon field coupled to displacement operator (constant)
   !
-  integer              :: Nsuccess            !# of repeated success to fall below convergence threshold  
-  real(8)              :: dmft_error          !dmft convergence threshold
-  real(8)              :: eps                 !broadening
-  real(8)              :: wini,wfin           !frequency range
-  real(8)              :: xmin,xmax           !x-range for the local lattice probability distribution function (phonons)
+  integer(c_int), bind(c, name="Nsuccess")                           :: Nsuccess            !# of repeated success to fall below convergence threshold  
+  real(c_double),bind(c, name="dmft_error")                          :: dmft_error          !dmft convergence threshold
+  real(c_double),bind(c, name="eps")                                 :: eps                 !broadening
+  real(c_double),bind(c, name="wini")                                :: wini           !frequency range min
+  real(c_double),bind(c, name="wfin")                                :: wfin                !frequency range max
+  real(c_double),bind(c, name="xmin")                                :: xmin                !x-range for the local lattice probability distribution function (phonons)
+  real(c_double),bind(c, name="xmax")                                :: xmax                !x-range for the local lattice probability distribution function (phonons)
+  real(c_double),bind(c, name="sb_field")                            :: sb_field            !symmetry breaking field
+  real(c_double),bind(c, name="nread")                               :: nread               !fixed density. if 0.d0 fixed chemical potential calculation.
+  !
   logical              :: HFmode              !flag for HF interaction form U(n-1/2)(n-1/2) VS Unn
   real(8)              :: cutoff              !cutoff for spectral summation
   real(8)              :: gs_threshold        !Energy threshold for ground state degeneracy loop up
   real(8)              :: deltasc             !breaking symmetry field
-  real(8)              :: sb_field            !symmetry breaking field
+  !
+  integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
+  real(8)              :: A_ph                !A_ph: phonon field coupled to displacement operator (constant)
+  complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
+  real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
+  real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
   !
   real(8),allocatable  :: spin_field_x(:)        !magnetic field per orbital coupling to X-spin component
   real(8),allocatable  :: spin_field_y(:)        !magnetic field per orbital coupling to Y-spin component
@@ -92,7 +99,6 @@ MODULE ED_INPUT_VARS
   logical              :: finiteT             !flag for finite temperature calculation
   character(len=7)     :: bath_type           !flag to set bath type: normal (1bath/imp), hybrid(1bath)
   !
-  real(8)              :: nread               !fixed density. if 0.d0 fixed chemical potential calculation.
   real(8)              :: nerr                !fix density threshold. a loop over from 1.d-1 to required nerr is performed
   real(8)              :: ndelta              !initial chemical potential step
   real(8)              :: ncoeff              !multiplier for the initial ndelta read from a file (ndelta-->ndelta*ncoeff)
@@ -102,17 +108,17 @@ MODULE ED_INPUT_VARS
   real(8)              :: Jz_max_value
 
   !Some parameters for function dimension:
-  !=========================================================
-  integer              :: Lmats
-  integer              :: Lreal
-  integer              :: Lfit
-  integer              :: Ltau
-  integer              :: Lpos
+  integer(c_int),bind(c, name="Lmats")             :: Lmats
+  integer(c_int),bind(c, name="Lreal")             :: Lreal
+  integer(c_int),bind(c, name="Lfit")              :: Lfit
+
+  integer(c_int),bind(c, name="Ltau")              :: Ltau
+  integer(c_int),bind(c, name="Lpos")              :: Lpos
 
   !LOG AND Hamiltonian UNITS
   !=========================================================
   character(len=100)   :: Hfile,HLOCfile,SectorFile,GPHfile
-  integer,save         :: LOGfile
+  integer(c_int),bind(c, name="LOGfile"),save             :: LOGfile
 
   !THIS IS JUST A RELOCATED GLOBAL VARIABLE
   character(len=200)                                 :: ed_input_file=""
@@ -153,8 +159,9 @@ contains
     call parse_input_variable(Nph,"NPH",INPUTunit,default=0,comment="Max number of phonons allowed (cut off)")
     call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp), general(replica++)")
     !
-    allocate(Uloc(Norb))
-    call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
+    !allocate(Uloc(Norb)) #TODO: put me back!
+    !call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
+    call parse_input_variable(uloc,"ULOC",INPUTunit,default=[2d0,0d0,0d0,0d0,0d0],comment="Values of the local interaction per orbital (max 5)")
     call parse_input_variable(ust,"UST",INPUTunit,default=0.d0,comment="Value of the inter-orbital interaction term")
     call parse_input_variable(Jh,"JH",INPUTunit,default=0.d0,comment="Hunds coupling")
     call parse_input_variable(Jx,"JX",INPUTunit,default=0.d0,comment="S-E coupling")
