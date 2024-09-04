@@ -4,12 +4,13 @@ import os,sys
 import types
 
 #################################
-#link to access global variables
+#AUXILIARY FUNCTIONS
 #################################
 
 #dummy class, to be filled
 class Link:
-    pass
+    def __init__(self,library):
+        self.library = library
 
 #function that will add a variable to the dummy class, will be called in variable definition
 def add_global_variable(obj, dynamic_name, target_object, target_attribute):
@@ -53,31 +54,20 @@ libext = '.so'
 if(system=='darwin'):
     libext = '.dylib'
 libpath = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, libpath)
 libfile = os.path.join(libpath, 'libedi2py'+libext)
 libedi2py = CDLL(libfile)
-
-
-######################################
-# READ_INPUT
-######################################
-
-read_input_wrap = libedi2py.read_input
-read_input_wrap.argtypes = [c_char_p]  
-read_input_wrap.restype = None
-
-def read_input(self,input_string):
-    c_string = c_char_p(input_string.encode())
-    read_input_wrap(c_string)
-    
-
 
 ####################################################################
 # Create the global_env class (this is what the python module sees)
 ####################################################################
 
-global_env=Link()
+global_env=Link(libedi2py)
 
-#variables
+######################################
+# GLOBAL VARIABLES
+######################################
+
 add_global_variable(global_env, "Nbath", c_int.in_dll(libedi2py, "Nbath"), "value")
 add_global_variable(global_env, "Norb", c_int.in_dll(libedi2py, "Norb"), "value")
 add_global_variable(global_env, "Nspin", c_int.in_dll(libedi2py, "Nspin"), "value")
@@ -106,7 +96,12 @@ add_global_variable(global_env, "xmax", c_double.in_dll(libedi2py, "xmax"), "val
 add_global_variable(global_env, "sb_field", c_double.in_dll(libedi2py, "sb_field"), "value")
 add_global_variable(global_env, "nread", c_double.in_dll(libedi2py, "nread"), "value")
 
+######################################
+# GLOBAL FUNCTIONS
+######################################
 
-#functions
-global_env.read_input = types.MethodType(read_input, global_env)
+#read input
+import func_read_input
+global_env.read_input = types.MethodType(func_read_input.read_input, global_env)
+
 

@@ -6,7 +6,9 @@ scifor_dep= dependency('scifor', required:true)
 edipack_dep= dependency('edipack', required:true)
 
 fortran_src = ['src/ED_INPUT_VARS.f90','src/edi2py/edi2py.f90']
-python_src  = ['python/edi2py.py', 'python/__init__.py']
+python_src  = ['python/edi2py.py',
+               'python/func_read_input.py',
+               'python/__init__.py']
 
 library('edi2py', 
                     fortran_src,
