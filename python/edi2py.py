@@ -100,8 +100,36 @@ add_global_variable(global_env, "nread", c_double.in_dll(libedi2py, "nread"), "v
 # GLOBAL FUNCTIONS
 ######################################
 
-#read input
+#read_input
 import func_read_input
 global_env.read_input = types.MethodType(func_read_input.read_input, global_env)
 
+#aux_funx
+import func_aux_funx
+global_env.set_hloc = types.MethodType(func_aux_funx.set_hloc, global_env)
+global_env.search_variable = types.MethodType(func_aux_funx.search_variable, global_env)
+global_env.check_convergence = types.MethodType(func_aux_funx.check_convergence, global_env)
 
+#bath
+import func_bath
+global_env.get_bath_dimension = types.MethodType(func_bath.get_bath_dimension, global_env)
+global_env.set_Hreplica = types.MethodType(func_bath.set_Hreplica, global_env)
+global_env.break_symmetry_bath = types.MethodType(func_bath.break_symmetry_bath, global_env)
+global_env.spin_symmetrize_bath = types.MethodType(func_bath.spin_symmetrize_bath, global_env)
+global_env.orb_symmetrize_bath = types.MethodType(func_bath.orb_symmetrize_bath, global_env)
+global_env.orb_equality_bath = types.MethodType(func_bath.orb_equality_bath, global_env)
+global_env.ph_symmetrize_bath = types.MethodType(func_bath.ph_symmetrize_bath, global_env)
+
+#main
+import func_main
+global_env.init_solver = types.MethodType(func_main.init_solver, global_env)
+global_env.solve = types.MethodType(func_main.solve, global_env)
+
+#io
+import func_io
+global_env.get_sigma = types.MethodType(func_io.get_sigma, global_env)
+global_env.get_gimp = types.MethodType(func_io.get_gimp, global_env)
+
+#bath_fit
+import func_bath_fit
+global_env.chi2_fitgf = types.MethodType(func_bath_fit.chi2_fitgf, global_env)

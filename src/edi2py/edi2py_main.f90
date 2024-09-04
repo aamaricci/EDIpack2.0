@@ -12,24 +12,18 @@ subroutine init_solver_ineq_c(bath,dim_bath) bind(c, name='init_solver_ineq')
 end subroutine init_solver_ineq_c
 
 
-subroutine solve_site_c(bath,dim_bath,hloc,dim_hloc,sflag) bind(c, name='solve_site')
+subroutine solve_site_c(bath,dim_bath,sflag,fmpi) bind(c, name='solve_site')
   integer(c_int64_t),dimension(1),intent(in)                                             :: dim_bath
-  integer(c_int64_t),dimension(4),intent(in)                                             :: dim_hloc
-  integer(c_int),value                                                                   :: sflag
+  integer(c_int),value                                                                   :: sflag,fmpi
   real(c_double),dimension(dim_bath(1)),intent(in)                                       :: bath
-  real(c_double),dimension(dim_hloc(1),dim_hloc(2),dim_hloc(3),dim_hloc(4)),intent(in)   :: hloc
-  call assert_shape(hloc,[Nspin,Nspin,Norb,Norb],"solve","hloc")
-  call ed_solve(bath,hloc,sflag=i2l(sflag))
+  call ed_solve(bath,sflag=i2l(sflag),fmpi=i2l(fmpi))
 end subroutine solve_site_c
 !
-subroutine solve_ineq_c(bath,dim_bath,hloc,dim_hloc,mpi_lanc) bind(c, name='solve_ineq')
+subroutine solve_ineq_c(bath,dim_bath,mpi_lanc,iflag) bind(c, name='solve_ineq')
   integer(c_int64_t),dimension(2),intent(in)                                                           :: dim_bath
-  integer(c_int64_t),dimension(5),intent(in)                                                           :: dim_hloc
-  integer(c_int),value                                                                                 :: mpi_lanc
+  integer(c_int),value                                                                                 :: mpi_lanc,iflag
   real(c_double),dimension(dim_bath(1),dim_bath(2)),intent(in)                                         :: bath
-  real(c_double),dimension(dim_hloc(1),dim_hloc(2),dim_hloc(3),dim_hloc(4),dim_hloc(5)),intent(in)     :: hloc
   integer                                                                                              :: Nineq
   Nineq = size(bath,1)
-  call assert_shape(Hloc,[Nineq,Nspin,Nspin,Norb,Norb],"solve","hloc")  
-  call ed_solve(bath,hloc,i2l(mpi_lanc))
+  call ed_solve(bath,mpi_lanc=i2l(mpi_lanc),iflag=i2l(iflag))
 end subroutine solve_ineq_c

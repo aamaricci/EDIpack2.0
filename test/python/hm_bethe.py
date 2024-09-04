@@ -43,11 +43,12 @@ Gmats=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex',orde
 Sreal=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lreal),dtype='complex',order='F')
 Greal=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lreal),dtype='complex',order='F')
 Delta=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex',order='F')
-Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='float',order='F')
+Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex',order='F')
 
 
 
 #SETUP SOLVER
+ed.set_hloc(hloc=Hloc)
 Nb=ed.get_bath_dimension()
 bath = np.zeros(Nb,dtype='float',order='F')
 ed.init_solver(bath)
@@ -60,12 +61,14 @@ while (not converged and iloop<ed.Nloop ):
     print("DMFT-loop:",iloop,"/",ed.Nloop)
 
     #Solve the EFFECTIVE IMPURITY PROBLEM (first w/ a guess for the bath)
-    ed.solve(bath,Hloc)
+    ed.solve(bath)
     
 
     #Get Self-energies
-    ed.get_sigma_matsubara(Smats)
-    ed.get_sigma_realaxis(Sreal)
+    Smats = ed.get_sigma(Smats,axis="m")
+    Sreal = ed.get_sigma(Sreal,axis="r")
+    Gimp  = ed.get_gimp(Gmats,axis="m")
+    Greal = ed.get_gimp(Greal,axis="r")
 
     #Compute the local gf:
     for i in range(ed.Lmats):
@@ -85,7 +88,7 @@ while (not converged and iloop<ed.Nloop ):
     Delta[0,0,0,0,:] = 0.25*wband*Gmats[0,0,0,0,:]
     if(rank==0):
         np.savetxt('Delta_iw.dat', np.transpose([wm,Delta[0,0,0,0,:].imag,Delta[0,0,0,0,:].real]))
-    ed.chi2_fitgf(Delta,bath,ispin=1,iorb=1)
+    ed.chi2_fitgf(Delta,bath,ispin=0,iorb=0)
     
     if(iloop>1):
         bath = wmixing*bath + (1.0-wmixing)*bath_prev
