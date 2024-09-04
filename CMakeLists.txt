@@ -1,9 +1,9 @@
 ##################################################
 # DMFTED PROJECT
 ##################################################
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
 PROJECT(edipack2 Fortran)
-SET(VERSION 0.4.7)
+SET(VERSION 1.4.0)
 
 
 MESSAGE(STATUS "OS: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
