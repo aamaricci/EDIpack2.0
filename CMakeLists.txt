@@ -3,7 +3,7 @@
 ##################################################
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
 PROJECT(edipack2 Fortran)
-SET(VERSION 1.4.0)
+SET(VERSION 1.4.1)
 
 
 MESSAGE(STATUS "OS: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
