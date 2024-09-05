@@ -3,47 +3,6 @@ import numpy as np
 import os,sys
 import types
 
-#################################
-#AUXILIARY FUNCTIONS
-#################################
-
-#dummy class, to be filled
-class Link:
-    def __init__(self,library):
-        self.library = library
-
-#function that will add a variable to the dummy class, will be called in variable definition
-def add_global_variable(obj, dynamic_name, target_object, target_attribute):
-    @property
-    def getter(self):
-        try:
-            attrib = getattr(target_object, target_attribute)
-            try: #this is for strings
-                attrib = attrib.decode()
-            except:
-                pass
-        except: #this is for arrays
-            if(len(target_object)>1):
-                return [target_object[x] for x in range(len(target_object))]
-        return attrib
-
-    @getter.setter
-    def setter(self, new_value):
-        try: #this is for arrays
-            if(len(target_object)>1):
-                minlength=min(len(target_object),len(new_value))
-                target_object[0:minlength]=new_value[0:minlength]
-        except:
-            try:
-                new_value = new_value.encode()
-            except:
-                pass
-            setattr(target_object, target_attribute, new_value)
-
-    # Dynamically add the property to the class
-    setattr(obj.__class__, dynamic_name, getter)
-    setattr(obj.__class__, dynamic_name, setter)
-
 
 ######################################
 # Load shared library with C-bindings
@@ -57,6 +16,60 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, libpath)
 libfile = os.path.join(libpath, 'libedi2py'+libext)
 libedi2py = CDLL(libfile)
+
+
+#################################
+#AUXILIARY FUNCTIONS
+#################################
+
+#dummy class, to be filled
+class Link:
+    def __init__(self,library):
+        self.library = library
+        
+#function that equates the assumed-shape Fortran internal arrays with the fixed-shape c-binding ones
+
+def update_array(name,setget):
+    wrapper = libedi2py.update_array
+    wrapper.argtypes = [c_char_p,c_char_p]
+    wrapper.restypes = None
+    wrapper(c_char_p(name.encode()),c_char_p(setget.encode()))
+
+#function that will add a variable to the dummy class, will be called in variable definition
+def add_global_variable(obj, dynamic_name, target_object, target_attribute):
+    @property
+    def getter(self):
+        try:
+            attrib = getattr(target_object, target_attribute)
+            try: #this is for strings
+                attrib = attrib.decode()
+            except:
+                pass
+        except: #this is for arrays
+            if(len(target_object)>1):
+                update_array(dynamic_name,"get")
+                aux_norb=c_int.in_dll(libedi2py, "Norb").value
+                return np.asarray([target_object[x] for x in range(aux_norb)])
+        return attrib
+
+    @getter.setter
+    def setter(self, new_value):
+        try: #this is for arrays
+            if(len(target_object)>1):
+                minlength=min(len(target_object),len(new_value))
+                target_object[0:minlength]=new_value[0:minlength]
+                update_array(dynamic_name,"set")
+        except:
+            try:
+                new_value = new_value.encode()
+            except:
+                pass
+            setattr(target_object, target_attribute, new_value)
+
+    # Dynamically add the property to the class
+    setattr(obj.__class__, dynamic_name, getter)
+    setattr(obj.__class__, dynamic_name, setter)
+
 
 ####################################################################
 # Create the global_env class (this is what the python module sees)
@@ -80,7 +93,7 @@ add_global_variable(global_env, "Ltau", c_int.in_dll(libedi2py, "Ltau"), "value"
 add_global_variable(global_env, "Lpos", c_int.in_dll(libedi2py, "Lpos"), "value")
 add_global_variable(global_env, "LOGfile", c_int.in_dll(libedi2py, "LOGfile"), "value")
 
-add_global_variable(global_env, "Uloc", ARRAY(c_double, 5).in_dll(libedi2py, "Uloc"), "value")
+add_global_variable(global_env, "Uloc", ARRAY(c_double, 5).in_dll(libedi2py, "Uloc_cbind"), "value")
 add_global_variable(global_env, "Ust", c_double.in_dll(libedi2py, "Ust"), "value")
 add_global_variable(global_env, "Jh", c_double.in_dll(libedi2py, "Jh"), "value")
 add_global_variable(global_env, "Jx", c_double.in_dll(libedi2py, "Jx"), "value")

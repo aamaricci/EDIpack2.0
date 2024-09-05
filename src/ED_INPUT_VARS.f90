@@ -9,13 +9,12 @@ MODULE ED_INPUT_VARS
 
   !input variables
   !=========================================================
-  integer(c_int), bind(c, name="Nbath")                              :: Nbath               !Nbath=# of bath sites (per orbital or not depending on bath_type)
-  integer(c_int), bind(c, name="Norb")                               :: Norb                !Norb =# of impurity orbitals
-  integer(c_int), bind(c, name="Nspin")                              :: Nspin               !Nspin=# spin degeneracy (max 2)
+  integer(c_int),bind(c, name="Nbath")                              :: Nbath               !Nbath=# of bath sites (per orbital or not depending on bath_type)
+  integer(c_int),bind(c, name="Norb")                               :: Norb                !Norb =# of impurity orbitals
+  integer(c_int),bind(c, name="Nspin")                              :: Nspin               !Nspin=# spin degeneracy (max 2)
 
-  integer(c_int), bind(c, name="Nloop")                              :: Nloop               !max dmft loop variables
-  integer(c_int), bind(c, name="Nph")                                :: Nph                 !max number of phonons allowed (cut off)
-  real(c_double),dimension(5),bind(c, name="Uloc")                   :: Uloc                !local interactions
+  integer(c_int),bind(c, name="Nloop")                              :: Nloop               !max dmft loop variables
+  integer(c_int),bind(c, name="Nph")                                :: Nph                 !max number of phonons allowed (cut off)
   real(c_double),bind(c, name="Ust")                                 :: Ust                 !intra-orbitals interactions
   real(c_double),bind(c, name="Jh")                                  :: Jh                  !J_Hund: Hunds' coupling constant 
   real(c_double),bind(c, name="Jx")                                  :: Jx                  !J_X: coupling constant for the spin-eXchange interaction term
@@ -24,7 +23,7 @@ MODULE ED_INPUT_VARS
   real(c_double),bind(c, name="beta")                                :: beta                !inverse temperature
   !
   !
-  integer(c_int), bind(c, name="Nsuccess")                           :: Nsuccess            !# of repeated success to fall below convergence threshold  
+  integer(c_int),bind(c, name="Nsuccess")                           :: Nsuccess            !# of repeated success to fall below convergence threshold  
   real(c_double),bind(c, name="dmft_error")                          :: dmft_error          !dmft convergence threshold
   real(c_double),bind(c, name="eps")                                 :: eps                 !broadening
   real(c_double),bind(c, name="wini")                                :: wini           !frequency range min
@@ -34,6 +33,7 @@ MODULE ED_INPUT_VARS
   real(c_double),bind(c, name="sb_field")                            :: sb_field            !symmetry breaking field
   real(c_double),bind(c, name="nread")                               :: nread               !fixed density. if 0.d0 fixed chemical potential calculation.
   !
+  real(8),dimension(:),allocatable        :: Uloc                !local interactions
   logical              :: HFmode              !flag for HF interaction form U(n-1/2)(n-1/2) VS Unn
   real(8)              :: cutoff              !cutoff for spectral summation
   real(8)              :: gs_threshold        !Energy threshold for ground state degeneracy loop up
@@ -159,9 +159,8 @@ contains
     call parse_input_variable(Nph,"NPH",INPUTunit,default=0,comment="Max number of phonons allowed (cut off)")
     call parse_input_variable(bath_type,"BATH_TYPE",INPUTunit,default='normal',comment="flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp), general(replica++)")
     !
-    !allocate(Uloc(Norb)) #TODO: put me back!
-    !call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
-    call parse_input_variable(uloc,"ULOC",INPUTunit,default=[2d0,0d0,0d0,0d0,0d0],comment="Values of the local interaction per orbital (max 5)")
+    allocate(Uloc(Norb))
+    call parse_input_variable(uloc,"ULOC",INPUTunit,default=(/( 2d0,i=1,size(Uloc) )/),comment="Values of the local interaction per orbital")
     call parse_input_variable(ust,"UST",INPUTunit,default=0.d0,comment="Value of the inter-orbital interaction term")
     call parse_input_variable(Jh,"JH",INPUTunit,default=0.d0,comment="Hunds coupling")
     call parse_input_variable(Jx,"JX",INPUTunit,default=0.d0,comment="S-E coupling")
