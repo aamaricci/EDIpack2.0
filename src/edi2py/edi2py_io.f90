@@ -107,3 +107,20 @@ subroutine ed_get_gimp_lattice_n6_c(self,nlat,d,axis,typ) bind(c, name='ed_get_g
   axis_(1:1)=axis(1)
   call ed_get_gimp(self,nlat,axis_,typ_)
 end subroutine ed_get_gimp_lattice_n6_c
+
+
+!OBSERVABLES
+
+!density
+subroutine ed_get_dens_n1_c(self) bind(c,name="ed_get_dens_n1")
+  real(c_double)     :: self(Norb)
+  call ed_get_dens(self)
+end subroutine ed_get_dens_n1_c
+
+
+subroutine ed_get_dens_n2(self,d,Nlat) bind(c,name="ed_get_dens_n2")
+  integer(c_int64_t) :: d(2)
+  real(c_double)     :: self(d(1),d(2))
+  integer(c_int)     :: Nlat
+  call ed_get_dens(self,Nlat)
+end subroutine ed_get_dens_n2

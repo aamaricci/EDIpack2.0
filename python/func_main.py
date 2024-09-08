@@ -20,6 +20,7 @@ def init_solver(self,bath):
         init_solver_site(bath,dim_bath)
     else:
         init_solver_ineq(bath,dim_bath)
+        self.Nineq = np.shape(bath)[0] #save number of inequivalent sites: this is useful when we want to know if we are in lattice case or not
 
 # Define the function signature for the Fortran function `solve_site`.
 def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):

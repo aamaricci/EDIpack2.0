@@ -11,6 +11,7 @@ import types
 class Link:
     def __init__(self,library):
         self.library = library
+        self.Nineq = None
 
 #function that will add a variable to the dummy class, will be called in variable definition
 def add_global_variable(obj, dynamic_name, target_object, target_attribute):
@@ -130,6 +131,7 @@ global_env.solve = types.MethodType(func_main.solve, global_env)
 import func_io
 global_env.get_sigma = types.MethodType(func_io.get_sigma, global_env)
 global_env.get_gimp = types.MethodType(func_io.get_gimp, global_env)
+global_env.get_dens = types.MethodType(func_io.get_dens, global_env)
 
 #bath_fit
 import func_bath_fit

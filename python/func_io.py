@@ -121,3 +121,45 @@ def get_gimp(self,gimp,Nlat=-1,axis="m",typ="n"):
         else:
             raise ValueError('Shape(array) != 3 in get_bath_component')
     return gimp
+    
+    
+#observables
+
+#density
+def get_dens(self,ilat=None,iorb=None):
+
+    aux_norb = c_int.in_dll(self.library, "Norb").value
+    
+    ed_get_dens_n1_wrap = self.library.ed_get_dens_n1
+    ed_get_dens_n1_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS')]
+    ed_get_dens_n1_wrap.restype = None
+    
+    ed_get_dens_n2_wrap = self.library.ed_get_dens_n2
+    ed_get_dens_n2_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
+                                    np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                    c_int]
+    ed_get_dens_n2_wrap.restype = None
+
+    if self.Nineq is None:
+        densvec = np.zeros(aux_norb,dtype=float,order="F")
+        ed_get_dens_n1_wrap(densvec)
+        
+        if ilat is not None:
+            raise ValueError("ilat cannot be none for single-impurity DMFT")
+        elif iorb is not None:
+            return densvec[iorb]
+        else:
+            return densvec
+    else:
+        densvec = np.zeros([self.Nineq,aux_norb],dtype=float,order="F")
+        dim_densvector = np.asarray(np.shape(densvec),dtype=np.int64,order="F")
+        ed_get_dens_n2_wrap(densvec,self.Nineq)
+        
+        if ilat is not None and iorb is not None:
+            return densvec[ilat,iorb]
+        elif ilat is None and iorb is not None:
+            return densvec[:,iorb]
+        elif ilat is not None and iorb is None:
+            return densvec[ilat,:]
+        else:
+            return densvec
