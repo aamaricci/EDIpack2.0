@@ -38,10 +38,6 @@ wr = np.linspace(ed.wini,ed.wfin,ed.Lreal)
 
 #Allocate minimal required arrays:
 #ALL functions must have shape [Nspin,Nspin,Norb,Norb(,L)]:
-Smats=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex',order='F')
-Gmats=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex',order='F')
-Sreal=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lreal),dtype='complex',order='F')
-Greal=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lreal),dtype='complex',order='F')
 Delta=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex',order='F')
 Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex',order='F')
 
@@ -65,10 +61,12 @@ while (not converged and iloop<ed.Nloop ):
     
 
     #Get Self-energies
-    Smats = ed.get_sigma(Smats,axis="m")
-    Sreal = ed.get_sigma(Sreal,axis="r")
-    Gimp  = ed.get_gimp(Gmats,axis="m")
-    Greal = ed.get_gimp(Greal,axis="r")
+    Smats = ed.get_sigma(axis="m")
+    Sreal = ed.get_sigma(axis="r")
+    Gimp_mats = ed.get_gimp(axis="m")
+    Gimp_real = ed.get_gimp(axis="r")
+    Gmats = np.zeros_like(Smats)
+    Greal = np.zeros_like(Sreal)
 
     #Compute the local gf:
     for i in range(ed.Lmats):

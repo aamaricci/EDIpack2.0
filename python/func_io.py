@@ -4,7 +4,7 @@ import os,sys
 import types
 
 #sigma
-def get_sigma(self,Sigma,Nlat=-1,axis="m",typ="n"):
+def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n"):
     ed_get_sigma_site_n3 = self.library.ed_get_sigma_site_n3
     ed_get_sigma_site_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
                                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -43,28 +43,57 @@ def get_sigma(self,Sigma,Nlat=-1,axis="m",typ="n"):
                                            c_char_p]       
     ed_get_sigma_lattice_n6.restype = None
     
-    DimSigma = np.asarray(np.shape(Sigma),dtype=np.int64,order="F")
-    if Nlat < 0:
-        if len(DimSigma)==3:
+    norb_aux = c_int.in_dll(self.library, "Norb").value
+    nspin_aux = c_int.in_dll(self.library, "Norb").value
+    if axis == "m" or axis == "M":
+        nfreq = c_int.in_dll(self.library, "Lmats").value
+    elif axis == "r" or axis == "R":
+        nfreq = c_int.in_dll(self.library, "Lreal").value
+    else:
+        raise ValueError("axis can only be 'm' or 'r'")
+    
+    if self.Nineq is None:
+        if ilat is not None:
+            raise ValueError("ilat is not defined in single-impurity DMFT")
+        if ishape is None:
+            ishape = 5
+        if ishape==3:
+            Sigma = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            DimSigma = np.asarray([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
             ed_get_sigma_site_n3(Sigma,DimSigma,c_char_p(axis.encode()),c_char_p(typ.encode()))
-        if len(DimSigma)==5:
+        elif ishape==5:
+            Sigma = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+            DimSigma = np.asarray([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
             ed_get_sigma_site_n5(Sigma,DimSigma,c_char_p(axis.encode()),c_char_p(typ.encode()))
         else:
-            raise ValueError('Shape(array) != 3 in get_bath_component')
+            raise ValueError('Shape(array) != 3,5 in get_sigma_site')
+        return Sigma
     else:
-        if len(DimSigma)==3:
-            ed_get_sigma_site_n3(Sigma,DimSigma,Nlat,c_char_p(axis.encode()),c_char_p(typ.encode()))
-        if len(DimSigma)==4:
-            ed_get_sigma_site_n4(Sigma,DimSigma,Nlat,c_char_p(axis.encode()),c_char_p(typ.encode()))
-        if len(DimSigma)==6:
-            ed_get_sigma_site_n6(Sigma,DimSigma,Nlat,c_char_p(axis.encode()),c_char_p(typ.encode()))
+        if ishape is None:
+            ishape = 6
+        if ishape==3:
+            Sigma = np.zeros([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            DimSigma = np.asarray([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
+            ed_get_sigma_site_n3(Sigma,DimSigma,self.Nineq,c_char_p(axis.encode()),c_char_p(typ.encode()))
+        elif ishape==4:
+            Sigma = np.zeros([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            DimSigma = np.asarray([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
+            ed_get_sigma_site_n4(Sigma,DimSigma,self.Nineq,c_char_p(axis.encode()),c_char_p(typ.encode()))
+        elif ishape==6:
+            Sigma = np.zeros([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+            DimSigma = np.asarray([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
+            ed_get_sigma_site_n6(Sigma,DimSigma,self.Nineq,c_char_p(axis.encode()),c_char_p(typ.encode()))
         else:
-            raise ValueError('Shape(array) != 3 in get_bath_component')
-    return Sigma
+            raise ValueError('Shape(array) != 3,4,6 in get_sigma_lattice')
+        if ilat is not None:
+            return Sigma[ilat]
+        else:
+            return Sigma
+
 
 
 #gimp
-def get_gimp(self,gimp,Nlat=-1,axis="m",typ="n"):
+def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
     ed_get_gimp_site_n3 = self.library.ed_get_gimp_site_n3
     ed_get_gimp_site_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
                                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -102,25 +131,53 @@ def get_gimp(self,gimp,Nlat=-1,axis="m",typ="n"):
                                            c_char_p,
                                            c_char_p]       
     ed_get_gimp_lattice_n6.restype = None
+
+    norb_aux = c_int.in_dll(self.library, "Norb").value
+    nspin_aux = c_int.in_dll(self.library, "Norb").value
+    if axis == "m" or axis == "M":
+        nfreq = c_int.in_dll(self.library, "Lmats").value
+    elif axis == "r" or axis == "R":
+        nfreq = c_int.in_dll(self.library, "Lreal").value
+    else:
+        raise ValueError("axis can only be 'm' or 'r'")    
     
-    Dimgimp = np.asarray(np.shape(gimp),dtype=np.int64,order="F")
-    if Nlat < 0:
-        if len(Dimgimp)==3:
+    if self.Nineq is None:
+        if ilat is not None:
+            raise ValueError("ilat is not defined in single-impurity DMFT")
+        if ishape is None:
+            ishape = 5
+        if ishape==3:
+            gimp = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            Dimgimp = np.asarray([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
             ed_get_gimp_site_n3(gimp,Dimgimp,c_char_p(axis.encode()),c_char_p(typ.encode()))
-        if len(Dimgimp)==5:
+        elif ishape==5:
+            gimp = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+            Dimgimp = np.asarray([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
             ed_get_gimp_site_n5(gimp,Dimgimp,c_char_p(axis.encode()),c_char_p(typ.encode()))
         else:
-            raise ValueError('Shape(array) != 3 in get_bath_component')
+            raise ValueError('Shape(array) != 3,5 in get_gimp_site')
+        return gimp
     else:
-        if len(Dimgimp)==3:
-            ed_get_gimp_site_n3(gimp,Dimgimp,Nlat,c_char_p(axis.encode()),c_char_p(typ.encode()))
-        if len(Dimgimp)==4:
-            ed_get_gimp_site_n4(gimp,Dimgimp,Nlat,c_char_p(axis.encode()),c_char_p(typ.encode()))
-        if len(Dimgimp)==6:
-            ed_get_gimp_site_n6(gimp,Dimgimp,Nlat,c_char_p(axis.encode()),c_char_p(typ.encode()))
+        if ishape is None:
+            ishape = 6
+        if ishape==3:
+            gimp = np.zeros([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            Dimgimp = np.asarray([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
+            ed_get_gimp_site_n3(gimp,Dimgimp,self.Nineq,c_char_p(axis.encode()),c_char_p(typ.encode()))
+        elif ishape==4:
+            gimp = np.zeros([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            Dimgimp = np.asarray([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
+            ed_get_gimp_site_n4(gimp,Dimgimp,self.Nineq,c_char_p(axis.encode()),c_char_p(typ.encode()))
+        elif ishape==6:
+            Dimgimp = np.zeros([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+            Dimgimp = np.asarray([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
+            ed_get_gimp_site_n6(gimp,Dimgimp,self.Nineq,c_char_p(axis.encode()),c_char_p(typ.encode()))
         else:
-            raise ValueError('Shape(array) != 3 in get_bath_component')
-    return gimp
+            raise ValueError('Shape(array) != 3,4,6 in get_gimp_lattice')
+        if ilat is not None:
+            return gimp[ilat]
+        else:
+            return gimp
     
     
 #observables
