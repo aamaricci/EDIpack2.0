@@ -136,7 +136,6 @@ def get_dens(self,ilat=None,iorb=None):
     
     ed_get_dens_n2_wrap = self.library.ed_get_dens_n2
     ed_get_dens_n2_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
-                                    np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
                                     c_int]
     ed_get_dens_n2_wrap.restype = None
 
@@ -152,7 +151,6 @@ def get_dens(self,ilat=None,iorb=None):
             return densvec
     else:
         densvec = np.zeros([self.Nineq,aux_norb],dtype=float,order="F")
-        dim_densvector = np.asarray(np.shape(densvec),dtype=np.int64,order="F")
         ed_get_dens_n2_wrap(densvec,self.Nineq)
         
         if ilat is not None and iorb is not None:
@@ -163,3 +161,98 @@ def get_dens(self,ilat=None,iorb=None):
             return densvec[ilat,:]
         else:
             return densvec
+            
+#magnetization
+def get_mag(self,icomp=None,ilat=None,iorb=None):
+
+    if icomp =="x" or icomp == "X":
+        icomp = 0
+    elif icomp =="y" or icomp == "Y":
+        icomp = 1
+    elif icomp == "z" or icomp == "Z":
+        icomp = 2
+
+    aux_norb = c_int.in_dll(self.library, "Norb").value
+    
+    ed_get_mag_n2_wrap = self.library.ed_get_mag_n2
+    ed_get_mag_n2_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS')]
+    ed_get_mag_n2_wrap.restype = None
+    
+    ed_get_mag_n3_wrap = self.library.ed_get_mag_n3
+    ed_get_mag_n3_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=3, flags='F_CONTIGUOUS'),
+                                    c_int]
+    ed_get_mag_n3_wrap.restype = None
+
+    if self.Nineq is None:
+        magvec = np.zeros([3,aux_norb],dtype=float,order="F")
+        ed_get_mag_n2_wrap(magvec)
+        
+        if ilat is not None:
+            raise ValueError("ilat cannot be none for single-impurity DMFT")
+        elif iorb is not None and icomp is not None:
+            return magvec[icomp,iorb]
+        elif iorb is not None and icomp is None:
+            return magvec[:,iorb]
+        elif iorb is None and icomp is not None:
+            return magvec[icomp,:]
+        elif iorb is None and icomp is None:
+            return magvec
+    else:
+        magvec = np.zeros([self.Nineq,3,aux_norb],dtype=float,order="F")
+        ed_get_mag_n3_wrap(magvec,self.Nineq)
+        
+        if ilat is not None:
+            if iorb is not None and icomp is not None:
+                return magvec[ilat,icomp,iorb]
+            if iorb is None and icomp is not None:
+                return magvec[ilat,icomp,:]
+            if iorb is not None and icomp is None:
+                return magvec[ilat,:,iorb]
+            if iorb is None and icomp is None:
+                return magvec[ilat,:,:]
+        else:
+            if iorb is not None and icomp is not None:
+                return magvec[:,icomp,iorb]
+            if iorb is None and icomp is not None:
+                return magvec[:,icomp,:]
+            if iorb is not None and icomp is None:
+                return magvec[:,:,iorb]
+            if iorb is None and icomp is None:
+                return magvec
+            
+#double occupation
+def get_docc(self,ilat=None,iorb=None):
+
+    aux_norb = c_int.in_dll(self.library, "Norb").value
+    
+    ed_get_docc_n1_wrap = self.library.ed_get_docc_n1
+    ed_get_docc_n1_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS')]
+    ed_get_docc_n1_wrap.restype = None
+    
+    ed_get_docc_n2_wrap = self.library.ed_get_docc_n2
+    ed_get_docc_n2_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
+                                    c_int]
+    ed_get_docc_n2_wrap.restype = None
+
+    if self.Nineq is None:
+        doccvec = np.zeros(aux_norb,dtype=float,order="F")
+        ed_get_docc_n1_wrap(doccvec)
+        
+        if ilat is not None:
+            raise ValueError("ilat cannot be none for single-impurity DMFT")
+        elif iorb is not None:
+            return doccvec[iorb]
+        else:
+            return doccvec
+    else:
+        doccvec = np.zeros([self.Nineq,aux_norb],dtype=float,order="F")
+        ed_get_docc_n2_wrap(doccvec,self.Nineq)
+        
+        if ilat is not None and iorb is not None:
+            return doccvec[ilat,iorb]
+        elif ilat is None and iorb is not None:
+            return doccvec[:,iorb]
+        elif ilat is not None and iorb is None:
+            return doccvec[ilat,:]
+        else:
+            return doccvec

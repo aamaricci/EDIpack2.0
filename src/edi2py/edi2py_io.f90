@@ -117,10 +117,36 @@ subroutine ed_get_dens_n1_c(self) bind(c,name="ed_get_dens_n1")
   call ed_get_dens(self)
 end subroutine ed_get_dens_n1_c
 
-
-subroutine ed_get_dens_n2(self,d,Nlat) bind(c,name="ed_get_dens_n2")
-  integer(c_int64_t) :: d(2)
-  real(c_double)     :: self(d(1),d(2))
-  integer(c_int)     :: Nlat
+subroutine ed_get_dens_n2_c(self,Nlat) bind(c,name="ed_get_dens_n2")
+  real(c_double)           :: self(Nlat,Norb)
+  integer(c_int),value     :: Nlat
   call ed_get_dens(self,Nlat)
-end subroutine ed_get_dens_n2
+end subroutine ed_get_dens_n2_c
+
+!magnetization
+subroutine ed_get_mag_n2_c(self) bind(c,name="ed_get_mag_n2")
+  real(c_double)           :: self(3,Norb)
+  call ed_get_mag(self(1,:),component="x")
+  call ed_get_mag(self(2,:),component="y")
+  call ed_get_mag(self(3,:),component="z")
+end subroutine ed_get_mag_n2_c
+
+subroutine ed_get_mag_n3_c(self,Nlat) bind(c,name="ed_get_mag_n3")
+  real(c_double)           :: self(Nlat,3,Norb)
+  integer(c_int),value     :: Nlat
+  call ed_get_mag(self(:,1,:),"x",Nlat)
+  call ed_get_mag(self(:,2,:),"y",Nlat)
+  call ed_get_mag(self(:,3,:),"z",Nlat)
+end subroutine ed_get_mag_n3_c
+
+!double occupation
+subroutine ed_get_docc_n1_c(self) bind(c,name="ed_get_docc_n1")
+  real(c_double)     :: self(Norb)
+  call ed_get_docc(self)
+end subroutine ed_get_docc_n1_c
+
+subroutine ed_get_docc_n2_c(self,Nlat) bind(c,name="ed_get_docc_n2")
+  real(c_double)           :: self(Nlat,Norb)
+  integer(c_int),value     :: Nlat
+  call ed_get_docc(self,Nlat)
+end subroutine ed_get_docc_n2_c
