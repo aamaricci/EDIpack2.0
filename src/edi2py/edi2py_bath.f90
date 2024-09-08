@@ -33,6 +33,36 @@ subroutine init_Hreplica_symmetries_lattice_d3_c(Hvec,d_hvec,lambdavec,d_lambdav
 end subroutine init_Hreplica_symmetries_lattice_d3_c
 
 
+!H_general SETUP
+subroutine init_Hgeneral_symmetries_d5_c(Hvec,d_hvec,lambdavec,d_lambdavec) bind(c, name='init_Hgeneral_symmetries_d5')
+  integer(c_int64_t)                                                                     :: d_hvec(5), d_lambdavec(2)
+  complex(c_double_complex),dimension(d_hvec(1),d_hvec(2),d_hvec(3),d_hvec(4),d_hvec(5)) :: Hvec
+  real(c_double),dimension(d_lambdavec(1),d_lambdavec(2))                                :: lambdavec
+  call ed_set_Hgeneral(Hvec,lambdavec)
+end subroutine init_Hgeneral_symmetries_d5_c
+
+subroutine init_Hgeneral_symmetries_d3_c(Hvec,d_hvec,lambdavec,d_lambdavec) bind(c, name='init_Hgeneral_symmetries_d3')
+  integer(c_int64_t)                                                 :: d_hvec(3), d_lambdavec(2)
+  complex(c_double_complex),dimension(d_hvec(1),d_hvec(2),d_hvec(3)) :: Hvec
+  real(c_double),dimension(d_lambdavec(1),d_lambdavec(2))            :: lambdavec
+  call ed_set_Hgeneral(Hvec,lambdavec)
+end subroutine init_Hgeneral_symmetries_d3_c
+
+subroutine init_Hgeneral_symmetries_lattice_d5_c(Hvec,d_hvec,lambdavec,d_lambdavec) bind(c, name='init_Hgeneral_symmetries_lattice_d5')
+  integer(c_int64_t)                                                                     :: d_hvec(5), d_lambdavec(3)
+  complex(c_double_complex),dimension(d_hvec(1),d_hvec(2),d_hvec(3),d_hvec(4),d_hvec(5)) :: Hvec
+  real(c_double),dimension(d_lambdavec(1),d_lambdavec(2),d_lambdavec(3))                 :: lambdavec
+  call ed_set_Hgeneral(Hvec,lambdavec)
+end subroutine init_Hgeneral_symmetries_lattice_d5_c
+
+subroutine init_Hgeneral_symmetries_lattice_d3_c(Hvec,d_hvec,lambdavec,d_lambdavec) bind(c, name='init_Hgeneral_symmetries_lattice_d3')
+  integer(c_int64_t)                                                                     :: d_hvec(3), d_lambdavec(3)
+  complex(c_double_complex),dimension(d_hvec(1),d_hvec(2),d_hvec(3))                     :: Hvec
+  real(c_double),dimension(d_lambdavec(1),d_lambdavec(2),d_lambdavec(3))                 :: lambdavec
+  call ed_set_Hgeneral(Hvec,lambdavec)
+end subroutine init_Hgeneral_symmetries_lattice_d3_c
+
+
 
 !BREAK_SYMMETRY_BATH
 subroutine break_symmetry_bath_site_c(bath,dim_bath,field,sgn,sav) bind(c, name='break_symmetry_bath_site')

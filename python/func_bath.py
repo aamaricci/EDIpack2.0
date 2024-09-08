@@ -11,8 +11,7 @@ def get_bath_dimension(self):
     return get_bath_dimension_wrap()
 
 #init_hreplica
-   
-def set_Hreplica(self,hvec,lambdavec):
+def set_hreplica(self,hvec,lambdavec):
     init_hreplica_symmetries_d5 = self.library.init_Hreplica_symmetries_d5
     init_hreplica_symmetries_d5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
                                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -58,12 +57,67 @@ def set_Hreplica(self,hvec,lambdavec):
     elif(len(dim_hvec) == 5):
         if(len(dim_lambdavec)==2):
             init_hreplica_symmetries_d5(hvec,dim_hvec,lambdavec,dim_lambdavec)
-        elif(len(Ddim_lambdavec)==3):
+        elif(len(dim_lambdavec)==3):
             init_hreplica_symmetries_lattice_d5(hvec,dim_hvec,lambdavec,dim_lambdavec)
         else:
              raise ValueError('Shape(lambdavec) != 2 or 3  in set_Hreplica')
     else:
          raise ValueError('Shape(Hvec) != 3 or 5  in set_Hreplica')
+    return ;
+    
+#init_hgeneral
+def set_hgeneral(self,hvec,lambdavec):
+    init_hgeneral_symmetries_d5 = self.library.init_Hgeneral_symmetries_d5
+    init_hgeneral_symmetries_d5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
+    init_hgeneral_symmetries_d5.restype = None
+    
+    init_hgeneral_symmetries_d3 = self.library.init_Hgeneral_symmetries_d3
+    init_hgeneral_symmetries_d3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
+    init_hgeneral_symmetries_d3.restype = None
+    
+    init_hgeneral_symmetries_lattice_d5 = self.library.init_Hgeneral_symmetries_lattice_d5
+    init_hgeneral_symmetries_lattice_d5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=float,ndim=3, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
+    init_hgeneral_symmetries_lattice_d5.restype = None
+    
+    init_hgeneral_symmetries_lattice_d3 = self.library.init_Hgeneral_symmetries_lattice_d3
+    init_hgeneral_symmetries_lattice_d3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=float,ndim=3, flags='F_CONTIGUOUS'),
+                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
+    init_hgeneral_symmetries_lattice_d3.restype = None
+
+    
+    aux_norb=c_int.in_dll(self.library, "Norb").value
+    aux_nspin=c_int.in_dll(self.library, "Nspin").value
+    dim_hvec = np.asarray(np.shape(hvec),dtype=np.int64,order="F")
+    dim_lambdavec = np.asarray(np.shape(lambdavec),dtype=np.int64,order="F")
+
+
+    if(len(dim_hvec) == 3):
+        if(len(dim_lambdavec)==2):
+            init_hgeneral_symmetries_d3(hvec,dim_hvec,lambdavec,dim_lambdavec)
+        elif(len(Ddim_lambdavec)==3):
+            init_hgeneral_symmetries_lattice_d3(hvec,dim_hvec,lambdavec,dim_lambdavec)
+        else:
+             raise ValueError('Shape(lambdavec) != 2 or 3  in set_Hgeneral')
+    elif(len(dim_hvec) == 5):
+        if(len(dim_lambdavec)==2):
+            init_hgeneral_symmetries_d5(hvec,dim_hvec,lambdavec,dim_lambdavec)
+        elif(len(dim_lambdavec)==3):
+            init_hgeneral_symmetries_lattice_d5(hvec,dim_hvec,lambdavec,dim_lambdavec)
+        else:
+             raise ValueError('Shape(lambdavec) != 2 or 3  in set_Hgeneral')
+    else:
+         raise ValueError('Shape(Hvec) != 3 or 5  in set_Hgeneral')
     return ;
     
 #break_symmetry_bath

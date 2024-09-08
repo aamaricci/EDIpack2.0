@@ -113,7 +113,8 @@ global_env.check_convergence = types.MethodType(func_aux_funx.check_convergence,
 #bath
 import func_bath
 global_env.get_bath_dimension = types.MethodType(func_bath.get_bath_dimension, global_env)
-global_env.set_Hreplica = types.MethodType(func_bath.set_Hreplica, global_env)
+global_env.set_hreplica = types.MethodType(func_bath.set_hreplica, global_env)
+global_env.set_hgeneral = types.MethodType(func_bath.set_hgeneral, global_env)
 global_env.break_symmetry_bath = types.MethodType(func_bath.break_symmetry_bath, global_env)
 global_env.spin_symmetrize_bath = types.MethodType(func_bath.spin_symmetrize_bath, global_env)
 global_env.orb_symmetrize_bath = types.MethodType(func_bath.orb_symmetrize_bath, global_env)
