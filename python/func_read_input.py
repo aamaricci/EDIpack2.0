@@ -9,4 +9,3 @@ def read_input(self,input_string):
     read_input_wrap.restype = None
     c_string = c_char_p(input_string.encode())
     read_input_wrap(c_string)
-    return "lol"
