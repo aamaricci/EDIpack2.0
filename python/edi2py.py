@@ -12,7 +12,7 @@ class Link:
     def __init__(self,library):
         self.library = library
         self.Nineq = None
-        self.dim_hloc = None
+        self.dim_hloc = 0
 
 #function that will add a variable to the dummy class, will be called in variable definition
 def add_global_variable(obj, dynamic_name, target_object, target_attribute):
