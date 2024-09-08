@@ -56,7 +56,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n"):
         if ilat is not None:
             raise ValueError("ilat is not defined in single-impurity DMFT")
         if ishape is None:
-            ishape = 5
+            ishape = self.dim_hloc + 1
         if ishape==3:
             Sigma = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
             DimSigma = np.asarray([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
@@ -70,7 +70,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n"):
         return Sigma
     else:
         if ishape is None:
-            ishape = 6
+            ishape = self.dim_hloc + 1
         if ishape==3:
             Sigma = np.zeros([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
             DimSigma = np.asarray([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
@@ -145,7 +145,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
         if ilat is not None:
             raise ValueError("ilat is not defined in single-impurity DMFT")
         if ishape is None:
-            ishape = 5
+            ishape = self.dim_hloc + 1
         if ishape==3:
             gimp = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
             Dimgimp = np.asarray([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
@@ -159,7 +159,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
         return gimp
     else:
         if ishape is None:
-            ishape = 6
+            ishape = self.dim_hloc + 1
         if ishape==3:
             gimp = np.zeros([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
             Dimgimp = np.asarray([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")

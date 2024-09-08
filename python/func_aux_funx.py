@@ -34,6 +34,9 @@ def set_hloc(self,hloc=None,Nlat=None):
                                 c_int] 
     ed_set_Hloc_lattice_N5.restype = None
     dim_hloc = np.asarray(np.shape(hloc),dtype=np.int64,order="F")
+    
+    self.dim_hloc = len(dim_hloc)
+    
     if(Nlat is not None):
         if len(dim_hloc) == 2:
             ed_set_Hloc_lattice_N2(hloc,dim_hloc,Nlat)
