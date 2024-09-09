@@ -46,8 +46,8 @@ Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex',order='F')
 #SETUP SOLVER
 ed.set_hloc(hloc=Hloc)
 Nb=ed.get_bath_dimension()
-bath = np.zeros(Nb,dtype='float',order='F')
-ed.init_solver(bath)
+#bath = np.zeros(Nb,dtype='float',order='F')
+ed.init_solver(Nb)
 bath_prev = np.copy(bath)
 
 #DMFT CYCLE

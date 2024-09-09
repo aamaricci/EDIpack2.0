@@ -159,3 +159,4 @@ def chi2_fitgf(self,*args,ispin=0,iorb=-1,fmpi=True):
             raise ValueError("chi_fitgf_superc: takes dim(bath) = 1 or 2")
     else:
         raise ValueError("chi_fitgf: takes g,bath or g,f,bath")
+    return bath
