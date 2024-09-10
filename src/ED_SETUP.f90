@@ -285,8 +285,8 @@ contains
        endif
     endif
     !
-    Jhflag=.FALSE.
-    if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))Jhflag=.TRUE.
+    !Jhflag=.FALSE.
+    !if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))Jhflag=.TRUE.
     !
     !
     offdiag_gf_flag=ed_solve_offdiag_gf

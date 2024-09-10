@@ -437,7 +437,7 @@ contains
              !
              !SPIN-EXCHANGE (S-E) TERMS
              !S-E: Jh *( c^+_iorb_up c^+_jorb_dw c_iorb_dw c_jorb_up )  (i.ne.j) 
-             if(Norb>1.AND.Jhflag)then
+             if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))then
                 do iorb=1,Norb
                    do jorb=1,Norb
                       Jcondition=((iorb/=jorb).AND.&
@@ -463,7 +463,7 @@ contains
              !PAIR-HOPPING (P-H) TERMS
              !P-H: J c^+_iorb_up c^+_iorb_dw   c_jorb_dw   c_jorb_up  (i.ne.j) 
              !P-H: J c^+_{iorb}  c^+_{iorb+Ns} c_{jorb+Ns} c_{jorb}
-             if(Norb>1.AND.Jhflag)then
+             if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))then
                 do iorb=1,Norb
                    do jorb=1,Norb
                       Jcondition=((iorb/=jorb).AND.&
