@@ -98,6 +98,10 @@ add_global_variable(global_env, "xmax", c_double.in_dll(libedi2py, "xmax"), "val
 add_global_variable(global_env, "sb_field", c_double.in_dll(libedi2py, "sb_field"), "value")
 add_global_variable(global_env, "nread", c_double.in_dll(libedi2py, "nread"), "value")
 
+add_global_variable(global_env, "ed_total_ud", c_bool.in_dll(libedi2py, "ed_total_ud"), "value")
+add_global_variable(global_env, "ed_twin", c_bool.in_dll(libedi2py, "ed_twin"), "value")
+
+
 ######################################
 # GLOBAL FUNCTIONS
 ######################################
