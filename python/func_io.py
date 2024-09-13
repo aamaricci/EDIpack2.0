@@ -54,7 +54,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n"):
     if ishape is None:
             ishape = self.dim_hloc + 1
     
-    if self.Nineq is None:
+    if self.Nineq == 0:
         if ilat is not None:
             raise ValueError("ilat is not defined in single-impurity DMFT")
         if ishape==3:
@@ -141,7 +141,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
     if ishape is None:
         ishape = self.dim_hloc + 1
     
-    if self.Nineq is None:
+    if self.Nineq == 0:
         if ilat is not None:
             raise ValueError("ilat is not defined in single-impurity DMFT")
         if ishape==3:
@@ -192,7 +192,7 @@ def get_dens(self,ilat=None,iorb=None):
                                     c_int]
     ed_get_dens_n2_wrap.restype = None
 
-    if self.Nineq is None:
+    if self.Nineq == 0:
         densvec = np.zeros(aux_norb,dtype=float,order="F")
         ed_get_dens_n1_wrap(densvec)
         
@@ -236,7 +236,7 @@ def get_mag(self,icomp=None,ilat=None,iorb=None):
                                     c_int]
     ed_get_mag_n3_wrap.restype = None
 
-    if self.Nineq is None:
+    if self.Nineq == 0:
         magvec = np.zeros([3,aux_norb],dtype=float,order="F")
         ed_get_mag_n2_wrap(magvec)
         
@@ -287,7 +287,7 @@ def get_docc(self,ilat=None,iorb=None):
                                     c_int]
     ed_get_docc_n2_wrap.restype = None
 
-    if self.Nineq is None:
+    if self.Nineq == 0:
         doccvec = np.zeros(aux_norb,dtype=float,order="F")
         ed_get_docc_n1_wrap(doccvec)
         

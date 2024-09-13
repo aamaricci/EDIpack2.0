@@ -3,6 +3,7 @@ import numpy as np
 import os,sys
 import types
 
+# init_solver
 def init_solver(self,*args):
     if not args:
         raise ValueError("init_solver takes either a bath vector, a [Nineq,Nbath] or [Nbath] vector or a Nbath number")
@@ -31,13 +32,14 @@ def init_solver(self,*args):
     
     if len(dim_bath)<2:
         init_solver_site(bath,dim_bath)
+        self.Nineq = 0
     else:
         init_solver_ineq(bath,dim_bath)
         self.Nineq = np.shape(bath)[0] #save number of inequivalent sites: this is useful when we want to know if we are in lattice case or not
     
     return bath
 
-# Define the function signature for the Fortran function `solve_site`.
+# `solve`.
 def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):
     solve_site = self.library.solve_site
     solve_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
@@ -60,3 +62,17 @@ def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):
         solve_site(bath,dim_bath,sflag,fmpi)
     else:
         solve_ineq(bath,dim_bath,mpi_lanc,iflag)
+        
+#finalize solver
+def finalize_solver(self):
+    finalize_solver_wrapper = self.library.finalize_solver
+    finalize_solver_wrapper.argtypes = [c_int]
+    finalize_solver_wrapper.restype = None
+    if self.Nineq is None:
+        print("ED environment is not initialized yet")
+        return ;
+    else:
+        finalize_solver_wrapper(self.Nineq)
+        self.Nineq = None
+        print("ED environment finalized")
+        return ;

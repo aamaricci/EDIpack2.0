@@ -81,7 +81,8 @@ MODULE EDIPACK2
   USE ED_MAIN, only:    &
        ed_init_solver , &
        ed_rebuild_gf  , &
-       ed_solve
+       ed_solve       , &
+       ed_finalize_solver
 
   USE ED_BATH_FIT,  only: ed_chi2_fitgf
 

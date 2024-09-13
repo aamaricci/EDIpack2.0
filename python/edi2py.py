@@ -131,6 +131,7 @@ global_env.ph_symmetrize_bath = types.MethodType(func_bath.ph_symmetrize_bath, g
 import func_main
 global_env.init_solver = types.MethodType(func_main.init_solver, global_env)
 global_env.solve = types.MethodType(func_main.solve, global_env)
+global_env.finalize_solver = types.MethodType(func_main.finalize_solver, global_env)
 
 #io
 import func_io
