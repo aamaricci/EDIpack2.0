@@ -140,6 +140,9 @@ global_env.get_gimp = types.MethodType(func_io.get_gimp, global_env)
 global_env.get_dens = types.MethodType(func_io.get_dens, global_env)
 global_env.get_mag = types.MethodType(func_io.get_mag, global_env)
 global_env.get_docc = types.MethodType(func_io.get_docc, global_env)
+global_env.get_eimp = types.MethodType(func_io.get_eimp, global_env)
+global_env.build_sigma = types.MethodType(func_io.build_sigma, global_env)
+global_env.build_gimp = types.MethodType(func_io.build_gimp, global_env)
 
 #bath_fit
 import func_bath_fit

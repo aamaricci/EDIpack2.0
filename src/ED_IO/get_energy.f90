@@ -10,7 +10,7 @@ subroutine ed_get_eimp_n2(self,Nlat)
   !
   if(.not.allocated(e_ineq))stop "ed_get_eimp error: e_ineq not allocated"
   if(Nlat>size(e_ineq,1))stop "ed_get_eimp error: required N_sites > evaluated N_sites"
-  call assert_shape(self,[2,Nlat],'ed_get_eimp','eimp')
+  call assert_shape(self,[Nlat,4],'ed_get_eimp','eimp')
   self = e_ineq
 end subroutine ed_get_eimp_n2
 
