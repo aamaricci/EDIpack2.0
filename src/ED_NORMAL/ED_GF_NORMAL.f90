@@ -59,10 +59,10 @@ contains
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_s"//str(ispin)
-          if(MPIMASTER)call start_timer
+          if(MPIMASTER)call start_timer(unit=LOGfile)
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_normal_diag(iorb,ispin)
-          if(MPIMASTER)call stop_timer(unit=LOGfile)
+          if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
           write(Logfile,"(A)")""
 #endif
@@ -90,10 +90,10 @@ contains
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
-                if(MPIMASTER)call start_timer
+                if(MPIMASTER)call start_timer(unit=LOGfile)
                 call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_normal_mix(iorb,jorb,ispin)
-                if(MPIMASTER)call stop_timer(unit=LOGfile)
+                if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
                 write(Logfile,"(A)")""
 #endif
@@ -134,9 +134,9 @@ contains
     !> PHONONS
     if(DimPh>1)then
        write(LOGfile,"(A)")"Get phonon Green function:"
-       if(MPIMASTER)call start_timer()
+       if(MPIMASTER)call start_timer(unit=LOGfile)
        call lanc_build_gf_phonon_main()
-       if(MPIMASTER)call stop_timer(unit=LOGfile)
+       if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
        write(Logfile,"(A)")""
 #endif

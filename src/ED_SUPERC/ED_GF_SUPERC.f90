@@ -70,10 +70,10 @@ contains
        auxGmats=zero
        auxGreal=zero
        write(LOGfile,"(A)")"Get G&F_l"//str(iorb)//"_s"//str(ispin)
-       if(MPIMASTER)call start_timer()
+       if(MPIMASTER)call start_timer(unit=LOGfile)
        call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
        call lanc_build_gf_superc_Gdiag(iorb)
-       if(MPIMASTER)call stop_timer(unit=logfile)
+       if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
        write(Logfile,"(A)")""
 #endif
@@ -91,10 +91,10 @@ contains
           auxGmats=zero
           auxGreal=zero
           write(LOGfile,"(A)")"Get F_l"//str(iorb)
-          if(MPIMASTER)call start_timer()
+          if(MPIMASTER)call start_timer(unit=LOGfile)
           call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_superc_Fmix(iorb,iorb)
-          if(MPIMASTER)call stop_timer(unit=logfile)
+          if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
           write(Logfile,"(A)")""
 #endif
@@ -112,10 +112,10 @@ contains
              auxGreal=zero
              if(iorb==jorb)cycle
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)
-             if(MPIMASTER)call start_timer()
+             if(MPIMASTER)call start_timer(unit=LOGfile)
              call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
              call lanc_build_gf_superc_Gmix(iorb,jorb)
-             if(MPIMASTER)call stop_timer(unit=logfile)
+             if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
@@ -131,10 +131,10 @@ contains
              auxGmats=zero
              auxGreal=zero
              write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)
-             if(MPIMASTER)call start_timer()
+             if(MPIMASTER)call start_timer(unit=LOGfile)
              call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),Nstate=state_list%size)
              call lanc_build_gf_superc_Fmix(iorb,jorb)
-             if(MPIMASTER)call stop_timer(unit=logfile)
+             if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
@@ -148,9 +148,9 @@ contains
     !PHONONS
     if(DimPh>1)then
        write(LOGfile,"(A)")"Get phonon Green function:"
-       if(MPIMASTER)call start_timer()
+       if(MPIMASTER)call start_timer(unit=LOGfile)
        call lanc_build_gf_phonon_main()
-       if(MPIMASTER)call stop_timer(unit=LOGfile)
+       if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
        write(Logfile,"(A)")""
 #endif

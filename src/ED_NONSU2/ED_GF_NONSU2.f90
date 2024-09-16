@@ -93,10 +93,10 @@ contains
        do iorb=1,Norb
           write(LOGfile,"(A)")""
           write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(iorb)//"_s"//str(ispin)//str(ispin)
-          if(MPIMASTER)call start_timer()
+          if(MPIMASTER)call start_timer(unit=LOGfile)
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_nonsu2_diagOrb_diagSpin(iorb,ispin)
-          if(MPIMASTER)call stop_timer(unit=logfile)
+          if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
           write(Logfile,"(A)")""
 #endif
@@ -115,10 +115,10 @@ contains
              !
              write(LOGfile,"(A)")""
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(iorb)//"_s"//str(ispin)//str(jspin)
-             if(MPIMASTER)call start_timer()
+             if(MPIMASTER)call start_timer(unit=LOGfile)
              call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,iorb),Nstate=state_list%size)
              call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,iorb,ispin,jspin)
-             if(MPIMASTER)call stop_timer(unit=logfile)
+             if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
@@ -158,10 +158,10 @@ contains
                 !
                 write(LOGfile,"(A)")""
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(ispin)
-                if(MPIMASTER)call start_timer()
+                if(MPIMASTER)call start_timer(unit=LOGfile)
                 call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,ispin)
-                if(MPIMASTER)call stop_timer(unit=logfile)
+                if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
                 write(Logfile,"(A)")""
 #endif
@@ -199,10 +199,10 @@ contains
                    !
                    write(LOGfile,"(A)")""
                    write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
-                   if(MPIMASTER)call start_timer()
+                   if(MPIMASTER)call start_timer(unit=LOGfile)
                    call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,jorb),Nstate=state_list%size)
                    call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
-                   if(MPIMASTER)call stop_timer(unit=logfile)
+                   if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
                    write(Logfile,"(A)")""
 #endif
