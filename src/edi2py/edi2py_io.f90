@@ -126,9 +126,12 @@ end subroutine ed_get_dens_n2_c
 !magnetization
 subroutine ed_get_mag_n2_c(self) bind(c,name="ed_get_mag_n2")
   real(c_double)           :: self(3,Norb)
-  call ed_get_mag(self(1,:),component="x")
-  call ed_get_mag(self(2,:),component="y")
-  call ed_get_mag(self(3,:),component="z")
+  integer(c_int)           :: icomp,iorb
+  do iorb = 1,Norb
+    call ed_get_mag(self(1,iorb),component="x",iorb=iorb)
+    call ed_get_mag(self(2,iorb),component="y",iorb=iorb)
+    call ed_get_mag(self(3,iorb),component="z",iorb=iorb)
+  enddo
 end subroutine ed_get_mag_n2_c
 
 subroutine ed_get_mag_n3_c(self,Nlat) bind(c,name="ed_get_mag_n3")

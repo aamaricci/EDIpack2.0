@@ -417,6 +417,7 @@ contains
           ed_dens_up(iorb)=dens_up(iorb)
           ed_dens_dw(iorb)=dens_dw(iorb)
           ed_dens(iorb)   =dens(iorb)
+          ed_mag(3,iorb)  =magZ(iorb)
           ed_docc(iorb)   =docc(iorb)
        enddo
     endif

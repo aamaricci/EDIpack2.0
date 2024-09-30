@@ -275,7 +275,7 @@ contains
        ed_dens_dw(iorb)=dens_dw(iorb)
        ed_dens(iorb)   =dens(iorb)
        ed_docc(iorb)   =docc(iorb)
-       ed_mag(1,iorb)  =magZ(iorb)
+       ed_mag(3,iorb)  =magZ(iorb)
        ed_phisc(iorb)  =phisc(iorb)
     enddo
 #ifdef _MPI
