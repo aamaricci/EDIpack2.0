@@ -179,7 +179,9 @@ contains
 
     call parse_input_variable(beta,"BETA",INPUTunit,default=1000.d0,comment="Inverse temperature, at T=0 is used as a IR cut-off.")
     call parse_input_variable(xmu,"XMU",INPUTunit,default=0.d0,comment="Chemical potential. If HFMODE=T, xmu=0 indicates half-filling condition.")
-
+    
+    if(allocated(g_ph))deallocate(g_ph)
+    if(allocated(g_ph_diag))deallocate(g_ph_diag)
     allocate(g_ph(Norb,Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
     allocate(g_ph_diag(Norb)) ! THIS SHOULD BE A MATRIX Norb*Norb
     call parse_input_variable(g_ph_diag,"G_PH",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="Electron-phonon coupling density constant")
@@ -187,6 +189,10 @@ contains
     call parse_input_variable(A_ph,"A_PH",INPUTunit,default=0.d0,comment="Forcing field coupled to phonon's displacement operator")
     call parse_input_variable(GPHfile,"GPHfile",INPUTunit,default="NONE",comment="File of Phonon couplings. Put NONE to use only density couplings.")
 
+    if(allocated(spin_field_x))deallocate(spin_field_x)
+    if(allocated(spin_field_y))deallocate(spin_field_y)
+    if(allocated(spin_field_z))deallocate(spin_field_z)
+    if(allocated(pair_field))deallocate(pair_field)
     allocate(spin_field_x(Norb))
     allocate(spin_field_y(Norb))
     allocate(spin_field_z(Norb))

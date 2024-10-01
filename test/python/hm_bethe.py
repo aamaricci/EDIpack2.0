@@ -38,16 +38,19 @@ wr = np.linspace(ed.wini,ed.wfin,ed.Lreal)
 
 #Allocate minimal required arrays:
 #ALL functions must have shape [Nspin,Nspin,Norb,Norb(,L)]:
-Delta=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex',order='F')
-Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex',order='F')
+Delta=np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb,ed.Lmats),dtype='complex')
+Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex')
 
 
 
 #SETUP SOLVER
 ed.set_hloc(hloc=Hloc)
 Nb=ed.get_bath_dimension()
-#bath = np.zeros(Nb,dtype='float',order='F')
+bath = ed.init_solver(Nb)
+ed.finalize_solver()
+print("AAAAA")
 ed.init_solver(Nb)
+ed.set_hloc(hloc=Hloc)
 bath_prev = np.copy(bath)
 
 #DMFT CYCLE
