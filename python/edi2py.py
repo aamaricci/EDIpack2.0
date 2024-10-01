@@ -93,6 +93,7 @@ add_global_variable(global_env, "Nsuccess", c_int.in_dll(libedi2py, "Nsuccess"),
 add_global_variable(global_env, "Lmats", c_int.in_dll(libedi2py, "Lmats"), "value")
 add_global_variable(global_env, "Lreal", c_int.in_dll(libedi2py, "Lreal"), "value")
 add_global_variable(global_env, "Ltau", c_int.in_dll(libedi2py, "Ltau"), "value")
+add_global_variable(global_env, "Lfit", c_int.in_dll(libedi2py, "Lfit"), "value")
 add_global_variable(global_env, "Lpos", c_int.in_dll(libedi2py, "Lpos"), "value")
 add_global_variable(global_env, "LOGfile", c_int.in_dll(libedi2py, "LOGfile"), "value")
 
