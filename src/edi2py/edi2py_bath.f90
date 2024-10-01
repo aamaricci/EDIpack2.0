@@ -152,3 +152,16 @@ subroutine ph_symmetrize_bath_ineq_c(bath,dim_bath,sav) bind(c, name='ph_symmetr
   call ed_ph_symmetrize_bath(bath,i2l(sav))
 end subroutine ph_symmetrize_bath_ineq_c
 
+
+!save array as bath
+subroutine save_array_as_bath_site_c(bath,dim_bath) bind(c, name='save_array_as_bath_site')
+  integer(c_int64_t)                                :: dim_bath(1)
+  real(c_double),dimension(dim_bath(1))             :: bath
+  call ed_save_array_as_bath(bath)
+end subroutine save_array_as_bath_site_c
+
+subroutine save_array_as_bath_ineq_c(bath,dim_bath) bind(c, name='save_array_as_bath_ineq')
+  integer(c_int64_t)                                    :: dim_bath(2)
+  real(c_double),dimension(dim_bath(1),dim_bath(2))     :: bath
+  call ed_save_array_as_bath(bath)
+end subroutine save_array_as_bath_ineq_c

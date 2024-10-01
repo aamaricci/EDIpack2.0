@@ -57,6 +57,11 @@ MODULE ED_BATH_USER
      module procedure enforce_normal_bath_site
      module procedure enforce_normal_bath_lattice
   end interface enforce_normal_bath
+  
+  interface save_array_as_bath
+     module procedure save_array_as_bath_site
+     module procedure save_array_as_bath_lattice
+  end interface save_array_as_bath
 
 
 
@@ -75,6 +80,7 @@ MODULE ED_BATH_USER
   public :: enforce_normal_bath
   public :: impose_equal_lambda
   public :: impose_bath_offset
+  public :: save_array_as_bath
 
 
 
@@ -527,6 +533,7 @@ contains
     call get_dmft_bath(dmft_bath_,bath_)
     call deallocate_dmft_bath(dmft_bath_)
   end subroutine enforce_normal_bath_site
+  
   subroutine enforce_normal_bath_lattice(bath_,save)
     real(8),dimension(:,:) :: bath_
     logical,optional       :: save
@@ -571,6 +578,29 @@ contains
     return
   end subroutine check_bath_component
 
+  !+------------------------------------------------------------------+
+  !PURPOSE  : given a array, save it as a bath. Do nothing else.
+  !+------------------------------------------------------------------+
+  
+  subroutine save_array_as_bath_site(bath_)
+    real(8),dimension(:)   :: bath_
+    type(effective_bath)   :: dmft_bath_
+    call allocate_dmft_bath(dmft_bath_)
+    call set_dmft_bath(bath_,dmft_bath_)
+    call save_dmft_bath(dmft_bath_)
+    call deallocate_dmft_bath(dmft_bath_)
+  end subroutine save_array_as_bath_site
+  
+  subroutine save_array_as_bath_lattice(bath_)
+    real(8),dimension(:,:) :: bath_
+    integer                :: Nsites,ilat
+    Nsites=size(bath_,1)
+    do ilat=1,Nsites
+       ed_file_suffix=reg(ineq_site_suffix)//reg(str(ilat,site_indx_padding))
+       call save_array_as_bath_site(bath_(ilat,:))
+    enddo
+    ed_file_suffix=""
+  end subroutine save_array_as_bath_lattice
 
 
 

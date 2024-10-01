@@ -144,6 +144,7 @@ global_env.spin_symmetrize_bath = types.MethodType(func_bath.spin_symmetrize_bat
 global_env.orb_symmetrize_bath = types.MethodType(func_bath.orb_symmetrize_bath, global_env)
 global_env.orb_equality_bath = types.MethodType(func_bath.orb_equality_bath, global_env)
 global_env.ph_symmetrize_bath = types.MethodType(func_bath.ph_symmetrize_bath, global_env)
+global_env.save_array_as_bath = types.MethodType(func_bath.save_array_as_bath, global_env)
 
 global_env.bath_packaging = types.MethodType(func_bath.bath_packaging, global_env)
 

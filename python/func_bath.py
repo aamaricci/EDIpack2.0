@@ -255,6 +255,25 @@ def ph_symmetrize_bath(self, bath, save):
     else:
         ph_symmetrize_bath_ineq(bath,bath_shape,save_int)
     return bath
+    
+#save array as .restart file
+def save_array_as_bath(self, bath):
+    save_array_as_bath_site = self.library.save_array_as_bath_site
+    save_array_as_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
+                                         np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
+    save_array_as_bath_site.restypes = None
+
+    save_array_as_bath_ineq = self.library.save_array_as_bath_ineq
+    save_array_as_bath_ineq.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
+                                        np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
+    save_array_as_bath_ineq.restypes = None
+    
+    bath_shape = np.asarray(np.shape(bath),dtype=np.int64,order="F")
+    if (len(bath_shape)) == 1:
+        save_array_as_bath_site(bath,bath_shape)
+    else:
+        save_array_as_bath_ineq(bath,bath_shape)
+    return ;
 
 
 #auxiliary functions to get/set bath structure. Only works for single-site. User has to do a loop on sites
@@ -300,9 +319,9 @@ def bath_packaging(self,*args):
                 return bath_out
                     
             elif len(args) == 1: #e and v are none
-                bath_vector=np.asarray(args[0],order="F")
+                bath_array=np.asarray(args[0],order="F")
                 Nb = self.get_bath_dimension()
-                if np.shape(bath_vector)[0] != Nb:
+                if np.shape(bath_array)[0] != Nb:
                     raise ValueError("bath has the wrong length")
                     
                 bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))
@@ -314,13 +333,13 @@ def bath_packaging(self,*args):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
-                            bath_e[ispin,iorb,ibath] = bath_vector[io]
+                            bath_e[ispin,iorb,ibath] = bath_array[io]
                 stride = aux_nspin * aux_norb * aux_nbath            
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
-                            bath_v[ispin,iorb,ibath] = bath_vector[io]
+                            bath_v[ispin,iorb,ibath] = bath_array[io]
                 return bath_e,bath_v
             else:
                 raise ValueError("Wrong input for normal/normal")
@@ -361,9 +380,9 @@ def bath_packaging(self,*args):
                             bath_out[io] = bath_v[ispin,iorb,ibath]
                 return bath_out
             elif len(args) == 1: #e and v are none
-                bath_vector=np.asarray(args[0],order="F")
+                bath_array=np.asarray(args[0],order="F")
                 Nb = self.get_bath_dimension()
-                if np.shape(bath_vector)[0] != Nb:
+                if np.shape(bath_array)[0] != Nb:
                     raise ValueError("bath has the wrong length")
                     
                 bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))
@@ -428,9 +447,9 @@ def bath_packaging(self,*args):
                             bath_out[io] = bath_u[ispin,iorb,ibath]
                 return bath_out
             elif len(args) == 1: #e and v are none
-                bath_vector=np.asarray(args[0],order="F")
+                bath_array=np.asarray(args[0],order="F")
                 Nb = self.get_bath_dimension()
-                if np.shape(bath_vector)[0] != Nb:
+                if np.shape(bath_array)[0] != Nb:
                     raise ValueError("bath has the wrong length")
                     
                 bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))

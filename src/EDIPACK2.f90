@@ -49,7 +49,8 @@ MODULE EDIPACK2
        ed_ph_symmetrize_bath           => ph_symmetrize_bath           , &
        ed_ph_trans_bath                => ph_trans_bath                , &
        ed_break_symmetry_bath          => break_symmetry_bath          , &
-       ed_enforce_normal_bath          => enforce_normal_bath
+       ed_enforce_normal_bath          => enforce_normal_bath          , &
+       ed_save_array_as_bath          => save_array_as_bath       
 
 
   USE ED_AUX_FUNX, only:                        &
