@@ -33,9 +33,13 @@ def set_hloc(self,hloc=None,Nlat=None):
                                 np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
                                 c_int] 
     ed_set_Hloc_lattice_N5.restype = None
-    dim_hloc = np.asarray(np.shape(hloc),dtype=np.int64,order="F")
     
-    self.dim_hloc = len(dim_hloc)
+    try:
+        hloc = np.asarray(hloc,order="F")
+        dim_hloc = np.asarray(np.shape(hloc),dtype=np.int64,order="F")
+        self.dim_hloc = len(dim_hloc)
+    except:
+        raise ValueError("In Edipack2.0, set_Hloc needs an Hloc defined")
     
     if(Nlat is not None):
         if len(dim_hloc) == 2:
@@ -87,6 +91,7 @@ def check_convergence(self,func,threshold,N1,N2):
     check_convergence_wrap.restype = None
     err=np.asarray([1.0])
     converged=np.asarray([0])
+    func=np.asarray(func,order="F")
     dim_func=np.shape(func)
     check_convergence_wrap(func,dim_func[0],threshold,N1,N2,err,converged)
     if converged[0]==0:

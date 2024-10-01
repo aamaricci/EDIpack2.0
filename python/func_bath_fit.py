@@ -110,8 +110,8 @@ def chi2_fitgf(self,*args,ispin=0,iorb=-1,fmpi=True):
     ispin = ispin + 1
     iorb = iorb + 1
     if len(args) == 2: #normal
-        g = args[0]
-        bath = args[1]
+        g = np.asarray(args[0],order="F")
+        bath = np.asarray(args[1],order="F")
         dim_g = np.asarray(np.shape(g),dtype=np.int64,order="F")
         dim_bath = np.asarray(np.shape(bath),dtype=np.int64,order="F")
         if len(dim_bath) == 1: #single
@@ -133,9 +133,9 @@ def chi2_fitgf(self,*args,ispin=0,iorb=-1,fmpi=True):
         else:
             raise ValueError("chi_fitgf_normal: takes dim(bath) = 1 or 2")
     elif len(args) == 3: #superc
-        g = args[0]
-        f = args[1]
-        bath = args[2]
+        g = np.asarray(args[0],order="F")
+        f = np.asarray(args[1],order="F")
+        bath = np.asarray(args[2],order="F")
         dim_g = np.asarray(np.shape(g),dtype=np.int64,order="F")
         dim_f = np.asarray(np.shape(g),dtype=np.int64,order="F")
         dim_bath = np.asarray(np.shape(bath),dtype=np.int64,order="F")
