@@ -9,7 +9,7 @@ def get_bath_dimension(self):
     get_bath_dimension_wrap.argtypes = None  
     get_bath_dimension_wrap.restype = c_int
     return get_bath_dimension_wrap()
-
+    
 #init_hreplica
 def set_hreplica(self,hvec,lambdavec):
     init_hreplica_symmetries_d5 = self.library.init_Hreplica_symmetries_d5
@@ -255,4 +255,210 @@ def ph_symmetrize_bath(self, bath, save):
     else:
         ph_symmetrize_bath_ineq(bath,bath_shape,save_int)
     return bath
+
+
+#auxiliary functions to get/set bath structure. Only works for single-site. User has to do a loop on sites
+
+
+def bath_packaging(self,*args):
+    
+    aux_norb=c_int.in_dll(self.library, "Norb").value
+    aux_nspin=c_int.in_dll(self.library, "Nspin").value
+    aux_nbath=c_int.in_dll(self.library, "Nbath").value
+    
+    match (self.get_bath_type(),self.get_ed_mode()):
+        case(1,1): #normal ed mode, normal bath
+            if len(args) == 2:
+                try:
+                    bath_e=np.asarray(args[0],order="F")
+                    bath_v=np.asarray(args[1],order="F")
+                    if np.shape(bath_e) != (aux_nspin,aux_norb,aux_nbath):
+                        raise ValueError("e must be (nspin,norb,nbath)")
+                    if np.shape(bath_v) != (aux_nspin,aux_norb,aux_nbath):
+                        raise ValueError("v must be (nspin,norb,nbath)")
+                except:
+                    print(np.shape(bath_e))
+                    print(np.shape(bath_v))
+                    raise ValueError("e or v have wrong dimension")
+
+                Nb = self.get_bath_dimension()
+                bath_out = np.zeros(Nb)
+                
+                stride = 0
+                io = 0
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io]=bath_e[ispin,iorb,ibath]
+                stride = aux_nspin * aux_norb * aux_nbath
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io]=bath_v[ispin,iorb,ibath]
+                return bath_out
+                    
+            elif len(args) == 1: #e and v are none
+                bath_vector=np.asarray(args[0],order="F")
+                Nb = self.get_bath_dimension()
+                if np.shape(bath_vector)[0] != Nb:
+                    raise ValueError("bath has the wrong length")
+                    
+                bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                bath_v=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                
+                stride = 0
+                io = 0
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_e[ispin,iorb,ibath] = bath_vector[io]
+                stride = aux_nspin * aux_norb * aux_nbath            
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_v[ispin,iorb,ibath] = bath_vector[io]
+                return bath_e,bath_v
+            else:
+                raise ValueError("Wrong input for normal/normal")
+                
+        case(2,1): #superc ed mode, normal bath
+            if len(args) == 3:
+                try:
+                    bath_e=np.asarray(args[0],order="F")
+                    bath_d=np.asarray(args[1],order="F")
+                    bath_v=np.asarray(args[2],order="F")
+                    if np.shape(bath_e) != (aux_nspin,aux_norb,aux_nbath):
+                        raise ValueError("e must be (nspin,norb,nbath)")
+                    if np.shape(bath_v) != (aux_nspin,aux_norb,aux_nbath):
+                        raise ValueError("v must be (nspin,norb,nbath)")
+                except:
+                    raise ValueError("e or v have wrong dimension")
+
+                Nb = self.get_bath_dimension()
+                bath_out = np.zeros(Nb)
+                stride = 0
+                io = 0
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io] = bath_e[ispin,iorb,ibath]
+                stride = aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io] = bath_d[ispin,iorb,ibath]
+                stride = 2 * aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io] = bath_v[ispin,iorb,ibath]
+                return bath_out
+            elif len(args) == 1: #e and v are none
+                bath_vector=np.asarray(args[0],order="F")
+                Nb = self.get_bath_dimension()
+                if np.shape(bath_vector)[0] != Nb:
+                    raise ValueError("bath has the wrong length")
+                    
+                bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                bath_v=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                
+                stride = 0
+                io = 0
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_e[ispin,iorb,ibath] = bath_out[io]
+                stride = aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_d[ispin,iorb,ibath] = bath_out[io]
+                stride = 2 * aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_v[ispin,iorb,ibath] = bath_out[io]
+                return bath_e,bath_d,bath_v
+            else:
+                raise ValueError("Wrong input for superc/normal")
+                
+        case(3,1): #nonsu2 ed mode, normal bath
+            if len(args) == 3:
+                try:
+                    bath_e=np.asarray(args[0],order="F")
+                    bath_v=np.asarray(args[1],order="F")
+                    bath_u=np.asarray(args[2],order="F")
+                    if np.shape(bath_e) != (aux_nspin,aux_norb,aux_nbath):
+                        raise ValueError("e must be (nspin,norb,nbath)")
+                    if np.shape(bath_v) != (aux_nspin,aux_norb,aux_nbath):
+                        raise ValueError("v must be (nspin,norb,nbath)")
+                except:
+                    raise ValueError("e or v have wrong dimension")
+
+                Nb = self.get_bath_dimension()
+                bath_out = np.zeros(Nb)
+                stride = 0
+                io = 0
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io] = bath_e[ispin,iorb,ibath]
+                stride = aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io] = bath_v[ispin,iorb,ibath]
+                stride = 2 * aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_out[io] = bath_u[ispin,iorb,ibath]
+                return bath_out
+            elif len(args) == 1: #e and v are none
+                bath_vector=np.asarray(args[0],order="F")
+                Nb = self.get_bath_dimension()
+                if np.shape(bath_vector)[0] != Nb:
+                    raise ValueError("bath has the wrong length")
+                    
+                bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                bath_v=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                
+                stride = 0
+                io = 0
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_e[ispin,iorb,ibath] = bath_out[io]
+                stride = aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_v[ispin,iorb,ibath] = bath_out[io]
+                stride = 2 * aux_nspin * aux_norb * aux_nbath 
+                for ispin in range(aux_nspin):
+                    for iorb in range(aux_norb):
+                        for ibath in range(aux_nbath):
+                            io = stride + ibath + (iorb-1)*aux_nbath + (ispin-1)*aux_nbath*aux_norb
+                            bath_u[ispin,iorb,ibath] = bath_out[io]
+                return bath_e,bath_v,bath_u
+            else:
+                raise ValueError("Wrong input for nonsu2/normal")
+            
+        
+    
 

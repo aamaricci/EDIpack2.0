@@ -50,6 +50,25 @@ contains
         f_str=trim(f_str)
     end subroutine c2f
     
+    !Get Bath Type
+    integer(c_int) function get_bath_type_c() result(bt) bind(c, name='get_bath_type')
+      select case(bath_type)
+        case("normal");  bt = 1
+        case("hybrid");  bt = 2
+        case("replica"); bt = 3
+        case("general"); bt = 4
+      end select
+    end function get_bath_type_c
+    
+    !Get Bath Type
+    integer(c_int) function get_ed_mode_c() result(edm) bind(c, name='get_ed_mode')
+      select case(ed_mode)
+        case("normal");  edm = 1
+        case("superc");  edm = 2
+        case("nonsu2");  edm = 3
+      end select
+    end function get_ed_mode_c
+    
     !include library functions
     include "edi2py_read_input.f90"
     include "edi2py_main.f90"

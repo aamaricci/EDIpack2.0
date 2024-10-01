@@ -152,4 +152,3 @@ subroutine ph_symmetrize_bath_ineq_c(bath,dim_bath,sav) bind(c, name='ph_symmetr
   call ed_ph_symmetrize_bath(bath,i2l(sav))
 end subroutine ph_symmetrize_bath_ineq_c
 
-

@@ -47,6 +47,20 @@ def add_global_variable(obj, dynamic_name, target_object, target_attribute):
     setattr(obj.__class__, dynamic_name, setter)
 
 
+#get bath type
+def get_bath_type(self):
+    get_bath_type_wrap = self.library.get_bath_type
+    get_bath_type_wrap.argtypes = None  
+    get_bath_type_wrap.restype = c_int
+    return get_bath_type_wrap()
+    
+#get ed mode
+def get_ed_mode(self):
+    get_ed_mode_wrap = self.library.get_ed_mode
+    get_ed_mode_wrap.argtypes = None  
+    get_ed_mode_wrap.restype = c_int
+    return get_ed_mode_wrap()
+
 ######################################
 # Load shared library with C-bindings
 ######################################
@@ -106,6 +120,10 @@ add_global_variable(global_env, "ed_twin", c_bool.in_dll(libedi2py, "ed_twin"), 
 # GLOBAL FUNCTIONS
 ######################################
 
+#from here
+global_env.get_bath_type = types.MethodType(get_bath_type, global_env)
+global_env.get_ed_mode = types.MethodType(get_ed_mode, global_env)
+
 #read_input
 import func_read_input
 global_env.read_input = types.MethodType(func_read_input.read_input, global_env)
@@ -126,6 +144,9 @@ global_env.spin_symmetrize_bath = types.MethodType(func_bath.spin_symmetrize_bat
 global_env.orb_symmetrize_bath = types.MethodType(func_bath.orb_symmetrize_bath, global_env)
 global_env.orb_equality_bath = types.MethodType(func_bath.orb_equality_bath, global_env)
 global_env.ph_symmetrize_bath = types.MethodType(func_bath.ph_symmetrize_bath, global_env)
+
+global_env.bath_packaging = types.MethodType(func_bath.bath_packaging, global_env)
+
 
 #main
 import func_main
