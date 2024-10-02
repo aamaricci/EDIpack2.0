@@ -581,6 +581,7 @@ def bath_packaging(self,*args):
                     raise ValueError("bath has the wrong length")
                     
                 bath_e=np.zeros((aux_nspin,aux_nbath))
+                bath_d=np.zeros((aux_nspin,aux_nbath))
                 bath_v=np.zeros((aux_nspin,aux_norb,aux_nbath))
                 
                 stride = 0
@@ -647,8 +648,9 @@ def bath_packaging(self,*args):
                 if np.shape(bath_array)[0] != Nb:
                     raise ValueError("bath has the wrong length")
                     
-                bath_e=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                bath_e=np.zeros((aux_nspin,aux_nbath))
                 bath_v=np.zeros((aux_nspin,aux_norb,aux_nbath))
+                bath_u=np.zeros((aux_nspin,aux_norb,aux_nbath))
                 
                 stride = 0
                 io = 0
