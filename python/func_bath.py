@@ -396,19 +396,19 @@ def bath_packaging(self,*args):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_e[ispin,iorb,ibath] = bath_out[io]
+                            bath_e[ispin,iorb,ibath] = bath_array[io]
                 stride = aux_nspin * aux_norb * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_d[ispin,iorb,ibath] = bath_out[io]
+                            bath_d[ispin,iorb,ibath] = bath_array[io]
                 stride = 2 * aux_nspin * aux_norb * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_v[ispin,iorb,ibath] = bath_out[io]
+                            bath_v[ispin,iorb,ibath] = bath_array[io]
                 return bath_e,bath_d,bath_v
             else:
                 raise ValueError("Wrong input for superc/normal")
@@ -465,19 +465,19 @@ def bath_packaging(self,*args):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_e[ispin,iorb,ibath] = bath_out[io]
+                            bath_e[ispin,iorb,ibath] = bath_array[io]
                 stride = aux_nspin * aux_norb * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_v[ispin,iorb,ibath] = bath_out[io]
+                            bath_v[ispin,iorb,ibath] = bath_array[io]
                 stride = 2 * aux_nspin * aux_norb * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_u[ispin,iorb,ibath] = bath_out[io]
+                            bath_u[ispin,iorb,ibath] = bath_array[io]
                 return bath_e,bath_v,bath_u
             else:
                 raise ValueError("Wrong input for nonsu2/normal")
@@ -588,18 +588,18 @@ def bath_packaging(self,*args):
                 for ispin in range(aux_nspin):
                     for ibath in range(aux_nbath):
                         io = stride + ibath + (ispin)*aux_nbath
-                        bath_e[ispin,ibath] = bath_out[io]
+                        bath_e[ispin,ibath] = bath_array[io]
                 stride = aux_nspin * aux_nbath 
                 for ispin in range(aux_nspin):
                     for ibath in range(aux_nbath):
                         io = stride + ibath + (ispin)*aux_nbath
-                        bath_d[ispin,ibath] = bath_out[io]
+                        bath_d[ispin,ibath] = bath_array[io]
                 stride = 2 * aux_nspin * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_v[ispin,iorb,ibath] = bath_out[io]
+                            bath_v[ispin,iorb,ibath] = bath_array[io]
                 return bath_e,bath_d,bath_v
             else:
                 raise ValueError("Wrong input for superc/hybrid")
@@ -655,19 +655,19 @@ def bath_packaging(self,*args):
                 for ispin in range(aux_nspin):
                     for ibath in range(aux_nbath):
                         io = stride + ibath + (ispin)*aux_nbath
-                        bath_e[ispin,ibath] = bath_out[io]
+                        bath_e[ispin,ibath] = bath_array[io]
                 stride = aux_nspin * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_v[ispin,iorb,ibath] = bath_out[io]
+                            bath_v[ispin,iorb,ibath] = bath_array[io]
                 stride = aux_nspin * aux_nbath + aux_nspin * aux_norb * aux_nbath 
                 for ispin in range(aux_nspin):
                     for iorb in range(aux_norb):
                         for ibath in range(aux_nbath):
                             io = stride + ibath + (iorb)*aux_nbath + (ispin)*aux_nbath*aux_norb
-                            bath_u[ispin,iorb,ibath] = bath_out[io]
+                            bath_u[ispin,iorb,ibath] = bath_array[io]
                 return bath_e,bath_v,bath_u
             else:
                 raise ValueError("Wrong input for nonsu2/hybrid")
