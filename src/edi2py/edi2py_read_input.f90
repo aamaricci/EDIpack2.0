@@ -1,5 +1,6 @@
 !ED_MAIN:
 subroutine ed_read_input_c(instr) bind(c, name='read_input')
+    use, intrinsic :: iso_c_binding
     character(kind=c_char), dimension(*), intent(IN) :: instr
     character(len=20), allocatable :: INPUTunit
     integer :: length
