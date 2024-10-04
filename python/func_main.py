@@ -65,21 +65,14 @@ def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):
         
 #finalize solver
 def finalize_solver(self):
-    finalize_solver_site_wrapper = self.library.finalize_solver_site
-    finalize_solver_site_wrapper.argtypes = None
-    finalize_solver_site_wrapper.restype = None
-
-    finalize_solver_ineq_wrapper = self.library.finalize_solver_ineq
-    finalize_solver_ineq_wrapper.argtypes = [c_int]
-    finalize_solver_ineq_wrapper.restype = None
-    
+    finalize_solver_wrapper = self.library.finalize_solver
+    finalize_solver_wrapper.argtypes = [c_int]
+    finalize_solver_wrapper.restype = None
     if self.Nineq is None:
         print("ED environment is not initialized yet")
         return ;
-    elif self.Nineq == 0:
-        finalize_solver_site_wrapper()
     else:
-        finalize_solver_ineq_wrapper(self.Nineq)
+        finalize_solver_wrapper(self.Nineq)
         self.Nineq = None
         print("ED environment finalized")
         return ;

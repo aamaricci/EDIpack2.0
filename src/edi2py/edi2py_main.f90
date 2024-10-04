@@ -28,11 +28,11 @@ subroutine solve_ineq_c(bath,dim_bath,mpi_lanc,iflag) bind(c, name='solve_ineq')
   call ed_solve(bath,mpi_lanc=i2l(mpi_lanc),iflag=i2l(iflag))
 end subroutine solve_ineq_c
 
-subroutine finalize_solver_site_c() bind(c, name='finalize_solver_site')
-    call ed_finalize_solver()
-end subroutine finalize_solver_site_c
-
-subroutine finalize_solver_ineq_c(Nineq) bind(c, name='finalize_solver_ineq')
+subroutine finalize_solver_c(Nineq) bind(c, name='finalize_solver')
   integer(c_int),value                            :: Nineq
-  call ed_finalize_solver(Nineq)
-end subroutine finalize_solver_ineq_c
+  if (Nineq == 0) then
+    call ed_finalize_solver()
+  else
+    call ed_finalize_solver(Nineq)
+  endif
+end subroutine finalize_solver_c
