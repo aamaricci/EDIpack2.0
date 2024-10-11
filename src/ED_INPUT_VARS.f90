@@ -204,7 +204,8 @@ contains
     call parse_input_variable(pair_field,"PAIR_FIELD",INPUTunit,default=(/( 0d0,i=1,Norb )/),comment="pair field per orbital coupling to s-wave order parameter component")
 
 
-    call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")    !    
+    call parse_input_variable(ed_mode,"ED_MODE",INPUTunit,default='normal',comment="Flag to set ED type: normal=normal, superc=superconductive, nonsu2=broken SU(2)")
+    if(ed_mode.eq."super")ed_mode="superc"
     call parse_input_variable(ed_diag_type,"ED_DIAG_TYPE",INPUTunit,default="lanc",comment="flag to select the diagonalization type: 'lanc' for Lanczos/Davidson, 'full' for Full diagonalization method")
     call parse_input_variable(ed_finite_temp,"ED_FINITE_TEMP",INPUTunit,default=.false.,comment="flag to select finite temperature method. note that if T then lanc_nstates_total must be > 1")
     call parse_input_variable(ed_sectors,"ED_SECTORS",INPUTunit,default=.false.,comment="flag to reduce sector scan for the spectrum to specific sectors +/- ed_sectors_shift.")
