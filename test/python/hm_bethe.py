@@ -46,7 +46,7 @@ Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex')
 #SETUP SOLVER
 ed.set_hloc(hloc=Hloc)
 Nb=ed.get_bath_dimension()
-bath = ed.init_solver(Nb)
+bath = ed.init_solver()
 ed.finalize_solver()
 print("AAAAA")
 ed.init_solver(Nb)
