@@ -205,6 +205,7 @@ def get_dens(self,ilat=None,iorb=None):
     else:
         densvec = np.zeros([self.Nineq,aux_norb],dtype=float,order="F")
         ed_get_dens_n2_wrap(densvec,self.Nineq)
+        densvec = np.asarray(densvec)
         
         if ilat is not None and iorb is not None:
             return densvec[ilat,iorb]
@@ -253,6 +254,7 @@ def get_mag(self,icomp=None,ilat=None,iorb=None):
     else:
         magvec = np.zeros([self.Nineq,3,aux_norb],dtype=float,order="F")
         ed_get_mag_n3_wrap(magvec,self.Nineq)
+        magvec = np.asarray(magvec)
         
         if ilat is not None:
             if iorb is not None and icomp is not None:
@@ -300,6 +302,7 @@ def get_docc(self,ilat=None,iorb=None):
     else:
         doccvec = np.zeros([self.Nineq,aux_norb],dtype=float,order="F")
         ed_get_docc_n2_wrap(doccvec,self.Nineq)
+        doccvec = np.asarray(doccvec)
         
         if ilat is not None and iorb is not None:
             return doccvec[ilat,iorb]
@@ -335,6 +338,7 @@ def get_eimp(self,ilat=None,ikind=None):
     else:
         eimp_vec = np.zeros([self.Nineq,4],dtype=float,order="F")
         ed_get_eimp_n2_wrap(eimp_vec,self.Nineq)
+        eimp_vec=np.asarray(eimp_vec)
         
         if ilat is not None and ikind is not None:
             return eimp_vec[ilat,ikind]
