@@ -4,20 +4,22 @@ import os,sys
 import types
 
 # init_solver
-def init_solver(self,*args):
-    if not args:
-        Nb = self.library.get_bath_dimension()
-        bath = np.zeros(Nb,dtype='float',order='F')
-    elif isinstance(args[0], np.ndarray) or isinstance(args[0], list):
-        if isinstance(args[0][0], int):
-            bath = np.zeros(args[0],dtype='float',order='F')
-        elif isinstance(args[0][0], float):
-            bath = args[0]
-    elif isinstance(args[0], int):
-        bath = np.zeros(args[0],dtype='float',order='F')
+def init_solver(self,bath=None,Nb=None,Nlat=None):
+    if bath is None:
+        if Nb is None and Nlat is None:
+            Nb = self.library.get_bath_dimension()
+            bath = np.zeros(Nb,dtype='float',order='F')
+        elif Nb is None and Nlat is not None:
+            Nb = self.library.get_bath_dimension()
+            bath = np.zeros((Nlat,Nb),dtype='float',order='F')
+        elif Nb is not None and Nlat is None:
+            bath = np.zeros(Nb,dtype='float',order='F')
+        elif Nb is not None and Nlat is not None:
+            bath = np.zeros((Nlat,Nb),dtype='float',order='F')
     else:
-        print(type(args[0]))
-        raise ValueError("init_solver: wrong input type.")
+        if Nb is not None or Nlat is not None:
+            print("INIT_SOLVER WARNING: Bath vector provided, Nb and Nlat are discarded")
+
         
     init_solver_site = self.library.init_solver_site
     init_solver_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
