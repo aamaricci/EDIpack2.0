@@ -3,7 +3,7 @@ import numpy as np
 import os,sys
 import types
 
-def chi2_fitgf(self,*args,ispin=0,iorb=-1,fmpi=True):
+def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
 #single normal
     chi2_fitgf_single_normal_n3 = self.library.chi2_fitgf_single_normal_n3
     chi2_fitgf_single_normal_n3.argtypes = [np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
@@ -108,7 +108,10 @@ def chi2_fitgf(self,*args,ispin=0,iorb=-1,fmpi=True):
     
     #main function
     ispin = ispin + 1
-    iorb = iorb + 1
+    if iorb is None:
+        iorb = 0
+    else:
+        iorb = iorb + 1
     if len(args) == 2: #normal
         g = np.asarray(args[0],order="F")
         bath = np.asarray(args[1],order="F")
