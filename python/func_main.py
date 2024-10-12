@@ -6,7 +6,8 @@ import types
 # init_solver
 def init_solver(self,*args):
     if not args:
-        raise ValueError("init_solver takes either a bath vector, a [Nineq,Nbath] or [Nbath] vector or a Nbath number")
+        Nb = self.library.get_bath_dimension()
+        bath = np.zeros(Nb,dtype='float',order='F')
     elif isinstance(args[0], np.ndarray) or isinstance(args[0], list):
         if isinstance(args[0][0], int):
             bath = np.zeros(args[0],dtype='float',order='F')
