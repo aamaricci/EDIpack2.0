@@ -5,7 +5,7 @@ import types
 
 #set_hloc
 
-def set_hloc(self,hloc=None,Nlat=None):
+def set_hloc(self,hloc,Nlat=None):
     ed_set_Hloc_single_N2 = self.library.ed_set_Hloc_single_N2
     ed_set_Hloc_single_N2.argtypes = [np.ctypeslib.ndpointer(dtype=complex,ndim=2, flags='F_CONTIGUOUS'),
                                 np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')] 
