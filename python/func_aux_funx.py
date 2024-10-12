@@ -76,7 +76,7 @@ def search_variable(self,var,ntmp,converged):
         converged=False
     else:
         converged=True
-    return err[0],conv_bool
+    return var[0],conv_bool
 
 #check_convergence
 def check_convergence(self,func,threshold,N1,N2):
