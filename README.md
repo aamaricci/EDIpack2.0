@@ -64,19 +64,46 @@ The `CMake` compilation can be controlled using the following additional variabl
 For any information contact the author as:  
 adriano DOT amaricci @ gmail DOT com
 
+
+### Python module
+
+The `edipy2` python module is installable from this folder via
+
+`pip install .`
+
+on some systems such as Debian >= 11 and Mas Os, if a virtual environment is not in use, the flag `--break-system-packages` has to be set. This creates no issue since no distro is packaging this library.
+To remove the module, run
+
+`pip uninstall -y edipy2`
+
+with same caveat for the `--break-system-packages` flag.
+
+Documentation for the edipy2 module is available at [https://aamaricci.github.io/EDIpack2.0/] (https://aamaricci.github.io/EDIpack2.0/)
+
+--
+
+### CONTACT
+
+If you encounter bugs or difficulties, please [file an issue](https://github.com/aamaricci/SciFortran/issues/new/choose). For any other communication, please reach out any of the contributors or developers:         
+[Adriano Amaricci](https://github.com/aamaricci)
+[Lorenzo Crippa](https://github.com/lcrippa)
+[Samuele Giuli](https://github.com/SamueleGiuli)
+[Gabriele Bellomia](https://github.com/beddalumia)
+[Giacomo Mazza](https://github.com/GiacMazza)
+[Francesco Petocchi](mailto:francesco.petocchi@gmail.com)
+[Alberto Scazzola](mailto:alberto.scazzola@polito.it)
+[Massimo Capone](mailto:capone@sissa.it)
+
 --
 
 ***LICENSE***  
-Copyright 2020- (C) Adriano Amaricci, Lorenzo Crippa, Alberto Scazzola, Gabriele Bellomia, Samuele Giuli, Giacomo Mazza, Francesco Petocchi
-
-The software is provided with no license, as such it is protected by copyright.
-The software is provided as it is and can be read and copied, in agreement with 
-the Terms of Service of GITHUB. Use of the code is constrained to author agreement.   
-
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License (LGPL) as published by
+the Free Software Foundation, either version 3 of the License, or any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU LGPL for more details.
 
-
+You should have received a copy of the GNU LGPL along with this program.  If not, see <http://www.gnu.org/licenses/>.
