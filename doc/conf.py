@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.abspath('..'))
 import recommonmark
 from recommonmark.transform import AutoStructify
 import sphinx_rtd_theme
-from edipy2 import global_env as ed
 
 
 # -- Project information -----------------------------------------------------
