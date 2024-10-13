@@ -116,20 +116,20 @@ end subroutine spin_symmetrize_bath_ineq_c
 
 
 !ORB_SYMMETRIZE_BATH
-subroutine orb_symmetrize_bath_site_c(bath,dim_bath,sav) bind(c, name='orb_symmetrize_bath_site')
+subroutine orb_symmetrize_bath_site_c(bath,dim_bath,orb1,orb2,sav) bind(c, name='orb_symmetrize_bath_site')
   use, intrinsic :: iso_c_binding
   integer(c_int64_t)                    :: dim_bath(1)
-  integer(c_int),value                  :: sav
+  integer(c_int),value                  :: sav,orb1,orb2
   real(c_double),dimension(dim_bath(1)) :: bath
-  call ed_orb_symmetrize_bath(bath,i2l(sav))
+  call ed_orb_symmetrize_bath(bath,orb1,orb2,i2l(sav))
 end subroutine orb_symmetrize_bath_site_c
 !
-subroutine orb_symmetrize_bath_ineq_c(bath,dim_bath,sav) bind(c, name='orb_symmetrize_bath_ineq')
+subroutine orb_symmetrize_bath_ineq_c(bath,dim_bath,orb1,orb2,sav) bind(c, name='orb_symmetrize_bath_ineq')
   use, intrinsic :: iso_c_binding
   integer(c_int64_t)                                :: dim_bath(2)
-  integer(c_int),value                              :: sav
+  integer(c_int),value                              :: sav,orb1,orb2
   real(c_double),dimension(dim_bath(1),dim_bath(2)) :: bath
-  call ed_orb_symmetrize_bath(bath,i2l(sav))
+  call ed_orb_symmetrize_bath(bath,orb1,orb2,i2l(sav))
 end subroutine orb_symmetrize_bath_ineq_c
 
 
