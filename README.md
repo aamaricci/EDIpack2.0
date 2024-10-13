@@ -1,6 +1,6 @@
 # EDIpack2.0: Massively parallel Exact Diagonalization for generic Quantum Impurity problems
 
-[![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/EDIpack2.0/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/EDIpack2/actions/workflows/PushWorkflow.yml) 
+[![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/EDIpack2.0/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/EDIpack2.0/actions/workflows/PushWorkflow.yml) 
 
 <!-- TO BE SETUP ASAP
 [![Coverage]()]()
