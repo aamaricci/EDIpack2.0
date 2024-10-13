@@ -57,7 +57,7 @@ These functions manipulate the user-accessible bath array
 
 .. function:: chi2_fitgf(*args,ispin=0,iorb=None,fmpi=True)
 
-   This function fits the Weiss field or Hybridization function (delta) with a discretized version. The fit parameters are the bath parameters contained in the user-accessible array. Depending on the type of system we are considering (normal, superconductive, non-SU(2)) a different set of inputs has to be passed.
+   This function fits the Weiss field or Hybridization function (delta) with a discretized version. The fit parameters are the bath parameters contained in the user-accessible array. Depending on the type of system we are considering (normal, superconductive, non-SU(2)) a different set of inputs has to be passed. The specifics of the numerical fitting routines are controlled in the input file.
    
     
    :type args: [np.array(dtype=complex,np.array(dtype=complex),np.array(dtype=float)] **or** [np.array(dtype=complex,np.array(dtype=float)]
