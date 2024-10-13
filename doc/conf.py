@@ -24,8 +24,8 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = u'Edipy2 documentation'
-copyright = u'2024, io'
-author = u'io'
+copyright = u'2024, Lorenzo Crippa'
+author = u'Lorenzo Crippa'
 
 # The short X.Y version
 version = u''
