@@ -43,7 +43,7 @@ The solver needs to be initialized via
 
     ed.init_solver()
     
-Optionally, such as when real-space DMFT is used, the bath can be already allocated as an array, the dimension of which has to be given by the output of :code:`Nb` = :func:`ed.get_bath_dimension` for single-impurity DMFT and :code:`[Nlat,Nb]` for real-space DMFT, where :code:`Nlat` is the number of inequivalent impurities
+Optionally, such as when real-space DMFT is used, the bath can be already allocated as an array, the dimension of which has to be given by the output of :code:`Nb` = :func:`get_bath_dimension` for single-impurity DMFT and :code:`[Nlat,Nb]` for real-space DMFT, where :code:`Nlat` is the number of inequivalent impurities
 
 The impurity problem is then solved via 
 

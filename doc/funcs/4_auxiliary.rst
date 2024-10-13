@@ -24,8 +24,9 @@ Auxiliary functions
 
 
 .. function:: get_bath_type(func,threshold,N1,N2)
-
+    
    This function returns an integer number related to the value of :code:`BATH_TYPE` in the input file
+   
     - :code:`1` for **normal** bath
     - :code:`2` for **hybrid** bath
     - :code:`3` for **replica** bath
@@ -38,6 +39,7 @@ Auxiliary functions
 .. function:: get_ed_mode(func,threshold,N1,N2)
 
    This function returns an integer number related to the value of :code:`ED_MODE` in the input file
+   
     - :code:`1` for **normal** mode
     - :code:`2` for **superc** mode
     - :code:`3` for **nonsu2** mode

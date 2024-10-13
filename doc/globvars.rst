@@ -85,14 +85,6 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    
    :type: int
    :default: 6
-   
-.. data:: Lpos
-
-   Number of points for the lattice PDF
-   
-   :type: int
-   :default: 100
-
 
 .. data:: Lfloat
 
@@ -100,6 +92,13 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    
    :type: int
    :default: 5000
+   
+.. data:: Lpos
+
+   Number of points for the lattice PDF
+   
+   :type: int
+   :default: 100
    
 .. data:: Ltau
 
