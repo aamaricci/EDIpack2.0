@@ -24,7 +24,7 @@ These functions initialize, solve and finalize the impurity problem. They can be
    :param Nlat: This sets the number of inequivalent sites for real-space DMFT. If this parameter alone is provided, :func:`get_bath_dimension` is invoked to determine the bath vector length Nb for each impurity. A ``[Nlat,Nb]`` vector is then allocated.
    
      
-   :return: An array of floats that contains the bath parameters for the impurity problem. This is a required input of :func:`solve` and :func:`chi2_fitgf`. Its elements are ordered differently depending on the bath geometry. They are (de)compactified for user interaction via :func:`bath_packaging`. Specific symmetrization operations are implemented and listed in the :ref:`bath` section.
+   :return: An array of floats that contains the bath parameters for the impurity problem. This is a required input of :func:`solve` and :func:`chi2_fitgf`. Its elements are ordered differently depending on the bath geometry. They are (de)compactified for user interaction via :func:`bath_inspect`. Specific symmetrization operations are implemented and listed in the :ref:`bath` section.
    :rtype: np.array(dtype=float) 
     
 .. function:: finalize_solver()

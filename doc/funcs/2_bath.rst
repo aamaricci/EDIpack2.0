@@ -78,7 +78,7 @@ These functions manipulate the user-accessible bath array
    
     The dimension of :code:`bath` can be
  
-    * :code:`Nb`: if single-impurity, the output of :func:`get_bath_gimension`
+    * :code:`Nb`: if single-impurity, the output of :func:`get_bath_dimension`
     * :code:`[Nlat,Nb]`: if real-space DMFT
    
     Accordingly, the dimension of g (and f) can be:
@@ -105,7 +105,7 @@ These functions manipulate the user-accessible bath array
    :raise ValueError: if the shapes of the positional arguments are incompatible
    :raise ValueError: if a number of positional arguments different from 2 or 3 are passed   
      
-   :return: An array of floats that contains the bath parameters for the impurity problem. This is a required input of :func:`solve` and :func:`chi2_fitgf`. Its elements are ordered differently depending on the bath geometry. They are (de)compactified for user interaction via :func:`bath_packaging`. Specific symmetrization operations are implemented and listed in the :ref:`bath` section.
+   :return: An array of floats that contains the bath parameters for the impurity problem. This is a required input of :func:`solve` and :func:`chi2_fitgf`. Its elements are ordered differently depending on the bath geometry. They are (de)compactified for user interaction via :func:`bath_inspect`. Specific symmetrization operations are implemented and listed in the :ref:`bath` section.
    :rtype: np.array(dtype=float) 
 
 
