@@ -24,7 +24,7 @@ These functions manipulate the user-accessible bath array
    :type u: np.array(dtype=float)
    :param u: an array for the bath spin off-diagonal hybridization (:code:`ED_MODE = NONSU2`). It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath
 
-    :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d` are provided, or the shapes are inconsistent
+   :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d` are provided, or the shapes are inconsistent
 
    :return: 
      - if :code:`bath` is provided, returns :code:`e,v`, :code:`e,d,v` or :code:`e,v,u` depending on :code:`ED_MODE`
