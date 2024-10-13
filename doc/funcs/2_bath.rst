@@ -115,28 +115,7 @@ These functions manipulate the user-accessible bath array
    
    :return: a number which is the dimension of the bath array for each impurity.
    :rtype: int  
-   
-   
-.. function:: set_hreplica(hvec,lambdavec)
-
-   This function is specific to :code:`BATH_TYPE=REPLICA`. It sets the basis of matrices and scalar parameters that, upon linear combination, make up the bath replica.
     
-   :type hvec: np.array(dtype=complex)
-   :param hvec: array of bath matrices. They decompose the nonzero part of the replica in a set. Each element of the set correspond to a variational parameter. That way the bath replica matrix is updated while preserving symmetries of the user's choosing. The array can have the following shapes:
-
-    * :code:`[(Nnambu)*ed.Nspin*ed.Norb, (Nnambu)*ed.Nspin*ed.Norb, Nsym]`: 3-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
-    * :code:`[(Nnambu)*ed.Nspin*, (Nnambu)*ed.Nspin, ed.Norb, ed.Norb, Nsym]`:5-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
-    
-   :type lambdavec: np.array(dtype=float) 
-   :param iorb: the array of coefficients of the linear combination. This, along with the hybridizations V, are the fitting parameters of the bath. The array has the following shape
-    * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional, where Nsym is the number of matrices that make up the linear combination 
-    * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional, where Nlat is the number of inequivalent impurity sites and Nsym is the number of matrices that make up the linear combination 
-
-   :raise ValueError: if the shapes of the arrays are inconsistent
-     
-   :return: Nothing
-   :rtype: None
-   
    
 .. function:: orb_equality_bath(bath, indx, save=True)
 
@@ -203,7 +182,7 @@ These functions manipulate the user-accessible bath array
    
    :return: Nothing
    :rtype: None
- 
+
    
 .. function:: set_hgeneral(hvec,lambdavec)
 
@@ -225,6 +204,27 @@ These functions manipulate the user-accessible bath array
    :return: Nothing
    :rtype: None
    
+
+.. function:: set_hreplica(hvec,lambdavec)
+
+   This function is specific to :code:`BATH_TYPE=REPLICA`. It sets the basis of matrices and scalar parameters that, upon linear combination, make up the bath replica.
+    
+   :type hvec: np.array(dtype=complex)
+   :param hvec: array of bath matrices. They decompose the nonzero part of the replica in a set. Each element of the set correspond to a variational parameter. That way the bath replica matrix is updated while preserving symmetries of the user's choosing. The array can have the following shapes:
+
+    * :code:`[(Nnambu)*ed.Nspin*ed.Norb, (Nnambu)*ed.Nspin*ed.Norb, Nsym]`: 3-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
+    * :code:`[(Nnambu)*ed.Nspin*, (Nnambu)*ed.Nspin, ed.Norb, ed.Norb, Nsym]`:5-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
+    
+   :type lambdavec: np.array(dtype=float) 
+   :param iorb: the array of coefficients of the linear combination. This, along with the hybridizations V, are the fitting parameters of the bath. The array has the following shape
+    * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional, where Nsym is the number of matrices that make up the linear combination 
+    * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional, where Nlat is the number of inequivalent impurity sites and Nsym is the number of matrices that make up the linear combination 
+
+   :raise ValueError: if the shapes of the arrays are inconsistent
+     
+   :return: Nothing
+   :rtype: None
+
    
 .. function:: spin_symmetrize_bath(bath, save=True)
 
