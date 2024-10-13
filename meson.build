@@ -7,14 +7,14 @@ edipack_dep= dependency('edipack2', required:true)
 
 fortran_src = ['src/ED_INPUT_VARS.f90',
                'src/edi2py/edi2py.f90']
-python_src  = ['python/edi2py.py',
-               'python/func_read_input.py',
-               'python/func_aux_funx.py',
-               'python/func_bath.py',
-               'python/func_main.py',
-               'python/func_io.py',
-               'python/func_bath_fit.py',
-               'python/__init__.py']
+python_src  = ['edipy2/edi2py.py',
+               'edipy2/func_read_input.py',
+               'edipy2/func_aux_funx.py',
+               'edipy2/func_bath.py',
+               'edipy2/func_main.py',
+               'edipy2/func_io.py',
+               'edipy2/func_bath_fit.py',
+               'edipy2/__init__.py']
 
 library('edi2py', 
                     fortran_src,

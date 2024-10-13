@@ -5,6 +5,12 @@ import types
 
 #get_bath_dimension
 def get_bath_dimension(self):
+    """
+       This function returns the correct dimension for the bath to be allocated (for each impurity) given the parameters of the system.
+       
+       :return: a number which is the dimension of the bath array for each impurity.
+       :rtype: int  
+    """
     get_bath_dimension_wrap = self.library.get_bath_dimension
     get_bath_dimension_wrap.argtypes = None  
     get_bath_dimension_wrap.restype = c_int
@@ -12,6 +18,26 @@ def get_bath_dimension(self):
     
 #init_hreplica
 def set_hreplica(self,hvec,lambdavec):
+    """
+
+       This function is specific to :code:`BATH_TYPE=REPLICA`. It sets the basis of matrices and scalar parameters that, upon linear combination, make up the bath replica.
+        
+       :type hvec: np.array(dtype=complex)
+       :param hvec: array of bath matrices. They decompose the nonzero part of the replica in a set. Each element of the set correspond to a variational parameter. That way the bath replica matrix is updated while preserving symmetries of the user's choosing. The array can have the following shapes:
+
+        * :code:`[(Nnambu)*ed.Nspin*ed.Norb, (Nnambu)*ed.Nspin*ed.Norb, Nsym]`: 3-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
+        * :code:`[(Nnambu)*ed.Nspin*, (Nnambu)*ed.Nspin, ed.Norb, ed.Norb, Nsym]`:5-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
+        
+       :type lambdavec: np.array(dtype=float) 
+       :param iorb: the array of coefficients of the linear combination. This, along with the hybridizations V, are the fitting parameters of the bath. The array has the following shape
+        * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional, where Nsym is the number of matrices that make up the linear combination 
+        * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional, where Nlat is the number of inequivalent impurity sites and Nsym is the number of matrices that make up the linear combination 
+
+       :raise ValueError: if the shapes of the arrays are inconsistent
+         
+       :return: Nothing
+       :rtype: None
+    """
     init_hreplica_symmetries_d5 = self.library.init_Hreplica_symmetries_d5
     init_hreplica_symmetries_d5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
                                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -67,6 +93,25 @@ def set_hreplica(self,hvec,lambdavec):
     
 #init_hgeneral
 def set_hgeneral(self,hvec,lambdavec):
+    """
+       This function is specific to :code:`BATH_TYPE=GENERAL`. It sets the basis of matrices and scalar parameters that, upon linear combination, make up the bath replica. The difference between the bath types :code:`REPLICA` and :code:`GENERAL` is only in the hybridization, which is independently set, so the input of this function is the same as that of :func:`set_hreplica`.
+        
+       :type hvec: np.array(dtype=complex)
+       :param hvec: array of bath matrices. They decompose the nonzero part of the replica in a set. Each element of the set correspond to a variational parameter. That way the bath replica matrix is updated while preserving symmetries of the user's choosing. The array can have the following shapes:
+
+        * :code:`[(Nnambu)*ed.Nspin*ed.Norb, (Nnambu)*ed.Nspin*ed.Norb, Nsym]`: 3-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
+        * :code:`[(Nnambu)*ed.Nspin*, (Nnambu)*ed.Nspin, ed.Norb, ed.Norb, Nsym]`:5-dimensional, where Nnambu refers to the superconducting case and Nsym is the number of matrices that make up the linear combination 
+        
+       :type lambdavec: np.array(dtype=float) 
+       :param iorb: the array of coefficients of the linear combination. This, along with the hybridizations V, are the fitting parameters of the bath. The array has the following shape
+        * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional, where Nsym is the number of matrices that make up the linear combination 
+        * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional, where Nlat is the number of inequivalent impurity sites and Nsym is the number of matrices that make up the linear combination 
+
+       :raise ValueError: if the shapes of the arrays are inconsistent
+         
+       :return: Nothing
+       :rtype: None
+    """
     init_hgeneral_symmetries_d5 = self.library.init_Hgeneral_symmetries_d5
     init_hgeneral_symmetries_d5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
                                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -122,6 +167,27 @@ def set_hgeneral(self,hvec,lambdavec):
     
 #break_symmetry_bath
 def break_symmetry_bath(self, bath, field, sign, save=True):
+    """
+    
+    This function breaks the spin symmetry of the bath, useful for magnetic calculations to incite symmetry breaking. Not compatible with :code:`REPLICA` or :code:`GENERAL` bath types.
+
+    :type bath: np.array(dtype=float)
+    :param bath: The user-accessible bath array
+   
+    :type field: float
+    :param field: the magnitude of the symmetry-breaking shift
+   
+    :type sign: float
+    :param sign: the sign of the symmetry-breaking shift
+   
+    :type save: bool
+    :param save: whether to save the symmetry-broken bath for reading
+   
+    :return: the modified bath array
+    :rtype: np.array(dtype=float) 
+       
+    """
+    
     break_symmetry_bath_site = self.library.break_symmetry_bath_site
     break_symmetry_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                          np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -152,6 +218,18 @@ def break_symmetry_bath(self, bath, field, sign, save=True):
 #spin_symmetrize_bath
     
 def spin_symmetrize_bath(self, bath, save=True):
+    """
+       This function enforces equality of the opposite-spin components of the bath array. Not compatible with :code:`REPLICA` or :code:`GENERAL` bath types.
+
+       :type bath: np.array(dtype=float)
+       :param bath: The user-accessible bath array
+          
+       :type save: bool
+       :param save: whether to save the symmetry-broken bath for reading
+       
+       :return: the modified bath array
+       :rtype: np.array(dtype=float)
+    """
     spin_symmetrize_bath_site = self.library.spin_symmetrize_bath_site
     spin_symmetrize_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -176,6 +254,25 @@ def spin_symmetrize_bath(self, bath, save=True):
     
 #orb_symmetrize_bath
 def orb_symmetrize_bath(self, bath,orb1,orb2, save=True):
+    """
+       This function enforces equality of the different-orbital components of the bath array. Not compatible with :code:`REPLICA` or :code:`GENERAL` bath types.
+
+       :type bath: np.array(dtype=float)
+       :param bath: The user-accessible bath array
+       
+       :type orb1: int
+       :param orb1: first orbital index
+       
+       :type orb2: int
+       :param orb2: second orbital index
+          
+       :type save: bool
+       :param save: whether to save the symmetry-broken bath for reading
+       
+       :return: the modified bath array
+       :rtype: np.array(dtype=float)
+    """
+
     orb_symmetrize_bath_site = self.library.orb_symmetrize_bath_site
     orb_symmetrize_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -202,6 +299,23 @@ def orb_symmetrize_bath(self, bath,orb1,orb2, save=True):
 #orb_equality_bath
     
 def orb_equality_bath(self, bath, indx, save=True):
+    """
+       This function sets every orbital component to be equal to the one of orbital :code:`indx`. Not compatible with :code:`REPLICA` or :code:`GENERAL` bath types.
+
+       :type bath: np.array(dtype=float)
+       :param bath: The user-accessible bath array
+       
+       :type iorb: int 
+       :param iorb: the orbital index to which every other will be set as equal
+          
+       :type save: bool
+       :param save: whether to save the symmetry-broken bath for reading
+       
+       :raise ValueError: if the orbital index is out of bounds
+       
+       :return: the modified bath array
+       :rtype: np.array(dtype=float) 
+    """
     orb_equality_bath_site = self.library.orb_equality_bath_site
     orb_equality_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                        np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'), 
@@ -234,6 +348,18 @@ def orb_equality_bath(self, bath, indx, save=True):
     
 #ph_symmetrize_bath
 def ph_symmetrize_bath(self, bath, save):
+    """
+       This function enforces particle-hole symmetry of the bath hybridization function. Not compatible with :code:`REPLICA` or :code:`GENERAL` bath types.
+
+       :type bath: np.array(dtype=float)
+       :param bath: The user-accessible bath array
+          
+       :type save: bool
+       :param save: whether to save the symmetry-broken bath for reading
+       
+       :return: the modified bath array
+       :rtype: np.array(dtype=float) 
+    """
     ph_symmetrize_bath_site = self.library.ph_symmetrize_bath_site
     ph_symmetrize_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                         np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
@@ -258,6 +384,15 @@ def ph_symmetrize_bath(self, bath, save):
     
 #save array as .restart file
 def save_array_as_bath(self, bath):
+    """
+       This function takes the user-accessible array and saves it in the correct format for every bath type in the file :code:`hamiltonian.restart`
+
+       :type bath: np.array(dtype=float)
+       :param bath: The user-accessible bath array
+       
+       :return: Nothing
+       :rtype: None
+    """
     save_array_as_bath_site = self.library.save_array_as_bath_site
     save_array_as_bath_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                          np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')]
@@ -280,6 +415,32 @@ def save_array_as_bath(self, bath):
 
 
 def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None):
+    """
+       This function translates between the user-accessible continuous bath array and the bath components (energy level, hybridization and so on). It functions in both ways, given the array returns the components and vice-versa. It autonomously determines the type of bath and ED mode.
+
+       :type bath: np.array(dtype=float)
+       :param bath: The user-accessible bath array
+       
+       :type e: np.array(dtype=float)
+       :param e: an array for the bath levels (:code:`ED_MODE = NORMAL, NONSU2, SUPERC`) It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` bath, :code:`[ed.Nspin, ed.Nbath]` for :code:`HYBRID` bath 
+       
+       :type v: np.array(dtype=float)
+       :param v: an array for the bath hybridizations (:code:`ED_MODE = NORMAL, NONSU2, SUPERC`) It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath
+       
+       :type d: np.array(dtype=float)
+       :param d: an array for the bath anomalous enery levels(:code:`ED_MODE = SUPERC`) It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` bath, :code:`[ed.Nspin, ed.Nbath]` for :code:`HYBRID` bath
+       
+       :type u: np.array(dtype=float)
+       :param u: an array for the bath spin off-diagonal hybridization (:code:`ED_MODE = NONSU2`). It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath
+
+       :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d` are provided, or the shapes are inconsistent
+
+       :return: 
+         - if :code:`bath` is provided, returns :code:`e,v`, :code:`e,d,v` or :code:`e,v,u` depending on :code:`ED_MODE`
+         - if :code:`e,v`, :code:`e,d,v` or :code:`e,v,u` depending on :code:`ED_MODE` are provided, returns :code:`bath` 
+       :rtype: np.array(dtype=float) 
+    """
+
     
     aux_norb=c_int.in_dll(self.library, "Norb").value
     aux_nspin=c_int.in_dll(self.library, "Nspin").value

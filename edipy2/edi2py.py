@@ -49,6 +49,20 @@ def add_global_variable(obj, dynamic_name, target_object, target_attribute):
 
 #get bath type
 def get_bath_type(self):
+    """
+    
+     This function returns an integer number related to the value of :code:`BATH_TYPE` in the input file
+    
+      - :code:`1` for **normal** bath
+      - :code:`2` for **hybrid** bath
+      - :code:`3` for **replica** bath
+      - :code:`4` for **general** bath
+   
+    :return: the integer index
+    :rtype: int
+    
+   """
+
     get_bath_type_wrap = self.library.get_bath_type
     get_bath_type_wrap.argtypes = None  
     get_bath_type_wrap.restype = c_int
@@ -56,6 +70,19 @@ def get_bath_type(self):
     
 #get ed mode
 def get_ed_mode(self):
+    """
+    
+     This function returns an integer number related to the value of :code:`ED_MODE` in the input file
+     
+      - :code:`1` for **normal** mode
+      - :code:`2` for **superc** mode
+      - :code:`3` for **nonsu2** mode
+   
+     :return: the integer index
+     :rtype: int
+    
+    """
+    
     get_ed_mode_wrap = self.library.get_ed_mode
     get_ed_mode_wrap.argtypes = None  
     get_ed_mode_wrap.restype = c_int
@@ -72,7 +99,10 @@ if(system=='darwin'):
 libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, libpath)
 libfile = os.path.join(libpath, 'libedi2py'+libext)
-libedi2py = CDLL(libfile)
+try:
+    libedi2py = CDLL(libfile)
+except:
+    libedi2py = None
 
 ####################################################################
 # Create the global_env class (this is what the python module sees)
@@ -84,37 +114,40 @@ global_env=Link(libedi2py)
 # GLOBAL VARIABLES
 ######################################
 
-add_global_variable(global_env, "Nbath", c_int.in_dll(libedi2py, "Nbath"), "value")
-add_global_variable(global_env, "Norb", c_int.in_dll(libedi2py, "Norb"), "value")
-add_global_variable(global_env, "Nspin", c_int.in_dll(libedi2py, "Nspin"), "value")
-add_global_variable(global_env, "Nloop", c_int.in_dll(libedi2py, "Nloop"), "value")
-add_global_variable(global_env, "Nph", c_int.in_dll(libedi2py, "Nph"), "value")
-add_global_variable(global_env, "Nsuccess", c_int.in_dll(libedi2py, "Nsuccess"), "value")
-add_global_variable(global_env, "Lmats", c_int.in_dll(libedi2py, "Lmats"), "value")
-add_global_variable(global_env, "Lreal", c_int.in_dll(libedi2py, "Lreal"), "value")
-add_global_variable(global_env, "Ltau", c_int.in_dll(libedi2py, "Ltau"), "value")
-add_global_variable(global_env, "Lfit", c_int.in_dll(libedi2py, "Lfit"), "value")
-add_global_variable(global_env, "Lpos", c_int.in_dll(libedi2py, "Lpos"), "value")
-add_global_variable(global_env, "LOGfile", c_int.in_dll(libedi2py, "LOGfile"), "value")
+try:
+    add_global_variable(global_env, "Nbath", c_int.in_dll(libedi2py, "Nbath"), "value")
+    add_global_variable(global_env, "Norb", c_int.in_dll(libedi2py, "Norb"), "value")
+    add_global_variable(global_env, "Nspin", c_int.in_dll(libedi2py, "Nspin"), "value")
+    add_global_variable(global_env, "Nloop", c_int.in_dll(libedi2py, "Nloop"), "value")
+    add_global_variable(global_env, "Nph", c_int.in_dll(libedi2py, "Nph"), "value")
+    add_global_variable(global_env, "Nsuccess", c_int.in_dll(libedi2py, "Nsuccess"), "value")
+    add_global_variable(global_env, "Lmats", c_int.in_dll(libedi2py, "Lmats"), "value")
+    add_global_variable(global_env, "Lreal", c_int.in_dll(libedi2py, "Lreal"), "value")
+    add_global_variable(global_env, "Ltau", c_int.in_dll(libedi2py, "Ltau"), "value")
+    add_global_variable(global_env, "Lfit", c_int.in_dll(libedi2py, "Lfit"), "value")
+    add_global_variable(global_env, "Lpos", c_int.in_dll(libedi2py, "Lpos"), "value")
+    add_global_variable(global_env, "LOGfile", c_int.in_dll(libedi2py, "LOGfile"), "value")
 
-add_global_variable(global_env, "Uloc", ARRAY(c_double, 5).in_dll(libedi2py, "Uloc"), "value")
-add_global_variable(global_env, "Ust", c_double.in_dll(libedi2py, "Ust"), "value")
-add_global_variable(global_env, "Jh", c_double.in_dll(libedi2py, "Jh"), "value")
-add_global_variable(global_env, "Jx", c_double.in_dll(libedi2py, "Jx"), "value")
-add_global_variable(global_env, "Jp", c_double.in_dll(libedi2py, "Jp"), "value")
-add_global_variable(global_env, "xmu", c_double.in_dll(libedi2py, "xmu"), "value")
-add_global_variable(global_env, "beta", c_double.in_dll(libedi2py, "beta"), "value")
-add_global_variable(global_env, "dmft_error", c_double.in_dll(libedi2py, "dmft_error"), "value")
-add_global_variable(global_env, "eps", c_double.in_dll(libedi2py, "eps"), "value")
-add_global_variable(global_env, "wini", c_double.in_dll(libedi2py, "wini"), "value")
-add_global_variable(global_env, "wfin", c_double.in_dll(libedi2py, "wfin"), "value")
-add_global_variable(global_env, "xmin", c_double.in_dll(libedi2py, "xmin"), "value")
-add_global_variable(global_env, "xmax", c_double.in_dll(libedi2py, "xmax"), "value")
-add_global_variable(global_env, "sb_field", c_double.in_dll(libedi2py, "sb_field"), "value")
-add_global_variable(global_env, "nread", c_double.in_dll(libedi2py, "nread"), "value")
+    add_global_variable(global_env, "Uloc", ARRAY(c_double, 5).in_dll(libedi2py, "Uloc"), "value")
+    add_global_variable(global_env, "Ust", c_double.in_dll(libedi2py, "Ust"), "value")
+    add_global_variable(global_env, "Jh", c_double.in_dll(libedi2py, "Jh"), "value")
+    add_global_variable(global_env, "Jx", c_double.in_dll(libedi2py, "Jx"), "value")
+    add_global_variable(global_env, "Jp", c_double.in_dll(libedi2py, "Jp"), "value")
+    add_global_variable(global_env, "xmu", c_double.in_dll(libedi2py, "xmu"), "value")
+    add_global_variable(global_env, "beta", c_double.in_dll(libedi2py, "beta"), "value")
+    add_global_variable(global_env, "dmft_error", c_double.in_dll(libedi2py, "dmft_error"), "value")
+    add_global_variable(global_env, "eps", c_double.in_dll(libedi2py, "eps"), "value")
+    add_global_variable(global_env, "wini", c_double.in_dll(libedi2py, "wini"), "value")
+    add_global_variable(global_env, "wfin", c_double.in_dll(libedi2py, "wfin"), "value")
+    add_global_variable(global_env, "xmin", c_double.in_dll(libedi2py, "xmin"), "value")
+    add_global_variable(global_env, "xmax", c_double.in_dll(libedi2py, "xmax"), "value")
+    add_global_variable(global_env, "sb_field", c_double.in_dll(libedi2py, "sb_field"), "value")
+    add_global_variable(global_env, "nread", c_double.in_dll(libedi2py, "nread"), "value")
 
-add_global_variable(global_env, "ed_total_ud", c_bool.in_dll(libedi2py, "ed_total_ud"), "value")
-add_global_variable(global_env, "ed_twin", c_bool.in_dll(libedi2py, "ed_twin"), "value")
+    add_global_variable(global_env, "ed_total_ud", c_bool.in_dll(libedi2py, "ed_total_ud"), "value")
+    add_global_variable(global_env, "ed_twin", c_bool.in_dll(libedi2py, "ed_twin"), "value")
+except:
+    print("Error loading .so library")
 
 
 ######################################

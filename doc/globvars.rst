@@ -71,6 +71,13 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    
    :type: float
    :default: 0.0
+   
+.. data:: Lfloat
+
+   Number of frequencies, float frequency axis
+   
+   :type: int
+   :default: 5000
 
 .. data:: Lmats
 
@@ -85,13 +92,6 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    
    :type: int
    :default: 6
-
-.. data:: Lfloat
-
-   Number of frequencies, float frequency axis
-   
-   :type: int
-   :default: 5000
    
 .. data:: Lpos
 

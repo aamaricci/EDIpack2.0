@@ -6,6 +6,31 @@ import types
 #set_hloc
 
 def set_hloc(self,hloc,Nlat=None):
+    """
+       This function sets the local Hamiltonian of the impurity problem. 
+        
+       :type hloc: np.array(dtype=complex)
+       :param hloc: Local Hamiltonian matrix. This can have the following shapes:
+       
+        * :code:`[ed.Nspin*ed.Norb,ed.Nspin*ed.Norb]`: single-impurity case, 2-dimensional array
+        * :code:`[ed.Nspin,ed.Nspin,ed.Norb,ed.Norb]`: single-impurity case, 4-dimensional array
+        * :code:`[Nlat*ed.Nspin*ed.Norb,Nlat*ed.Nspin*ed.Norb]`: real-space DMFT case, 2-dimensional array.
+        * :code:`[Nlat,Nspin*ed.Norb,ed.Nspin*ed.Norb]`: single-impurity case, 3-dimensional array.
+        * :code:`[Nlat,ed.Nspin,ed.Nspin,ed.Norb,ed.Norb]`: single-impurity case, 5-dimensional array.
+       
+        The array is ordered in F convention inside the function.
+        
+        **Note**: the way the EDIpack2 library passes from 1 comulative to 2 or 3 running indices is, from slower to faster: ``lat``, ``spin``, ``orb``
+        
+       :type Nlat: int
+       :param Nlat: Number of inequivalent sites for real-space DMFT. The function will raise a ValueError if the dimensions of ``hloc`` are inconsistent with the presence or absence of Nlat. 
+        The EDIpack2 library will check the correctness of the dimensions of ``hloc`` and terminate execution if inconsistent.
+       
+       :raise ValueError: If hloc is not provided or has the wrong shape
+       
+       :return: Nothing
+       :rtype: None
+    """
     ed_set_Hloc_single_N2 = self.library.ed_set_Hloc_single_N2
     ed_set_Hloc_single_N2.argtypes = [np.ctypeslib.ndpointer(dtype=complex,ndim=2, flags='F_CONTIGUOUS'),
                                 np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS')] 
@@ -62,6 +87,25 @@ def set_hloc(self,hloc,Nlat=None):
 
 #search_variable
 def search_variable(self,var,ntmp,converged):
+    """
+     
+     This function checks the value of the read density :code:`ntmp` against the desired value :code:`ed.nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
+   
+     :type var: float
+     :param var: the variable to be adjusted (usually :code:`ed.xmu`)
+
+     :type ntmp: float
+     :param ntmp: the density value at the given iteration
+   
+     :type converged: bool
+     :param converged: whether the DMFT loop has achieved a sufficiently small error independently on the density
+   
+     :return: 
+      - the new value of :code:`var`
+      - a boolean signifying convergence
+     :rtype: float, bool
+     
+    """
     search_variable_wrap = self.library.search_variable
     search_variable_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
                                      np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
@@ -80,6 +124,29 @@ def search_variable(self,var,ntmp,converged):
 
 #check_convergence
 def check_convergence(self,func,threshold,N1,N2):
+    """
+    
+    This function checks the variation of a given quantity (Weiss field, Delta, ...) against the one for the previous step. It is used to determined whether the DMFT loop has converged. If a maximum number of loops is exceeded, returns True with a warning.
+
+    :type func: np.array(dtype=complex) 
+    :param func: the quantity to be checked. It is one-dimensional, with its length being a number of frequencies
+   
+    :type threshold: float 
+    :param threshold: the error threshold
+   
+    :type N1: int
+    :param N1: minimum number of loops
+
+    :type N2: int
+    :param N2: maximum number of loops
+   
+    :return: 
+     - the error
+     - a boolean signifying convergence
+    :rtype: float, bool
+    
+    """
+    
     check_convergence_wrap = self.library.check_convergence
     check_convergence_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
                                        c_int,
