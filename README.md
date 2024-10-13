@@ -71,7 +71,7 @@ The `edipy2` python module is installable from this folder via
 
 `pip install .`
 
-on some systems such as Debian >= 11 and Mas Os, if a virtual environment is not in use, the flag `--break-system-packages` has to be set. This creates no issue since no distro is packaging this library.
+on some systems such as Debian >= 11 and Mac Os, if a virtual environment is not in use, the flag `--break-system-packages` has to be set. This creates no issue since no distro is packaging this library.
 To remove the module, run
 
 `pip uninstall -y edipy2`
