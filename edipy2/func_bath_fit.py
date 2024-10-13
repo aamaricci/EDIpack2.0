@@ -5,13 +5,19 @@ import types
 
 def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
     """
-      This function fits the Weiss field or Hybridization function (delta) with a discretized version. The fit parameters are the bath parameters contained in the user-accessible array. Depending on the type of system we are considering (normal, superconductive, non-SU(2)) a different set of inputs has to be passed. The specifics of the numerical fitting routines are controlled in the input file.
+      This function fits the Weiss field or Hybridization function (delta) with a discretized version.\
+      The fit parameters are the bath parameters contained in the user-accessible array.\
+      Depending on the type of system we are considering (normal, superconductive, non-SU(2))\
+      a different set of inputs has to be passed. The specifics of the numerical\
+      fitting routines are controlled in the input file.
        
         
-      :type args: [np.array(dtype=complex,np.array(dtype=complex),np.array(dtype=float)] **or** [np.array(dtype=complex,np.array(dtype=float)]
+      :type args: [np.array(dtype=complex,np.array(dtype=complex),np.array(dtype=float)]\
+      **or** [np.array(dtype=complex,np.array(dtype=float)]
       :param args: The positional arguments are the function(s) to fit and the bath array. 
        
-       If the system is not superconductive (:code:`ED_MODE=NORMAL` or :code:`ED_MODE=NONSU2`) the argumens are
+       If the system is not superconductive (:code:`ED_MODE=NORMAL` or\
+       :code:`ED_MODE=NONSU2`) the argumens are
       
        * :code:`g`: the function to fit
        * :code:`bath`: the bath
@@ -31,18 +37,27 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
        
        Accordingly, the dimension of g (and f) can be:
        
-       * :code:`3`: in the single-impurity case,  an array of the shape :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Lfit]`. 
-       * :code:`3`: in the real-space DMFT case, an array of the shape :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, Lfit]`
-       * :code:`4`: in the real-space DMFT case, an array of the shape :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Lfit]`
-       * :code:`5`: in the single-impurity case, an array of the shape :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Lfit]`
-       * :code:`6`: in the real-space DMFT case, an array of the shape :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Lfit]`
+       * :code:`3`: in the single-impurity case,  an array of \
+       the shape :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Lfit]`. 
+       * :code:`3`: in the real-space DMFT case, an array of \
+       the shape :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, Lfit]`
+       * :code:`4`: in the real-space DMFT case, an array of \
+       the shape :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Lfit]`
+       * :code:`5`: in the single-impurity case, an array of \
+       the shape :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Lfit]`
+       * :code:`6`: in the real-space DMFT case, an array of \
+       the shape :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Lfit]`
        
        where :code:`Lfit` is a given number of frequencies.
 
        
      
       :type ispin: int 
-      :param ispin: spin species to be fitted. For the normal and superconducting cases, if :code:`ed.Nspin=2`, the fitting function needs to be called twice. Only the corresponding elements of :code:`bath` will be updated each time. For the non-SU(2) case, this argument is irrelevant, since all the elements of the Weiss/Delta function need to be fitted.
+      :param ispin: spin species to be fitted. For the normal \
+      and superconducting cases, if :code:`ed.Nspin=2`, the fitting function \
+      needs to be called twice. Only the corresponding elements of :code:`bath` \
+      will be updated each time. For the non-SU(2) case, this argument is irrelevant, \
+      since all the elements of the Weiss/Delta function need to be fitted.
         
       :type iorb: int 
       :param iorb: the orbital to be fitted. If omitted, all orbitals will be fitted
@@ -53,7 +68,12 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
       :raise ValueError: if the shapes of the positional arguments are incompatible
       :raise ValueError: if a number of positional arguments different from 2 or 3 are passed   
          
-      :return: An array of floats that contains the bath parameters for the impurity problem. This is a required input of :func:`solve` and :func:`chi2_fitgf`. Its elements are ordered differently depending on the bath geometry. They are (de)compactified for user interaction via :func:`bath_packaging`. Specific symmetrization operations are implemented and listed in the :ref:`bath` section.
+      :return: An array of floats that contains the bath parameters \
+      for the impurity problem. This is a required input of :func:`solve` \
+      and :func:`chi2_fitgf`. Its elements are ordered differently \
+      depending on the bath geometry. They are (de)compactified for \
+      user interaction via :func:`bath_packaging`. Specific \
+      symmetrization operations are implemented and listed in the :ref:`bath` section.
       :rtype: np.array(dtype=float) 
     """
 
