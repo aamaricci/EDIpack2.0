@@ -78,20 +78,20 @@ To remove the module, run
 
 with same caveat for the `--break-system-packages` flag.
 
-Documentation for the edipy2 module is available at [https://aamaricci.github.io/EDIpack2.0/] (https://aamaricci.github.io/EDIpack2.0/)
+Documentation for the edipy2 module is available at [https://aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)
 
 --
 
 ### CONTACT
 
 If you encounter bugs or difficulties, please [file an issue](https://github.com/aamaricci/SciFortran/issues/new/choose). For any other communication, please reach out any of the contributors or developers:         
-[Adriano Amaricci](https://github.com/aamaricci)
-[Lorenzo Crippa](https://github.com/lcrippa)
-[Samuele Giuli](https://github.com/SamueleGiuli)
-[Gabriele Bellomia](https://github.com/beddalumia)
-[Giacomo Mazza](https://github.com/GiacMazza)
-[Francesco Petocchi](mailto:francesco.petocchi@gmail.com)
-[Alberto Scazzola](mailto:alberto.scazzola@polito.it)
+[Adriano Amaricci](https://github.com/aamaricci)\
+[Lorenzo Crippa](https://github.com/lcrippa)\
+[Samuele Giuli](https://github.com/SamueleGiuli)\
+[Gabriele Bellomia](https://github.com/beddalumia)\
+[Giacomo Mazza](https://github.com/GiacMazza)\
+[Francesco Petocchi](mailto:francesco.petocchi@gmail.com)\
+[Alberto Scazzola](mailto:alberto.scazzola@polito.it)\
 [Massimo Capone](mailto:capone@sissa.it)
 
 --
