@@ -30,6 +30,7 @@ def set_hreplica(self,hvec,lambdavec):
         
        :type lambdavec: np.array(dtype=float) 
        :param iorb: the array of coefficients of the linear combination. This, along with the hybridizations V, are the fitting parameters of the bath. The array has the following shape
+       
         * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional, where Nsym is the number of matrices that make up the linear combination 
         * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional, where Nlat is the number of inequivalent impurity sites and Nsym is the number of matrices that make up the linear combination 
 
@@ -104,6 +105,7 @@ def set_hgeneral(self,hvec,lambdavec):
         
        :type lambdavec: np.array(dtype=float) 
        :param iorb: the array of coefficients of the linear combination. This, along with the hybridizations V, are the fitting parameters of the bath. The array has the following shape
+       
         * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional, where Nsym is the number of matrices that make up the linear combination 
         * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional, where Nlat is the number of inequivalent impurity sites and Nsym is the number of matrices that make up the linear combination 
 
