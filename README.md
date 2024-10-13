@@ -61,10 +61,6 @@ The `CMake` compilation can be controlled using the following additional variabl
 * `-DBUILD_TYPE=<RELEASE>/TESTING/DEBUG`  
 
 
-For any information contact the author as:  
-adriano DOT amaricci @ gmail DOT com
-
-
 ### Python module
 
 The `edipy2` python module is installable from this folder via
