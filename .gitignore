@@ -7,7 +7,7 @@ cmake_install.cmake
 *.gcda
 *.gcno
 test/bin
-build*
+*build*
 .archive/
 src/ED_VERSION.f90
 .DS_Store

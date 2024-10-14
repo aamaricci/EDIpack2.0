@@ -15,7 +15,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../python'))
 
 import recommonmark
 from recommonmark.transform import AutoStructify
@@ -24,9 +24,9 @@ import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
-project = u'Edipy2 documentation'
-copyright = u'2024, Lorenzo Crippa'
-author = u'Lorenzo Crippa'
+project = u'EDIpack2.0'
+copyright = u'2024, Lorenzo Crippa and Adriano Amaricci'
+author = u'Lorenzo Crippa and Adriano Amaricci'
 
 # The short X.Y version
 version = u''
@@ -49,7 +49,9 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.autodoc',
     'recommonmark',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    'sphinxfortran.fortran_domain',
+    'sphinxfortran.fortran_autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -61,6 +63,15 @@ templates_path = ['_templates']
 # source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
+
+fortran_src=[os.path.abspath('../src/'),]
+
+#DEFAULT
+fortran_ext=['f90', 'f95']
+
+# fortran_subsection_type = "title"
+# fortran_title_underline = "_"
+# fortran_indent=4
 # The master toctree document.
 master_doc = 'index'
 
@@ -85,11 +96,13 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'    #'alabaster'
+#html_theme = 'sphinxdoc'
+#html_theme = 'classic'
+#html_theme = 'alabaster'    
+html_theme = 'sphinx_rtd_theme'
 html_css_files = [
     'css/custom.css',
 ]
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -118,7 +131,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'edipy2-docs'
+htmlhelp_basename = 'test-docs'
 
 
 # -- Options for LaTeX output ------------------------------------------------
