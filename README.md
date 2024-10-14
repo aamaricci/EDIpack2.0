@@ -12,6 +12,21 @@ This updated version, aims to solve single-site, multi-orbital models, in either
  
 See [j.cpc.2021.108261](https://doi.org/10.1016/j.cpc.2021.108261) for further information about the underlying algorithms. Yet, suitable modifications have been developed to address the Superconducting and non-SU(2) channels.  
 
+### Documentation
+The documentation for the EDIpack2 library and the its Python API (EDIpy2) is available at [https://aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)  
+
+The documentation is under construction:  
+- [x] Setup the general structure  
+- [x] Merge with the EDIpy2 documentation (from L.Crippa)  
+- [] Draft the main index of the documentation  
+- [] Write documentation for the global initial part  
+- [] Write documentation for the bath part  
+- [] Write documentation for the I/O part  
+- [] Write documentation for the NORMAL part  
+- [] Write documentation for the SUPERC part  
+- [] Write documentation for the NONSU2 part  
+- [] Write documentation for the global final part  
+
 
 ### Dependencies
 
@@ -74,7 +89,6 @@ To remove the module, run
 
 with same caveat for the `--break-system-packages` flag.
 
-Documentation for the edipy2 module is available at [https://aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)
 
 --
 

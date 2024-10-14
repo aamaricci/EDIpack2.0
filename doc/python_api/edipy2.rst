@@ -1,5 +1,5 @@
-Edipy2: Python API for EDIpack2
-================================
+EDIpy2: the Python API for EDIpack2
+====================================
 
 
 .. toctree::

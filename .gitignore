@@ -12,3 +12,4 @@ test/bin
 src/ED_VERSION.f90
 .DS_Store
 *~
+src/python/edipy2/__pycache__
