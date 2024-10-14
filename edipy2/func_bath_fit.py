@@ -72,7 +72,7 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
       for the impurity problem. This is a required input of :func:`solve` \
       and :func:`chi2_fitgf`. Its elements are ordered differently \
       depending on the bath geometry. They are (de)compactified for \
-      user interaction via :func:`bath_packaging`. Specific \
+      user interaction via :func:`bath_inspect`. Specific \
       symmetrization operations are implemented and listed in the :ref:`bath` section.
       :rtype: np.array(dtype=float) 
     """
