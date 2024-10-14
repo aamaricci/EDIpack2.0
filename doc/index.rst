@@ -1,4 +1,4 @@
-EDIpack 2.0: a massively parallel Exact Diagonalization solver for quantum Impurity problems
+EDIpack 2.0: A massively parallel Exact Diagonalization solver for quantum Impurity problems
 ============================================================================================================
 
 
