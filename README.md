@@ -13,19 +13,12 @@ This updated version, aims to solve single-site, multi-orbital models, in either
 See [j.cpc.2021.108261](https://doi.org/10.1016/j.cpc.2021.108261) for further information about the underlying algorithms. Yet, suitable modifications have been developed to address the Superconducting and non-SU(2) channels.  
 
 ### Documentation
-The documentation for the EDIpack2 library and the its Python API (EDIpy2) is available at [https://aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)  
+The documentation for the EDIpack2 library and its Python API (EDIpy2) is available at [https://aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)  
 
 The documentation is under construction:  
 - [x] Setup the general structure  
 - [x] Merge with the EDIpy2 documentation (from L.Crippa)  
-- [] Draft the main index of the documentation  
-- [] Write documentation for the global initial part  
-- [] Write documentation for the bath part  
-- [] Write documentation for the I/O part  
-- [] Write documentation for the NORMAL part  
-- [] Write documentation for the SUPERC part  
-- [] Write documentation for the NONSU2 part  
-- [] Write documentation for the global final part  
+- [ ] Draft the main index of the documentation  
 
 
 ### Dependencies
@@ -41,7 +34,7 @@ The code is based on:
 
 ### Installation
 
-Installation is available using CMake. In the current v0.0.1 API are only provided in Fortran. In a future release Python and C/C++ API will be included.  
+Installation is available using CMake. In the current version API are only provided in Fortran and Python.  
 The software gives acces to the static library `libedipack2.a` and the related modules `EDIPACK2`
 
 Clone the repo:
@@ -50,12 +43,11 @@ Clone the repo:
 
 And from the repository directory (`cd EDIpack2`) make a standard out-of-source CMake compilation:
 
-`mkdir build`
-`cd build`
-`cmake ..`     
+`mkdir build`  
+`cd build`  
+`cmake ..`      
 `make`     
 `make install`   
-`make post-install`    
 
 Please follow the instructions on the screen to complete installation on your environment.  
 The library can be loaded using one of the following, automatically generated, files :  

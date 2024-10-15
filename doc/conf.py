@@ -31,7 +31,7 @@ author = u'Lorenzo Crippa and Adriano Amaricci'
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u''
+release = u'beta 0.0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -88,7 +88,7 @@ language = "en"
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = 'sphinx'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -96,9 +96,6 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'sphinxdoc'
-#html_theme = 'classic'
-#html_theme = 'alabaster'    
 html_theme = 'sphinx_rtd_theme'
 html_css_files = [
     'css/custom.css',
