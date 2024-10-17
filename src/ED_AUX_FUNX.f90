@@ -12,11 +12,7 @@ MODULE ED_AUX_FUNX
 
   !> ED SET HLOC
   interface ed_set_Hloc
-     module procedure :: ed_set_Hloc_single_N2
-     module procedure :: ed_set_Hloc_single_N4
-     module procedure :: ed_set_Hloc_lattice_N2
-     module procedure :: ed_set_Hloc_lattice_N3
-     module procedure :: ed_set_Hloc_lattice_N5
+     module procedure ed_set_Hloc_single_N2,ed_set_Hloc_single_N4,ed_set_Hloc_lattice_N2,ed_set_Hloc_lattice_N3,ed_set_Hloc_lattice_N5
   end interface ed_set_Hloc
 
   interface lso2nnn_reshape

@@ -16,6 +16,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../src/python'))
+sys.path.insert(0, os.path.abspath('.'))
 
 import recommonmark
 from recommonmark.transform import AutoStructify
@@ -64,7 +65,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 
-fortran_src=[os.path.abspath('../src/'),]
+fortran_src=[os.path.abspath('../src/*.f90'),]
 
 #DEFAULT
 fortran_ext=['f90', 'f95']
