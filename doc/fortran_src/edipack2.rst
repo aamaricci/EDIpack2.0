@@ -8,5 +8,6 @@ EDIpack 2.0
 
    01_dependencies
    02_installation
+   init
    
 
