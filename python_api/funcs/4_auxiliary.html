@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auxiliary functions &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=ab210c7a" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Input / Output Functions" href="3_inputoutput.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../fortran_src/edipack2.html">EDIpack 2.0</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../globvars.html">Global variables</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0_readinput.html">Input file manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="1_solver.html">Impurity Problem Initialization, Solution and Finalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="2_bath.html">Bath Manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="3_inputoutput.html">Input / Output Functions</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Auxiliary functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">Auxiliary functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/funcs/4_auxiliary.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="auxiliary-functions">
+<h1>Auxiliary functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.check_convergence">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">check_convergence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.check_convergence" title="Link to this definition"></a></dt>
+<dd><p>This function checks the variation of a given quantity (Weiss field, Delta, …) against the one for the previous step. It is used to determined whether the DMFT loop has converged. If a maximum number of loops is exceeded, returns True with a warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em>) – the quantity to be checked. It is one-dimensional, with its length being a number of frequencies</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – the error threshold</p></li>
+<li><p><strong>N1</strong> (<em>int</em>) – minimum number of loops</p></li>
+<li><p><strong>N2</strong> (<em>int</em>) – maximum number of loops</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>the error</p></li>
+<li><p>a boolean signifying convergence</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float, bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_bath_type">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_bath_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_bath_type" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>This function returns an integer number related to the value of <code class="code docutils literal notranslate"><span class="pre">BATH_TYPE</span></code> in the input file</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">1</span></code> for <strong>normal</strong> bath</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">2</span></code> for <strong>hybrid</strong> bath</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code> for <strong>replica</strong> bath</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code> for <strong>general</strong> bath</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the integer index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_ed_mode">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_ed_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_ed_mode" title="Link to this definition"></a></dt>
+<dd><p>This function returns an integer number related to the value of <code class="code docutils literal notranslate"><span class="pre">ED_MODE</span></code> in the input file</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">1</span></code> for <strong>normal</strong> mode</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">2</span></code> for <strong>superc</strong> mode</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code> for <strong>nonsu2</strong> mode</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the integer index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.search_variable">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">search_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converged</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.search_variable" title="Link to this definition"></a></dt>
+<dd><p>This function checks the value of the read density <code class="code docutils literal notranslate"><span class="pre">ntmp</span></code> against the desired value <code class="code docutils literal notranslate"><span class="pre">ed.nread</span></code> (if different from zero) and adjusts <code class="code docutils literal notranslate"><span class="pre">var</span></code> accordingly (in a monotonous way).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var</strong> (<em>float</em>) – the variable to be adjusted (usually <code class="code docutils literal notranslate"><span class="pre">ed.xmu</span></code>)</p></li>
+<li><p><strong>ntmp</strong> (<em>float</em>) – the density value at the given iteration</p></li>
+<li><p><strong>converged</strong> (<em>bool</em>) – whether the DMFT loop has achieved a sufficiently small error independently on the density</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>the new value of <code class="code docutils literal notranslate"><span class="pre">var</span></code></p></li>
+<li><p>a boolean signifying convergence</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float, bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="3_inputoutput.html" class="btn btn-neutral float-left" title="Input / Output Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

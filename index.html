@@ -1,0 +1,158 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EDIpack2.0 &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ab210c7a" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="EDIpack 2.0" href="fortran_src/edipack2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="fortran_src/edipack2.html">EDIpack 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_api/edipy2.html">EDIpy2: the Python API for EDIpack2</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">EDIpack2.0</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="edipack2-0">
+<h1>EDIpack2.0<a class="headerlink" href="#edipack2-0" title="Link to this heading"></a></h1>
+<section id="a-massively-parallel-exact-diagonalization-solver-for-quantum-impurity-problems">
+<h2>A massively parallel Exact Diagonalization solver for quantum Impurity problems.<a class="headerlink" href="#a-massively-parallel-exact-diagonalization-solver-for-quantum-impurity-problems" title="Link to this heading"></a></h2>
+<p>(under construction)</p>
+<section id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h3>
+<p>EDIpack2.0 is a Lanczos based method
+for the solution of generic Quantum Impurity problems,  exploiting distributed memory MPI parallelisation.
+The 2.0 version extends the <a class="reference external" href="https://github.com/aamaricci/EDIpack">EDIpack</a> by enabling the solution of
+single-site, multi-orbital models with different conserved
+quantum numbers <span class="math notranslate nohighlight">\(\vec{Q}\)</span> corresponding to separate operational modes:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\vec{Q}=[\vec{N}_\uparrow,\vec{N}_\downarrow]\)</span> for which
+either the number of total or orbital spin up and down electrons is
+conserved: <strong>normal</strong>:</p></li>
+<li><p><span class="math notranslate nohighlight">\(\vec{Q}=S_z\)</span>  with <em>s</em>-wave pairing with conserved total
+magnetization:  <strong>superconducting</strong></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vec{Q}=N_{\rm tot}\)</span>  where spin degrees
+freedom is not fully conserved:  <strong>non-SU(2)</strong>
+(used, for instance, in presence of local Spin-Orbit coupling, in-plane magnetization or in-plane triplet excitonic condensation)</p></li>
+</ul>
+<p>All modes include electron-phonon coupling (local or Holstein
+phonons). EDIpack2.0  is designed to obtain the lowest part of the
+spectrum of the problem, thus it naturally works at zero temperature
+but can also be used to explore low temperature properties.</p>
+<p>The EDIpack2.0 diagonalization algorithm is based on a massively
+parallel execution of matrix-vector products, required in the context
+of Lanczos-Arnoldi linear procedures.  See <a class="reference external" href="https://doi.org/10.1016/j.cpc.2021.108261">j.cpc.2021.108261</a> for a detailed
+descriptions of these algorithms.
+However, substantial modifications have been introduced in the 2.0
+version to address the <em>Superconducting</em> and <em>non-SU(2)</em> channels.
+An updated manuscript will be released soon.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fortran_src/edipack2.html">EDIpack 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fortran_src/01_dependencies.html">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran_src/02_installation.html">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python_api/edipy2.html">EDIpy2: the Python API for EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/globvars.html">Global variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/functions.html">Functions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="fortran_src/edipack2.html" class="btn btn-neutral float-right" title="EDIpack 2.0" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
