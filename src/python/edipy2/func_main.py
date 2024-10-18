@@ -157,5 +157,7 @@ def finalize_solver(self):
     else:
         finalize_solver_wrapper(self.Nineq)
         self.Nineq = None
+        self.dim_hloc = 0
+        self.Nsym = None
         print("ED environment finalized")
         return ;
