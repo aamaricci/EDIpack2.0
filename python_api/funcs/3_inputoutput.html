@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input / Output Functions &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=4a2be672" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Auxiliary functions" href="4_auxiliary.html" />
+    <link rel="prev" title="Bath Manipulation" href="2_bath.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../fortran_src/edipack2.html">EDIpack 2.0</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../globvars.html">Global variables</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0_readinput.html">Input file manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="1_solver.html">Impurity Problem Initialization, Solution and Finalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="2_bath.html">Bath Manipulation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.build_gimp"><code class="docutils literal notranslate"><span class="pre">build_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.build_sigma"><code class="docutils literal notranslate"><span class="pre">build_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="4_auxiliary.html">Auxiliary functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">Input / Output Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/funcs/3_inputoutput.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="input-output-functions">
+<h1>Input / Output Functions<a class="headerlink" href="#input-output-functions" title="Link to this heading"></a></h1>
+<p>These functions pass to the userspace the observables and response functions calculated and stored within the EDIpack2 library.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.build_gimp">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">build_gimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.build_gimp" title="Link to this definition"></a></dt>
+<dd><p>This function generates the Green’s function for a user-chosen set of frequencies in the complex plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeta</strong> (complex <strong>or</strong> [complex] <strong>or</strong> np.array(dtype=complex)) – user-defined array of frequencies in the whole complex plane.</p></li>
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the Green’s function of      a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ishape</strong> (<em>int</em>) – <p>this variable determines the shape of the returned array. Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case, it will return an array of the shape       <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">len(zeta)]</span></code>. In the real-space DMFT       case, it will return an array of the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nlat*</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">len(zeta)]</span></code>. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module       by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, ValueError is returned.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, it will return an array of the shape       <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">len(zeta)</span></code>. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will       be determined from the module by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code>       is set, the output will have one dimension less.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, it will return an array of the shape       <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">len(zeta)]</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, it will return an array of the shape       <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">len(zeta)]</span></code>. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code>       will be determined from the module by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code>       is set, the output will have one dimension less.</p></li>
+</ul>
+</p></li>
+<li><p><strong>typ</strong> (<em>str</em>) – whether to return the normal or anomalous Green’s function      (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal or <code class="code docutils literal notranslate"><span class="pre">a</span></code> for anomalous.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is incompatible woth <code class="code docutils literal notranslate"><span class="pre">ilat</span></code>      or not in the previous list.</p></li>
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> is not in the previous list.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the Green’s function along the      specific axis, with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">zeta</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.build_sigma">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">build_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.build_sigma" title="Link to this definition"></a></dt>
+<dd><p>This function generates the self-energy for a user-chosen set of frequencies in the complex plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeta</strong> (complex <strong>or</strong> [complex] <strong>or</strong> np.array(dtype=complex)) – user-defined array of frequencies in the whole complex plane.</p></li>
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the self-energy of     a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ishape</strong> (<em>int</em>) – <p>this variable determines the shape of the returned array. Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case, it will return an array of the shape      <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">len(zeta)]</span></code>. In the real-space DMFT case,      it will return an array of the shape      <code class="code docutils literal notranslate"><span class="pre">[Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">len(zeta)]</span></code>.      <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the      shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, ValueError is returned.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, it will return an array of the shape      <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">len(zeta)</span></code>. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will      be determined from the module by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is      set, the output will have one dimension less.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, it will return an array of the      shape <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">len(zeta)]</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, it will return an array of the      shape <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">len(zeta)]</span></code>.      <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.      If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, the output will have one dimension less.</p></li>
+</ul>
+</p></li>
+<li><p><strong>typ</strong> (<em>str</em>) – whether to return the normal or anomalous self-energy     (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal or <code class="code docutils literal notranslate"><span class="pre">a</span></code> for anomalous.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is incompatible woth <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> or not in the previous list.</p></li>
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> is not in the previous list.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the self-energy along the     specific axis, with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">zeta</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_dens">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_dens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_dens" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the charge density</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the Green’s function of     a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<em>int</em>) – the orbital index. If none is provided, the whole density vector is returned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full charge density tensor has dimensions [Nlat,Norb]. Depending on     which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_docc">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_docc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_docc" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the double occupation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the Green’s function of a    specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<em>int</em>) – the orbital index. If none is provided, the whole density vector is returned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full double-occupation tensor has dimensions [Nlat,Norb]. Depending on    which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_eimp">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_eimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ikind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_eimp" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the local energy components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the Green’s function of        a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ikind</strong> (<em>int</em>) – <p>index of the component. It is</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">1</span></code>: ed_Epot: the potential energy from interaction</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">2</span></code>: ed_Eint: ed-Epot - ed_Ehartree (? it is not assigned)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: ed_Ehartree: Hartree part of interaction energy</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: ed_Eknot: on-site part of the kinetic term</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full local energy tensor has dimensions [Nlat,4]. Depending on        which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_mag">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_mag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icomp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_mag" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the magnetization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>icomp</strong> (<em>str</em>) – the component of the magnetization, <code class="code docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> or <code class="code docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> (default).</p></li>
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the Green’s function        of a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<em>int</em>) – the orbital index. If none is provided, the whole density vector is returned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full magnetization tensor has dimensions [Nlat,3,Norb]. Depending on        which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_gimp">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_gimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_gimp" title="Link to this definition"></a></dt>
+<dd><p>This function gets from the EDIpack2 library the value of the Green’s function        calculated on the Matsubara or real-frequency axis, with parameters specified in the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the Green’s function of a        specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ishape</strong> (<em>int</em>) – <p>this variable determines the shape of the returned array. Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case, it will return an array of the shape         <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">Nfrequencies=ed.Lmats/ed.Lreal]</span></code>.         In the real-space DMFT case, it will return an array of the shape         <code class="code docutils literal notranslate"><span class="pre">[Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nfrequencies=Lmats/Lreal]</span></code>.         <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.         If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, ValueError is returned.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, it will return an array of the shape         <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">Nfrequencies=ed.Lmats/ed.Lreal]</span></code>.         <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.         If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, the output will have one dimension less.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, it will return an array         of the shape <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Nfrequencies=Lmats/Lreal]</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, it will return an array of         the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Nfrequencies=ed.Lmats/ed.Lreal]</span></code>.         <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.         If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, the output will have one dimension less.</p></li>
+</ul>
+</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – the axis along which to return the Green’s functio. Can be <code class="code docutils literal notranslate"><span class="pre">m</span></code>        for Matsubara or <code class="code docutils literal notranslate"><span class="pre">r</span></code> for real. In the first case, the number of frequencies        will be given by <code class="code docutils literal notranslate"><span class="pre">ed.Lmats</span></code>, in the second by <code class="code docutils literal notranslate"><span class="pre">ed.Lreal</span></code>.</p></li>
+<li><p><strong>typ</strong> (<em>str</em>) – whether to return the normal or anomalous Green’s function        (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal or <code class="code docutils literal notranslate"><span class="pre">a</span></code> for anomalous.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is incompatible woth <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> or not in the previous list.</p></li>
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> is not in the previous list.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the Green’s function along the specific        axis, with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">axis</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_sigma">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_sigma" title="Link to this definition"></a></dt>
+<dd><p>This function gets from the EDIpack2 library the value of the self-energy calculated        on the Matsubara or real-frequency axis, with parameters specified in the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<em>int</em>) – if the case of real-space DMFT, if only the self-energy of a specific        inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ishape</strong> (<em>int</em>) – <p>this variable determines the shape of the returned array. Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case, it will return an array of the         shape <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">Nfrequencies=ed.Lmats/ed.Lreal]</span></code>.         In the real-space DMFT case, it will return an array of the shape         <code class="code docutils literal notranslate"><span class="pre">[Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nfrequencies=Lmats/Lreal]</span></code>.         <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.         If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, ValueError is returned.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, it will return an array         of the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">Nfrequencies=ed.Lmats/ed.Lreal]</span></code>.         <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.         If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, the output will have one dimension less.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, it will return an array         of the shape <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Nfrequencies=Lmats/Lreal]</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, it will return an array         of the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Nfrequencies=ed.Lmats/ed.Lreal]</span></code>.         <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.         If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, the output will have one dimension less.</p></li>
+</ul>
+</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – the axis along which to return the self-energy. Can be <code class="code docutils literal notranslate"><span class="pre">m</span></code> for        Matsubara or <code class="code docutils literal notranslate"><span class="pre">r</span></code> for real. In the first case, the number of frequencies will        be given by <code class="code docutils literal notranslate"><span class="pre">ed.Lmats</span></code>, in the second by <code class="code docutils literal notranslate"><span class="pre">ed.Lreal</span></code>.</p></li>
+<li><p><strong>typ</strong> (<em>str</em>) – whether to return the normal or anomalous self-energy        (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal or <code class="code docutils literal notranslate"><span class="pre">a</span></code> for anomalous.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is incompatible woth <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> or not in the previous list.</p></li>
+<li><p><strong>ValueError</strong> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> is not in the previous list.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the self-energy along the specific axis,        with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">axis</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="2_bath.html" class="btn btn-neutral float-left" title="Bath Manipulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="4_auxiliary.html" class="btn btn-neutral float-right" title="Auxiliary functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auxiliary Functions &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=4a2be672" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="EIGEN-SPACE" href="ed_eigenspace.html" />
+    <link rel="prev" title="Modules" href="../03_modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../edipack2.html">EDIpack 2.0</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../01_dependencies.html">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02_installation.html">Installation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../03_modules.html">Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_eigenspace.html">EIGEN-SPACE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_sector.html">SECTOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_setup.html">SETUP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_sparse_matrix.html">SPARSE MATRIX</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_vars_global.html">VARS GLOBAL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ed_version.html">VERSION</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_api/edipy2.html">EDIpy2: the Python API for EDIpack2</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../edipack2.html">EDIpack 2.0</a></li>
+          <li class="breadcrumb-item"><a href="../03_modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">Auxiliary Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/fortran_src/modules/ed_aux_funx.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="f/ed_aux_funx">
+<span id="auxiliary-functions"></span><h1>Auxiliary Functions<a class="headerlink" href="#f/ed_aux_funx" title="Link to this heading"></a></h1>
+<p>The module <code class="code docutils literal notranslate"><span class="pre">ED_AUX_FUNX</span></code> contains all the auxiliary procedures needed in different parts of the code.</p>
+<p class="rubric">Quick access</p>
+<dl class="field-list simple">
+<dt class="field-odd">Routines<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#f/ed_aux_funx/ed_reset_suffix" title="f/ed_aux_funx/ed_reset_suffix"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_reset_suffix()</span></code></a>, <a class="reference internal" href="#f/ed_aux_funx/ed_search_variable" title="f/ed_aux_funx/ed_search_variable"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_search_variable()</span></code></a>, <a class="reference internal" href="#f/ed_aux_funx/ed_set_hloc" title="f/ed_aux_funx/ed_set_hloc"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_set_hloc()</span></code></a>, <a class="reference internal" href="#f/ed_aux_funx/ed_set_suffix" title="f/ed_aux_funx/ed_set_suffix"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_set_suffix()</span></code></a>, <a class="reference internal" href="#f/ed_aux_funx/search_chemical_potential" title="f/ed_aux_funx/search_chemical_potential"><code class="xref f f-func docutils literal notranslate"><span class="pre">search_chemical_potential()</span></code></a></p>
+</dd>
+</dl>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="ed_input_vars.html#f/ed_input_vars" title="f/ed_input_vars"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_input_vars</span></code></a></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_vars_global</span></code></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_timer</span></code></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_linalg</span></code> (<code class="xref f f-func docutils literal notranslate"><span class="pre">eye()</span></code>)</p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_spin</span></code></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_misc</span></code> (<code class="xref f f-func docutils literal notranslate"><span class="pre">assert_shape()</span></code>)</p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_iotools</span></code> (<code class="xref f f-func docutils literal notranslate"><span class="pre">free_unit()</span></code>, <code class="xref f f-func docutils literal notranslate"><span class="pre">reg()</span></code>, <code class="xref f f-func docutils literal notranslate"><span class="pre">txtfy()</span></code>)</p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_arrays</span></code> (<code class="xref f f-func docutils literal notranslate"><span class="pre">arange()</span></code>, <code class="xref f f-func docutils literal notranslate"><span class="pre">linspace()</span></code>)</p></li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl>
+<dt class="sig sig-object f" id="f/ed_aux_funx/ed_set_hloc">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_aux_funx/</span></span><span class="sig-name descname"><span class="pre">ed_set_hloc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">hloc</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_aux_funx/ed_set_hloc" title="Link to this definition"></a></dt>
+<dd><p>This subroutine sets the local Hamiltonian of the impurity problem.
+The local hamiltonian can have different shapes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nspin*Norb,Nspin*Norb]</span></code>: single-impurity case, 2-dimensional array</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nspin,Nspin,Norb,Norb]</span></code>: single-impurity case, 4-dimensional array</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat*Nspin*Norb,Nlat*Nspin*Norb]</span></code>: real-space DMFT case, 2-dimensional array.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,Nspin*Norb,Nspin*Norb]</span></code>: single-impurity case, 3-dimensional array.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,Nspin,Nspin,Norb,Norb]</span></code>: single-impurity case, 5-dimensional array.</p></li>
+</ul>
+</div></blockquote>
+<p>In the case of real-space DMFT, the number of impurities <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> must be provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hloc</strong> (various shapes)<em> [</em><em>complex</em><em>, </em><em>in</em><em>]</em> :: The local Hamiltonian array</p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em> :: Number of impurities for real-space DMFT</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_aux_funx/ed_set_suffix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_aux_funx/</span></span><span class="sig-name descname"><span class="pre">ed_set_suffix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">indx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_aux_funx/ed_set_suffix" title="Link to this definition"></a></dt>
+<dd><p>This subroutine sets a suffix for the output files, stored in the global
+variable <code class="code docutils literal notranslate"><span class="pre">ed_file_suffix</span></code>. The suffix can be of type:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">integer</span></code>: will be converted to string and padded with zeros</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">real</span></code>: will be converted to string</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">character[len=*]</span></code></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indx</strong><em> [</em><em>integer</em><em>, </em><em>real</em><em>, </em><em>character(len=*)</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_aux_funx/ed_reset_suffix">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_aux_funx/</span></span><span class="sig-name descname"><span class="pre">ed_reset_suffix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_aux_funx/ed_reset_suffix" title="Link to this definition"></a></dt>
+<dd><p>This subroutine resets the suffix set by <a class="reference internal" href="#f/ed_aux_funx/ed_set_suffix" title="f/ed_aux_funx/ed_set_suffix"><code class="xref f f-subr docutils literal notranslate"><span class="pre">ed_set_suffix()</span></code></a> to an empty string</p>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_aux_funx/ed_search_variable">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_aux_funx/</span></span><span class="sig-name descname"><span class="pre">ed_search_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">var</span></em>, <em class="sig-param"><span class="pre">ntmp</span></em>, <em class="sig-param"><span class="pre">converged</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_aux_funx/ed_search_variable" title="Link to this definition"></a></dt>
+<dd><p>This function checks the value of the read density <code class="code docutils literal notranslate"><span class="pre">ntmp</span></code> against the desired value
+<code class="code docutils literal notranslate"><span class="pre">nread</span></code> (if different from zero) and adjusts <code class="code docutils literal notranslate"><span class="pre">var</span></code> accordingly (in a monotonous way).</p>
+<p>The updated <code class="code docutils literal notranslate"><span class="pre">xmu</span></code> is saved in <code class="code docutils literal notranslate"><span class="pre">search_variable_iteration&quot;//reg(ed_file_suffix)//&quot;.ed</span></code></p>
+<p>The converged <code class="code docutils literal notranslate"><span class="pre">xmu</span></code> is saved in <code class="code docutils literal notranslate"><span class="pre">var_compressibility.restart</span></code></p>
+<p>If a file <code class="code docutils literal notranslate"><span class="pre">var_compressibility.used</span></code> is present, its value is read</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var</strong><em> [</em><em>real</em><em>, </em><em>inout</em><em>]</em> :: the variable to be adjusted</p></li>
+<li><p><strong>ntmp</strong><em> [</em><em>real</em><em>, </em><em>in</em><em>]</em> :: the density value at the given iteration</p></li>
+<li><p><strong>converged</strong><em> [</em><em>logical</em><em>, </em><em>inout</em><em>]</em> :: whether the DMFT loop has achieved a sufficiently small error independently on the density</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_aux_funx/search_chemical_potential">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_aux_funx/</span></span><span class="sig-name descname"><span class="pre">search_chemical_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">var</span></em>, <em class="sig-param"><span class="pre">ntmp</span></em>, <em class="sig-param"><span class="pre">converged</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_aux_funx/search_chemical_potential" title="Link to this definition"></a></dt>
+<dd><p>This function checks the value of the read density <code class="code docutils literal notranslate"><span class="pre">ntmp</span></code> against the desired value
+<code class="code docutils literal notranslate"><span class="pre">nread</span></code> (if different from zero) and adjusts <code class="code docutils literal notranslate"><span class="pre">xmu</span></code> accordingly (in a monotonous way).</p>
+<p>The updated <code class="code docutils literal notranslate"><span class="pre">xmu</span></code> is saved in <code class="code docutils literal notranslate"><span class="pre">search_mu_iteration&quot;//reg(ed_file_suffix)//&quot;.ed</span></code></p>
+<p>The converged <code class="code docutils literal notranslate"><span class="pre">xmu</span></code> is saved in <code class="code docutils literal notranslate"><span class="pre">xmu.restart</span></code></p>
+<p>If a file <code class="code docutils literal notranslate"><span class="pre">var_compressibility.used</span></code> is present, its value is read</p>
+<p><strong>NOTE:</strong> this function is accessible to the user as <code class="xref f f-subr docutils literal notranslate"><span class="pre">ed_search_chemical_potential()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var</strong><em> [</em><em>real</em><em>, </em><em>inout</em><em>]</em> :: the chemical potential</p></li>
+<li><p><strong>ntmp</strong><em> [</em><em>real</em><em>, </em><em>in</em><em>]</em> :: the density value at the given iteration</p></li>
+<li><p><strong>converged</strong><em> [</em><em>logical</em><em>, </em><em>inout</em><em>]</em> :: reset convergence</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../03_modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ed_eigenspace.html" class="btn btn-neutral float-right" title="EIGEN-SPACE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

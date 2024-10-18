@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impurity Problem Initialization, Solution and Finalization &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=4a2be672" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Bath Manipulation" href="2_bath.html" />
+    <link rel="prev" title="Input file manipulation" href="0_readinput.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../fortran_src/edipack2.html">EDIpack 2.0</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../globvars.html">Global variables</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0_readinput.html">Input file manipulation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="2_bath.html">Bath Manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="3_inputoutput.html">Input / Output Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="4_auxiliary.html">Auxiliary functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">Impurity Problem Initialization, Solution and Finalization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/funcs/1_solver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="impurity-problem-initialization-solution-and-finalization">
+<span id="solver"></span><h1>Impurity Problem Initialization, Solution and Finalization<a class="headerlink" href="#impurity-problem-initialization-solution-and-finalization" title="Link to this heading"></a></h1>
+<p>These functions initialize, solve and finalize the impurity problem. They can be invoked inside or outside the DMFT loop. The solution environment can be completely reconstructed from the bath parameters array and the global variables.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.finalize_solver">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">finalize_solver</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.finalize_solver" title="Link to this definition"></a></dt>
+<dd><p>This function cleans up the ED environment, deallocates the relevant        arrays and makes a second call to <strong class="command">init_solver</strong> possible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.init_solver">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">init_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nlat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.init_solver" title="Link to this definition"></a></dt>
+<dd><p>This function initializes the ED environment for the impurity problem        solution, and sets the bath reading it from the <code class="docutils literal notranslate"><span class="pre">hamiltonian.restart</span></code>       file or initializing it in a symmetric way.
+The function can take different argument combinations.</p>
+<p>If no input is provided, a single-impurity bath is allocated, with        dimension given by <a class="reference internal" href="2_bath.html#edipy2.global_env.get_bath_dimension" title="edipy2.global_env.get_bath_dimension"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (np.array(dtype=float) <strong>or</strong> [float]) – If a bath array is provided, it has to be a numpy array        or a tuple of floats. It has to have one or two dimensions. If it has        one dimension, that must be the same as specified by <a class="reference internal" href="2_bath.html#edipy2.global_env.get_bath_dimension" title="edipy2.global_env.get_bath_dimension"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a>.        If it has two dimensions, the first has to be the number of inequivalent        sites for real-space DMFT, the second must be in agreement with        <a class="reference internal" href="2_bath.html#edipy2.global_env.get_bath_dimension" title="edipy2.global_env.get_bath_dimension"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a>. If <code class="docutils literal notranslate"><span class="pre">Nlat</span></code> or <code class="docutils literal notranslate"><span class="pre">Nb</span></code> are provided,        this overrides them. If the provided vector is not in agreement        with the global system parameters, EDIpack2 will exit with an error.
+The array is ordered in F convention inside the function.</p></li>
+<li><p><strong>Nb</strong> (<em>int</em>) – This sets the bath vector length for each single impurity        problem. It has to be in agreement with <a class="reference internal" href="2_bath.html#edipy2.global_env.get_bath_dimension" title="edipy2.global_env.get_bath_dimension"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a>.        When this parameter alone is provided, a numpy array of this length        will be initialized.</p></li>
+<li><p><strong>Nlat</strong> (<em>int</em>) – This sets the number of inequivalent sites for        real-space DMFT. If this parameter alone is provided,        <a class="reference internal" href="2_bath.html#edipy2.global_env.get_bath_dimension" title="edipy2.global_env.get_bath_dimension"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a> is invoked to determine the bath vector        length Nb for each impurity. A <code class="docutils literal notranslate"><span class="pre">[Nlat,Nb]</span></code> vector is then allocated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array of floats that contains the bath parameters for the        impurity problem. This is a required input of <a class="reference internal" href="#edipy2.global_env.solve" title="edipy2.global_env.solve"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code></a> and        <a class="reference internal" href="2_bath.html#edipy2.global_env.chi2_fitgf" title="edipy2.global_env.chi2_fitgf"><code class="xref py py-func docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a>. Its elements are ordered differently depending        on the bath geometry. They are (de)compactified for user interaction        via <a class="reference internal" href="2_bath.html#edipy2.global_env.bath_inspect" title="edipy2.global_env.bath_inspect"><code class="xref py py-func docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a>. Specific symmetrization operations are        implemented and listed in the <a class="reference internal" href="2_bath.html#bath"><span class="std std-ref">Bath Manipulation</span></a> section.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.set_hloc">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">set_hloc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hloc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nlat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.set_hloc" title="Link to this definition"></a></dt>
+<dd><p>This function sets the local Hamiltonian of the impurity problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hloc</strong> (<em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em>) – <p>Local Hamiltonian matrix. This can have the following shapes:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[ed.Nspin*ed.Norb,ed.Nspin*ed.Norb]</span></code>: single-impurity case, 2-dimensional array</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,ed.Nspin,ed.Norb,ed.Norb]</span></code>: single-impurity case, 4-dimensional array</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat*ed.Nspin*ed.Norb,Nlat*ed.Nspin*ed.Norb]</span></code>: real-space DMFT case, 2-dimensional array.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,Nspin*ed.Norb,ed.Nspin*ed.Norb]</span></code>: single-impurity case, 3-dimensional array.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,ed.Nspin,ed.Nspin,ed.Norb,ed.Norb]</span></code>: single-impurity case, 5-dimensional array.</p></li>
+</ul>
+<p>The array is ordered in F convention inside the function.</p>
+<p><strong>Note</strong>: the way the EDIpack2 library passes from 1 comulative to 2 or 3 running indices is, from slower to faster: <code class="docutils literal notranslate"><span class="pre">lat</span></code>, <code class="docutils literal notranslate"><span class="pre">spin</span></code>, <code class="docutils literal notranslate"><span class="pre">orb</span></code></p>
+</p></li>
+<li><p><strong>Nlat</strong> (<em>int</em>) – Number of inequivalent sites for real-space DMFT. The function will raise a ValueError if the dimensions of <code class="docutils literal notranslate"><span class="pre">hloc</span></code> are inconsistent with the presence or absence of Nlat. 
+The EDIpack2 library will check the correctness of the dimensions of <code class="docutils literal notranslate"><span class="pre">hloc</span></code> and terminate execution if inconsistent.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If hloc is not provided or has the wrong shape</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.solve">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sflag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iflag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpi_lanc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.solve" title="Link to this definition"></a></dt>
+<dd><p>This function solves the impurity problem and calculates the        observables, Green’s function and self-energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The bath array returned by  <a class="reference internal" href="#edipy2.global_env.init_solver" title="edipy2.global_env.init_solver"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_solver()</span></code></a>.        If the bath dimensions are inconsistent with the global properties        of the problem, EDIpack2 will exit with an error.</p></li>
+<li><p><strong>sflag</strong> (<em>bool</em>) – for single-impurity DMFT, if <code class="code docutils literal notranslate"><span class="pre">False</span></code>, it disables        the calculation of the Green’s function and susceptibilities</p></li>
+<li><p><strong>iflag</strong> (<em>bool</em>) – for real-space DMFT, if <code class="code docutils literal notranslate"><span class="pre">False</span></code>, it disables the        calculation of the Green’s function and susceptibilities</p></li>
+<li><p><strong>fmpi</strong> (<em>bool</em>) – if <code class="code docutils literal notranslate"><span class="pre">False</span></code>, for single-impurity DMFT, it disables        MPI for the ED routine, if the communicator is used elsewhere</p></li>
+<li><p><strong>mpi_lanc</strong> (<em>bool</em>) – if <code class="code docutils literal notranslate"><span class="pre">True</span></code>, for real-space DMFT sets the MPI        parallelization for the ED routine. By default it is <code class="code docutils literal notranslate"><span class="pre">False</span></code>,        and each inequivalent site is solved serially by a different core.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="0_readinput.html" class="btn btn-neutral float-left" title="Input file manipulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="2_bath.html" class="btn btn-neutral float-right" title="Bath Manipulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

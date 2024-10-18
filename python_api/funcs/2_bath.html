@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bath Manipulation &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=4a2be672" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Input / Output Functions" href="3_inputoutput.html" />
+    <link rel="prev" title="Impurity Problem Initialization, Solution and Finalization" href="1_solver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../fortran_src/edipack2.html">EDIpack 2.0</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../globvars.html">Global variables</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0_readinput.html">Input file manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="1_solver.html">Impurity Problem Initialization, Solution and Finalization</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="3_inputoutput.html">Input / Output Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="4_auxiliary.html">Auxiliary functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../edipy2.html">EDIpy2: the Python API for EDIpack2</a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">Bath Manipulation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/funcs/2_bath.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bath-manipulation">
+<span id="bath"></span><h1>Bath Manipulation<a class="headerlink" href="#bath-manipulation" title="Link to this heading"></a></h1>
+<p>These functions manipulate the user-accessible bath array</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.bath_inspect">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">bath_inspect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.bath_inspect" title="Link to this definition"></a></dt>
+<dd><p>This function translates between the user-accessible continuous        bath array and the bath components (energy level, hybridization and so on).        It functions in both ways, given the array returns the components and        vice-versa. It autonomously determines the type of bath and ED mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>e</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath levels (<code class="code docutils literal notranslate"><span class="pre">ED_MODE</span> <span class="pre">=</span> <span class="pre">NORMAL,</span> <span class="pre">NONSU2,</span> <span class="pre">SUPERC</span></code>)        It has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Nbath]</span></code> for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> bath,        <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nbath]</span></code> for <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath</p></li>
+<li><p><strong>v</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath hybridizations (<code class="code docutils literal notranslate"><span class="pre">ED_MODE</span> <span class="pre">=</span> <span class="pre">NORMAL,</span> <span class="pre">NONSU2,</span> <span class="pre">SUPERC</span></code>).        It has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Nbath]</span></code> for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> and <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath.        For <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> bath it has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nbath]</span></code> and for <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath it has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nbath,ed.Nspin*ed.Norb]</span></code></p></li>
+<li><p><strong>d</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath anomalous enery levels(<code class="code docutils literal notranslate"><span class="pre">ED_MODE</span> <span class="pre">=</span> <span class="pre">SUPERC</span></code>).        It has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Nbath]</span></code> for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> bath,        <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nbath]</span></code> for <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath</p></li>
+<li><p><strong>u</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath spin off-diagonal hybridization (<code class="code docutils literal notranslate"><span class="pre">ED_MODE</span> <span class="pre">=</span> <span class="pre">NONSU2</span></code>).        It has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Nbath]</span></code> for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> and <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath</p></li>
+<li><p><strong>l</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the linear coefficients of the Replica matrix linear combination (<code class="code docutils literal notranslate"><span class="pre">ED_BATH_TYPE</span> <span class="pre">=</span> <span class="pre">REPLICA,GENERAL</span></code>).        It has dimension <code class="code docutils literal notranslate"><span class="pre">[ed.Nbath,Nsym]</span></code>, the latter being the number of terms on the linear combination</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if both <code class="code docutils literal notranslate"><span class="pre">bath</span></code> and some among <code class="code docutils literal notranslate"><span class="pre">e,u,v,d,l</span></code> are provided, none is provided, the shapes are inconsistent         or the inputs are inconsistent with <code class="code docutils literal notranslate"><span class="pre">ED_BATH_TYPE</span></code> and <code class="code docutils literal notranslate"><span class="pre">ED_MODE</span></code>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>if <code class="code docutils literal notranslate"><span class="pre">bath</span></code> is provided, returns <code class="code docutils literal notranslate"><span class="pre">e,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,d,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,v,u</span></code> or <code class="code docutils literal notranslate"><span class="pre">l,v</span></code> depending on <code class="code docutils literal notranslate"><span class="pre">ED_MODE</span></code></p></li>
+<li><p>if <code class="code docutils literal notranslate"><span class="pre">e,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,d,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,v,u</span></code> or <code class="code docutils literal notranslate"><span class="pre">l,v</span></code> depending on <code class="code docutils literal notranslate"><span class="pre">ED_MODE</span></code> are provided, returns <code class="code docutils literal notranslate"><span class="pre">bath</span></code></p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.break_symmetry_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">break_symmetry_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.break_symmetry_bath" title="Link to this definition"></a></dt>
+<dd><p>This function breaks the spin symmetry of the bath, useful     for magnetic calculations to incite symmetry breaking.    Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>field</strong> (<em>float</em>) – the magnitude of the symmetry-breaking shift</p></li>
+<li><p><strong>sign</strong> (<em>float</em>) – the sign of the symmetry-breaking shift</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.chi2_fitgf">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">chi2_fitgf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ispin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.chi2_fitgf" title="Link to this definition"></a></dt>
+<dd><p>This function fits the Weiss field or Hybridization function (delta) with a discretized version.      The fit parameters are the bath parameters contained in the user-accessible array.      Depending on the type of system we are considering (normal, superconductive, non-SU(2))      a different set of inputs has to be passed. The specifics of the numerical      fitting routines are controlled in the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> ([np.array(dtype=complex,np.array(dtype=complex),np.array(dtype=float)]      <strong>or</strong> [np.array(dtype=complex,np.array(dtype=float)]) – <p>The positional arguments are the function(s) to fit and the bath array.</p>
+<p>If the system is not superconductive (<code class="code docutils literal notranslate"><span class="pre">ED_MODE=NORMAL</span></code> or       <code class="code docutils literal notranslate"><span class="pre">ED_MODE=NONSU2</span></code>) the argumens are</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">g</span></code>: the function to fit</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">bath</span></code>: the bath</p></li>
+</ul>
+<p>If the system is superconductive (<code class="code docutils literal notranslate"><span class="pre">ED_MODE=SUPERC</span></code>) the arguments are</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">g</span></code>: the normal function to fit</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">f</span></code>: the anomalous function to fit</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">bath</span></code>: the bath</p></li>
+</ul>
+<p>The dimensions of the previous arrays can vary:</p>
+<p>The dimension of <code class="code docutils literal notranslate"><span class="pre">bath</span></code> can be</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">Nb</span></code>: if single-impurity, the output of <code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_gimension()</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,Nb]</span></code>: if real-space DMFT</p></li>
+</ul>
+<p>Accordingly, the dimension of g (and f) can be:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case,  an array of        the shape <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">Lfit]</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the real-space DMFT case, an array of        the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Nlat*ed.Nspin*ed.Norb,</span> <span class="pre">Lfit]</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, an array of        the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">ed.Nspin*ed.Norb,</span> <span class="pre">Lfit]</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, an array of        the shape <code class="code docutils literal notranslate"><span class="pre">[ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Lfit]</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, an array of        the shape <code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Lfit]</span></code></p></li>
+</ul>
+<p>where <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> is a given number of frequencies.</p>
+</p></li>
+<li><p><strong>ispin</strong> (<em>int</em>) – spin species to be fitted. For the normal       and superconducting cases, if <code class="code docutils literal notranslate"><span class="pre">ed.Nspin=2</span></code>, the fitting function       needs to be called twice. Only the corresponding elements of <code class="code docutils literal notranslate"><span class="pre">bath</span></code>       will be updated each time. For the non-SU(2) case, this argument is irrelevant,       since all the elements of the Weiss/Delta function need to be fitted.</p></li>
+<li><p><strong>iorb</strong> (<em>int</em>) – the orbital to be fitted. If omitted, all orbitals will be fitted</p></li>
+<li><p><strong>fmpi</strong> (<em>bool</em>) – flag to automatically do and broadcast the fit over MPI, if defined</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if the shapes of the positional arguments are incompatible</p></li>
+<li><p><strong>ValueError</strong> – if a number of positional arguments different from 2 or 3 are passed</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the bath parameters       for the impurity problem. This is a required input of <a class="reference internal" href="1_solver.html#edipy2.global_env.solve" title="edipy2.global_env.solve"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code></a>       and <a class="reference internal" href="#edipy2.global_env.chi2_fitgf" title="edipy2.global_env.chi2_fitgf"><code class="xref py py-func docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a>. Its elements are ordered differently       depending on the bath geometry. They are (de)compactified for       user interaction via <a class="reference internal" href="#edipy2.global_env.bath_inspect" title="edipy2.global_env.bath_inspect"><code class="xref py py-func docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a>. Specific       symmetrization operations are implemented and listed in the <a class="reference internal" href="#bath"><span class="std std-ref">Bath Manipulation</span></a> section.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_bath_dimension">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_bath_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_bath_dimension" title="Link to this definition"></a></dt>
+<dd><p>This function returns the correct dimension for the bath to be allocated (for each impurity) given the parameters of the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a number which is the dimension of the bath array for each impurity.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.orb_equality_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">orb_equality_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.orb_equality_bath" title="Link to this definition"></a></dt>
+<dd><p>This function sets every orbital component to be equal to the        one of orbital <code class="code docutils literal notranslate"><span class="pre">indx</span></code>. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>iorb</strong> (<em>int</em>) – the orbital index to which every other will be set as equal</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the orbital index is out of bounds</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the modified bath array</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.orb_symmetrize_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">orb_symmetrize_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orb1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orb2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.orb_symmetrize_bath" title="Link to this definition"></a></dt>
+<dd><p>This function enforces equality of the different-orbital components        of the bath array. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>orb1</strong> (<em>int</em>) – first orbital index</p></li>
+<li><p><strong>orb2</strong> (<em>int</em>) – second orbital index</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.ph_symmetrize_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">ph_symmetrize_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.ph_symmetrize_bath" title="Link to this definition"></a></dt>
+<dd><p>This function enforces particle-hole symmetry of the bath hybridization        function. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.save_array_as_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">save_array_as_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.save_array_as_bath" title="Link to this definition"></a></dt>
+<dd><p>This function takes the user-accessible array and saves it in the        correct format for every bath type in the file <code class="code docutils literal notranslate"><span class="pre">hamiltonian.restart</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.set_hgeneral">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">set_hgeneral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdavec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.set_hgeneral" title="Link to this definition"></a></dt>
+<dd><p>This function is specific to <code class="code docutils literal notranslate"><span class="pre">BATH_TYPE=GENERAL</span></code>. It sets the basis of matrices       and scalar parameters that, upon linear combination, make up the bath replica.        The input is the same as that of <a class="reference internal" href="#edipy2.global_env.set_hreplica" title="edipy2.global_env.set_hreplica"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hvec</strong> (<em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em>) – <p>array of bath matrices. They decompose the nonzero part of the replica in a set.       Each element of the set correspond to a variational parameter.       That way the bath replica matrix is updated while preserving symmetries       of the user’s choosing. The array can have the following shapes:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[(Nnambu)*ed.Nspin*ed.Norb,</span> <span class="pre">(Nnambu)*ed.Nspin*ed.Norb,</span> <span class="pre">Nsym]</span></code>:        3-dimensional, where Nnambu refers to the superconducting case and Nsym         is the number of matrices that make up the linear combination</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[(Nnambu)*ed.Nspin*,</span> <span class="pre">(Nnambu)*ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Nsym]</span></code>:        5-dimensional, where Nnambu refers to the superconducting case and Nsym is         the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+<li><p><strong>lambdavec</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – <p>the array of coefficients of the linear combination.       This, along with the hybridizations V, are the fitting parameters of        the bath. The array has the following shape</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[ed.Nbath,</span> <span class="pre">Nsym]</span></code>: for single-impurity DMFT, 2-dimensional,        where Nsym is the number of matrices that make up the linear combination</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nbath,</span> <span class="pre">Nsym]</span></code>: for real-space DMFT, 3-dimensional,        where Nlat is the number of inequivalent impurity sites and Nsym is        the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the shapes of the arrays are inconsistent</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.set_hreplica">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">set_hreplica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdavec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.set_hreplica" title="Link to this definition"></a></dt>
+<dd><p>This function is specific to <code class="code docutils literal notranslate"><span class="pre">BATH_TYPE=REPLICA</span></code>. It sets the basis of matrices       and scalar parameters that, upon linear combination, make up the bath replica.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hvec</strong> (<em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em>) – <p>array of bath matrices. They decompose the nonzero part of the replica in a set.       Each element of the set correspond to a variational parameter.       That way the bath replica matrix is updated while preserving symmetries       of the user’s choosing. The array can have the following shapes:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[(Nnambu)*ed.Nspin*ed.Norb,</span> <span class="pre">(Nnambu)*ed.Nspin*ed.Norb,</span> <span class="pre">Nsym]</span></code>:        3-dimensional, where Nnambu refers to the superconducting case and Nsym         is the number of matrices that make up the linear combination</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[(Nnambu)*ed.Nspin*,</span> <span class="pre">(Nnambu)*ed.Nspin,</span> <span class="pre">ed.Norb,</span> <span class="pre">ed.Norb,</span> <span class="pre">Nsym]</span></code>:        5-dimensional, where Nnambu refers to the superconducting case and Nsym is         the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+<li><p><strong>lambdavec</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – <p>the array of coefficients of the linear combination.       This, along with the hybridizations V, are the fitting parameters of        the bath. The array has the following shape</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[ed.Nbath,</span> <span class="pre">Nsym]</span></code>: for single-impurity DMFT, 2-dimensional,        where Nsym is the number of matrices that make up the linear combination</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat,</span> <span class="pre">ed.Nbath,</span> <span class="pre">Nsym]</span></code>: for real-space DMFT, 3-dimensional,        where Nlat is the number of inequivalent impurity sites and Nsym is        the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the shapes of the arrays are inconsistent</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.spin_symmetrize_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">spin_symmetrize_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.spin_symmetrize_bath" title="Link to this definition"></a></dt>
+<dd><p>This function enforces equality of the opposite-spin components       of the bath array. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="1_solver.html" class="btn btn-neutral float-left" title="Impurity Problem Initialization, Solution and Finalization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="3_inputoutput.html" class="btn btn-neutral float-right" title="Input / Output Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
