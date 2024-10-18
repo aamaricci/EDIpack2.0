@@ -9,9 +9,9 @@ MODULE ED_INPUT_VARS
 
   !input variables
   !=========================================================
-  integer(c_int), bind(c, name="Nbath")                              :: Nbath               !Nbath=# of bath sites (per orbital or not depending on bath_type)
-  integer(c_int), bind(c, name="Norb")                               :: Norb                !Norb =# of impurity orbitals
-  integer(c_int), bind(c, name="Nspin")                              :: Nspin               !Nspin=# spin degeneracy (max 2)
+  integer(c_int), bind(c, name="Nbath")                              :: Nbath               !Number of bath sites (per orbital or not depending on bath_type)
+  integer(c_int), bind(c, name="Norb")                               :: Norb                !Number of impurity orbitals
+  integer(c_int), bind(c, name="Nspin")                              :: Nspin               !Number spin degeneracy (max 2)
 
   integer(c_int), bind(c, name="Nloop")                              :: Nloop               !max dmft loop variables
   integer(c_int), bind(c, name="Nph")                                :: Nph                 !max number of phonons allowed (cut off)
@@ -24,10 +24,10 @@ MODULE ED_INPUT_VARS
   real(c_double),bind(c, name="beta")                                :: beta                !inverse temperature
   !
   !
-  integer(c_int), bind(c, name="Nsuccess")                           :: Nsuccess            !# of repeated success to fall below convergence threshold  
+  integer(c_int), bind(c, name="Nsuccess")                           :: Nsuccess            !Number of repeated success to fall below convergence threshold  
   real(c_double),bind(c, name="dmft_error")                          :: dmft_error          !dmft convergence threshold
   real(c_double),bind(c, name="eps")                                 :: eps                 !broadening
-  real(c_double),bind(c, name="wini")                                :: wini           !frequency range min
+  real(c_double),bind(c, name="wini")                                :: wini                !frequency range min
   real(c_double),bind(c, name="wfin")                                :: wfin                !frequency range max
   real(c_double),bind(c, name="xmin")                                :: xmin                !x-range for the local lattice probability distribution function (phonons)
   real(c_double),bind(c, name="xmax")                                :: xmax                !x-range for the local lattice probability distribution function (phonons)
@@ -46,10 +46,10 @@ MODULE ED_INPUT_VARS
   real(8)              :: deltasc             !breaking symmetry field
   !
   integer              :: ph_type             !shape of the e part of the e-ph interaction: 1=orbital occupation, 2=orbital hybridization
-  real(8)              :: A_ph                !A_ph: phonon field coupled to displacement operator (constant)
-  complex(8),allocatable  :: g_ph(:,:)        !g_ph: electron-phonon coupling constant all
-  real(8)              :: w0_ph               !w0_ph: phonon frequency (constant)
-  real(8),allocatable  :: g_ph_diag(:)        !g_ph: electron-phonon coupling constant diagonal (density)
+  real(8)              :: A_ph                !phonon field coupled to displacement operator (constant)
+  complex(8),allocatable  :: g_ph(:,:)        !electron-phonon coupling constant all
+  real(8)              :: w0_ph               !phonon frequency (constant)
+  real(8),allocatable  :: g_ph_diag(:)        !electron-phonon coupling constant diagonal (density)
   !
   real(8),allocatable  :: spin_field_x(:)        !magnetic field per orbital coupling to X-spin component
   real(8),allocatable  :: spin_field_y(:)        !magnetic field per orbital coupling to Y-spin component
@@ -73,7 +73,7 @@ MODULE ED_INPUT_VARS
   logical              :: ed_all_G            !flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries
   logical              :: ed_sectors          !flag to reduce sector scan for the spectrum to specific sectors +/- ed_sectors_shift
   integer              :: ed_sectors_shift    !shift to the ed_sectors scan
-  integer              :: ed_verbose          !
+  integer              :: ed_verbose          !verbosity level: 0=almost nothing --> 5:all. Really: all
   real(8)              :: ed_offset_bath      !half-bandwidth for the bath initialization: flat in -hwband:hwband
   real(8)              :: ed_hw_bath          !half-bandwidth for the bath initialization: flat in -hwband:hwband
   !
@@ -107,25 +107,28 @@ MODULE ED_INPUT_VARS
   real(8)              :: ndelta              !initial chemical potential step
   real(8)              :: ncoeff              !multiplier for the initial ndelta read from a file (ndelta-->ndelta*ncoeff)
   integer              :: niter               !
-  logical              :: Jz_basis
-  logical              :: Jz_max
-  real(8)              :: Jz_max_value
+  logical              :: Jz_basis            !"Flag to enable the Jz basis"
+  logical              :: Jz_max              !"Flag to enable a maximum value for Jz"
+  real(8)              :: Jz_max_value        !"Maximum value for Jz"
 
   !Some parameters for function dimension:
-  integer(c_int),bind(c, name="Lmats")             :: Lmats
-  integer(c_int),bind(c, name="Lreal")             :: Lreal
-  integer(c_int),bind(c, name="Lfit")              :: Lfit
+  integer(c_int),bind(c, name="Lmats")             :: Lmats !Number of Matsubara frequencies
+  integer(c_int),bind(c, name="Lreal")             :: Lreal !Number of real-axis frequencies
+  integer(c_int),bind(c, name="Lfit")              :: Lfit  !Number of frequencies for bath fitting
 
-  integer(c_int),bind(c, name="Ltau")              :: Ltau
-  integer(c_int),bind(c, name="Lpos")              :: Lpos
+  integer(c_int),bind(c, name="Ltau")              :: Ltau  !Number of imaginary time points
+  integer(c_int),bind(c, name="Lpos")              :: Lpos  !Number of points in PDF lattice
 
   !LOG AND Hamiltonian UNITS
   !=========================================================
-  character(len=100)   :: Hfile,HLOCfile,SectorFile,GPHfile
-  integer(c_int),bind(c, name="LOGfile"),save             :: LOGfile
+  character(len=100)   :: Hfile  !File where to retrieve/store the bath parameters.
+  character(len=100)   :: HLOCfile !File read the input local H
+  character(len=100)   :: SectorFile !File where to retrieve/store the sectors contributing to the spectrum
+  character(len=100)   :: GPHfile !File of Phonon couplings. Put NONE to use only density couplings.
+  integer(c_int),bind(c, name="LOGfile"),save             :: LOGfile  !Logfile unit
 
   !THIS IS JUST A RELOCATED GLOBAL VARIABLE
-  character(len=200)                                 :: ed_input_file=""
+  character(len=200)                                 :: ed_input_file="" !Name of input file
 
 
 contains
@@ -135,6 +138,7 @@ contains
   !PURPOSE  : READ THE INPUT FILE AND SETUP GLOBAL VARIABLES
   !+-------------------------------------------------------------------+
   subroutine ed_read_input(INPUTunit)
+  !This functions reads the input file provided by :code:`INPUTunit` and sets the global variables accordingly
 #ifdef _MPI
     USE MPI
     USE SF_MPI
@@ -275,9 +279,9 @@ contains
     call parse_input_variable(cg_minimize_ver,"CG_MINIMIZE_VER",INPUTunit,default=.false.,comment="Flag to pick old/.false. (Krauth) or new/.true. (Lichtenstein) version of the minimize CG routine")
     call parse_input_variable(cg_minimize_hh,"CG_MINIMIZE_HH",INPUTunit,default=1d-4,comment="Unknown parameter used in the CG minimize procedure.")
     !
-    call parse_input_variable(Jz_basis,"JZ_BASIS",INPUTunit,default=.false.,comment="")
-    call parse_input_variable(Jz_max,"JZ_MAX",INPUTunit,default=.false.,comment="")
-    call parse_input_variable(Jz_max_value,"JZ_MAX_VALUE",INPUTunit,default=1000.d0,comment="")
+    call parse_input_variable(Jz_basis,"JZ_BASIS",INPUTunit,default=.false.,comment="Flag to enable the Jz basis")
+    call parse_input_variable(Jz_max,"JZ_MAX",INPUTunit,default=.false.,comment="Whether to cutoff Jz")
+    call parse_input_variable(Jz_max_value,"JZ_MAX_VALUE",INPUTunit,default=1000.d0,comment="Maximum Jz")
     !
     call parse_input_variable(SectorFile,"SectorFile",INPUTunit,default="sectors",comment="File where to retrieve/store the sectors contributing to the spectrum.")
     call parse_input_variable(Hfile,"Hfile",INPUTunit,default="hamiltonian",comment="File where to retrieve/store the bath parameters.")

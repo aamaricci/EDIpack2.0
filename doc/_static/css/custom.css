@@ -25,6 +25,10 @@
     color: #0077aa;  /* Blue for variable names */
 }
 
+.sig-prename {
+    display: none;
+}
+
 /* Optional: Style the full signature block */
 .sig.sig-object {
     display: inline-block;      /* Ensures the signature is styled as a block */

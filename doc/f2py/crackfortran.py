@@ -1291,7 +1291,7 @@ def analyzeline(m, case, line):
             newitems = [x.strip() for x in m.group('after').split(',')]
             for x in newitems:
                 groupcache[groupcounter]['implementedby'].append(x.removeprefix(':: '))
-            print(groupcache[groupcounter]['implementedby'])
+            #print(groupcache[groupcounter]['implementedby'])
         except:
             groupcache[groupcounter]['implementedby'] = ([x.strip().removeprefix(':: ') for x in m.group('after').split(',')])
     elif case == 'parameter':
