@@ -281,7 +281,7 @@ contains
     !
     iadd = .false.                          !check if column already exist
     if(any(row%cols == column))then         !
-       pos = binary_search(row%cols,column) !find the position  column in %cols        
+       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
        iadd=.true.                          !set Iadd to true
     endif
     !
@@ -316,7 +316,7 @@ contains
     !
     iadd = .false.                          !check if column already exist
     if(any(row%cols == column))then         !
-       pos = binary_search(row%cols,column) !find the position  column in %cols        
+       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
        iadd=.true.                          !set Iadd to true
     endif
     !
@@ -356,7 +356,7 @@ contains
     !
     iadd = .false.                          !check if column already exist
     if(any(row%cols == column))then         !
-       pos = binary_search(row%cols,column) !find the position  column in %cols        
+       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
        iadd=.true.                          !set Iadd to true
     endif
     !
@@ -397,7 +397,7 @@ contains
     !
     iadd = .false.                          !check if column already exist
     if(any(row%cols == column))then         !
-       pos = binary_search(row%cols,column) !find the position  column in %cols        
+       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
        iadd=.true.                          !set Iadd to true
     endif
     !
@@ -589,7 +589,7 @@ contains
   !              AUXILIARY COMPUTATIONAL ROUTINES
   !##################################################################
   !##################################################################
-  recursive function binary_search(Ain,value) result(bsresult)
+  recursive function binary_search_spmat(Ain,value) result(bsresult)
     integer,intent(in)           :: Ain(:), value
     integer                      :: bsresult, mid
     integer,dimension(size(Ain)) :: A,Order
@@ -602,9 +602,9 @@ contains
        bsresult = 0        ! not found
        !stop "binary_search error: value not found"
     else if (a(mid) > value) then
-       bsresult= binary_search(a(:mid-1), value)
+       bsresult= binary_search_spmat(a(:mid-1), value)
     else if (a(mid) < value) then
-       bsresult = binary_search(a(mid+1:), value)
+       bsresult = binary_search_spmat(a(mid+1:), value)
        if (bsresult /= 0) then
           bsresult = mid + bsresult
        end if
@@ -614,7 +614,7 @@ contains
     !
     bsresult = Order(bsresult)
     !
-  end function binary_search
+  end function binary_search_spmat
 
 
 
