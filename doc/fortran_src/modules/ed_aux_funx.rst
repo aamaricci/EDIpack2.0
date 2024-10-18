@@ -1,7 +1,7 @@
-AUXILIARY FUNCTIONS
+Auxiliary Functions
 =======================
 
-Contains all the auxiliary procedures needed in different parts of the code.
+The module :code:`ED_AUX_FUNX` contains all the auxiliary procedures needed in different parts of the code.
 
 
 .. f:autoroutine::  ed_set_hloc

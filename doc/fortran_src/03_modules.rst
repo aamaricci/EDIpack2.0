@@ -1,9 +1,9 @@
-INIT
-======
+Modules
+========
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   init/*
+   modules/*
 
