@@ -85,6 +85,8 @@ def set_hreplica(self,hvec,lambdavec):
     aux_nspin=c_int.in_dll(self.library, "Nspin").value
     dim_hvec = np.asarray(np.shape(hvec),dtype=np.int64,order="F")
     dim_lambdavec = np.asarray(np.shape(lambdavec),dtype=np.int64,order="F")
+    
+    self.Nsym = dim_lambdavec[1]
 
 
     if(len(dim_hvec) == 3):
@@ -174,7 +176,8 @@ def set_hgeneral(self,hvec,lambdavec):
     aux_nspin=c_int.in_dll(self.library, "Nspin").value
     dim_hvec = np.asarray(np.shape(hvec),dtype=np.int64,order="F")
     dim_lambdavec = np.asarray(np.shape(lambdavec),dtype=np.int64,order="F")
-
+    
+    self.Nsym = dim_lambdavec[1]
 
     if(len(dim_hvec) == 3):
         if(len(dim_lambdavec)==2):
@@ -450,7 +453,7 @@ def save_array_as_bath(self, bath):
 #auxiliary functions to get/set bath structure. Only works for single-site. User has to do a loop on sites
 
 
-def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None):
+def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None,l=None):
     """
        This function translates between the user-accessible continuous \
        bath array and the bath components (energy level, hybridization and so on). \
@@ -467,7 +470,8 @@ def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None):
        
        :type v: np.array(dtype=float)
        :param v: an array for the bath hybridizations (:code:`ED_MODE = NORMAL, NONSU2, SUPERC`). \
-       It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath
+       It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath. \
+       For :code:`REPLICA` bath it has dimension :code:`[ed.Nbath]` and for :code:`GENERAL` bath it has dimension :code:`[ed.Nbath,ed.Nspin*ed.Norb]`
        
        :type d: np.array(dtype=float)
        :param d: an array for the bath anomalous enery levels(:code:`ED_MODE = SUPERC`). \
@@ -478,11 +482,16 @@ def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None):
        :param u: an array for the bath spin off-diagonal hybridization (:code:`ED_MODE = NONSU2`). \
        It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath
 
-       :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d` are provided, or the shapes are inconsistent
+       :type l: np.array(dtype=float)
+       :param l: an array for the linear coefficients of the Replica matrix linear combination (:code:`ED_BATH_TYPE = REPLICA,GENERAL`). \
+       It has dimension :code:`[ed.Nbath,Nsym]`, the latter being the number of terms on the linear combination
+
+       :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d,l` are provided, none is provided, the shapes are inconsistent \
+        or the inputs are inconsistent with :code:`ED_BATH_TYPE` and :code:`ED_MODE`.
 
        :return: 
-         - if :code:`bath` is provided, returns :code:`e,v`, :code:`e,d,v` or :code:`e,v,u` depending on :code:`ED_MODE`
-         - if :code:`e,v`, :code:`e,d,v` or :code:`e,v,u` depending on :code:`ED_MODE` are provided, returns :code:`bath` 
+         - if :code:`bath` is provided, returns :code:`e,v`, :code:`e,d,v`, :code:`e,v,u` or :code:`l,v` depending on :code:`ED_MODE`
+         - if :code:`e,v`, :code:`e,d,v`, :code:`e,v,u` or :code:`l,v` depending on :code:`ED_MODE` are provided, returns :code:`bath` 
        :rtype: np.array(dtype=float) 
     """
 
@@ -881,6 +890,126 @@ def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None):
             return e,v,u
         else:
             raise ValueError("Wrong input for nonsu2/hybrid")
+    elif settings == (1,3) or settings == (2,3) or settings == (3,3): #replica bath
+        if bath is None and l is not None and v is not None:
+                l=np.asarray(l,order="F")
+                v=np.asarray(v,order="F")
+                if self.Nsym is None:
+                    raise ValueError("Nsym is none, is Hreplica initialized?")        
+                if np.shape(l) != (aux_nbath,self.Nsym):
+                    raise ValueError("l must be (nbath,nsym)")
+                if np.shape(v) != (aux_nbath):
+                    raise ValueError("v must be (nbath)")
+                
+                Nb = self.get_bath_dimension()
+                bath = np.zeros(Nb)
+                
+                io = 0
+                il = 0
+                
+                bath[io]=self.Nsym
+                io += 1
+                
+                for ibath in range(aux_nbath):
+                    bath[io] = v[ibath]
+                    io += 1
+                    il = 0
+                    for il in range(Nsym):
+                        bath[io] = l[ibath,il]
+                        io += 1
+                        il += 1
+                return bath
+                    
+        elif bath is not None and l is None and v is None: #e and v are none
+            bath = np.asarray(bath,order="F")
+            Nb = self.get_bath_dimension()
+            if np.shape(bath)[0] != Nb:
+                raise ValueError("bath has the wrong length")
+            if bath[0] != self.Nsym:
+                raise ValueError("bath[0] is not Nsym")
+                
+            l=np.zeros((aux_nbath,self.Nsym))
+            v=np.zeros((aux_nbath))
+            
+            io = 1
+            il = 0
+            
+            for ibath in range(aux_nbath):
+                v[ibath] = bath[io]
+                io += 1
+                il = 0
+                for il in range(Nsym):
+                    l[ibath,il] = bath[io]
+                    io += 1
+                    il += 1
+            return l,v
+        else:
+            raise ValueError("Wrong input for replica")
+                
+    elif settings == (1,4) or settings == (2,4) or settings == (3,4): #general bath
+        if bath is None and l is not None and v is not None:
+                l=np.asarray(l,order="F")
+                v=np.asarray(v,order="F")
+                if self.Nsym is None:
+                    raise ValueError("Nsym is none, is Hgeneral initialized?")        
+                if np.shape(l) != (aux_nbath,self.Nsym):
+                    raise ValueError("l must be (Nbath,Nsym)")
+                if np.shape(v) != (aux_nbath,aux_nspin*aux_norb):
+                    raise ValueError("v must be (Nbath,ed.Nspin*ed.Norb)")
+                
+                Nb = self.get_bath_dimension()
+                bath = np.zeros(Nb)
+                
+                io = 0
+                il = 0
+                iv = 0
+                
+                bath[io]=self.Nsym
+                io += 1
+                
+                for ibath in range(aux_nbath):
+                    iv = 0
+                    for iv in range(aux_nspin*aux_norb):
+                        bath[io] = v[ibath,iv]
+                        io += 1
+                        iv += 1
+                    il = 0
+                    for il in range(Nsym):
+                        bath[io] = l[ibath,il]
+                        io += 1
+                        il += 1
+                return bath
+                    
+        elif bath is not None and l is None and v is None: #e and v are none
+            bath = np.asarray(bath,order="F")
+            Nb = self.get_bath_dimension()
+            if np.shape(bath)[0] != Nb:
+                raise ValueError("bath has the wrong length")
+            if bath[0] != self.Nsym:
+                raise ValueError("bath[0] is not Nsym")
+                
+            l=np.zeros((aux_nbath,self.Nsym))
+            v=np.zeros((aux_nbath,aux_nspin*aux_norb))
+            
+            io = 1
+            il = 0
+            iv = 0
+
+            for ibath in range(aux_nbath):
+                iv = 0
+                for iv in range(aux_nspin*aux_norb):
+                    v[ibath,iv] = bath[io]
+                    io += 1
+                    iv += 1
+                il = 0
+                for il in range(Nsym):
+                    l[ibath,il] = bath[io]
+                    io += 1
+                    il += 1
+            return l,v
+        else:
+            raise ValueError("Wrong input for replica")                
+
     else:
         raise ValueError("EDmode/bath combination not valid or not implemented.")
         

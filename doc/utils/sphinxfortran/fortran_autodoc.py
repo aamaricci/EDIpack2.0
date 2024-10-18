@@ -753,7 +753,6 @@ class F90toRst(object):
             name=object.get('name').strip()
         except:
             name=None
-        print(name,memberlist)
         ok='private' not in object.get('attrspec',[]) or self.exclude_private is None
         if ok:
             if self.members: ok = name is None or name in memberlist
