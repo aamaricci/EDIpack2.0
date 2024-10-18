@@ -85,10 +85,10 @@ The library can be loaded using one of the following, automatically generated, f
 Python API: EDIpy2 
 ======================
 The `edipy2` python module is installable from this folder via:
-o R
+
 .. code-block:: bash
 		
-   pip install .
+    pip install .
 
 on some systems such as Debian >= 11 and Mac Os, if a virtual environment is not in use, the flag `--break-system-packages` has to be set. This creates no issue since no distro is packaging this library.
 To remove the module, run:
