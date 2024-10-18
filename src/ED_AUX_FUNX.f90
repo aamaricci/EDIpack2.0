@@ -12,13 +12,23 @@ MODULE ED_AUX_FUNX
 
   !> ED SET HLOC
   interface ed_set_Hloc
+    !This subroutine sets the local Hamiltonian of the impurity problem. 
+    !The local hamiltonian can have different shapes:
+    !
+    !   * :code:`[Nspin*Norb,Nspin*Norb]`: single-impurity case, 2-dimensional array
+    !   * :code:`[Nspin,Nspin,Norb,Norb]`: single-impurity case, 4-dimensional array
+    !   * :code:`[Nlat*Nspin*Norb,Nlat*Nspin*Norb]`: real-space DMFT case, 2-dimensional array.
+    !   * :code:`[Nlat,Nspin*Norb,Nspin*Norb]`: single-impurity case, 3-dimensional array.
+    !   * :code:`[Nlat,Nspin,Nspin,Norb,Norb]`: single-impurity case, 5-dimensional array.
+    !
+    !In the case of real-space DMFT, the number of impurities :code:`Nlat` must be provided.
+    !
      module procedure :: ed_set_Hloc_single_N2
      module procedure :: ed_set_Hloc_single_N4
      module procedure :: ed_set_Hloc_lattice_N2
      module procedure :: ed_set_Hloc_lattice_N3
      module procedure :: ed_set_Hloc_lattice_N5
   end interface ed_set_Hloc
-
 
   interface lso2nnn_reshape
      module procedure d_nlso2nnn
@@ -62,6 +72,13 @@ MODULE ED_AUX_FUNX
 
 
   interface ed_set_suffix
+     !This subroutine sets a suffix for the output files, stored in the global
+     !variable :code:`ed_file_suffix`. The suffix can be of type:
+     !
+     !   * :code:`integer`: will be converted to string and padded with zeros
+     !   * :code:`real`: will be converted to string
+     !   * :code:`character[len=*]`
+     !
      module procedure :: ed_set_suffix_i
      module procedure :: ed_set_suffix_d
      module procedure :: ed_set_suffix_c
@@ -143,6 +160,7 @@ contains
 
 
   subroutine ed_reset_suffix()
+    !This subroutine resets the suffix set by :f:subr:`ed_set_suffix` to an empty string
     ed_file_suffix=''
   end subroutine ed_reset_suffix
 
@@ -170,7 +188,7 @@ contains
   !PURPOSE  : Setup Himpurity, the local part of the non-interacting Hamiltonian
   !+------------------------------------------------------------------+
   subroutine ed_set_Hloc_single_N2(Hloc)
-    complex(8),dimension(:,:),intent(in) :: Hloc
+    complex(8),dimension(:,:),intent(in) :: Hloc !The local Hamiltonian array
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG ed_set_Hloc: set impHloc"
 #endif
@@ -199,7 +217,8 @@ contains
 
   subroutine ed_set_Hloc_lattice_N2(Hloc,Nlat)
     complex(8),dimension(:,:),intent(in) :: Hloc
-    integer                              :: Nlat,ilat
+    integer                              :: Nlat !Number of impurities for real-space DMFT
+    integer                              :: ilat
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG ed_set_Hloc: set impHloc"
 #endif
@@ -1197,9 +1216,18 @@ contains
   !PURPOSE  : 
   !+------------------------------------------------------------------+
   subroutine ed_search_variable(var,ntmp,converged)
-    real(8),intent(inout) :: var
-    real(8),intent(in)    :: ntmp
-    logical,intent(inout) :: converged
+    !This function checks the value of the read density :code:`ntmp` against the desired value 
+    !:code:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
+    !
+    !The updated :code:`xmu` is saved in :code::`search_variable_iteration"//reg(ed_file_suffix)//".ed`
+    !
+    !The converged :code:`xmu` is saved in :code::`var_compressibility.restart`
+    !
+    !If a file :code:`var_compressibility.used` is present, its value is read
+
+    real(8),intent(inout) :: var !the variable to be adjusted
+    real(8),intent(in)    :: ntmp !the density value at the given iteration
+    logical,intent(inout) :: converged !whether the DMFT loop has achieved a sufficiently small error independently on the density
     logical               :: bool
     real(8),save          :: chich
     real(8),save          :: nold
@@ -1320,9 +1348,18 @@ contains
 
 
   subroutine search_chemical_potential(var,ntmp,converged)
-    real(8),intent(inout) :: var
-    real(8),intent(in)    :: ntmp
-    logical,intent(inout) :: converged
+    !This function checks the value of the read density :code:`ntmp` against the desired value 
+    !:code:`nread` (if different from zero) and adjusts :code:`xmu` accordingly (in a monotonous way).
+    !
+    !The updated :code:`xmu` is saved in :code::`search_mu_iteration"//reg(ed_file_suffix)//".ed`
+    !
+    !The converged :code:`xmu` is saved in :code::`xmu.restart
+    !
+    !If a file :code:`var_compressibility.used` is present, its value is read
+    
+    real(8),intent(inout) :: var !the chemical potential
+    real(8),intent(in)    :: ntmp !the density value at the given iteration
+    logical,intent(inout) :: converged !whether the DMFT loop has achieved a sufficiently small error independently on the density
     logical               :: bool
     real(8)               :: ndiff
     integer,save          :: count=0,totcount=0,i
