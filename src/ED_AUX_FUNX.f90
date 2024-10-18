@@ -1219,9 +1219,9 @@ contains
     !This function checks the value of the read density :code:`ntmp` against the desired value 
     !:code:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
     !
-    !The updated :code:`xmu` is saved in :code::`search_variable_iteration"//reg(ed_file_suffix)//".ed`
+    !The updated :code:`xmu` is saved in :code:`search_variable_iteration"//reg(ed_file_suffix)//".ed`
     !
-    !The converged :code:`xmu` is saved in :code::`var_compressibility.restart`
+    !The converged :code:`xmu` is saved in :code:`var_compressibility.restart`
     !
     !If a file :code:`var_compressibility.used` is present, its value is read
 
@@ -1351,11 +1351,13 @@ contains
     !This function checks the value of the read density :code:`ntmp` against the desired value 
     !:code:`nread` (if different from zero) and adjusts :code:`xmu` accordingly (in a monotonous way).
     !
-    !The updated :code:`xmu` is saved in :code::`search_mu_iteration"//reg(ed_file_suffix)//".ed`
+    !The updated :code:`xmu` is saved in :code:`search_mu_iteration"//reg(ed_file_suffix)//".ed`
     !
-    !The converged :code:`xmu` is saved in :code::`xmu.restart
+    !The converged :code:`xmu` is saved in :code:`xmu.restart`
     !
     !If a file :code:`var_compressibility.used` is present, its value is read
+    !
+    !**NOTE:** this function is accessible to the user as :f:subr:`ed_search_chemical_potential`
     
     real(8),intent(inout) :: var !the chemical potential
     real(8),intent(in)    :: ntmp !the density value at the given iteration
