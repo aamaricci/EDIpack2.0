@@ -5,4 +5,4 @@ The module :code:`ED_INPUT_VARS` contains the list of global variables to which 
 
 
 .. f:automodule::   ed_input_vars
-   :undoc-members: ed_total_ud_, ed_twin_, ed_update_input, s_chop, substring_delete
+   :undoc-members: ed_total_ud_, ed_twin_, s_chop, substring_delete

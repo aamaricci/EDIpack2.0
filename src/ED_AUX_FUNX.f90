@@ -73,7 +73,7 @@ MODULE ED_AUX_FUNX
 
   interface ed_set_suffix
      !This subroutine sets a suffix for the output files, stored in the global
-     !variable :code:`ed_file_suffix`. The suffix can be of type:
+     !variable :f:var:`ed_file_suffix`. The suffix can be of type:
      !
      !   * :code:`integer`: will be converted to string and padded with zeros
      !   * :code:`real`: will be converted to string
@@ -1361,7 +1361,7 @@ contains
     !
     !If a file :code:`var_compressibility.used` is present, its value is read
     !
-    !**NOTE:** this function is accessible to the user as :f:subr:`ed_search_chemical_potential`
+    !**NOTE:** this function is accessible to the user as :f:func:`edipack2/ed_search_chemical_potential`
     
     real(8),intent(inout) :: var !the chemical potential
     real(8),intent(in)    :: ntmp !the density value at the given iteration
