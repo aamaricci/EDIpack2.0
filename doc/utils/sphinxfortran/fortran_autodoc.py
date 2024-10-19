@@ -1391,17 +1391,17 @@ class F90toRst(object):
 
                 # callfrom += ', '.join([self.format_funcref(getattr(self,
                 # routines[fn]['name'], module) for fn in block['callfrom']])
-                if len(callfrom) > 0:
-                    callfrom = ':from: ' + ', '.join(callfrom)
-                    calls.append(callfrom)
+                #if len(callfrom) > 0:
+                #    callfrom = ':from: ' + ', '.join(callfrom)
+                #    calls.append(callfrom)
         # - call tos
-        if block['callto']:
-            callto = ', '.join([self.format_funcref(fn, module)
-                                for fn in block['callto'] if self.is_member(self.routines[fn])])
-            #callto = ', '.join([self.format_funcref(self.routines[fn]['name'], module) for fn in block['callto']])
-            if callto != '':
-                callto = ':to: ' + callto
-                calls.append(callto)
+        #if block['callto']:
+        #    callto = ', '.join([self.format_funcref(fn, module)
+        #                        for fn in block['callto'] if self.is_member(self.routines[fn])])
+        #    #callto = ', '.join([self.format_funcref(self.routines[fn]['name'], module) for fn in block['callto']])
+        #    if callto != '':
+        #        callto = ':to: ' + callto
+        #        calls.append(callto)
         calls = '\n' + self.format_lines(calls, indent=indent + 1)
         return declaration + description + use + calls + '\n\n'
 
