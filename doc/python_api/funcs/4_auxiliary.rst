@@ -1,4 +1,4 @@
-Auxiliary functions
+Auxiliary procedures
 ===========================
 
 .. autofunction:: edipy2.global_env.check_convergence
