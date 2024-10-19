@@ -25,6 +25,7 @@
     color: #0077aa;  /* Blue for variable names */
 }
 
+/*remove the module name from the fortran functions*/
 .sig-prename {
     display: none;
 }

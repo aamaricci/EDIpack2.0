@@ -7,4 +7,3 @@ Together with that all the  procedures required by Fock space
 constructions are defined here. 
 
 
-.. f:autosrcfile::   ED_SECTOR.f90

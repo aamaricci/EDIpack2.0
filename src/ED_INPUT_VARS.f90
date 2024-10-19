@@ -358,8 +358,11 @@ contains
   end subroutine ed_read_input
 
   subroutine ed_update_input(name,vals)
-    character(len=*)      :: name
-    real(8),dimension(:)  :: vals
+    !This functions updates some variables in the input file, namely
+    !:f:var:`exc_field`, :f:var:`pair_field`, :f:var:`exc_field`,
+    !:f:var:`spin_field_x`, :f:var:`spin_field_y`, and :f:var:`spin_field_z`.
+    character(len=*)      :: name !the name of the variable to update
+    real(8),dimension(:)  :: vals !the new value of the variable
     select case (name)
     case default
        stop "WRONG NAME ON ED_UPDATE_INPUT"

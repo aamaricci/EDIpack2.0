@@ -1357,7 +1357,7 @@ contains
     !
     !If a file :code:`var_compressibility.used` is present, its value is read
     !
-    !**NOTE:** this function is accessible to the user as :f:subr:`ed_search_chemical_potential`
+    !**NOTE:** this function is accessible to the user as :f:func:`edipack2/ed_search_chemical_potential`
     
     real(8),intent(inout) :: var !the chemical potential
     real(8),intent(in)    :: ntmp !the density value at the given iteration
