@@ -277,6 +277,8 @@ contains
   !   the sign of |out> has the phase convention, pos labels the sites
   !+-------------------------------------------------------------------+
   subroutine c(pos,in,out,fsgn)
+    !Fermionic destruction operator, used in the construction of the sector Hamiltonian. The :code:`C` operator reduces a bit 1 at :code:`pos` to 0 for the bit representation of the :code:`In`, evaluates the corresponding fermionic sign :code:`fsign` as :math:`\sum_{i<pos}(-1)^{i}`. The obtained bitset identifies a new integer :code:`Out`. 
+    !
     integer,intent(in)    :: pos
     integer,intent(in)    :: in
     integer,intent(inout) :: out
@@ -291,6 +293,8 @@ contains
   end subroutine c
 
   subroutine cdg(pos,in,out,fsgn)
+    !Fermionic creation operator, used in the construction of the sector Hamiltonian. The :code:`Cdg` operator increases a bit 0 at :code:`pos` to 1 for the bit representation of the :code:`In`, evaluates the corresponding fermionic sign :code:`fsign` as :math:`\sum_{i<pos}(-1)^{i}`. The obtained bitset identifies a new integer :code:`Out`. 
+    !
     integer,intent(in)    :: pos
     integer,intent(in)    :: in
     integer,intent(inout) :: out
@@ -316,11 +320,11 @@ contains
   !with its binary decomposition
   !(corresponds to the decomposition of the number i-1)
   !+------------------------------------------------------------------+
+
   function bdecomp(i,Ntot) result(ivec)
+    !Binary decomposition of the integer :code:`i` in  :code:`Ntot` bits. The input integers represents a Fock state :math:`|i-1\rangle` with :math:`i=1,\dots,2^{2N_s}`. The resulting vector :code:`ivec` describes the state :math:`|n_1,n_2,\dots,n_{N_{tot}}\rangle` with :math:`n_i=0,1`. 
     integer :: Ntot,ivec(Ntot),l,i
     logical :: busy
-    !this is the configuration vector |1,..,Ns,Ns+1,...,Ntot>
-    !obtained from binary decomposition of the state/number i\in 2^Ntot
     do l=0,Ntot-1
        busy=btest(i,l)
        ivec(l+1)=0

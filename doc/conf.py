@@ -107,7 +107,7 @@ html_css_files = [
 # documentation.
 #
 html_theme_options = {
-  'collapse_navigation': True,
+  'collapse_navigation': False,
   'navigation_depth': 4,
 }
 
@@ -124,7 +124,7 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -164,7 +164,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'edipy2.tex', u'edipy2 documentation',
+    (master_doc, 'EDIpack2.tex', u'EDIpack2 documentation',
      u'io', 'manual'),
 ]
 
@@ -174,7 +174,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'edipy2', u'edipy2 documentation',
+    (master_doc, 'EDIpack2', u'EDIpack2 documentation',
      [author], 1)
 ]
 
@@ -185,8 +185,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'edipy2', u'edipy2 documentation',
-     author, 'edipy2', 'One line description of project.',
+    (master_doc, 'EDIpack2', u'EDIpack2 documentation',
+     author, 'EDIpack2', 'One line description of project.',
      'Miscellaneous'),
 ]
 

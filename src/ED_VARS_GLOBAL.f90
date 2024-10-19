@@ -10,34 +10,33 @@ MODULE ED_VARS_GLOBAL
   implicit none
 
 
-  !-------------------- EFFECTIVE BATH STRUCTURE ----------------------!
   type H_operator
-     complex(8),dimension(:,:,:,:),allocatable :: O !Replica/General hamiltonian
+     ! The matrix storing in the basis :code:`[Nspin,Nspin,Norb,Norb]` each element of the Matrix basis decomposing the replica/general bath Hamiltonian :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, where :math:`N_{basis}` is the dimension of the user defined basis.  
+     complex(8),dimension(:,:,:,:),allocatable               :: O !Replica/General hamiltonian
   end type H_operator
 
   type effective_bath_component
-     real(8)                                   :: v
-     real(8),dimension(:),allocatable          :: vg
-     real(8),dimension(:),allocatable          :: lambda ![Nsym]
+     ! Effective bath component for the replica/general bath. Each istance of this type defines the parameters :math:`\vec{\lambda}` and the amplitudes :math:`\vec{V}`. The first is used to decompose the Hamiltonian of each element of the bath :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, the latter describes the hopping from/to the impurity.
+     real(8)                                                 :: v
+     real(8),dimension(:),allocatable                        :: vg
+     real(8),dimension(:),allocatable                        :: lambda ![Nsym]
   end type effective_bath_component
 
   type effective_bath
-     !normal
-     real(8),dimension(:,:,:),allocatable      :: e !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
-     real(8),dimension(:,:,:),allocatable      :: v !spin-keep hyb. [Nspin][Norb][Nbath]
-     !superc
-     real(8),dimension(:,:,:),allocatable      :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]_hybrid
-     !nonsu2
-     real(8),dimension(:,:,:),allocatable      :: u !spin-flip hyb. [Nspin][Norb][Nbath]
-     !replica/general
-     integer                                                 :: Nbasis  !H Basis dimension     
+     ! This structure describes the (effective) discretized bath used in the contruct the Hamiltonian of the quantum impurity system. Each element of this structure is allocated and used according the value of :code:`ed_mode=normal,superc,nonsu2` and :code:`bath_type=normal,hybrid,replica,general`.  
+     real(8),dimension(:,:,:),allocatable                    :: e !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
+     real(8),dimension(:,:,:),allocatable                    :: v !spin-keep hyb. [Nspin][Norb][Nbath]
+     real(8),dimension(:,:,:),allocatable                    :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
+     real(8),dimension(:,:,:),allocatable                    :: u !spin-flip hyb. [Nspin][Norb][Nbath] for :code:`ed_mode=nonsu2`
+     integer                                                 :: Nbasis  !The replica/general Matrix basis dimension     
      type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica/General bath components, V included
-     !
      logical                                                 :: status=.false.
   end type effective_bath
 
 
 
+
+  
   !-------------------- CUSTOM OBSERVABLE STRUCTURE ----------------------!
   type observable
      complex(8),dimension(:,:,:),allocatable   :: sij ![Nlso][Nlso][Nk]
@@ -337,8 +336,8 @@ MODULE ED_VARS_GLOBAL
   !PRIVATE (now public but accessible thru routine)
   !=========================================================
   complex(8),allocatable,dimension(:,:,:,:)          :: imp_density_matrix
-  integer,parameter,dimension(3)                     :: Lzdiag = [-1,+1,0]
-  integer,parameter,dimension(2)                     :: Szdiag = [1,-1]
+  integer,dimension(3)                     :: Lzdiag = [-1,+1,0]
+  integer,dimension(2)                     :: Szdiag = [1,-1]
   real(8),dimension(:,:),allocatable                 :: spin_field ![Norb,3=x,y,z]
 
 

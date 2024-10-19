@@ -83,6 +83,8 @@ contains
   !##################################################################
   !##################################################################
   subroutine build_sector(isector,self)
+    ! ciao
+    !
     integer,intent(in) :: isector
     type(sector)       :: self
     integer            :: iup,idw

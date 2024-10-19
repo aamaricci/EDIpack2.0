@@ -168,6 +168,8 @@ contains
   !PURPOSE  : Init ED structure and calculation
   !+------------------------------------------------------------------+
   subroutine init_ed_structure()
+    ! Initialize the pool of variables and data structures of the ED calculation.
+    ! Performs all the checks calling :code:`ed_checks_global`, set up the dimensions in :code:`ed_setup_dimensions` given the input variables :code:`Ns`, :code:`Norb`, :code:`Nspin`, :code:`Nbath`, :code:`bath_type`. Allocate all the dynamic memory which will be stored in the memory till the calculation will be finalized. 
     logical                          :: control
     integer                          :: i,iud
     integer                          :: dim_sector_max,iorb,jorb,ispin,jspin
@@ -389,6 +391,7 @@ contains
   !PURPOSE  : Deallocate ED structure and reset environment
   !+------------------------------------------------------------------+
   subroutine delete_ed_structure()
+    ! Delete the entire memory pool upon finalization of the ED calculation. 
     logical                          :: control
     integer                          :: i,iud
     integer                          :: dim_sector_max,iorb,jorb,ispin,jspin
@@ -474,6 +477,13 @@ contains
   !PURPOSE: SETUP THE GLOBAL POINTERS FOR THE ED CALCULAIONS.
   !+------------------------------------------------------------------+
   subroutine setup_global
+    ! Setup the all the dimensions and the local maps according to a given symmetry of the Hamiltonian problem calling the correct procedure for a given :code:`ed_mode`.
+    !
+    ! Setup the local Fock space maps used in the ED calculation for the normal operative mode.
+    ! All sectors dimensions, quantum numbers :math:`\{\vec{N_\uparrow},\vec{N_\downarrow}\}`, :math:`S_z`, :math:`N_{tot}`, 
+    ! twin sectors and list of requested eigensolutions for each sectors are defined here.
+    ! Identify Bath positions stride for a given value of :code:`bath_type`.
+    ! Determines the sector indices for :math:`\pm` 1-particle with either spin orientations.
     select case(ed_mode)
     case default
        call setup_global_normal()
@@ -624,6 +634,7 @@ contains
 
   !SUPERCONDUCTING
   subroutine setup_global_superc
+        !Setup the local Fock space maps used in the ED calculation for the **superc** operative mode. All sectors dimensions, quantum numbers, twin sectors and list of requested eigensolutions for each sectors are defined here. Identify Bath positions stride for a given value of :code:`bath_type`. Determines the sector indices for :math:`\pm` -particle with :math:`\sigma=\uparrow,\downarrow`.
     integer                                           :: i,isz,in,dim,isector,jsector
     integer                                           :: sz,iorb,jsz
     integer                                           :: unit,status,istate
@@ -742,6 +753,7 @@ contains
 
   !NON SU(2)
   subroutine setup_global_nonsu2
+        !Setup the local Fock space maps used in the ED calculation for the **nonsu2** operative mode. All sectors dimensions, quantum numbers, twin sectors and list of requested eigensolutions for each sectors are defined here. Identify Bath positions stride for a given value of :code:`bath_type`. Determines the sector indices for :math:`\pm` -particle with :math:`\sigma=\uparrow,\downarrow`.
     integer                                           :: i,dim,isector,jsector
     integer                                           :: in,jn,iorb,ispin
     integer                                           :: unit,status,istate
