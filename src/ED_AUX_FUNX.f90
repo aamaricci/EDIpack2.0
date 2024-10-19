@@ -73,7 +73,7 @@ MODULE ED_AUX_FUNX
 
   interface ed_set_suffix
      !This subroutine sets a suffix for the output files, stored in the global
-     !variable :code:`ed_file_suffix`. The suffix can be of type:
+     !variable :f:var:`ed_file_suffix`. The suffix can be of type:
      !
      !   * :code:`integer`: will be converted to string and padded with zeros
      !   * :code:`real`: will be converted to string
