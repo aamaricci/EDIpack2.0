@@ -13,8 +13,19 @@ MODULE ED_IO
   implicit none
   private
 
-  ! !Retrieve self-energy through routines:
+
   interface ed_get_sigma
+ !This function gets from the EDIpack2 library the value of the self-energy calculated 
+ !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+ !The self-energy is an array having the following possible dimensions:
+ !
+ !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`].  
+ !  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
+ !    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
+ !  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !
      module procedure :: ed_get_sigma_site_n3
      module procedure :: ed_get_sigma_site_n5
      module procedure :: ed_get_sigma_lattice_n3
@@ -22,8 +33,19 @@ MODULE ED_IO
      module procedure :: ed_get_sigma_lattice_n6
   end interface ed_get_sigma
 
-  !Retrieve imp GF through routines.
+
   interface ed_get_gimp
+ !This function gets from the EDIpack2 library the value of the impurity Green's function calculated 
+ !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+ !The impurity Green's function is an array having the following possible dimensions:
+ !
+ !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`].  
+ !  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
+ !    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
+ !  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !
      module procedure :: ed_get_gimp_site_n3
      module procedure :: ed_get_gimp_site_n5
      module procedure :: ed_get_gimp_lattice_n3

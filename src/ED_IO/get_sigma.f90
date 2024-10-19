@@ -1,7 +1,7 @@
 subroutine ed_get_sigma_site_n3(self,axis,type)
-  complex(8),dimension(:,:,:),intent(inout) :: self
-  character(len=*),optional                 :: axis
-  character(len=*),optional                 :: type
+  complex(8),dimension(:,:,:),intent(inout) :: self ! Self-energy matrix
+  character(len=*),optional                 :: axis ! Can be :f:var:`"m"` for Matsubara, :f:var:`"r"` for real
+  character(len=*),optional                 :: type ! Can be :f:var:`"n"` for Normal, :f:var:`"a"` for anomalous
   character(len=1)                          :: axis_
   character(len=1)                          :: type_
   axis_='m';if(present(axis))axis_=trim(axis)
@@ -76,7 +76,7 @@ end subroutine ed_get_sigma_site_n5
 
 subroutine ed_get_sigma_lattice_n3(self,nlat,axis,type)
   complex(8),dimension(:,:,:),intent(inout) :: self
-  integer,intent(in)                     :: nlat
+  integer,intent(in)                     :: nlat ! Number of inequivalent impurity sites for real-space DMFT
   character(len=*),optional              :: axis
   character(len=*),optional              :: type
   character(len=1)                       :: axis_
