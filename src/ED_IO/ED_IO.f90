@@ -15,11 +15,11 @@ MODULE ED_IO
 
 
   interface ed_get_sigma
- !This function gets from the EDIpack2 library the value of the self-energy calculated 
+ !| This function gets from the EDIpack2 library the value of the self-energy calculated 
  !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
- !The self-energy is an array having the following possible dimensions:
+ !| The self-energy is an array having the following possible dimensions:
  !
- !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`].  
+ !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
  !  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
  !    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
  !  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
@@ -37,9 +37,10 @@ MODULE ED_IO
   interface ed_get_gimp
  !This function gets from the EDIpack2 library the value of the impurity Green's function calculated 
  !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+ !
  !The impurity Green's function is an array having the following possible dimensions:
  !
- !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`].  
+ !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
  !  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
  !    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
  !  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
@@ -53,8 +54,29 @@ MODULE ED_IO
      module procedure :: ed_get_gimp_lattice_n6
   end interface ed_get_gimp
 
-  !Retrieve imp GF_0 (G0_and) through routines.
+
+
   interface ed_get_g0imp
+ !| This function gets from the EDIpack2 library the value of the impurity non-interacting Green's function calculated 
+ !  on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+ !| It autonomously decides whether the system is single-impurity or real-space DMFT based on the :f:var:`bath` shape
+ !
+ !The impurity non-interacting Green's function is an array having the following possible dimensions:
+ ! 
+ !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`].  
+ !  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
+ !    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
+ !  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+ !
+ !The bath is an array having the following possible dimensions:
+ !
+ !  * [:f:var:`Nb`]. 
+ !  * [:f:var:`NLAT`, :f:var:`Nb`]
+ !
+ !Where :f:var:`Nb` is the length of the :f:var:`BATH` array.
+ !
      module procedure :: ed_get_g0imp_site_n3
      module procedure :: ed_get_g0imp_site_n5
      module procedure :: ed_get_g0imp_lattice_n3

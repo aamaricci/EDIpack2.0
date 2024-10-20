@@ -1,8 +1,8 @@
 subroutine ed_get_g0imp_site_n3(self,bath,axis,type)
-  complex(8),dimension(:,:,:),intent(inout)   :: self
-  real(8),dimension(:)                        :: bath
-  character(len=*),optional                   :: axis
-  character(len=*),optional                   :: type
+  complex(8),dimension(:,:,:),intent(inout)   :: self ! Non-interacting Green's function matrix
+  real(8),dimension(:)                        :: bath ! The bath vector
+  character(len=*),optional                   :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
+  character(len=*),optional                   :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
   character(len=1)                            :: axis_
   character(len=1)                            :: type_
   complex(8),dimension(:,:,:,:,:),allocatable :: g0

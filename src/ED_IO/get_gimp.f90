@@ -1,5 +1,5 @@
 subroutine ed_get_gimp_site_n3(self,axis,type)
-  complex(8),dimension(:,:,:),intent(inout) :: self ! Self-energy matrix
+  complex(8),dimension(:,:,:),intent(inout) :: self ! Green's function matrix
   character(len=*),optional                 :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
   character(len=*),optional                 :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
   character(len=1)                          :: axis_
