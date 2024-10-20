@@ -1,3 +1,14 @@
+EDIpack2.0 Fortran Module
+###########################
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/edipack2
+
+
 General 
 ###########################
 
@@ -66,14 +77,3 @@ Main
    structure/chifunctions
    structure/observables
 
-
-
-EDIpack2
-###########################
-
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   structure/edipack2
