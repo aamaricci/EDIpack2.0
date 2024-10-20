@@ -63,7 +63,7 @@ MODULE ED_IO
  !
  !The impurity non-interacting Green's function is an array having the following possible dimensions:
  ! 
- !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`].  
+ !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]  
  !  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
  !    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
  !  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
@@ -72,7 +72,7 @@ MODULE ED_IO
  !
  !The bath is an array having the following possible dimensions:
  !
- !  * [:f:var:`Nb`]. 
+ !  * [:f:var:`Nb`] 
  !  * [:f:var:`NLAT`, :f:var:`Nb`]
  !
  !Where :f:var:`Nb` is the length of the :f:var:`BATH` array.
