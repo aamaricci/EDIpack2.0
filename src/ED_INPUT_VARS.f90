@@ -93,9 +93,9 @@ MODULE ED_INPUT_VARS
   integer              :: cg_grad             !gradient evaluation: 0=analytic, 1=numeric
   integer              :: cg_Niter            !Max number of iteration in the fit
   real(8)              :: cg_Ftol             !Tolerance in the cg fit
-  integer              :: cg_stop             !fit stop condition:0-3, 0=C1.AND.C2, 1=C1, 2=C2 with C1=|F_n-1 -F_n|<tol*(1+F_n), C2=||x_n-1 -x_n||<tol*(1+||x_n||).
+  integer              :: cg_stop             !fit stop condition:0-3, 0=C1.AND.C2, 1=C1, 2=C2 with C1= :math:`\vert F_{n-1} -F_{n} \vert < tol*(1+F_{n})`, C2= :math:`\vert\vert x_{n-1} -x_{n} \vert\vert <tol*(1+ \vert\vert x_{n} \vert\vert`).
   integer              :: cg_Weight           !CGfit mode 0=1, 1=1/n , 2=1/w_n weight
-  integer              :: cg_pow              !fit power to generalize the distance as |G0 - G0and|**cg_pow
+  integer              :: cg_pow              !fit power to generalize the distance as  :math:`\vert G0 - G0_{and} \vert ^{cg\_pow}`
   character(len=12)    :: cg_norm             !frobenius/elemental (for now only in general bath)
   logical              :: cg_minimize_ver     !flag to pick old (Krauth) or new (Lichtenstein) version of the minimize CG routine
   real(8)              :: cg_minimize_hh      !unknown parameter used in the CG minimize procedure.  

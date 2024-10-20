@@ -16,7 +16,7 @@ MODULE ED_IO
 
   interface ed_get_sigma
  !| This subrotine gets from the EDIpack2 library the value of the self-energy calculated 
- !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+ ! on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
  !| The self-energy is an array having the following possible dimensions:
  !
  !  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
@@ -58,7 +58,7 @@ MODULE ED_IO
 
   interface ed_get_g0imp
  !| This subroutine gets from the EDIpack2 library the value of the impurity non-interacting Green's function calculated 
- !  on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+ ! on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
  !| It autonomously decides whether the system is single-impurity or real-space DMFT based on the :f:var:`bath` shape
  !
  !The impurity non-interacting Green's function is an array having the following possible dimensions:
