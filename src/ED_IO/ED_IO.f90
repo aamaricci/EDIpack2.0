@@ -15,7 +15,7 @@ MODULE ED_IO
 
 
   interface ed_get_sigma
- !| This function gets from the EDIpack2 library the value of the self-energy calculated 
+ !| This subrotine gets from the EDIpack2 library the value of the self-energy calculated 
  !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
  !| The self-energy is an array having the following possible dimensions:
  !
@@ -35,7 +35,7 @@ MODULE ED_IO
 
 
   interface ed_get_gimp
- !This function gets from the EDIpack2 library the value of the impurity Green's function calculated 
+ !This subroutine gets from the EDIpack2 library the value of the impurity Green's function calculated 
  !on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
  !
  !The impurity Green's function is an array having the following possible dimensions:
@@ -57,7 +57,7 @@ MODULE ED_IO
 
 
   interface ed_get_g0imp
- !| This function gets from the EDIpack2 library the value of the impurity non-interacting Green's function calculated 
+ !| This subroutine gets from the EDIpack2 library the value of the impurity non-interacting Green's function calculated 
  !  on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
  !| It autonomously decides whether the system is single-impurity or real-space DMFT based on the :f:var:`bath` shape
  !
@@ -117,6 +117,15 @@ MODULE ED_IO
 
   !Observables
   interface ed_get_dens
+ !This subroutine gets from the EDIpack2 library the value of the charge density and passes it to the user.
+ !
+ !The :f:var:`self` variable can have the following timensions:
+ ! 
+ !  * scalar: if :f:var:`iorb` is provided for single-impurity DMFT, density for that orbital
+ !  * [:f:var:`NORB`]: if no optional variable is provided for single-impurity DMFT, density for all orbitals
+ !  * [:f:var:`nlat`]: if :f:var:`iorb` (default = 1) is provided for real-space DMFT with :f:var:`nlat` impurities, density for that orbital for all impurity sites
+ !  * [:f:var:`nlat`, :f:var:`NORB`]: if :f:var:`nlat` is provided for real-space DMFT, returns the density for all impurity sites and orbitals
+ !
      module procedure :: ed_get_dens_n0
      module procedure :: ed_get_dens_n1
      module procedure :: ed_get_dens_n2
