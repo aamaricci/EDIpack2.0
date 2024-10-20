@@ -1,6 +1,3 @@
 the following folders contain patched version of available code:
 
-- f2py contains a patched version of the numpy-provided f2py software, with modified crackfortran to adapt to our syntax for variable declarations
-
-- sphinxfortran contains a patched version of [https://gitlab.com/l_sim/sphinx-fortran](https://gitlab.com/l_sim/sphinx-fortran), with some modifications on how the interfaces are processed
-
+- sphinxfortran contains a patched version of (https://gitlab.com/l_sim/sphinx-fortran), with some modifications on how the interfaces are processed. It also contains a modified version of crackfortran from the numpy.f2py repo (https://github.com/numpy/numpy/tree/main/numpy/f2py) adapted to work well with sphinxfortran.
