@@ -50,33 +50,6 @@ Input/Output
    structure/io/*
 
 
-Normal
-###########################
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   structure/normal/*
-
-Superc
-###########################
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   structure/superc/*
-
-
-NonSU2
-###########################
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   structure/nonsu2/*
 
    
 Main
@@ -89,7 +62,7 @@ Main
 
    structure/hamiltonian
    structure/diag
-   structure/greenfunctions
+   structure/greensfunctions
    structure/chifunctions
    structure/observables
 
