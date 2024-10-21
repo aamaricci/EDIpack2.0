@@ -1,4 +1,4 @@
-Bath
+Core bath routines
 ============================
 
 How the DMFT bath is implemented

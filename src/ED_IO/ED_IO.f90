@@ -119,7 +119,7 @@ MODULE ED_IO
   interface ed_get_dens
  !This subroutine gets from the EDIpack2 library the value of the charge density and passes it to the user.
  !
- !The :f:var:`self` variable can have the following timensions:
+ !The :f:var:`self` variable can have the following dimensions:
  ! 
  !  * scalar: if :f:var:`iorb` is provided for single-impurity DMFT, density for that orbital
  !  * [:f:var:`NORB`]: if no optional variable is provided for single-impurity DMFT, density for all orbitals
@@ -132,6 +132,16 @@ MODULE ED_IO
   end interface ed_get_dens
 
   interface ed_get_mag
+ !This subroutine gets from the EDIpack2 library the value of the magnetization and passes it to the user.
+ !
+ !The :f:var:`self` variable can have the following dimensions:
+ ! 
+ !  * scalar: if :f:var:`component` and :f:var:`iorb` are provided for single-impurity DMFT, given magnetization component for that orbital
+ !  * [:f:var:`NORB`]: for single-impurity DMFT, one magnetization component for all orbitals
+ !  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities, magnetization for that orbital for all impurity sites
+ !  * [:f:var:`nlat`, :f:var:`NORB`]: if :f:var:`nlat` is provided for real-space DMFT, one magnetization component for all orbitals and impurity sites
+ !  * [:f:var:`nlat`, :code:`3`, :f:var:`NORB`]: if :f:var:`nlat` is provided for real-space DMFT, all magnetization components for all orbitals and sites
+ !
      module procedure :: ed_get_mag_n0
      module procedure :: ed_get_mag_n1
      module procedure :: ed_get_mag_n2

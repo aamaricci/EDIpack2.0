@@ -1,6 +1,6 @@
-Bath
+Bath Dimension routines
 ============================
 
-How the DMFT bath is implemented
+Check / operate on bath dimensions
 
 .. f:automodule::   ed_bath

@@ -1,7 +1,7 @@
 subroutine ed_get_mag_n0(self,component,iorb)
-  real(8) :: self
-  character(len=1),optional :: component
-  integer,optional          :: iorb
+  real(8) :: self !Magnetization
+  character(len=1),optional :: component !Component of the magnetization, can be :code:`"x"`, :code:`"y"`, :code:`"z"` (default :code:`"z"` )
+  integer,optional          :: iorb !Orbital (default :code:`1`)
   !
   integer                   :: iorb_
   character(len=1)          :: char
@@ -21,7 +21,8 @@ end subroutine ed_get_mag_n0
 subroutine ed_get_mag_n1(self,component,iorb,Nlat)
   real(8),dimension(:)     :: self
   character(len=1),optional :: component
-  integer,optional          :: iorb,Nlat
+  integer,optional          :: iorb
+  integer,optional          :: Nlat !Number of inequivalent impurities for real-space DMFT
   !
   integer                   :: iorb_
   character(len=1)          :: char

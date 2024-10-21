@@ -87,7 +87,9 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 
-fortran_src=[os.path.abspath('../src/*.f90'),os.path.abspath('../src/ED_IO/*.f90')]
+fortran_src=[os.path.abspath('../src/*.f90'),
+             os.path.abspath('../src/ED_IO/*.f90'),
+             os.path.abspath('../src/ED_BATH/*.f90'),]
 
 #DEFAULT
 fortran_ext=['f90', 'f95']

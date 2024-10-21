@@ -1,6 +1,6 @@
-Bath
+Bath Auxiliary routines
 ============================
 
-How the DMFT bath is implemented
+Auxiliary functions for the bath
 
 .. f:automodule::   ed_bath
