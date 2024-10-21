@@ -7,7 +7,7 @@ Installation is available using CMake. In the current release the
 library enables standard Fortran API and Python API `EDIpy2`. 
 
 
-Building EDIpack2.0
+Building
 ======================
 
 We assume that `SciFortran` and `MPI` have been correctly installed
@@ -77,7 +77,7 @@ additional variables (default values between `< >`, optional in `[ ]`):
 
 
 
-Install EDIpack2.0
+Install
 ======================
 
 System-wide installation is completed after the build step using either:
@@ -127,7 +127,7 @@ or
 
 
 
-Python API: EDIpy2 
+Install Python API
 ======================
 The `edipy2` python module is installable from this folder via:
 

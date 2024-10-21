@@ -110,7 +110,7 @@ Quick Start
 EDIpack2.0
 ======================
 
-:doc:`structure`
+:doc:`edipack2`
      An overview of the structure of the library and a detailed
      description of the relevant modules.
 
@@ -144,7 +144,7 @@ EDIpy2
    :maxdepth: 2
    :hidden:
       
-   structure
+   edipack2
 
 
 .. toctree::
