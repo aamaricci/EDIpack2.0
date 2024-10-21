@@ -1,0 +1,797 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input / Output Functions &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7574a189" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Hamiltonian" href="../hamiltonian.html" />
+    <link rel="prev" title="Bath User routines" href="../bath/ed_bath_user.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/quickstart.html">Quick Start</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/examples.html">Examples</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2.0</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../edipack2.html">EDIpack2.0 Library</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../structure.html">General</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../general/ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/ed_setup.html">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/ed_vars_global.html">Global Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../structure.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../classes/ed_eigenspace.html">EigenSpace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../classes/ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../structure.html#sectors">Sectors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../structure.html#bath">Bath</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath.html">Bath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_aux.html">Bath Auxiliary routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_dim.html">Bath Dimension routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_dmft.html">Core bath routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_fit.html">Bath Fit routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_functions.html">Bath frequency-dependent routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_replica.html">Bath Replica routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath/ed_bath_user.html">Bath User routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../structure.html#input-output">Input/Output</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../structure.html#main">Main</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../hamiltonian.html">Hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../greensfunctions.html">Green’s Function calculation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../chifunctions.html">Susceptibilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../structure.html#edipack2">EDIpack2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../edipack2.html">EDIpack2: Fortran API</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../edipy2.html">Python API for EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#beta"><code class="docutils literal notranslate"><span class="pre">beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Jh"><code class="docutils literal notranslate"><span class="pre">Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#dmft_error"><code class="docutils literal notranslate"><span class="pre">dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#ed_total_ud"><code class="docutils literal notranslate"><span class="pre">ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#ed_twin"><code class="docutils literal notranslate"><span class="pre">ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#eps"><code class="docutils literal notranslate"><span class="pre">eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Jx"><code class="docutils literal notranslate"><span class="pre">Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Jp"><code class="docutils literal notranslate"><span class="pre">Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Lfloat"><code class="docutils literal notranslate"><span class="pre">Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Lmats"><code class="docutils literal notranslate"><span class="pre">Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#LOGfile"><code class="docutils literal notranslate"><span class="pre">LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Lpos"><code class="docutils literal notranslate"><span class="pre">Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Ltau"><code class="docutils literal notranslate"><span class="pre">Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Nbath"><code class="docutils literal notranslate"><span class="pre">Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Nloop"><code class="docutils literal notranslate"><span class="pre">Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Norb"><code class="docutils literal notranslate"><span class="pre">Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Nph"><code class="docutils literal notranslate"><span class="pre">Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#nread"><code class="docutils literal notranslate"><span class="pre">nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Nspin"><code class="docutils literal notranslate"><span class="pre">Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Nsuccess"><code class="docutils literal notranslate"><span class="pre">Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#sb_field"><code class="docutils literal notranslate"><span class="pre">sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Uloc"><code class="docutils literal notranslate"><span class="pre">Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#Ust"><code class="docutils literal notranslate"><span class="pre">Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#wini"><code class="docutils literal notranslate"><span class="pre">wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#wfin"><code class="docutils literal notranslate"><span class="pre">wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#xmin"><code class="docutils literal notranslate"><span class="pre">xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#xmax"><code class="docutils literal notranslate"><span class="pre">xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#xmu"><code class="docutils literal notranslate"><span class="pre">xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/functions.html">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/2_bath.html">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.build_gimp"><code class="docutils literal notranslate"><span class="pre">build_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.build_sigma"><code class="docutils literal notranslate"><span class="pre">build_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../edipack2.html">EDIpack2.0 Library</a></li>
+          <li class="breadcrumb-item"><a href="../../structure.html">General</a></li>
+      <li class="breadcrumb-item active">Input / Output Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/structure/io/ed_io.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="f/ed_io">
+<span id="input-output-functions"></span><h1>Input / Output Functions<a class="headerlink" href="#f/ed_io" title="Link to this heading"></a></h1>
+<p>The module <code class="code docutils literal notranslate"><span class="pre">ED_IO</span></code> contains a set of functions that retrieve quantities such as Green’s function, self-energy and observables and pass them to the user.</p>
+<p class="rubric">Quick access</p>
+<dl class="field-list simple">
+<dt class="field-odd">Routines<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#f/ed_io/ed_build_gimp" title="f/ed_io/ed_build_gimp"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_build_gimp()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_build_sigma" title="f/ed_io/ed_build_sigma"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_build_sigma()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_delta" title="f/ed_io/ed_get_delta"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_delta()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_dens" title="f/ed_io/ed_get_dens"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_dens()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_density_matrix" title="f/ed_io/ed_get_density_matrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_density_matrix()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_docc" title="f/ed_io/ed_get_docc"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_docc()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_doubles" title="f/ed_io/ed_get_doubles"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_doubles()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_dph" title="f/ed_io/ed_get_dph"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_dph()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_dse" title="f/ed_io/ed_get_dse"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_dse()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_dund" title="f/ed_io/ed_get_dund"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_dund()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_dust" title="f/ed_io/ed_get_dust"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_dust()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_ehartree" title="f/ed_io/ed_get_ehartree"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_ehartree()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_eimp" title="f/ed_io/ed_get_eimp"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_eimp()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_eint" title="f/ed_io/ed_get_eint"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_eint()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_eknot" title="f/ed_io/ed_get_eknot"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_eknot()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_epot" title="f/ed_io/ed_get_epot"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_epot()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_g0and" title="f/ed_io/ed_get_g0and"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_g0and()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_g0imp" title="f/ed_io/ed_get_g0imp"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_g0imp()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_gimp" title="f/ed_io/ed_get_gimp"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_gimp()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_mag" title="f/ed_io/ed_get_mag"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_mag()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_phi" title="f/ed_io/ed_get_phi"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_phi()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_get_sigma" title="f/ed_io/ed_get_sigma"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_get_sigma()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_print_impchi" title="f/ed_io/ed_print_impchi"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_print_impchi()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_print_impd" title="f/ed_io/ed_print_impd"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_print_impd()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_print_impg" title="f/ed_io/ed_print_impg"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_print_impg()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_print_impg0" title="f/ed_io/ed_print_impg0"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_print_impg0()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_print_impgmatrix" title="f/ed_io/ed_print_impgmatrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_print_impgmatrix()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_print_impsigma" title="f/ed_io/ed_print_impsigma"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_print_impsigma()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_read_impgmatrix" title="f/ed_io/ed_read_impgmatrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_read_impgmatrix()</span></code></a>, <a class="reference internal" href="#f/ed_io/ed_read_impsigma" title="f/ed_io/ed_read_impsigma"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_read_impsigma()</span></code></a></p>
+</dd>
+</dl>
+<p class="rubric">Used modules</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../general/ed_input_vars.html#f/ed_input_vars" title="f/ed_input_vars"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_input_vars</span></code></a></p></li>
+<li><p><a class="reference internal" href="../general/ed_vars_global.html#f/ed_vars_global" title="f/ed_vars_global"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_vars_global</span></code></a></p></li>
+<li><p><a class="reference internal" href="../general/ed_aux_funx.html#f/ed_aux_funx" title="f/ed_aux_funx"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_aux_funx</span></code></a></p></li>
+<li><p><a class="reference internal" href="../general/ed_setup.html#f/ed_setup" title="f/ed_setup"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_setup</span></code></a></p></li>
+<li><p><a class="reference internal" href="../bath/ed_bath.html#f/ed_bath" title="f/ed_bath"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_bath</span></code></a></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_linalg</span></code></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_spin</span></code></p></li>
+<li><dl class="simple">
+<dt><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_arrays</span></code></dt><dd><ul>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_arrays/linspace()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_arrays/arange()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_iotools</span></code></dt><dd><ul>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/str()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/reg()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/free_unit()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/splot()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/sread()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_misc</span></code></dt><dd><ul>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_misc/assert_shape()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_sigma">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">axis</span></em>, <em class="sig-param"><span class="pre">type</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_sigma" title="Link to this definition"></a></dt>
+<dd><div class="line-block">
+<div class="line">This subrotine gets from the EDIpack2 library the value of the self-energy calculated
+on the Matsubara or real-frequency axis, with number of frequencies <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> or <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code> .</div>
+<div class="line">The self-energy is an array having the following possible dimensions:</div>
+</div>
+<blockquote>
+<div><ul class="simple">
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code><span class="math notranslate nohighlight">\(\cdot\)</span><code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>
+<span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>complex</em><em>, </em><em>inout</em><em>]</em> – Self-energy matrix</p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>, </em><em>in</em><em>]</em> – Number of inequivalent impurity sites for real-space DMFT</p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong><em> [</em><em>character(len=*)</em><em>]</em> – Can be <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;m&quot;</span></code> for Matsubara (default), <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;r&quot;</span></code> for real</p></li>
+<li><p><strong>type</strong><em> [</em><em>character(len=*)</em><em>]</em> – Can be <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;n&quot;</span></code> for Normal (default), <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;a&quot;</span></code> for anomalous</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_gimp">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_gimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">axis</span></em>, <em class="sig-param"><span class="pre">type</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_gimp" title="Link to this definition"></a></dt>
+<dd><p>This subroutine gets from the EDIpack2 library the value of the impurity Green’s function calculated
+on the Matsubara or real-frequency axis, with number of frequencies <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> or <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code> .</p>
+<p>The impurity Green’s function is an array having the following possible dimensions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code><span class="math notranslate nohighlight">\(\cdot\)</span><code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>
+<span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>complex</em><em>, </em><em>inout</em><em>]</em> – Green’s function matrix</p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>, </em><em>in</em><em>]</em> – Number of inequivalent impurity sites for real-space DMFT</p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong><em> [</em><em>character(len=*)</em><em>]</em> – Can be <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;m&quot;</span></code> for Matsubara (default), <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;r&quot;</span></code> for real</p></li>
+<li><p><strong>type</strong><em> [</em><em>character(len=*)</em><em>]</em> – Can be <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;n&quot;</span></code> for Normal (default), <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;a&quot;</span></code> for anomalous</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_g0imp">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_g0imp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">bath</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">axis</span></em>, <em class="sig-param"><span class="pre">type</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_g0imp" title="Link to this definition"></a></dt>
+<dd><div class="line-block">
+<div class="line">This subroutine gets from the EDIpack2 library the value of the impurity non-interacting Green’s function calculated
+on the Matsubara or real-frequency axis, with number of frequencies <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> or <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code> .</div>
+<div class="line">It autonomously decides whether the system is single-impurity or real-space DMFT based on the <code class="xref f f-var docutils literal notranslate"><span class="pre">bath</span></code> shape</div>
+</div>
+<p>The impurity non-interacting Green’s function is an array having the following possible dimensions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code><span class="math notranslate nohighlight">\(\cdot\)</span><code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>
+<span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NSPIN</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">LMATS</span></code> / <code class="xref f f-var docutils literal notranslate"><span class="pre">LREAL</span></code>]</p></li>
+</ul>
+</div></blockquote>
+<p>The bath is an array having the following possible dimensions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">Nb</span></code>]</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NLAT</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">Nb</span></code>]</p></li>
+</ul>
+</div></blockquote>
+<p>Where <code class="xref f f-var docutils literal notranslate"><span class="pre">Nb</span></code> is the length of the <code class="xref f f-var docutils literal notranslate"><span class="pre">BATH</span></code> array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>complex</em><em>, </em><em>inout</em><em>]</em> – Non-interacting Green’s function matrix</p></li>
+<li><p><strong>bath</strong> (various shapes)<em> [</em><em>real</em><em>]</em> – The bath vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong><em> [</em><em>character(len=*)</em><em>]</em> – Can be <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;m&quot;</span></code> for Matsubara (default), <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;r&quot;</span></code> for real</p></li>
+<li><p><strong>type</strong><em> [</em><em>character(len=*)</em><em>]</em> – Can be <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;n&quot;</span></code> for Normal (default), <code class="xref f f-var docutils literal notranslate"><span class="pre">&quot;a&quot;</span></code> for anomalous</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_build_gimp">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_build_gimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">zeta</span></em>, <em class="sig-param"><span class="pre">gimp</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">fimp</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_build_gimp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeta</strong> (*)<em> [</em><em>complex</em><em>]</em></p></li>
+<li><p><strong>gimp</strong> (various shapes)<em> [</em><em>complex</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fimp</strong> (various shapes)<em> [</em><em>complex</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_build_sigma">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_build_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">zeta</span></em>, <em class="sig-param"><span class="pre">sigma</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">self</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_build_sigma" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeta</strong> (*)<em> [</em><em>complex</em><em>]</em></p></li>
+<li><p><strong>sigma</strong> (various shapes)<em> [</em><em>complex</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> (various shapes)<em> [</em><em>complex</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_g0and">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_g0and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">x</span></em>, <em class="sig-param"><span class="pre">bath_</span></em>, <em class="sig-param"><span class="pre">g0and</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">axis</span></em>, <em class="sig-param"><span class="pre">type</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_g0and" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (*)<em> [</em><em>complex</em><em>, </em><em>in</em><em>]</em></p></li>
+<li><p><strong>bath_</strong> (*)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>g0and</strong> (various shapes)<em> [</em><em>complex</em><em>]</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong><em> [</em><em>character(len=*)</em><em>]</em></p></li>
+<li><p><strong>type</strong><em> [</em><em>character(len=*)</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_delta">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">x</span></em>, <em class="sig-param"><span class="pre">bath_</span></em>, <em class="sig-param"><span class="pre">delta</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">axis</span></em>, <em class="sig-param"><span class="pre">type</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_delta" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (*)<em> [</em><em>complex</em><em>, </em><em>in</em><em>]</em></p></li>
+<li><p><strong>bath_</strong> (*)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>delta</strong> (various shapes)<em> [</em><em>complex</em><em>]</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong><em> [</em><em>character(len=*)</em><em>]</em></p></li>
+<li><p><strong>type</strong><em> [</em><em>character(len=*)</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_dens">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_dens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">iorb</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_dens" title="Link to this definition"></a></dt>
+<dd><p>This subroutine gets from the EDIpack2 library the value of the charge density and passes it to the user.</p>
+<p>The <code class="xref f f-var docutils literal notranslate"><span class="pre">self</span></code> variable can have the following dimensions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>scalar: if <code class="xref f f-var docutils literal notranslate"><span class="pre">iorb</span></code> is provided for single-impurity DMFT, density for that orbital</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>]: if no optional variable is provided for single-impurity DMFT, density for all orbitals</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code>]: if <code class="xref f f-var docutils literal notranslate"><span class="pre">iorb</span></code> (default = 1) is provided for real-space DMFT with <code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code> impurities, density for that orbital for all impurity sites</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>]: if <code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code> is provided for real-space DMFT, returns the density for all impurity sites and orbitals</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em> – The density value or array of values</p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>iorb</strong><em> [</em><em>integer</em><em>]</em> – the orbital index</p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em> – the number of inequivalent impurity sites for real-space DMFT</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_mag">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_mag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">component</span></em>, <em class="sig-param"><span class="pre">iorb</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_mag" title="Link to this definition"></a></dt>
+<dd><p>This subroutine gets from the EDIpack2 library the value of the magnetization and passes it to the user.</p>
+<p>The <code class="xref f f-var docutils literal notranslate"><span class="pre">self</span></code> variable can have the following dimensions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>scalar: if <code class="xref f f-var docutils literal notranslate"><span class="pre">component</span></code> and <code class="xref f f-var docutils literal notranslate"><span class="pre">iorb</span></code> are provided for single-impurity DMFT, given magnetization component for that orbital</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>]: for single-impurity DMFT, one magnetization component for all orbitals</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code>]: for real-space DMFT with <code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code> impurities, magnetization for that orbital for all impurity sites</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>]: if <code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code> is provided for real-space DMFT, one magnetization component for all orbitals and impurity sites</p></li>
+<li><p>[<code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code>, <code class="code docutils literal notranslate"><span class="pre">3</span></code>, <code class="xref f f-var docutils literal notranslate"><span class="pre">NORB</span></code>]: if <code class="xref f f-var docutils literal notranslate"><span class="pre">nlat</span></code> is provided for real-space DMFT, all magnetization components for all orbitals and sites</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em> – Magnetization</p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>component</strong><em> [</em><em>character(len=1)</em><em>]</em> – Component of the magnetization, can be <code class="code docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> (default <code class="code docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> )</p></li>
+<li><p><strong>iorb</strong><em> [</em><em>integer</em><em>]</em> – Orbital (default <code class="code docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em> – Number of inequivalent impurities for real-space DMFT</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_docc">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_docc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">iorb</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_docc" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>iorb</strong><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_phi">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_phi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">iorb</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_phi" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>iorb</strong><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_eimp">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_eimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_eimp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_epot">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_epot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_epot" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_eint">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_eint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_eint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_ehartree">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_ehartree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_ehartree" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_eknot">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_eknot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_eknot" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_doubles">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_doubles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_doubles" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_dust">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_dust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_dust" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_dund">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_dund</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_dund" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_dse">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_dse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_dse" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_dph">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_dph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_dph" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (various shapes)<em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_density_matrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_density_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">dm_</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_density_matrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dm_</strong> (various shapes)<em> [</em><em>complex</em><em>, </em><em>out,allocatable</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_read_impsigma">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_read_impsigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">nineq</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_read_impsigma" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nineq</strong><em> [</em><em>integer</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_quantum_soc_operators_single">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_quantum_soc_operators_single</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_quantum_soc_operators_single" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_quantum_soc_operators_lattice">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_quantum_soc_operators_lattice</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_quantum_soc_operators_lattice" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_get_neigen_total">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_get_neigen_total</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">nlii</span></em>, <em class="sig-param"><span class="pre">nlat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_get_neigen_total" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nlii</strong> (nlat)<em> [</em><em>integer</em><em>]</em></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nlat</strong><em> [</em><em>integer</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_print_impsigma">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_print_impsigma</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_print_impsigma" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_print_impg">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_print_impg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_print_impg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_print_impg0">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_print_impg0</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_print_impg0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_print_impd">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_print_impd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_print_impd" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_print_impchi">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_print_impchi</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_print_impchi" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_print_impgmatrix">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_print_impgmatrix</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="pre">file</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_print_impgmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong><em> [</em><em>character(len=*)</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_io/ed_read_impgmatrix">
+<em class="property"><span class="pre">subroutine</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_io/</span></span><span class="sig-name descname"><span class="pre">ed_read_impgmatrix</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="pre">file</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_io/ed_read_impgmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong><em> [</em><em>character(len=*)</em><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../bath/ed_bath_user.html" class="btn btn-neutral float-left" title="Bath User routines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../hamiltonian.html" class="btn btn-neutral float-right" title="Hamiltonian" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
