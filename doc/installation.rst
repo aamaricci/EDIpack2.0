@@ -135,10 +135,11 @@ The `edipy2` python module is installable from this folder via:
 		
     pip install .
 
-on some systems such as Debian >= 11 and Mac Os
 
-.. note:: 
-   If a virtual environment is not in use, the flag
+
+.. note::
+   On some systems such as Debian >= 11 and Mac Os,
+   and if a virtual environment is not in use, the flag
    `--break-system-packages` has to be set. This creates no issue
    since no distro is packaging this library.
    
