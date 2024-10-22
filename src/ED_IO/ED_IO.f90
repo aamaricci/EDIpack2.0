@@ -147,7 +147,7 @@ MODULE ED_IO
  !  * scalar: if :f:var:`iorb` is provided for single-impurity DMFT, density for that orbital
  !  * [:f:var:`norb`]: if no optional variable is provided for single-impurity DMFT, density for all orbitals
  !  * [:f:var:`nlat`]: if :f:var:`iorb` (default = 1) is provided for real-space DMFT with :f:var:`nlat` impurities, density for that orbital for all impurity sites
- !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, returns the density for all impurity sites and orbitals
+ !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, density for all impurity sites and orbitals
  !
      module procedure :: ed_get_dens_n0
      module procedure :: ed_get_dens_n1
@@ -172,6 +172,14 @@ MODULE ED_IO
   end interface ed_get_mag
 
   interface ed_get_docc
+ !This subroutine gets from the EDIpack2 library the value of the double occupation and passes it to the user.
+ !
+ !The :f:var:`self` variable can have the following dimensions:
+ ! 
+ !  * scalar: if :f:var:`iorb` is provided for single-impurity DMFT, dobule-occupation for that orbital
+ !  * [:f:var:`norb`]: if no optional variable is provided for single-impurity DMFT, double-occupation for all orbitals
+ !  * [:f:var:`nlat`]: if :f:var:`iorb` (default = 1) is provided for real-space DMFT with :f:var:`nlat` impurities, double-occupation for that orbital for all impurity sites
+ !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, double-occupation for all impurity sites and orbitals
      module procedure :: ed_get_docc_n0
      module procedure :: ed_get_docc_n1
      module procedure :: ed_get_docc_n2
