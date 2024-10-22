@@ -1,7 +1,7 @@
 subroutine rebuild_gimp_single_n3(zeta,gimp,fimp)
   complex(8),dimension(:)                     :: zeta !array of frequencies
-  complex(8),dimension(:,:,:)                    :: Gimp !impurity Green's function matrix (:f:var:`ED_MODE` = :code:`normal/nonsu2` ) 
-  complex(8),dimension(:,:,:),optional           :: Fimp !anomalous impurity Green's function matrix ( :f:var:`ED_MODE` = :code:`superc` )
+  complex(8),dimension(:,:,:)                    :: Gimp !impurity Green's function matrix (:f:var:`ed_mode` = :code:`normal/nonsu2` ) 
+  complex(8),dimension(:,:,:),optional           :: Fimp !anomalous impurity Green's function matrix ( :f:var:`ed_mode` = :code:`superc` )
   integer                                     :: i,L
   logical                                     :: check
   complex(8),dimension(:,:,:,:,:),allocatable :: gf,ff

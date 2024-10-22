@@ -11,7 +11,7 @@ MODULE ED_VARS_GLOBAL
 
 
   type H_operator
-     ! The matrix storing in the basis :code:`[Nspin,Nspin,Norb,Norb]` each element of the Matrix basis decomposing the replica/general bath Hamiltonian :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, where :math:`N_{basis}` is the dimension of the user defined basis.  
+     ! The matrix storing in the basis [:f:var:`nspin` , :f:var:`nspin` , :f:var:`nspin` , :f:var:`nspin` ] each element of the Matrix basis decomposing the replica/general bath Hamiltonian :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, where :math:`N_{basis}` is the dimension of the user defined basis.  
      complex(8),dimension(:,:,:,:),allocatable               :: O !Replica/General hamiltonian
   end type H_operator
 
@@ -19,17 +19,17 @@ MODULE ED_VARS_GLOBAL
      ! Effective bath component for the replica/general bath. Each istance of this type defines the parameters :math:`\vec{\lambda}` and the amplitudes :math:`\vec{V}`. The first is used to decompose the Hamiltonian of each element of the bath :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, the latter describes the hopping from/to the impurity.
      real(8)                                                 :: v
      real(8),dimension(:),allocatable                        :: vg
-     real(8),dimension(:),allocatable                        :: lambda ![Nsym]
+     real(8),dimension(:),allocatable                        :: lambda ![:f:var:`nsym`]
   end type effective_bath_component
 
   type effective_bath
-     ! This structure describes the (effective) discretized bath used in the contruct the Hamiltonian of the quantum impurity system. Each element of this structure is allocated and used according the value of :code:`ed_mode=normal,superc,nonsu2` and :code:`bath_type=normal,hybrid,replica,general`.  
-     real(8),dimension(:,:,:),allocatable                    :: e !local energies [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
-     real(8),dimension(:,:,:),allocatable                    :: v !spin-keep hyb. [Nspin][Norb][Nbath]
-     real(8),dimension(:,:,:),allocatable                    :: d !SC amplitues   [Nspin][Norb][Nbath]/[Nspin][1][Nbath]
-     real(8),dimension(:,:,:),allocatable                    :: u !spin-flip hyb. [Nspin][Norb][Nbath] for :code:`ed_mode=nonsu2`
+     ! This structure describes the (effective) discretized bath used in the contruct the Hamiltonian of the quantum impurity system. Each element of this structure is allocated and used according the value of :f:var:`ed_mode` = :code:`normal,superc,nonsu2` and :f:var:`bath_type` = :code:`normal,hybrid,replica,general`.  
+     real(8),dimension(:,:,:),allocatable                    :: e !local energies [ :f:var:`nspin` ][ :f:var:`norb` ][ :f:var:`bath` ]/[ :f:var:`nspin` ][ :code:`1` ][ :f:var:`nspin` ]
+     real(8),dimension(:,:,:),allocatable                    :: v !spin-keep hyb. [ :f:var:`nspin` ][ :f:var:`norb` ][ :f:var:`nbath` ]
+     real(8),dimension(:,:,:),allocatable                    :: d !SC amplitues   [ :f:var:`nspin` ][ :f:var:`norb` ][ :f:var:`nbath` ]/[ :f:var:`norb` ][ :code:`1` ][ :f:var:`norb` ]
+     real(8),dimension(:,:,:),allocatable                    :: u !spin-flip hyb. [ :f:var:`nspin` ][ :f:var:`norb` ][ :f:var:`nbath` ] for :f:var:`ed_mode` = :code:`nonsu2`
      integer                                                 :: Nbasis  !The replica/general Matrix basis dimension     
-     type(effective_bath_component),dimension(:),allocatable :: item    ![Nbath] Replica/General bath components, V included
+     type(effective_bath_component),dimension(:),allocatable :: item    ![ :f:var:`nbath` ] Replica/General bath components, V included
      logical                                                 :: status=.false.
   end type effective_bath
 

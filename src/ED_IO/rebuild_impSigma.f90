@@ -1,7 +1,7 @@
 subroutine rebuild_sigma_single_n3(zeta,sigma,self)
   complex(8),dimension(:)                     :: zeta !array of frequencies
-  complex(8),dimension(:,:,:)                    :: Sigma !self-energy matrix (:f:var:`ED_MODE` = :code:`normal/nonsu2` ) 
-  complex(8),dimension(:,:,:),optional           :: Self !anomalous self-energy matrix ( :f:var:`ED_MODE` = :code:`superc` )
+  complex(8),dimension(:,:,:)                    :: Sigma !self-energy matrix (:f:var:`ed_mode` = :code:`normal/nonsu2` ) 
+  complex(8),dimension(:,:,:),optional           :: Self !anomalous self-energy matrix ( :f:var:`ed_mode` = :code:`superc` )
   integer                                     :: i,L
   logical                                     :: check
   complex(8),dimension(:,:,:,:,:),allocatable :: sn,sa

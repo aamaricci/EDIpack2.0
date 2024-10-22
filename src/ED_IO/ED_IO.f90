@@ -72,8 +72,8 @@ MODULE ED_IO
 !
 !The bath is an array having the following possible dimensions:
 !
-!  * [:f:var:`nb`] 
-!  * [:f:var:`nlat`, :f:var:`nb`]
+!  * [:f:var:`nb`] for single-impurity DMFT
+!  * [:f:var:`nlat`, :f:var:`nb`] for real-space DMFT, with :f:var:`nlat` the number of inequivalent impurity sites
 !
 !Where :f:var:`nb` is the length of the :f:var:`bath` array.
  !

@@ -21,7 +21,7 @@ MODULE ED_AUX_FUNX
     !   * [:f:var:`nlat` , :f:var:`nspin` :math:`\cdot` :f:var:`norb` , :f:var:`nspin` :math:`\cdot` :f:var:`norb` ]: single-impurity case, 3-dimensional array.
     !   * [:f:var:`nlat` , :f:var:`nspin` , :f:var:`nspin` , :f:var:`norb` , :f:var:`orb` ]: single-impurity case, 5-dimensional array.
     !
-    !In the case of real-space DMFT, the number of impurities :code:`Nlat` must be provided.
+    !In the case of real-space DMFT, the number of impurities :f:var:`nlat` must be provided.
     !
      module procedure :: ed_set_Hloc_single_N2
      module procedure :: ed_set_Hloc_single_N4
