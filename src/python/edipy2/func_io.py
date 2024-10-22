@@ -680,9 +680,10 @@ def build_gimp(self,zeta,ilat=None,ishape=None,typ="n"):
       * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
       * :code:`3`: in the single-impurity case, it will return an array of the shape \
       :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, len(zeta)]`. In the real-space DMFT \
-      case, it will return an array of the shape :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*\
-      ed.Nspin*ed.Norb, len(zeta)]`. :code:`Nlat` will be determined from the module \
-      by assessing the shape of Hloc. If :code:`ilat` is set, ValueError is returned.
+      case, it will return an array of the shape \
+      :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, len(zeta)]`. \
+      :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
+      If :code:`ilat` is set, ValueError is returned.
       * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
       :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, len(zeta)`. :code:`Nlat` will \
       be determined from the module by assessing the shape of Hloc. If :code:`ilat` \
