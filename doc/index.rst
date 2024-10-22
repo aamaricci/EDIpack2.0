@@ -153,6 +153,12 @@ EDIpy2
    :hidden:
 
    edipy2
+   
+.. toctree::
+   :caption: External Links
+   
+   EDIpack2.0 on GitHub <https://github.com/aamaricci/EDIpack2.0>
+   SciFortran on GitHub <https://github.com/SciFortran/SciFortran>
 
 
 
