@@ -11,7 +11,7 @@ MODULE ED_VARS_GLOBAL
 
 
   type H_operator
-     ! The matrix storing in the basis [:f:var:`nspin` , :f:var:`nspin` , :f:var:`nspin` , :f:var:`nspin` ] each element of the Matrix basis decomposing the replica/general bath Hamiltonian :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, where :math:`N_{basis}` is the dimension of the user defined basis.  
+     ! The matrix storing in the basis [:f:var:`nspin` , :f:var:`nspin` , :f:var:`norb` , :f:var:`norb` ] each element of the Matrix basis decomposing the replica/general bath Hamiltonian :math:`H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i`, where :math:`N_{basis}` is the dimension of the user defined basis.  
      complex(8),dimension(:,:,:,:),allocatable               :: O !Replica/General hamiltonian
   end type H_operator
 
