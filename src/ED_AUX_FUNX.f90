@@ -277,7 +277,7 @@ contains
   !   the sign of |out> has the phase convention, pos labels the sites
   !+-------------------------------------------------------------------+
   subroutine c(pos,in,out,fsgn)
-    !Fermionic destruction operator, used in the construction of the sector Hamiltonian. The :code:`C` operator reduces a bit 1 at :code:`pos` to 0 for the bit representation of the :code:`In`, evaluates the corresponding fermionic sign :code:`fsign` as :math:`\sum_{i<pos}(-1)^{i}`. The obtained bitset identifies a new integer :code:`Out`. 
+    !Fermionic destruction operator, used in the construction of the sector Hamiltonian. The :f:func:`c` operator reduces a bit 1 at :f:var:`pos` to 0 for the bit representation of the :f:var:`in`, evaluates the corresponding fermionic sign :f:var:`fsign` as :math:`\sum_{i<pos}(-1)^{i}`. The obtained bitset identifies a new integer :f:var:`Out`. 
     !
     integer,intent(in)    :: pos
     integer,intent(in)    :: in
@@ -293,7 +293,7 @@ contains
   end subroutine c
 
   subroutine cdg(pos,in,out,fsgn)
-    !Fermionic creation operator, used in the construction of the sector Hamiltonian. The :code:`Cdg` operator increases a bit 0 at :code:`pos` to 1 for the bit representation of the :code:`In`, evaluates the corresponding fermionic sign :code:`fsign` as :math:`\sum_{i<pos}(-1)^{i}`. The obtained bitset identifies a new integer :code:`Out`. 
+    !Fermionic creation operator, used in the construction of the sector Hamiltonian. The :f:func:`cdg` operator increases a bit 0 at :f:var:`pos` to 1 for the bit representation of the :f:var:`in`, evaluates the corresponding fermionic sign :f:var:`fsign` as :math:`\sum_{i<pos}(-1)^{i}`. The obtained bitset identifies a new integer :f:var:`out`. 
     !
     integer,intent(in)    :: pos
     integer,intent(in)    :: in
@@ -322,7 +322,7 @@ contains
   !+------------------------------------------------------------------+
 
   function bdecomp(i,Ntot) result(ivec)
-    !Binary decomposition of the integer :code:`i` in  :code:`Ntot` bits. The input integers represents a Fock state :math:`|i-1\rangle` with :math:`i=1,\dots,2^{2N_s}`. The resulting vector :code:`ivec` describes the state :math:`|n_1,n_2,\dots,n_{N_{tot}}\rangle` with :math:`n_i=0,1`. 
+    !Binary decomposition of the integer :f:var:`i` in  :f:var:`ntot` bits. The input integers represents a Fock state :math:`|i-1\rangle` with :math:`i=1,\dots,2^{2N_s}`. The resulting vector :f:var:`ivec` describes the state :math:`|n_1,n_2,\dots,n_{N_{tot}}\rangle` with :math:`n_i=0,1`. 
     integer :: Ntot,ivec(Ntot),l,i
     logical :: busy
     do l=0,Ntot-1
@@ -1220,14 +1220,14 @@ contains
   !PURPOSE  : 
   !+------------------------------------------------------------------+
   subroutine ed_search_variable(var,ntmp,converged)
-    !This function checks the value of the read density :code:`ntmp` against the desired value 
-    !:f:var:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
+    !This function checks the value of the read density :f:var:`ntmp` against the desired value 
+    !:f:var:`nread` (if different from zero) and adjusts :f:var:`var` accordingly (in a monotonous way).
     !
-    !The updated :f:var:`xmu` is saved in :code:`search_variable_iteration"//reg(ed_file_suffix)//".ed`
+    !The updated :f:var:`xmu` is saved in :f:var:`search_variable_iteration"//reg(ed_file_suffix)//".ed`
     !
-    !The converged :f:var:`xmu` is saved in :code:`var_compressibility.restart`
+    !The converged :f:var:`xmu` is saved in :f:var:`var_compressibility.restart`
     !
-    !If a file :code:`var_compressibility.used` is present, its value is read
+    !If a file :f:var:`var_compressibility.used` is present, its value is read
 
     real(8),intent(inout) :: var !the variable to be adjusted
     real(8),intent(in)    :: ntmp !the density value at the given iteration
@@ -1352,7 +1352,7 @@ contains
 
 
   subroutine search_chemical_potential(var,ntmp,converged)
-    !This function checks the value of the read density :code:`ntmp` against the desired value 
+    !This function checks the value of the read density :f:var:`ntmp` against the desired value 
     !:f:var:`nread` (if different from zero) and adjusts :f:var:`xmu` accordingly (in a monotonous way).
     !
     !The updated :f:var:`xmu` is saved in :code:`search_mu_iteration"//reg(ed_file_suffix)//".ed`
