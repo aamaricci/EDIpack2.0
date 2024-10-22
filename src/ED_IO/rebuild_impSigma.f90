@@ -1,7 +1,7 @@
 subroutine rebuild_sigma_single_n3(zeta,sigma,self)
-  complex(8),dimension(:)                     :: zeta
-  complex(8),dimension(:,:,:)                    :: Sigma
-  complex(8),dimension(:,:,:),optional           :: Self
+  complex(8),dimension(:)                     :: zeta !array of frequencies
+  complex(8),dimension(:,:,:)                    :: Sigma !self-energy matrix (:f:var:`ED_MODE` = :code:`normal/nonsu2` ) 
+  complex(8),dimension(:,:,:),optional           :: Self !anomalous self-energy matrix ( :f:var:`ED_MODE` = :code:`superc` )
   integer                                     :: i,L
   logical                                     :: check
   complex(8),dimension(:,:,:,:,:),allocatable :: sn,sa
@@ -87,7 +87,7 @@ end subroutine rebuild_sigma_single_n5
 
 subroutine rebuild_sigma_ineq_n3(zeta,Nlat,sigma,self)
   complex(8),dimension(:)                       :: zeta
-  integer                                       :: Nlat
+  integer                                       :: Nlat !Number of inequivalent impurity sites for real-space DMFT
   complex(8),dimension(:,:,:)                      :: Sigma
   complex(8),dimension(:,:,:),optional             :: Self
   integer                                       :: i,ilat,Nineq,L

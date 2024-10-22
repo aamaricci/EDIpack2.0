@@ -148,7 +148,7 @@ try:
     add_global_variable(global_env, "ed_total_ud", c_bool.in_dll(libedi2py, "ed_total_ud"), "value")
     add_global_variable(global_env, "ed_twin", c_bool.in_dll(libedi2py, "ed_twin"), "value")
 except:
-    print("Error loading .so library")
+    print("Could not load edipy2 library. Is the python module correctly installed?")
 
 
 ######################################
