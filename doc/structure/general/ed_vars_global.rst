@@ -1,7 +1,7 @@
 Global Variables
 =======================
 
-The module :code:`ED_VARS_GLOBAL` contains all the simple types and
+The module :f:mod:`ED_VARS_GLOBAL` contains all the simple types and
 variables shared throughout the code.  
 
 
