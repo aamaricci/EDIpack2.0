@@ -16,15 +16,15 @@ MODULE ED_IO
 
   interface ed_get_sigma
 !| This subrotine gets from the EDIpack2 library the value of the self-energy calculated 
-! on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+! on the Matsubara or real-frequency axis, with number of frequencies :f:var:`lmats` or :f:var:`lreal` .
 !| The self-energy is an array having the following possible dimensions:
 !
-!  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
-!    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
-!  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nlat` :math:`\cdot` :f:var:`nspin` 
+!    :math:`\cdot` :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`] 
+!  * [:f:var:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
 !
      module procedure :: ed_get_sigma_site_n3
      module procedure :: ed_get_sigma_site_n5
@@ -36,16 +36,16 @@ MODULE ED_IO
 
   interface ed_get_gimp
 !This subroutine gets from the EDIpack2 library the value of the impurity Green's function calculated 
-!on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+!on the Matsubara or real-frequency axis, with number of frequencies :f:var:`lmats` or :f:var:`lreal` .
 !
 !The impurity Green's function is an array having the following possible dimensions:
 !
-!  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
-!    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
-!  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nlat` :math:`\cdot` :f:var:`nspin` 
+!    :math:`\cdot` :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`] 
+!  * [:f:var:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
 !
      module procedure :: ed_get_gimp_site_n3
      module procedure :: ed_get_gimp_site_n5
@@ -58,24 +58,24 @@ MODULE ED_IO
 
   interface ed_get_g0imp
 !| This subroutine gets from the EDIpack2 library the value of the impurity non-interacting Green's function calculated 
-! on the Matsubara or real-frequency axis, with number of frequencies :f:var:`LMATS` or :f:var:`LREAL` .
+! on the Matsubara or real-frequency axis, with number of frequencies :f:var:`lmats` or :f:var:`lreal` .
 !| It autonomously decides whether the system is single-impurity or real-space DMFT based on the :f:var:`bath` shape
 !
 !The impurity non-interacting Green's function is an array having the following possible dimensions:
 ! 
-!  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]  
-!  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
-!    :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`] 
-!  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
-!  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :f:var:`LMATS` / :f:var:`LREAL`]
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]  
+!  * [:f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nlat` :math:`\cdot` :f:var:`nspin` 
+!    :math:`\cdot` :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`] 
+!  * [:f:var:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
+!  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
 !
 !The bath is an array having the following possible dimensions:
 !
-!  * [:f:var:`Nb`] 
-!  * [:f:var:`NLAT`, :f:var:`Nb`]
+!  * [:f:var:`nb`] 
+!  * [:f:var:`nlat`, :f:var:`nb`]
 !
-!Where :f:var:`Nb` is the length of the :f:var:`BATH` array.
+!Where :f:var:`nb` is the length of the :f:var:`bath` array.
  !
      module procedure :: ed_get_g0imp_site_n3
      module procedure :: ed_get_g0imp_site_n5
@@ -91,12 +91,12 @@ MODULE ED_IO
 !
 !The impurity Green's function is an array having the following possible dimensions:
 ! 
-!  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :code:`size(zeta)`]  
-!  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
-!    :math:`\cdot` :f:var:`NORB`, :code:`size(zeta)`]  
-!  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :code:`size(zeta)`] 
-!  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :code:`size(zeta)`]
-!  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :code:`size(zeta)`]
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :code:`size(zeta)`]  
+!  * [:f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nlat` :math:`\cdot` :f:var:`nspin` 
+!    :math:`\cdot` :f:var:`norb`, :code:`size(zeta)`]  
+!  * [:f:var:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :code:`size(zeta)`] 
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :code:`size(zeta)`]
+!  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :code:`size(zeta)`]
 !
      module procedure :: rebuild_gimp_single_n3
      module procedure :: rebuild_gimp_single_n5
@@ -111,12 +111,12 @@ MODULE ED_IO
 !
 !The self-energy is an array having the following possible dimensions:
 ! 
-!  * [:f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN`:math:`\cdot`:f:var:`NORB`, :code:`size(zeta)`]  
-!  * [:f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NLAT` :math:`\cdot` :f:var:`NSPIN` 
-!    :math:`\cdot` :f:var:`NORB`, :code:`size(zeta)`]  
-!  * [:f:var:`NLAT`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :f:var:`NSPIN` :math:`\cdot` :f:var:`NORB`, :code:`size(zeta)`] 
-!  * [:f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :code:`size(zeta)`]
-!  * [:f:var:`NLAT`, :f:var:`NSPIN`, :f:var:`NSPIN`, :f:var:`NORB`, :f:var:`NORB`, :code:`size(zeta)`]
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :code:`size(zeta)`]  
+!  * [:f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nlat` :math:`\cdot` :f:var:`nspin` 
+!    :math:`\cdot` :f:var:`norb`, :code:`size(zeta)`]  
+!  * [:f:var:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :code:`size(zeta)`] 
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :code:`size(zeta)`]
+!  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :code:`size(zeta)`]
 !
      module procedure :: rebuild_sigma_single_n3
      module procedure :: rebuild_sigma_single_n5
@@ -145,9 +145,9 @@ MODULE ED_IO
  !The :f:var:`self` variable can have the following dimensions:
  ! 
  !  * scalar: if :f:var:`iorb` is provided for single-impurity DMFT, density for that orbital
- !  * [:f:var:`NORB`]: if no optional variable is provided for single-impurity DMFT, density for all orbitals
+ !  * [:f:var:`norb`]: if no optional variable is provided for single-impurity DMFT, density for all orbitals
  !  * [:f:var:`nlat`]: if :f:var:`iorb` (default = 1) is provided for real-space DMFT with :f:var:`nlat` impurities, density for that orbital for all impurity sites
- !  * [:f:var:`nlat`, :f:var:`NORB`]: if :f:var:`nlat` is provided for real-space DMFT, returns the density for all impurity sites and orbitals
+ !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, returns the density for all impurity sites and orbitals
  !
      module procedure :: ed_get_dens_n0
      module procedure :: ed_get_dens_n1
@@ -160,10 +160,10 @@ MODULE ED_IO
  !The :f:var:`self` variable can have the following dimensions:
  ! 
  !  * scalar: if :f:var:`component` and :f:var:`iorb` are provided for single-impurity DMFT, given magnetization component for that orbital
- !  * [:f:var:`NORB`]: for single-impurity DMFT, one magnetization component for all orbitals
+ !  * [:f:var:`norb`]: for single-impurity DMFT, one magnetization component for all orbitals
  !  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities, magnetization for that orbital for all impurity sites
- !  * [:f:var:`nlat`, :f:var:`NORB`]: if :f:var:`nlat` is provided for real-space DMFT, one magnetization component for all orbitals and impurity sites
- !  * [:f:var:`nlat`, :code:`3`, :f:var:`NORB`]: if :f:var:`nlat` is provided for real-space DMFT, all magnetization components for all orbitals and sites
+ !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, one magnetization component for all orbitals and impurity sites
+ !  * [:f:var:`nlat`, :code:`3`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, all magnetization components for all orbitals and sites
  !
      module procedure :: ed_get_mag_n0
      module procedure :: ed_get_mag_n1

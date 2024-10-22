@@ -15,11 +15,11 @@ MODULE ED_AUX_FUNX
     !This subroutine sets the local Hamiltonian of the impurity problem. 
     !The local hamiltonian can have different shapes:
     !
-    !   * :code:`[Nspin*Norb,Nspin*Norb]`: single-impurity case, 2-dimensional array
-    !   * :code:`[Nspin,Nspin,Norb,Norb]`: single-impurity case, 4-dimensional array
-    !   * :code:`[Nlat*Nspin*Norb,Nlat*Nspin*Norb]`: real-space DMFT case, 2-dimensional array.
-    !   * :code:`[Nlat,Nspin*Norb,Nspin*Norb]`: single-impurity case, 3-dimensional array.
-    !   * :code:`[Nlat,Nspin,Nspin,Norb,Norb]`: single-impurity case, 5-dimensional array.
+    !   * [:f:var:`nspin` :math:`\cdot` :f:var:`norb` , :f:var:`nspin` :math:`\cdot` :f:var:`norb`]: single-impurity case, 2-dimensional array
+    !   * [:f:var:`nspin` , :f:var:`nspin` , :f:var:`norb` , :f:var:`orb`]: single-impurity case, 4-dimensional array
+    !   * [:f:var:`nlat`  :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb` , :f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb` ]: real-space DMFT case, 2-dimensional array.
+    !   * [:f:var:`nlat` , :f:var:`nspin` :math:`\cdot` :f:var:`norb` , :f:var:`nspin` :math:`\cdot` :f:var:`norb` ]: single-impurity case, 3-dimensional array.
+    !   * [:f:var:`nlat` , :f:var:`nspin` , :f:var:`nspin` , :f:var:`norb` , :f:var:`orb` ]: single-impurity case, 5-dimensional array.
     !
     !In the case of real-space DMFT, the number of impurities :code:`Nlat` must be provided.
     !
@@ -1221,11 +1221,11 @@ contains
   !+------------------------------------------------------------------+
   subroutine ed_search_variable(var,ntmp,converged)
     !This function checks the value of the read density :code:`ntmp` against the desired value 
-    !:code:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
+    !:f:var:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
     !
-    !The updated :code:`xmu` is saved in :code:`search_variable_iteration"//reg(ed_file_suffix)//".ed`
+    !The updated :f:var:`xmu` is saved in :code:`search_variable_iteration"//reg(ed_file_suffix)//".ed`
     !
-    !The converged :code:`xmu` is saved in :code:`var_compressibility.restart`
+    !The converged :f:var:`xmu` is saved in :code:`var_compressibility.restart`
     !
     !If a file :code:`var_compressibility.used` is present, its value is read
 
@@ -1353,11 +1353,11 @@ contains
 
   subroutine search_chemical_potential(var,ntmp,converged)
     !This function checks the value of the read density :code:`ntmp` against the desired value 
-    !:code:`nread` (if different from zero) and adjusts :code:`xmu` accordingly (in a monotonous way).
+    !:f:var:`nread` (if different from zero) and adjusts :f:var:`xmu` accordingly (in a monotonous way).
     !
-    !The updated :code:`xmu` is saved in :code:`search_mu_iteration"//reg(ed_file_suffix)//".ed`
+    !The updated :f:var:`xmu` is saved in :code:`search_mu_iteration"//reg(ed_file_suffix)//".ed`
     !
-    !The converged :code:`xmu` is saved in :code:`xmu.restart`
+    !The converged :f:var:`xmu` is saved in :code:`xmu.restart`
     !
     !If a file :code:`var_compressibility.used` is present, its value is read
     !
