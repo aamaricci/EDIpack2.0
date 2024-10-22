@@ -7,9 +7,10 @@ A massively parallel Exact Diagonalization solver for quantum Impurity problems.
 *The documentation is under construction*
 
 
-EDIpack2.0 is a Lanczos based method 
-for the solution of generic Quantum Impurity problems,  exploiting distributed memory MPI parallelisation.
-The 2.0 version extends the EDIpack_ by enabling the solution of
+EDIpack2.0 is a Lanczos based Exact Diagonalization method 
+for the solution of generic Quantum Impurity problems,  exploiting MPI
+distributed memory parallelisation.
+The 2.0 version extends the former EDIpack_ library enabling the solution of
 single-site, multi-orbital models with different conserved
 quantum numbers :math:`\vec{Q}` corresponding to separate operational
 modes which, in `EDIpack2.0` software, are selected by the input
@@ -39,10 +40,10 @@ variable `ed_mode=normal,superc,nonsu2` as follow:
 .. _PhysRevB.107.115117: https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.115117
 
 
-All modes include electron-phonon coupling (local or Holstein
+All operational modes include **electron-phonon** coupling (local or Holstein
 phonons). EDIpack2.0  is designed to obtain the lowest part of the
-spectrum of the problem, thus it naturally works at zero temperature
-but can also be used to explore low temperature properties.  
+spectrum of the problem, thus it naturally works at **zero temperature**
+but can also be used to explore **low temperature** properties.  
  
 The EDIpack2.0 diagonalization algorithm is based on a massively
 parallel execution of matrix-vector products, required in the context

@@ -14,14 +14,17 @@ This updated version, aims to solve single-site, multi-orbital models, in either
  
 See [j.cpc.2021.108261](https://doi.org/10.1016/j.cpc.2021.108261) for further information about the underlying algorithms. Yet, suitable modifications have been developed to address the Superconducting and non-SU(2) channels.  
 
-### Documentation
-The documentation for the EDIpack2 library and its Python API (EDIpy2) is available at [aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)  
-
-The documentation is currently under construction. 
-
 ### Install & Use
 
-Read the documentation at [aamaricci.github.io/EDIpack2.0](https://aamaricci.github.io/EDIpack2.0)
+*EDIpack2.0* builds and get installed using CMake. Loading into the operative systemisis provided by different methods, including module environment.    
+Further informations and a guided proceudre are available in the documentation.
+
+
+### Documentation
+All the informations about the structure of the library and its use, together with the Python API *EDIpy2*, are documented at [aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)  
+
+NOTE: The documentation is currently under construction. 
+
 
 
 ### Authors

@@ -616,7 +616,6 @@ contains        !some routine to perform simple operation on the lists
     else
        allocate(Order(dim))
        call twin_sector_order(c%twin%sector,Order)
-       allocate(vector(dim))
        do i=1,dim
           vector(i) = c%twin%dvec(Order(i))
        enddo
@@ -652,7 +651,6 @@ contains        !some routine to perform simple operation on the lists
     else
        allocate(Order(dim))
        call twin_sector_order(c%twin%sector,Order)
-       allocate(vector(dim))
        do i=1,dim
           vector(i) = c%twin%cvec(Order(i))
        enddo
