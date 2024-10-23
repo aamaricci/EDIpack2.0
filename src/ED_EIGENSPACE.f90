@@ -12,35 +12,51 @@ module ED_EIGENSPACE
 
 
   type sparse_estate
-     integer                             :: sector        !index of the sector
-     real(8)                             :: e             !energy of the eigen-state
+     !
+     ! A single element of the linked list :f:var:`sparse_espace`. The :f:var:`sparse_estate` gather all the information relative to a single eigen-state of the Hamiltonian spectrum. It includes a logical :f:var:`itwin` and pointer :f:var:`twin` to identiy  the equivalent state in the twin sector, i.e. a degenerate state with opposite quantum numbers, without actually storing the eigenvector. 
+     !
+     integer                             :: sector        !Symmetry sector index
+     real(8)                             :: e             !energy of the eigen-state, used to order the list
      real(8),dimension(:),allocatable    :: dvec          !double precision eigen-vector
      complex(8),dimension(:),allocatable :: cvec          !double complex eigen-vector
-     logical                             :: itwin=.false. !twin sector label
-     type(sparse_estate),pointer         :: twin=>null()  !link to twin box 
-     type(sparse_estate),pointer         :: next=>null()  !link to next box (chain)
+     logical                             :: itwin=.false. !twin sector logical label
+     type(sparse_estate),pointer         :: twin=>null()  !link to twin :f:var:`sparse_estate` in the list 
+     type(sparse_estate),pointer         :: next=>null()  !link to next :f:var:`sparse_estate` used to construct the ordered linked list
   end type sparse_estate
 
   type sparse_espace
-     integer                     :: size
-     real(8)                     :: emax,emin
-     logical                     :: status=.false.
-     type(sparse_estate),pointer :: root=>null()       !head/root of the list\== list itself
+     !
+     ! Ordered single linked list storing the lower part of the Hamiltonian spectrum state by state. 
+     !
+     integer                     :: size               !The current size of the list
+     real(8)                     :: emax               !The maximum energy of the list, fixed by the condition :math:`e^{-\beta {\rm emax}}<` :f:var:`cutoff`
+     real(8)                     :: emin               !The minimum energy of the list, i.e. the groundstate energy
+     logical                     :: status=.false.     !Allocation status of the list
+     type(sparse_estate),pointer :: root=>null()       !Root of the linked list
   end type sparse_espace
 
 
   interface es_insert_state
+     !
+     ! Insert a :f:var:`sparse_estate` into the :f:var:`sparse_espace` using :f:var:`e`, :f:var:`vec`, :f:var:`sector` and optionally a :f:var:`itwin` label
+     !
      module procedure :: es_insert_state_d
      module procedure :: es_insert_state_c
   end interface es_insert_state
 
   interface es_add_state
+     !
+     ! Insert a :f:var:`sparse_estate` into the :f:var:`sparse_espace` using :f:var:`e`, :f:var:`vec`, :f:var:`sector` and optionally a :f:var:`itwin` label optionally  filling the list  respecting the energy threshold limit. 
+     !
      module procedure :: es_add_state_d
      module procedure :: es_add_state_c
   end interface es_add_state
 
 
   interface es_return_dvector
+     !
+     ! Returns the double precision vector of a given :f:var:`sparse_estate` indicated by the position :f:var:`n` in the list. If MPI execution is active the vector is returned already split in chunks assigned to each thread according to the current parallel algorithm. Should the :f:var:`sparse_estate` correspond to a twin state, the vector is reconstructed on the fly using :f:var:`twin` pointer and suitable reordering (as the basis of the two symmetry sector with opposite quantum numbers do have different ordering in general).     
+     !
      module procedure :: es_return_dvector_default
 #ifdef _MPI
      module procedure :: es_return_dvector_mpi
@@ -48,6 +64,9 @@ module ED_EIGENSPACE
   end interface es_return_dvector
 
   interface es_return_cvector
+     !
+     ! Returns the double complex vector of a given :f:var:`sparse_estate` indicated by the position :f:var:`n` in the list. If MPI execution is active the vector is returned already split in chunks assigned to each thread according to the current parallel algorithm. Should the :f:var:`sparse_estate` correspond to a twin state, the vector is reconstructed on the fly using :f:var:`twin` pointer and suitable reordering (as the basis of the two symmetry sector with opposite quantum numbers do have different ordering in general).     
+     !
      module procedure :: es_return_cvector_default
 #ifdef _MPI
      module procedure :: es_return_cvector_mpi
@@ -74,7 +93,7 @@ module ED_EIGENSPACE
   !
   type(sparse_espace)                        :: state_list
   type(full_espace),dimension(:),allocatable :: espace
-  public :: state_list
+  public :: state_list          !The shared instance of the :f:var:`sparse_espace` used in the :code:`EDIpack2.0` library
   public :: espace
 
 
@@ -219,12 +238,12 @@ contains        !some routine to perform simple operation on the lists
   !+------------------------------------------------------------------+
   subroutine es_add_state_d(espace,e,vec,sector,twin,size,verbose)
     type(sparse_espace),intent(inout) :: espace
-    real(8),intent(in)                :: e
-    real(8),dimension(:),intent(in)   :: vec
-    integer,intent(in)                :: sector
-    integer,intent(in),optional       :: size
+    real(8),intent(in)                :: e        !The eigenenergy of the state to be added
+    real(8),dimension(:),intent(in)   :: vec      !The eigenvector of the state to be added
+    integer,intent(in)                :: sector   !The symetry sector index of the state to be added 
+    integer,intent(in),optional       :: size     !The size threshold of the list [optional]
     logical,intent(in),optional       :: verbose
-    logical,intent(in),optional       :: twin
+    logical,intent(in),optional       :: twin     !The twin state lable [optional]
     logical                           :: twin_
 #ifdef _DEBUG
     if(ed_verbose>4)write(Logfile,"(A)")"DEBUG es_add_state_d"
@@ -283,11 +302,11 @@ contains        !some routine to perform simple operation on the lists
   !PURPOSE  : insert a state into the list using ener,vector,sector
   !+------------------------------------------------------------------+
   subroutine es_insert_state_d(space,e,vec,sector,twin)
-    type(sparse_espace),intent(inout) :: space
-    real(8),intent(in)                :: e
-    real(8),dimension(:),intent(in)   :: vec
-    integer,intent(in)                :: sector
-    logical                           :: twin
+    type(sparse_espace),intent(inout) :: space 
+    real(8),intent(in)                :: e      !The eigenenergy of the state to be added
+    real(8),dimension(:),intent(in)   :: vec    !The eigenvector of the state to be added
+    integer,intent(in)                :: sector!The symmetry sector of the state to be added
+    logical                           :: twin  !The twin label of the state to be added
     type(sparse_estate),pointer       :: p,c
     p => space%root
     c => p%next
@@ -533,9 +552,12 @@ contains        !some routine to perform simple operation on the lists
   !PURPOSE  : 
   !+------------------------------------------------------------------+
   function es_return_sector(space,n) result(sector)
+    !
+    ! Returns the symmetry sector index of the indicated :f:var:`sparse_estate` in the list. If no position is indicated it returns the energy of the last state.
+    !
     type(sparse_espace),intent(in) :: space
-    integer,optional,intent(in)    :: n
-    integer                        :: sector
+    integer,optional,intent(in)    :: n !positions of the indicated :f:var:`sparse_estate` in the list     
+    integer                        :: sector !the symmetry sector index of the indicated :f:var:`sparse_estate` in the list
     type(sparse_estate),pointer    :: c
     integer                        :: i,pos
     if(.not.space%status) stop "es_return_sector: espace not allocated"
@@ -561,9 +583,12 @@ contains        !some routine to perform simple operation on the lists
   !PURPOSE  : 
   !+------------------------------------------------------------------+
   function es_return_energy(space,n) result(egs)
+    !
+    ! Returns the eigen-energy of the indicated :f:var:`sparse_estate` in the list. If no position is indicated it returns the energy of the last state. 
+    !
     type(sparse_espace),intent(in) :: space
-    integer,optional,intent(in)    :: n
-    real(8)                        :: egs
+    integer,optional,intent(in)    :: n !positions of the indicated :f:var:`sparse_estate` in the list 
+    real(8)                        :: egs !eigen-energy of the indicated  :f:var:`sparse_estate` in the list
     type(sparse_estate),pointer    :: c
     integer                        :: i,pos
     if(.not.space%status) stop "es_return_energy: espace not allocated"
@@ -591,8 +616,8 @@ contains        !some routine to perform simple operation on the lists
   !+------------------------------------------------------------------+
   subroutine es_return_dvector_default(space,n,vector)
     type(sparse_espace),intent(in)   :: space
-    integer,optional,intent(in)      :: n
-    real(8),dimension(:),allocatable :: vector
+    integer,optional,intent(in)      :: n      !The position in the list corresponding to the vector to be returned
+    real(8),dimension(:),allocatable :: vector !The selected eigen-vector 
     type(sparse_estate),pointer      :: c
     integer                          :: i,pos
     integer                          :: dim
