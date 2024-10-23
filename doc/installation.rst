@@ -63,18 +63,37 @@ take advantage of it), you can use it to build the library at lightning, multi-t
    ninja
 
 The `CMake` compilation can be customized using the following
-additional variables (default values between `< >`, optional in `[ ]`):   
+additional variables:   
 
-.. code-block:: bash
-		
-   -DPREFIX=prefix directory  #<~/opt/EDIpack2/VERSION/PLATFORM/[GIT_BRANCH]>` 
+.. list-table:: CMake Options
+   :widths: 30 20 50
+   :header-rows: 1
 
-   -DUSE_MPI=<yes>/no    
+   * - Option
+     - Scope
+     - Value
+       
+   * - :code:`-DPREFIX`
+     - prefix directory  
+     - ~/opt/EDIpack2/VERSION/PLATFORM/[GIT_BRANCH]
+       
+   * - :code:`-DUSE_MPI`
+     - MPI support pre-compilation flag
+     - yes/True OR no/False (default: True)
 
-   -DVERBOSE=yes/<no>
+   * - :code:`-DVERBOSE`
+     - Verbose CMake output 
+     - yes/True OR no/False (default: True, superseded by :code:`make VERBOSE=yes/no`
 
-  -DBUILD_TYPE = <RELEASE>/TESTING/DEBUG/AGGRESSIVE  #compilation options. TESTING:mild or no optimization, DEBUG:relevant debugging options, AGGRESSIVE: all debug options of (might not compile on  some systems) 
+   * - :code:`-DBUILD_TYPE`
+     - Compilation flags
+     - RELEASE/TESTING/DEBUG/AGGRESSIVE (Default RELEASE)
 
+..
+   TESTING:mild or no optimization,  DEBUG:relevant debugging options,  
+.. warning::
+   
+   :code:`BUILD_TYPE=AGGRESSIVE`  includes many deep level debug options which might not compile on some systems or breakdown compilation at linking step.  
 
 
 Install
