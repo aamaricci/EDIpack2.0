@@ -221,7 +221,7 @@ MODULE ED_IO
 
 
   interface ed_get_doubles
-!This subroutine gets from the EDIpack2 libraries passes it to the user the array [ :f:var:`dust` , :f:var:`dund` , :f:var:`dse` , :f:var:`dph` ].
+!This subroutine gets from the EDIpack2 library and passes to the user the array [ :f:var:`dust` , :f:var:`dund` , :f:var:`dse` , :f:var:`dph` ].
 !These are the expectation values of the two-body operators associated with the density-density inter-orbital interaction (with opposite and parallel spins), 
 !spin-exchange and pair-hopping.
 !
@@ -240,7 +240,7 @@ MODULE ED_IO
   end interface ed_get_doubles
 
   interface ed_get_dust
-!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!This subroutine gets from the EDIpack2 library and passes to the user the value of 
 !:f:var:`dust` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
@@ -252,7 +252,7 @@ MODULE ED_IO
   end interface ed_get_dust
 
   interface ed_get_dund
-!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!This subroutine gets from the EDIpack2 library and passes to the user the value of 
 !:f:var:`dund` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
@@ -264,7 +264,7 @@ MODULE ED_IO
   end interface ed_get_dund
 
   interface ed_get_dse
-!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!This subroutine gets from the EDIpack2 library and passes to the user the value of 
 !:f:var:`dse` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
@@ -276,7 +276,7 @@ MODULE ED_IO
   end interface ed_get_dse
 
   interface ed_get_dph
-!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!This subroutine gets from the EDIpack2 library and passes to the user the value of 
 !:f:var:`dph` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
