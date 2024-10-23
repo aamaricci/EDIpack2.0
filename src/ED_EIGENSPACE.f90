@@ -310,32 +310,32 @@ contains        !some routine to perform simple operation on the lists
     type(sparse_estate),pointer       :: p,c
     p => space%root
     c => p%next
-    do                            !traverse the list until e < value (ordered list)
+    do
        if(.not.associated(c))exit
        if(e <= c%e)exit
        p => c
        c => c%next
     end do
     !
-    allocate(p%next)                !Create a new element in the list
+    allocate(p%next)
     p%next%e = e
-    if(e > space%emax)space%emax=e !update the max energy (corresponds to the top entry)
-    if(e < space%emin)space%emin=e !update the min energy (corresponds to the first entry)
+    if(e > space%emax)space%emax=e
+    if(e < space%emin)space%emin=e
     allocate(p%next%dvec(size(vec)))
     p%next%dvec = vec
     p%next%itwin=.false.
     p%next%sector=sector
     space%size = space%size+1
-    if(twin)then !Create a twin element in the list with same energy, no vector and twin flag T
+    if(twin)then
        allocate(p%next%next)
        p%next%next%e = e    
        p%next%next%itwin=.true.
        p%next%next%sector=get_twin_sector(sector)
-       p%next%next%twin => p%next      ! wiggled arrow of the twin_wout_vector points to its twin_w_vector
-       p%next%twin      => p%next%next ! wiggled arrow of the twin_w_vector points to its twin_wout_vector
+       p%next%next%twin => p%next
+       p%next%twin      => p%next%next !wiggled arrow pointing to the twin :f:var:`sparse_estate`
        space%size = space%size+1
     endif
-    if(.not.associated(c))then !end of the list special case (current=>current%next)
+    if(.not.associated(c))then
        if(.not.twin)then
           p%next%next  => null()
        else
@@ -343,7 +343,7 @@ contains        !some routine to perform simple operation on the lists
        endif
     else
        if(.not.twin)then
-          p%next%next  => c      !the %next of the new node come to current
+          p%next%next  => c
        else
           p%next%next%next  => c
        endif
@@ -361,32 +361,32 @@ contains        !some routine to perform simple operation on the lists
     type(sparse_estate),pointer        :: p,c
     p => space%root
     c => p%next
-    do                            !traverse the list until e < value (ordered list)
+    do                         
        if(.not.associated(c))exit
        if(e <= c%e)exit
        p => c
        c => c%next
     end do
     !
-    allocate(p%next)                !Create a new element in the list
+    allocate(p%next)              
     p%next%e = e
-    if(e > space%emax)space%emax=e !update the max energy (corresponds to the top entry)
-    if(e < space%emin)space%emin=e !update the min energy (corresponds to the first entry)
+    if(e > space%emax)space%emax=e
+    if(e < space%emin)space%emin=e
     allocate(p%next%cvec(size(vec)))
     p%next%cvec = vec
     p%next%itwin=.false.
     p%next%sector=sector
     space%size = space%size+1
-    if(twin)then !Create a twin element in the list with same energy, no vector and twin flag T
+    if(twin)then 
        allocate(p%next%next)
        p%next%next%e = e    
        p%next%next%itwin=.true.
        p%next%next%sector=get_twin_sector(sector)
-       p%next%next%twin => p%next      ! wiggled arrow of the twin_wout_vector points to its twin_w_vector
-       p%next%twin      => p%next%next ! wiggled arrow of the twin_w_vector points to its twin_wout_vector
+       p%next%next%twin => p%next
+       p%next%twin      => p%next%next !wiggled arrow pointing to the twin :f:var:`sparse_estate`
        space%size = space%size+1
     endif
-    if(.not.associated(c))then !end of the list special case (current=>current%next)
+    if(.not.associated(c))then
        if(.not.twin)then
           p%next%next  => null()
        else
@@ -394,7 +394,7 @@ contains        !some routine to perform simple operation on the lists
        endif
     else
        if(.not.twin)then
-          p%next%next  => c      !the %next of the new node come to current
+          p%next%next  => c 
        else
           p%next%next%next  => c
        endif

@@ -12,6 +12,9 @@ MODULE ED_SECTOR
   private
 
   interface map_allocate
+     !
+     ! Allocate the map(s) connecting the states in the symmetry sector to thos in the Fock space. 
+     !
      module procedure :: map_allocate_scalar
      module procedure :: map_allocate_vector
   end interface map_allocate
@@ -27,12 +30,18 @@ MODULE ED_SECTOR
   end interface flip_state
 
   interface get_Sector
+     !
+     ! Returns the index of :f:var:`isector` of the symmetry sector given the quantum numbers :f:var:`qn`
+     !
      module procedure :: get_Sector_normal
      module procedure :: get_Sector_superc
      module procedure :: get_Sector_nonsu2
   end interface get_Sector
 
   interface get_QuantumNumbers
+     !
+     !Returns the quantum numbers :f:var:`qn` given the  index of :f:var:`isector` of the symmetry sector
+     !
      module procedure :: get_QuantumNumbers_normal
      module procedure :: get_QuantumNumbers_other
   end interface get_QuantumNumbers
@@ -83,7 +92,9 @@ contains
   !##################################################################
   !##################################################################
   subroutine build_sector(isector,self)
-    ! ciao
+    !
+    ! This procedure build the sector :f:type:`sector` :math:`{\cal S}(\vec{Q})` given the index :f:var:`isector` which univocally determines the quantum numbers :math:`\vec{Q}`. All the components of the data structure :f:type:`sector` are determined here. Moreover the map connecting the states of the sector to thos in the Fock space is constructed.
+    ! To avoid integer overflow the loop over Fock space states is decomposed in spin up and down integer so that :math:`I = I_\uparrow + 2^{N}I_\downarrow`.  
     !
     integer,intent(in) :: isector
     type(sector)       :: self
@@ -614,6 +625,9 @@ contains
   end subroutine get_DimDw
 
   subroutine  get_Dim(isector,Dim)
+    !
+    !Returns the dimension of the symmetry sector with index :f:var:`isector`
+    !
     integer                :: isector,Dim
     Dim=getDim(isector)
   end subroutine get_Dim

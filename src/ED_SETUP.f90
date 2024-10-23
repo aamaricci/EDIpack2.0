@@ -17,7 +17,10 @@ MODULE ED_SETUP
   public :: init_ed_structure
   public :: delete_ed_structure
   public :: setup_global
-
+  public :: get_normal_sector_dimension
+  public :: get_superc_sector_dimension
+  public :: get_nonsu2_sector_dimension
+  
 contains
 
   subroutine ed_checks_global
@@ -946,13 +949,24 @@ contains
   !SECTOR PROCEDURES - Sectors,Nup,Ndw,DimUp,DimDw,...
   !##################################################################
   !##################################################################
-  elemental function get_normal_sector_dimension(n,np) result(dim)
-    integer,intent(in) :: n,np
+  ! elemental function get_normal_sector_dimension(n,np) result(dim)
+  function get_normal_sector_dimension(n,m) result(dim)
+    !
+    !Returns the dimension of the symmetry sector per orbital and spin with quantum numbers :math:`\vec{Q}=[\vec{N}_\uparrow,\vec{N}_\downarrow]`. 
+    !
+    !:f:var:`dim` = :math:`\binom{n}{m}`
+    !
+    integer,intent(in) :: n,m
     integer            :: dim
-    dim = binomial(n,np)
+    dim = binomial(n,m)
   end function get_normal_sector_dimension
-  !SUPERC
+
   function get_superc_sector_dimension(mz) result(dim)
+    !
+    !Returns the dimension of the symmetry sector with quantum numbers :math:`\vec{Q}=S_z=N_\uparrow-N_\downarrow`
+    !
+    !:f:var:`dim` = :math:`\sum_i 2^{N-mz-2i}\binom{N}{N-mz-2i}\binom{mz+2i}{i}`
+    !
     integer :: mz
     integer :: i,dim,Nb
     dim=0
@@ -961,13 +975,19 @@ contains
        dim=dim + 2**(Nb-2*i)*binomial(ns,Nb-2*i)*binomial(ns-Nb+2*i,i)
     enddo
   end function get_superc_sector_dimension
-  !NONSU2
+
   function get_nonsu2_sector_dimension(n) result(dim)
+    !
+    !Returns the dimension of the symmetry sector with quantum numbers :math:`\vec{Q}=N_{tot}=N_\uparrow+N_\downarrow`
+    !
+    !:f:var:`dim` = :math:`\binom{2N}{n}`
+    !
     integer :: n
     integer :: dim
     dim=binomial(2*Ns,n)
   end function get_nonsu2_sector_dimension
-  !NONSU2 - Jz conserving
+
+  
   function get_nonsu2_sector_dimension_Jz(n,twoJz) result(dim)
     integer :: n
     integer :: twoJz

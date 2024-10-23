@@ -184,6 +184,11 @@ latex_elements = {
     # 'figure_align': 'htbp',
 }
 
+
+latex_elements = {
+    'preamble': [r'\usepackage{amsmath,amssymb,amsfonts}',r'\usepackage{mathtools}']
+}
+    
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).

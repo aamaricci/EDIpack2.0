@@ -10,22 +10,28 @@ MODULE ED_SPARSE_MATRIX
   complex(8),parameter :: zero=(0d0,0d0)
 
   type sparse_row_csr
-     integer                                   :: size
-     real(8),dimension(:),allocatable          :: dvals
-     complex(8),dimension(:),allocatable       :: cvals
-     integer,dimension(:),allocatable          :: cols
+     !
+     ! The sparse row data structure containing the non-zero elements on any given row of sparse matrix.
+     !
+     integer                                   :: size !the current size of the row, corresponding to number of non-zero elements
+     real(8),dimension(:),allocatable          :: dvals !rank-1 array for double precision values
+     complex(8),dimension(:),allocatable       :: cvals !rank-1 array for double complex values
+     integer,dimension(:),allocatable          :: cols  !rank-1 array for column indices
   end type sparse_row_csr
 
   type sparse_matrix_csr
-     type(sparse_row_csr),dimension(:),pointer :: row
-     integer                                   :: Nrow
-     integer                                   :: Ncol
-     logical                                   :: status=.false.
+     !
+     ! The sparse matrix data structure realized as an allocatable array of of :f:var:`sparse_row_csr` types.  
+     !
+     type(sparse_row_csr),dimension(:),pointer :: row !the array of :f:var:`sparse_row_csr` 
+     integer                                   :: Nrow !the total number of rows
+     integer                                   :: Ncol !the total number of columns
+     logical                                   :: status=.false. !Allocation status
 #ifdef _MPI
-     type(sparse_row_csr),dimension(:),pointer :: loc
-     integer                                   :: istart=0 !global start index for MPI storage
-     integer                                   :: iend=0
-     integer                                   :: ishift=0
+     type(sparse_row_csr),dimension(:),pointer :: loc !the array of :f:var:`sparse_row_csr` for the diagonal blocks
+     integer                                   :: istart=0 !starting index for the MPI decomposition of the sparse matrix
+     integer                                   :: iend=0   !ending index for the MPI decomposition of the sparse matrix
+     integer                                   :: ishift=0 !integer shift index for the MPI decomposition of the sparse matrix
      logical                                   :: mpi=.false.
 #endif
   end type sparse_matrix_csr
@@ -34,6 +40,9 @@ MODULE ED_SPARSE_MATRIX
 
   !INIT SPARSE MATRICES 
   interface sp_init_matrix
+     !
+     ! Initialization of the :f:var:`sparse_matrix_csr` via memory allocation. An empty matrix is returned 
+     !
      module procedure :: sp_init_matrix_csr
 #ifdef _MPI
      module procedure :: mpi_sp_init_matrix_csr
@@ -53,6 +62,10 @@ MODULE ED_SPARSE_MATRIX
 
   !INSERT ELEMENTS
   interface sp_insert_element
+     !
+     ! Matrix element insertion at a given row and columns. If an active MPI communicator is passed as input the element is stored in the matrix chunk of the corresponding thread. Double precision and double complex values are supported.
+     !
+     !
      module procedure :: sp_insert_element_csr_d
      module procedure :: sp_insert_element_csr_c
 #ifdef _MPI
@@ -64,6 +77,9 @@ MODULE ED_SPARSE_MATRIX
 
   !DUMP SPARSE MATRIX INTO STANDARD MATRIX
   interface sp_dump_matrix
+     !
+     ! Dump the :f:var:`sparse_matrix_csr` into a dense matrix. 
+     !
      module procedure :: sp_dump_matrix_csr_d
      module procedure :: sp_dump_matrix_csr_c
 #ifdef _MPI
@@ -74,6 +90,9 @@ MODULE ED_SPARSE_MATRIX
 
 #ifdef _MPI  
   interface sp_set_mpi_matrix
+     !
+     !  Set up the MPI parameters in the :f:var:`sparse_matrix_csr` for automatic spread of the values across the threads
+     !
      module procedure :: sp_set_mpi_matrix_csr
   end interface sp_set_mpi_matrix
 #endif
@@ -81,10 +100,10 @@ MODULE ED_SPARSE_MATRIX
   !Linked-List Sparse Matrix
   public :: sparse_matrix_csr
 
-  public :: sp_init_matrix      !init the sparse matrix   !checked
-  public :: sp_delete_matrix    !delete the sparse matrix !checked
-  public :: sp_insert_element   !insert an element        !checked
-  public :: sp_dump_matrix      !dump sparse into array   !checked
+  public :: sp_init_matrix 
+  public :: sp_delete_matrix
+  public :: sp_insert_element
+  public :: sp_dump_matrix
 #ifdef _MPI
   public :: sp_set_mpi_matrix
 #endif
@@ -114,9 +133,9 @@ contains
   !PURPOSE:  initialize the sparse matrix list
   !+------------------------------------------------------------------+
   subroutine sp_init_matrix_csr(sparse,N,N1)
-    type(sparse_matrix_csr),intent(inout) :: sparse
-    integer                               :: N
-    integer,optional                      :: N1
+    type(sparse_matrix_csr),intent(inout) :: sparse !sparse matrix to be initialized
+    integer                               :: N      !Number of rows 
+    integer,optional                      :: N1     !Number of columns [Optional]. If not present :code:`N1=N`
     integer                               :: i
     !
 #ifdef _DEBUG
@@ -132,9 +151,9 @@ contains
     allocate(sparse%row(N))
     do i=1,N
        sparse%row(i)%size=0
-       allocate(sparse%row(i)%dvals(0)) !empty array
-       allocate(sparse%row(i)%cvals(0)) !empty array
-       allocate(sparse%row(i)%cols(0)) !empty array
+       allocate(sparse%row(i)%dvals(0))
+       allocate(sparse%row(i)%cvals(0))
+       allocate(sparse%row(i)%cols(0))
     end do
     !
     sparse%status=.true.
@@ -145,7 +164,7 @@ contains
 
 #ifdef _MPI
   subroutine mpi_sp_init_matrix_csr(MpiComm,sparse,N,N1)
-    integer                               :: MpiComm
+    integer                               :: MpiComm !MPI global communicator
     type(sparse_matrix_csr),intent(inout) :: sparse
     integer                               :: N
     integer,optional                      :: N1
@@ -264,9 +283,10 @@ contains
   !PURPOSE: insert an element value at position (i,j) in the sparse matrix
   !+------------------------------------------------------------------+
   subroutine sp_insert_element_csr_d(sparse,value,i,j)
-    type(sparse_matrix_csr),intent(inout) :: sparse
-    real(8),intent(in)                    :: value
-    integer,intent(in)                    :: i,j
+    type(sparse_matrix_csr),intent(inout) :: sparse !
+    real(8),intent(in)                    :: value  !matrix value to be inserted 
+    integer,intent(in)                    :: i      !row index of the matrix value to be inserted
+    integer,intent(in)                    :: j      !column index of the matrix value to be inserted
     type(sparse_row_csr),pointer          :: row
     integer                               :: column,pos
     logical                               :: iadd
@@ -279,15 +299,15 @@ contains
     !
     row => sparse%row(i)
     !
-    iadd = .false.                          !check if column already exist
-    if(any(row%cols == column))then         !
-       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
+    iadd = .false.
+    if(any(row%cols == column))then
+       pos = binary_search_spmat(row%cols,column)
        iadd=.true.                          !set Iadd to true
     endif
     !
-    if(iadd)then                            !this column exists so just sum it up       
-       row%dvals(pos)=row%dvals(pos) + value  !add up value to the current one in %vals
-    else                                    !this column is new. increase counter and store it 
+    if(iadd)then     
+       row%dvals(pos)=row%dvals(pos) + value  
+    else                                    
        call add_to(row%dvals,value)
        call add_to(row%cols,column)
        row%Size = row%Size + 1
@@ -314,15 +334,15 @@ contains
     !
     row => sparse%row(i)
     !
-    iadd = .false.                          !check if column already exist
-    if(any(row%cols == column))then         !
-       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
-       iadd=.true.                          !set Iadd to true
+    iadd = .false.                   
+    if(any(row%cols == column))then   
+       pos = binary_search_spmat(row%cols,column)
+       iadd=.true.                          
     endif
     !
-    if(iadd)then                            !this column exists so just sum it up       
-       row%cvals(pos)=row%cvals(pos) + value  !add up value to the current one in %vals
-    else                                    !this column is new. increase counter and store it 
+    if(iadd)then                           
+       row%cvals(pos)=row%cvals(pos) + value  
+    else                                    
        call add_to(row%cvals,value)
        call add_to(row%cols,column)
        row%Size = row%Size + 1
@@ -334,7 +354,7 @@ contains
 
 #ifdef _MPI
   subroutine mpi_sp_insert_element_csr_d(MpiComm,sparse,value,i,j)
-    integer                               :: MpiComm
+    integer                               :: MpiComm !MPI global communicator
     type(sparse_matrix_csr),intent(inout) :: sparse
     real(8),intent(in)                    :: value
     integer,intent(in)                    :: i,j
@@ -354,15 +374,15 @@ contains
     !
     row => sparse%row(i-sparse%Ishift)
     !
-    iadd = .false.                          !check if column already exist
-    if(any(row%cols == column))then         !
-       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
-       iadd=.true.                          !set Iadd to true
+    iadd = .false.                          
+    if(any(row%cols == column))then         
+       pos = binary_search_spmat(row%cols,column) 
+       iadd=.true.                          
     endif
     !
-    if(iadd)then                            !this column exists so just sum it up       
-       row%dvals(pos)=row%dvals(pos) + value  !add up value to the current one in %vals
-    else                                    !this column is new. increase counter and store it 
+    if(iadd)then                            
+       row%dvals(pos)=row%dvals(pos) + value
+    else                                    
        call add_to(row%dvals,value)
        call add_to(row%cols,column)
        row%Size = row%Size + 1
@@ -395,15 +415,15 @@ contains
        row => sparse%row(i-sparse%Ishift)
     endif
     !
-    iadd = .false.                          !check if column already exist
-    if(any(row%cols == column))then         !
-       pos = binary_search_spmat(row%cols,column) !find the position  column in %cols        
-       iadd=.true.                          !set Iadd to true
+    iadd = .false.                          
+    if(any(row%cols == column))then         
+       pos = binary_search_spmat(row%cols,column)
+       iadd=.true.                          
     endif
     !
-    if(iadd)then                            !this column exists so just sum it up       
-       row%cvals(pos)=row%cvals(pos) + value  !add up value to the current one in %vals
-    else                                    !this column is new. increase counter and store it 
+    if(iadd)then                            
+       row%cvals(pos)=row%cvals(pos) + value
+    else                                    
        call add_to(row%cvals,value)
        call add_to(row%cols,column)
        row%Size = row%Size + 1
@@ -423,8 +443,8 @@ contains
   !PURPOSE: dump a sparse matrix into a regular 2dim array
   !+------------------------------------------------------------------+
   subroutine sp_dump_matrix_csr_d(sparse,matrix)
-    type(sparse_matrix_csr),intent(in)   :: sparse
-    real(8),dimension(:,:),intent(inout) :: matrix
+    type(sparse_matrix_csr),intent(in)   :: sparse !
+    real(8),dimension(:,:),intent(inout) :: matrix !dense matrix corresponding to :f:var:`sparse` having the same type. 
     integer                              :: i,j,Ndim1,Ndim2
     !
 #ifdef _DEBUG
@@ -467,7 +487,7 @@ contains
 
 #ifdef _MPI
   subroutine mpi_sp_dump_matrix_csr_d(MpiComm,sparse,matrix)
-    integer                              :: MpiComm
+    integer                              :: MpiComm !MPI global communicator
     type(sparse_matrix_csr),intent(in)   :: sparse
     real(8),dimension(:,:),intent(inout) :: matrix
     real(8),dimension(:,:),allocatable   :: matrix_tmp
@@ -552,9 +572,11 @@ contains
 
 #ifdef _MPI
   subroutine sp_set_mpi_matrix_csr(MpiComm,sparse,istart,iend,ishift)
-    integer                               :: MpiComm
+    integer                               :: MpiComm !MPI global communicator
     type(sparse_matrix_csr),intent(inout) :: sparse
-    integer                               :: istart,iend,ishift
+    integer                               :: istart !starting index for the MPI decomposition of the sparse matrix
+    integer                               :: iend   !ending index for the MPI decomposition of the sparse matrix
+    integer                               :: ishift !shift index for the MPI decomposition of the sparse matrix
     !
     if(MpiComm==Mpi_Comm_Null)return
     !
