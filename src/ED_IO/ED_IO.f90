@@ -180,6 +180,7 @@ MODULE ED_IO
  !  * [:f:var:`norb`]: if no optional variable is provided for single-impurity DMFT, double-occupation for all orbitals
  !  * [:f:var:`nlat`]: if :f:var:`iorb` (default = 1) is provided for real-space DMFT with :f:var:`nlat` impurities, double-occupation for that orbital for all impurity sites
  !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, double-occupation for all impurity sites and orbitals
+ !
      module procedure :: ed_get_docc_n0
      module procedure :: ed_get_docc_n1
      module procedure :: ed_get_docc_n2
@@ -219,28 +220,69 @@ MODULE ED_IO
   end interface ed_get_eknot
 
 
-  !Get Double occupancies
   interface ed_get_doubles
+!This subroutine gets from the EDIpack2 libraries passes it to the user the array [ :f:var:`dust` , :f:var:`dund` , :f:var:`dse` , :f:var:`dph` ].
+!These are the expectation values of the two-body operators associated with the density-density inter-orbital interaction (with opposite and parallel spins), 
+!spin-exchange and pair-hopping.
+!
+!  * :f:var:`dust` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
+!  * :f:var:`dund` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
+!  * :f:var:`dse` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!  * :f:var:`dph` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!
+!The returned array can have the following dimensions:
+!
+!  * [:code:`4`]: for single-site DMFT
+!  * [:f:var:`nlat`, :code:`4`]: for real-space DMFT with :f:var:`nlat` impurities
+!
      module procedure :: ed_get_doubles_n1
      module procedure :: ed_get_doubles_n2
   end interface ed_get_doubles
 
   interface ed_get_dust
+!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!:f:var:`dust` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
+!The returned array can have the following dimensions:
+!
+!  * scalar: for single-site DMFT
+!  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities
+!
      module procedure :: ed_get_dust_n0
      module procedure :: ed_get_dust_n1
   end interface ed_get_dust
 
   interface ed_get_dund
+!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!:f:var:`dund` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
+!The returned array can have the following dimensions:
+!
+!  * scalar: for single-site DMFT
+!  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities
+!
      module procedure :: ed_get_dund_n0
      module procedure :: ed_get_dund_n1
   end interface ed_get_dund
 
   interface ed_get_dse
+!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!:f:var:`dse` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!The returned array can have the following dimensions:
+!
+!  * scalar: for single-site DMFT
+!  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities
+!
      module procedure :: ed_get_dse_n0
      module procedure :: ed_get_dse_n1
   end interface ed_get_dse
 
   interface ed_get_dph
+!This subroutine gets from the EDIpack2 libraries passes it to the user the value of 
+!:f:var:`dph` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!The returned array can have the following dimensions:
+!
+!  * scalar: for single-site DMFT
+!  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities
+!
      module procedure :: ed_get_dph_n0
      module procedure :: ed_get_dph_n1
   end interface ed_get_dph
