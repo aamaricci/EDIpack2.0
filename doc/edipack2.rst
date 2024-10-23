@@ -38,7 +38,7 @@ automatic rows split balanced among the different threads and a
 further subdivision of the columns/values in local and non-local
 blocks.   
 
-The second class is :mod:`ed_eigenspace` which describes an ordered
+The second class is :f:mod:`ed_eigenspace` which describes an ordered
 single linked list efficiently storing the lower part of the energy
 spectrum, including eigenvectors, eigenvalues, symmetry sector and
 twin states (states in sectors with exchanged quantum numbers which do
@@ -129,7 +129,7 @@ For :f:var:`ed_mode` = :code:`superc` the bath includes a set of parameters
 level. 
 
 
-For :code:`bath_type=replica` a number :code:`Nbath` of copies of the
+For :f:var:`bath_type` = :code:`replica` a number :code:`nbath` of copies of the
 impurity structure are  coupled to the impurity itself.  Each bath
 element is made of a number :math:`N_{orb}` of electronic levels,
 i.e. the number of orbitals in the impurity site. Each bath element is
