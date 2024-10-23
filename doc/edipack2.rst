@@ -21,8 +21,8 @@ Classes
 ###########################
 
 Some simple data structures contained in :f:mod:`ed_vars_global` have
-been discussed in :doc:`structure/general/ed_vars_global`, such as  :f:type:`gmatrix` type storing
-all weights and poles of the Green's functions or
+been discussed in :doc:`structure/general/ed_vars_global`, such as  :f:type:`gfmatrix` 
+type storing all weights and poles of the Green's functions or
 :f:type:`effective_bath` gathering the different bath components
 according to value of :f:var:`bath_type` and :f:var:`ed_mode`.
 However other tasks in the code requires more elaborated classes which
