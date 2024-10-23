@@ -101,7 +101,7 @@ MODULE ED_INPUT_VARS
   real(8)              :: cg_minimize_hh      !unknown parameter used in the CG minimize procedure.  
   !
   logical              :: finiteT             !flag for finite temperature calculation
-  character(len=7)     :: bath_type           !flag to set bath type: normal (1bath/imp), hybrid(1bath)
+  character(len=7)     :: bath_type           !flag to set bath type: normal (1bath/imp), hybrid(1bath), replica(1replica/imp), general(replica++)
   !
   real(8)              :: nerr                !fix density threshold. a loop over from 1.d-1 to required nerr is performed
   real(8)              :: ndelta              !initial chemical potential step
