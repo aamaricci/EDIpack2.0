@@ -99,7 +99,7 @@ Installation
      Build, install and configure `EDIpack2.0`
      
 
-Quick Start 
+Usage
 =================
 
 :doc:`quickstart`
@@ -134,7 +134,7 @@ EDIpy2
    installation
 
 .. toctree::
-   :caption: Quick Start
+   :caption: Usage
    :maxdepth: 2
    :hidden:
 
