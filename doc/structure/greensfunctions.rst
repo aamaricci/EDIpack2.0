@@ -27,8 +27,7 @@ Superconductive mode
 ###############################
 
 This set of modules implements the calculations of impurity dynamical
-response functions, e.g. the Green's functions and different
-susceptibilities,  assuming 
+response functions, e.g. the Green's functions,  assuming 
 :math:`\vec{Q}\equiv S_z=N_\uparrow-N_\downarrow`.
 
 This case corresponds to the superconductive phase with :math:`s-`
@@ -40,7 +39,6 @@ wave pairing.
    :glob:
 
    superc/03_greensfunctions
-   superc/04_chifunctions
 
 
 
@@ -48,8 +46,7 @@ Non-SU(2) mode
 ###############################
 
 This set of modules implements the calculations of impurity dynamical
-response functions, e.g. the Green's functions and different
-susceptibilities,  assuming 
+response functions, e.g. the Green's functions,  assuming 
 :math:`\vec{Q}\equiv N_{tot}=N_\uparrow+N_\downarrow`.
 
 This case corresponds to the normal phase in the absence of spin
@@ -61,4 +58,3 @@ conservation, as for instance in presence of Spin-Orbit coupling.
    :glob:
 
    nonsu2/03_greensfunctions
-   nonsu2/04_chifunctions

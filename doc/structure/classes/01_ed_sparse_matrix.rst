@@ -1,6 +1,12 @@
 Sparse Matrices 
 =======================
 
+.. raw:: html
+   :file:  01_ed_sparse_matrix.html
+
+|
+
+
 This class defines a data structure to efficiently store sparse
 matrices into dedicated CSR matrices. The class features support to
 MPI parallel storage, so that each matrix is spread across the
@@ -20,5 +26,7 @@ values of the dense matrix. Access to each element is :math:`O(1)`.
 
 .. f:automodule::   ed_sparse_matrix
    :members: sparse_row_csr,sparse_matrix_csr, sp_init_matrix, sp_insert_element,sp_dump_matrix, sp_insert_element,sp_set_mpi_matrix
+
+
 
 

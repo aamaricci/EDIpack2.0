@@ -175,6 +175,18 @@ variational parameters.
 Exact Diagonalization
 ###########################
 
+
+.. raw:: html
+   :file:  structure/diag.html
+
+|
+
+.. raw:: html
+   :file:  structure/hamiltonian.html
+
+|
+
+
 This part of the `EDIpack2.0` code implements the exact
 diagonalization of the general, single-site, multi-orbital quantum
 impurity problem using  different operational modes,  corresponding to the

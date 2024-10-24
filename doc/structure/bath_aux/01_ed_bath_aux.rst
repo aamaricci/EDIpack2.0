@@ -1,6 +1,13 @@
 Bath Auxiliary routines
 ============================
 
+.. raw:: html
+   :file:  01_ed_bath_aux.html
+
+|
+
+
+
 Auxiliary functions for the bath
 
 .. f:automodule::   ed_bath_aux
