@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Install &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7574a189" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quick Start" href="quickstart.html" />
+    <link rel="prev" title="Dependencies" href="dependencies.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/anderson.html">Single Impurity Anderson problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/dmft.html">ED solver for Dynamical Mean-Field Theory</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/3band.html">Multi-band physics from ED-DMFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ahm.html">A dive into superconductivity: attractive Hubbard model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/bhz.html">A simple topological model: interacting Bernevig-Hughes-Zhang model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/exciton.html">Breaking spin SU(2): in-plane excitonic phase in quantum spin Hall insulators</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2.0</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html">General</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/general/01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structure/general/02_ed_vars_global.html">Global Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structure/general/03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structure/general/04_ed_setup.html">Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#sparse-matrix">Sparse Matrix</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/classes/01_ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#eigenspace">EigenSpace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/classes/02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#sectors">Sectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#bath">Bath</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/bath.html">Bath Auxiliary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_aux/00_ed_vars_global.html">Bath data structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_aux/01_ed_bath_aux.html">Bath Auxiliary routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_aux/02_ed_bath_dim.html">Bath Dimension routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/bath.html#bath-dmft">Bath DMFT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_dmft/01_ed_bath_dmft.html">DMFT Bath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_dmft/02_ed_bath_user.html">User Bath symmetry operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_dmft/03_ed_bath_replica.html">Bath Replica routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/bath.html#bath-functions">Bath Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_functions/ed_bath_functions.html">Bath frequency-dependent routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/bath.html#bath-fit">Bath Fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath_fit/ed_bath_fit.html">Bath <span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#exact-diagonalization">Exact Diagonalization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/diag.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/normal/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/normal/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/diag.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/superc/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/superc/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/diag.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/nonsu2/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/nonsu2/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#green-s-functions">Green’s functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/greensfunctions.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/normal/03_greensfunctions.html">Green’s Function calculation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/normal/04_chifunctions.html">Susceptibilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/greensfunctions.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/superc/03_greensfunctions.html">Green’s Function calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/greensfunctions.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/nonsu2/03_greensfunctions.html">Green’s Function calculation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#observables">Observables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/observables.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/normal/05_observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/observables.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/superc/05_observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="structure/observables.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/nonsu2/05_observables.html">Observables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#input-output">Input/Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#edipack2">EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure/edipackmodule.html">EDIpack2: Fortran API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edipack2.html#browse-source-code">Browse Source Code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_aux_funx.html">ed_aux_funx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath.html">ed_bath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_aux.html">ed_bath_aux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_dim.html">ed_bath_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_fit.html">ed_bath_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_functions.html">ed_bath_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_replica.html">ed_bath_replica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_user.html">ed_bath_user</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_dens.html">ed_chi_dens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_exct.html">ed_chi_exct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_functions.html">ed_chi_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_pair.html">ed_chi_pair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_spin.html">ed_chi_spin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag.html">ed_diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag_nonsu2.html">ed_diag_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag_normal.html">ed_diag_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag_superc.html">ed_diag_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_eigenspace.html">ed_eigenspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_common.html">ed_fit_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_general.html">ed_fit_general</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_hybrid.html">ed_fit_hybrid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_normal.html">ed_fit_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_replica.html">ed_fit_replica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gf_nonsu2.html">ed_gf_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gf_normal.html">ed_gf_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gf_superc.html">ed_gf_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_greens_functions.html">ed_greens_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian.html">ed_hamiltonian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2.html">ed_hamiltonian_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2_common.html">ed_hamiltonian_nonsu2_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2_direct_hxv.html">ed_hamiltonian_nonsu2_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2_stored_hxv.html">ed_hamiltonian_nonsu2_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal.html">ed_hamiltonian_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal_common.html">ed_hamiltonian_normal_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal_direct_hxv.html">ed_hamiltonian_normal_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal_stored_hxv.html">ed_hamiltonian_normal_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc.html">ed_hamiltonian_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc_common.html">ed_hamiltonian_superc_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc_direct_hxv.html">ed_hamiltonian_superc_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc_stored_hxv.html">ed_hamiltonian_superc_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_input_vars.html">ed_input_vars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_io.html">ed_io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_main.html">ed_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables.html">ed_observables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables_nonsu2.html">ed_observables_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables_normal.html">ed_observables_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables_superc.html">ed_observables_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_sector.html">ed_sector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_setup.html">ed_setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_sparse_matrix.html">ed_sparse_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_vars_global.html">ed_vars_global</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_version.html">ed_version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/edipack2.html">edipack2</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="edipy2.html">Python API for EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api/pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.beta"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Jh"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.dmft_error"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.ed_total_ud"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.ed_twin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.eps"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Jx"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Jp"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lfloat"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lmats"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.LOGfile"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lpos"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Ltau"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nbath"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nloop"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Norb"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nph"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.nread"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nspin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nsuccess"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.sb_field"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Uloc"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Ust"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.wini"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.wfin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.xmin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.xmax"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.xmu"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/functions.html">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/2_bath.html">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/3_inputoutput.html">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.build_gimp"><code class="docutils literal notranslate"><span class="pre">build_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.build_sigma"><code class="docutils literal notranslate"><span class="pre">build_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">External Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/aamaricci/EDIpack2.0">EDIpack2.0 on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/SciFortran/SciFortran">SciFortran on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Install</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="install">
+<h1>Install<a class="headerlink" href="#install" title="Link to this heading"></a></h1>
+<p>EDIpack2.0 is available in the form of a static Fortran library
+<cite>libedipack2.a</cite> and the related Fortran module <cite>EDIPACK2</cite>.
+Installation is available using CMake. In the current release the
+library enables standard Fortran API and Python API <cite>EDIpy2</cite>.</p>
+<section id="building">
+<h2>Building<a class="headerlink" href="#building" title="Link to this heading"></a></h2>
+<p>We assume that <cite>SciFortran</cite> and <cite>MPI</cite> have been correctly installed
+and are available in the system. See related documentation. Note that
+the installation of <cite>EDIpack2.0</cite> closely follows the <cite>SciFortran</cite>
+template.</p>
+<p>Clone the repo:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/aamaricci/EDIpack2.0<span class="w"> </span>EDIpack2
+</pre></div>
+</div>
+<p>Optionally define the fortran compiler:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">FC</span><span class="o">=</span>mpif90/gfortran/ifort
+</pre></div>
+</div>
+<p>From the repository directory (<cite>cd EDIpack2</cite>) make a standard
+out-of-source CMake compilation:</p>
+<p><strong>GNU Make</strong></p>
+<p>Using GNU <cite>make</cite> is the default CMake workflow, with widest version
+support (CMake &gt; 3.0). Note that parallel <cite>make</cite> execution is tested
+and working.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make<span class="w"> </span>-j
+</pre></div>
+</div>
+<p><strong>Ninja</strong></p>
+<p>Using <cite>ninja</cite> if a fortran-capable version of <a class="reference external" href="https://ninja-build.org">ninja</a> is available in your system (and CMake can
+take advantage of it), you can use it to build the library at lightning, multi-threaded, speed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-GNinja<span class="w"> </span>..
+ninja
+</pre></div>
+</div>
+<p>The <cite>CMake</cite> compilation can be customized using the following
+additional variables:</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">CMake Options</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Scope</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">-DPREFIX</span></code></p></td>
+<td><p>prefix directory</p></td>
+<td><p>~/opt/EDIpack2/VERSION/PLATFORM/[GIT_BRANCH]</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">-DUSE_MPI</span></code></p></td>
+<td><p>MPI support pre-compilation flag</p></td>
+<td><p>yes/True OR no/False (default: True)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">-DVERBOSE</span></code></p></td>
+<td><p>Verbose CMake output</p></td>
+<td><p>yes/True OR no/False (default: True, superseded by <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">VERBOSE=yes/no</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">-DBUILD_TYPE</span></code></p></td>
+<td><p>Compilation flags</p></td>
+<td><p>RELEASE/TESTING/DEBUG/AGGRESSIVE (Default RELEASE)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="code docutils literal notranslate"><span class="pre">BUILD_TYPE=AGGRESSIVE</span></code>  includes many deep level debug options which might not compile on some systems or breakdown compilation at linking step.</p>
+</div>
+</section>
+<section id="id1">
+<h2>Install<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>System-wide installation is completed after the build step using either:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>install
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ninja<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Please follow the instructions on the screen to complete installation on your environment.
+The library can be loaded using one of the following, automatically generated, files :</p>
+<ul class="simple">
+<li><p>A generated <a class="reference external" href="https://github.com/cea-hpc/modules">environment module</a> , installed to`~/.modules.d/EDIpack2/&lt;PLAT&gt;`</p></li>
+<li><p>A generated <cite>bash</cite> script at <cite>&lt;PREFIX&gt;/bin/configvars.sh</cite>, to be sourced for permanent loading.</p></li>
+<li><p>A generated <a class="reference external" href="https://github.com/freedesktop/pkg-config">pkg-config</a> file to, installed to <cite>~/.pkg-config.d/EDIpack2.pc</cite></p></li>
+</ul>
+</section>
+<section id="uninstall">
+<h2>Uninstall<a class="headerlink" href="#uninstall" title="Link to this heading"></a></h2>
+<p>Although CMake does not officially provide uninstall procedures in the
+generated Make/Ninja files. Hence SciFortran supplies a homebrew
+method to remove the generated files by calling (from the relevant
+build folder):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>uninstall
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ninja<span class="w"> </span>uninstall
+</pre></div>
+</div>
+</section>
+<section id="install-python-api">
+<h2>Install Python API<a class="headerlink" href="#install-python-api" title="Link to this heading"></a></h2>
+<p>The <cite>edipy2</cite> python module is installable from this folder via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>On some systems such as Debian &gt;= 11 and Mac Os,
+and if a virtual environment is not in use, the flag
+<cite>–break-system-packages</cite> has to be set. This creates no issue
+since no distro is packaging this library.</p>
+</div>
+<p>To remove the module, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>edipy2
+</pre></div>
+</div>
+<p>with same caveat for the <cite>–break-system-packages</cite> flag.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>See <cite>EDIpy2</cite> documentation for more details on installing the <cite>python</cite> API.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dependencies.html" class="btn btn-neutral float-left" title="Dependencies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quick Start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

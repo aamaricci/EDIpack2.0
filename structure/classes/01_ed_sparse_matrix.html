@@ -1,0 +1,664 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sparse Matrices &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7574a189" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="EigenSpace" href="02_ed_eigenspace.html" />
+    <link rel="prev" title="Setup" href="../general/04_ed_setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/anderson.html">Single Impurity Anderson problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/dmft.html">ED solver for Dynamical Mean-Field Theory</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/3band.html">Multi-band physics from ED-DMFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ahm.html">A dive into superconductivity: attractive Hubbard model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/bhz.html">A simple topological model: interacting Bernevig-Hughes-Zhang model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/exciton.html">Breaking spin SU(2): in-plane excitonic phase in quantum spin Hall insulators</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2.0</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html">General</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../general/01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../general/02_ed_vars_global.html">Global Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../general/03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../general/04_ed_setup.html">Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../edipack2.html#sparse-matrix">Sparse Matrix</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#eigenspace">EigenSpace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#sectors">Sectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#bath">Bath</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html">Bath Auxiliary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_aux/00_ed_vars_global.html">Bath data structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_aux/01_ed_bath_aux.html">Bath Auxiliary routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_aux/02_ed_bath_dim.html">Bath Dimension routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html#bath-dmft">Bath DMFT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_dmft/01_ed_bath_dmft.html">DMFT Bath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_dmft/02_ed_bath_user.html">User Bath symmetry operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_dmft/03_ed_bath_replica.html">Bath Replica routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html#bath-functions">Bath Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_functions/ed_bath_functions.html">Bath frequency-dependent routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html#bath-fit">Bath Fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_fit/ed_bath_fit.html">Bath <span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#exact-diagonalization">Exact Diagonalization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../diag.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../normal/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../normal/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../diag.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../superc/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../superc/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../diag.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#green-s-functions">Green’s functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../greensfunctions.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../normal/03_greensfunctions.html">Green’s Function calculation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../normal/04_chifunctions.html">Susceptibilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../greensfunctions.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../superc/03_greensfunctions.html">Green’s Function calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../greensfunctions.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/03_greensfunctions.html">Green’s Function calculation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#observables">Observables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../observables.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../normal/05_observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../observables.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../superc/05_observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../observables.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/05_observables.html">Observables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#input-output">Input/Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#edipack2">EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../edipackmodule.html">EDIpack2: Fortran API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#browse-source-code">Browse Source Code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_aux_funx.html">ed_aux_funx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath.html">ed_bath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_aux.html">ed_bath_aux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_dim.html">ed_bath_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_fit.html">ed_bath_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_functions.html">ed_bath_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_replica.html">ed_bath_replica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_user.html">ed_bath_user</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_dens.html">ed_chi_dens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_exct.html">ed_chi_exct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_functions.html">ed_chi_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_pair.html">ed_chi_pair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_spin.html">ed_chi_spin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag.html">ed_diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_nonsu2.html">ed_diag_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_normal.html">ed_diag_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_superc.html">ed_diag_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_eigenspace.html">ed_eigenspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_common.html">ed_fit_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_general.html">ed_fit_general</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_hybrid.html">ed_fit_hybrid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_normal.html">ed_fit_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_replica.html">ed_fit_replica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_nonsu2.html">ed_gf_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_normal.html">ed_gf_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_superc.html">ed_gf_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_greens_functions.html">ed_greens_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian.html">ed_hamiltonian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2.html">ed_hamiltonian_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_common.html">ed_hamiltonian_nonsu2_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_direct_hxv.html">ed_hamiltonian_nonsu2_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_stored_hxv.html">ed_hamiltonian_nonsu2_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal.html">ed_hamiltonian_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_common.html">ed_hamiltonian_normal_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_direct_hxv.html">ed_hamiltonian_normal_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_stored_hxv.html">ed_hamiltonian_normal_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc.html">ed_hamiltonian_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_common.html">ed_hamiltonian_superc_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_direct_hxv.html">ed_hamiltonian_superc_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_stored_hxv.html">ed_hamiltonian_superc_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_input_vars.html">ed_input_vars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_io.html">ed_io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_main.html">ed_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables.html">ed_observables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_nonsu2.html">ed_observables_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_normal.html">ed_observables_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_superc.html">ed_observables_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sector.html">ed_sector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_setup.html">ed_setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sparse_matrix.html">ed_sparse_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_vars_global.html">ed_vars_global</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_version.html">ed_version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/edipack2.html">edipack2</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../edipy2.html">Python API for EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.beta"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Jh"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.dmft_error"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.ed_total_ud"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.ed_twin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.eps"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Jx"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Jp"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Lfloat"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Lmats"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.LOGfile"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Lpos"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Ltau"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nbath"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nloop"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Norb"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nph"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.nread"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nspin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nsuccess"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.sb_field"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Uloc"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Ust"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.wini"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.wfin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.xmin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.xmax"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.xmu"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/functions.html">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/2_bath.html">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.build_gimp"><code class="docutils literal notranslate"><span class="pre">build_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.build_sigma"><code class="docutils literal notranslate"><span class="pre">build_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">External Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/aamaricci/EDIpack2.0">EDIpack2.0 on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/SciFortran/SciFortran">SciFortran on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../edipack2.html">General</a></li>
+      <li class="breadcrumb-item active">Sparse Matrices</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/structure/classes/01_ed_sparse_matrix.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sparse-matrices">
+<h1>Sparse Matrices<a class="headerlink" href="#sparse-matrices" title="Link to this heading"></a></h1>
+<svg id="moduleed_sparse_matrixUsesGraph" width="398pt" height="195pt"
+ viewBox="0.00 0.00 398.06 194.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_sparse_matrix~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 190.77)">
+<title>module~~ed_sparse_matrix~~UsesGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-190.77 394.06,-190.77 394.06,4 -4,4"/>
+<!-- module~ed_sparse_matrix -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node1" class="node">
+<title>module~ed_sparse_matrix</title>
+<polygon fill="none" stroke="black" points="390.06,-104.77 272.04,-104.77 272.04,-82 390.06,-82 390.06,-104.77"/>
+<text text-anchor="middle" x="331.05" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_SPARSE_MATRIX</text>
+</g>
+<!-- SF_MPI -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node2" class="node">
+<title>SF_MPI</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="214.53,-145.77 160.53,-145.77 160.53,-123 214.53,-123 214.53,-145.77"/>
+<text text-anchor="middle" x="187.53" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_MPI</text>
+</g>
+<!-- module~ed_sparse_matrix&#45;&gt;SF_MPI -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge1" class="edge">
+<title>module~ed_sparse_matrix&#45;&gt;SF_MPI</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M289.12,-105.24C269.05,-111.06 245.08,-118 225.56,-123.66"/>
+<polygon fill="#000000" stroke="#000000" points="224.74,-120.25 216.11,-126.4 226.69,-126.97 224.74,-120.25"/>
+</g>
+<!-- module~ed_input_vars -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node3" class="node">
+<title>module~ed_input_vars</title>
+<g id="a_module~~ed_sparse_matrix~~UsesGraph_node3"><a xlink:href="../module/ed_input_vars.html" xlink:title="ED_INPUT_VARS">
+<polygon fill="#337ab7" stroke="#337ab7" points="236.04,-104.77 139.02,-104.77 139.02,-82 236.04,-82 236.04,-104.77"/>
+<text text-anchor="middle" x="187.53" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_INPUT_VARS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_sparse_matrix&#45;&gt;module~ed_input_vars -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge2" class="edge">
+<title>module~ed_sparse_matrix&#45;&gt;module~ed_input_vars</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M271.67,-93.39C263.79,-93.39 255.7,-93.39 247.81,-93.39"/>
+<polygon fill="#000000" stroke="#000000" points="247.95,-89.89 237.95,-93.39 247.95,-96.89 247.95,-89.89"/>
+</g>
+<!-- mpi -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node4" class="node">
+<title>mpi</title>
+<g id="a_module~~ed_sparse_matrix~~UsesGraph_node4"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="214.53,-63.77 160.53,-63.77 160.53,-41 214.53,-41 214.53,-63.77"/>
+<text text-anchor="middle" x="187.53" y="-48.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~ed_sparse_matrix&#45;&gt;mpi -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge3" class="edge">
+<title>module~ed_sparse_matrix&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M289.12,-81.53C269.05,-75.71 245.08,-68.77 225.56,-63.11"/>
+<polygon fill="#000000" stroke="#000000" points="226.69,-59.8 216.11,-60.37 224.74,-66.52 226.69,-59.8"/>
+</g>
+<!-- SF_IOTOOLS -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node5" class="node">
+<title>SF_IOTOOLS</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="90.27,-186.77 12.75,-186.77 12.75,-164 90.27,-164 90.27,-186.77"/>
+<text text-anchor="middle" x="51.51" y="-171.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
+</g>
+<!-- module~ed_input_vars&#45;&gt;SF_IOTOOLS -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge4" class="edge">
+<title>module~ed_input_vars&#45;&gt;SF_IOTOOLS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M154.83,-105.15C149.33,-107.8 143.84,-110.89 139.02,-114.39 119.65,-128.42 122.54,-140.57 103.02,-154.38 101.08,-155.76 99.04,-157.06 96.94,-158.3"/>
+<polygon fill="#000000" stroke="#000000" points="95.36,-155.17 88.1,-162.89 98.59,-161.38 95.36,-155.17"/>
+</g>
+<!-- SF_PARSE_INPUT -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node6" class="node">
+<title>SF_PARSE_INPUT</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="103.02,-145.77 0,-145.77 0,-123 103.02,-123 103.02,-145.77"/>
+<text text-anchor="middle" x="51.51" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_PARSE_INPUT</text>
+</g>
+<!-- module~ed_input_vars&#45;&gt;SF_PARSE_INPUT -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge5" class="edge">
+<title>module~ed_input_vars&#45;&gt;SF_PARSE_INPUT</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M147.77,-105.24C133.46,-109.62 117.05,-114.64 101.92,-119.27"/>
+<polygon fill="#000000" stroke="#000000" points="101.17,-115.84 92.63,-122.11 103.22,-122.53 101.17,-115.84"/>
+</g>
+<!-- SF_VERSION -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node7" class="node">
+<title>SF_VERSION</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="90.27,-104.77 12.75,-104.77 12.75,-82 90.27,-82 90.27,-104.77"/>
+<text text-anchor="middle" x="51.51" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_VERSION</text>
+</g>
+<!-- module~ed_input_vars&#45;&gt;SF_VERSION -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge6" class="edge">
+<title>module~ed_input_vars&#45;&gt;SF_VERSION</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M138.52,-93.39C126.57,-93.39 113.74,-93.39 101.73,-93.39"/>
+<polygon fill="#000000" stroke="#000000" points="102.03,-89.89 92.03,-93.39 102.03,-96.89 102.03,-89.89"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node8" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~ed_sparse_matrix~~UsesGraph_node8"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89.89,-63.77 13.12,-63.77 13.12,-41 89.89,-41 89.89,-63.77"/>
+<text text-anchor="middle" x="51.51" y="-48.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~ed_input_vars&#45;&gt;iso_c_binding -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge7" class="edge">
+<title>module~ed_input_vars&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M147.77,-81.53C133.21,-77.07 116.48,-71.95 101.14,-67.26"/>
+<polygon fill="#000000" stroke="#000000" points="102.3,-63.96 91.71,-64.38 100.25,-70.65 102.3,-63.96"/>
+</g>
+<!-- module~ed_version -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_node9" class="node">
+<title>module~ed_version</title>
+<g id="a_module~~ed_sparse_matrix~~UsesGraph_node9"><a xlink:href="../module/ed_version.html" xlink:title="ED_VERSION">
+<polygon fill="#337ab7" stroke="#337ab7" points="90.64,-22.77 12.37,-22.77 12.37,0 90.64,0 90.64,-22.77"/>
+<text text-anchor="middle" x="51.51" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_VERSION</text>
+</a>
+</g>
+</g>
+<!-- module~ed_input_vars&#45;&gt;module~ed_version -->
+<g id="module~~ed_sparse_matrix~~UsesGraph_edge8" class="edge">
+<title>module~ed_input_vars&#45;&gt;module~ed_version</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M154.83,-81.62C149.33,-78.97 143.84,-75.88 139.02,-72.39 119.65,-58.35 122.54,-46.2 103.02,-32.39 101.08,-31.01 99.04,-29.71 96.94,-28.47"/>
+<polygon fill="#000000" stroke="#000000" points="98.59,-25.39 88.1,-23.88 95.36,-31.6 98.59,-25.39"/>
+</g>
+</g>
+</svg>
+<svg id="moduleed_sparse_matrixUsedByGraph" width="270pt" height="31pt"
+ viewBox="0.00 0.00 269.54 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_sparse_matrix~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<title>module~~ed_sparse_matrix~~UsedByGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 265.54,-26.77 265.54,4 -4,4"/>
+<!-- module~ed_sparse_matrix -->
+<g id="module~~ed_sparse_matrix~~UsedByGraph_node1" class="node">
+<title>module~ed_sparse_matrix</title>
+<polygon fill="none" stroke="black" points="118.02,-22.77 0,-22.77 0,0 118.02,0 118.02,-22.77"/>
+<text text-anchor="middle" x="59.01" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_SPARSE_MATRIX</text>
+</g>
+<!-- module~ed_vars_global -->
+<g id="module~~ed_sparse_matrix~~UsedByGraph_node2" class="node">
+<title>module~ed_vars_global</title>
+<g id="a_module~~ed_sparse_matrix~~UsedByGraph_node2"><a xlink:href="../module/ed_vars_global.html" xlink:title="ED_VARS_GLOBAL">
+<polygon fill="#337ab7" stroke="#337ab7" points="261.54,-22.77 154.02,-22.77 154.02,0 261.54,0 261.54,-22.77"/>
+<text text-anchor="middle" x="207.78" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_VARS_GLOBAL</text>
+</a>
+</g>
+</g>
+<!-- module~ed_vars_global&#45;&gt;module~ed_sparse_matrix -->
+<g id="module~~ed_sparse_matrix~~UsedByGraph_edge1" class="edge">
+<title>module~ed_vars_global&#45;&gt;module~ed_sparse_matrix</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M153.79,-11.39C145.98,-11.39 137.83,-11.39 129.74,-11.39"/>
+<polygon fill="#000000" stroke="#000000" points="129.9,-7.89 119.9,-11.39 129.9,-14.89 129.9,-7.89"/>
+</g>
+</g>
+</svg>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>This class defines a data structure to efficiently store sparse
+matrices into dedicated CSR matrices. The class features support to
+MPI parallel storage, so that each matrix is spread across the
+threads.</p>
+<p>Each instance of <code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_matrix_csr</span></code> corresponds to a rank-1
+array of dynamically reallocated rows, <code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_row_csr</span></code>,
+including one array for columns indices and one array for non-zero
+values of the dense matrix. Access to each element is <span class="math notranslate nohighlight">\(O(1)\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A more modern, object oriented, class for sparse matrices is
+available in <a class="reference external" href="https://github.com/SciFortran/SciFortran/tree/master/src/SF_SPARSE">SciFortran</a></p>
+</div>
+<p class="rubric" id="f/ed_sparse_matrix">Quick access</p>
+<dl class="field-list simple">
+<dt class="field-odd">Types<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><code class="xref f f-type docutils literal notranslate"><span class="pre">sparse_matrix_csr</span></code></a></p>
+</dd>
+<dt class="field-even">Routines<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#f/ed_sparse_matrix/sp_dump_matrix" title="f/ed_sparse_matrix/sp_dump_matrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">sp_dump_matrix()</span></code></a>, <a class="reference internal" href="#f/ed_sparse_matrix/sp_init_matrix" title="f/ed_sparse_matrix/sp_init_matrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">sp_init_matrix()</span></code></a>, <a class="reference internal" href="#f/ed_sparse_matrix/sp_insert_element" title="f/ed_sparse_matrix/sp_insert_element"><code class="xref f f-func docutils literal notranslate"><span class="pre">sp_insert_element()</span></code></a>, <a class="reference internal" href="#f/ed_sparse_matrix/sp_set_mpi_matrix" title="f/ed_sparse_matrix/sp_set_mpi_matrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">sp_set_mpi_matrix()</span></code></a></p>
+</dd>
+</dl>
+<p class="rubric">Used modules</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../general/01_ed_input_vars.html#f/ed_input_vars" title="f/ed_input_vars"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_input_vars</span></code></a></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_mpi</span></code></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">mpi</span></code></p></li>
+</ul>
+<p class="rubric">Types</p>
+<ul>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_sparse_matrix/sparse_matrix_csr">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_sparse_matrix/</span></span><span class="sig-name descname"><span class="pre">sparse_matrix_csr</span></span><a class="headerlink" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="Link to this definition"></a></dt>
+<dd><p>The sparse matrix data structure realized as an allocatable array of of <code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_row_csr</span></code> types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">iend</span><em> [</em><em>integer</em><em>, </em><em>optional/default=0</em><em>]</em> – ending index for the MPI decomposition of the sparse matrix</p></li>
+<li><p><span class="sig-name descname">ishift</span><em> [</em><em>integer</em><em>, </em><em>optional/default=0</em><em>]</em> – integer shift index for the MPI decomposition of the sparse matrix</p></li>
+<li><p><span class="sig-name descname">istart</span><em> [</em><em>integer</em><em>, </em><em>optional/default=0</em><em>]</em> – starting index for the MPI decomposition of the sparse matrix</p></li>
+<li><p><span class="sig-name descname">loc</span> (*)<em> [</em><em>sparse_row_csr</em><em>, </em><em>pointer</em><em>]</em> – the array of <code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_row_csr</span></code> for the diagonal blocks</p></li>
+<li><p><span class="sig-name descname">mpi</span><em> [</em><em>logical</em><em>, </em><em>optional/default=.false.</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">ncol</span><em> [</em><em>integer</em><em>]</em> – the total number of columns</p></li>
+<li><p><span class="sig-name descname">nrow</span><em> [</em><em>integer</em><em>]</em> – the total number of rows</p></li>
+<li><p><span class="sig-name descname">row</span> (*)<em> [</em><em>sparse_row_csr</em><em>, </em><em>pointer</em><em>]</em> – the array of <code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_row_csr</span></code></p></li>
+<li><p><span class="sig-name descname">status</span><em> [</em><em>logical</em><em>, </em><em>optional/default=.false.</em><em>]</em> – Allocation status</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl>
+<dt class="sig sig-object f" id="f/ed_sparse_matrix/sp_init_matrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_sparse_matrix/</span></span><span class="sig-name descname"><span class="pre">sp_init_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sparse</span></em>, <em class="sig-param"><span class="pre">n</span></em>, <em class="sig-param"><span class="pre">mpicomm</span></em><span class="optional">[</span>, <em class="sig-param"><span class="pre">n1</span></em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_sparse_matrix/sp_init_matrix" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Initialization of the <a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_matrix_csr</span></code></a> via memory allocation. An empty matrix is returned</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sparse</strong><em> [</em><a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em>sparse_matrix_csr</em></a><em>, </em><em>inout</em><em>]</em> – sparse matrix to be initialized</p></li>
+<li><p><strong>n</strong><em> [</em><em>integer</em><em>]</em> – Number of rows</p></li>
+<li><p><strong>mpicomm</strong><em> [</em><em>integer</em><em>]</em> – MPI global communicator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>n1</strong><em> [</em><em>integer</em><em>]</em> – Number of columns [Optional]. If not present <code class="code docutils literal notranslate"><span class="pre">N1=N</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_sparse_matrix/sp_insert_element">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_sparse_matrix/</span></span><span class="sig-name descname"><span class="pre">sp_insert_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sparse</span></em>, <em class="sig-param"><span class="pre">value</span></em>, <em class="sig-param"><span class="pre">i</span></em>, <em class="sig-param"><span class="pre">j</span></em>, <em class="sig-param"><span class="pre">mpicomm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_sparse_matrix/sp_insert_element" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Matrix element insertion at a given row and columns. If an active MPI communicator is passed as input the element is stored in the matrix chunk of the corresponding thread. Double precision and double complex values are supported.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sparse</strong><em> [</em><a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em>sparse_matrix_csr</em></a><em>, </em><em>inout</em><em>]</em></p></li>
+<li><p><strong>value</strong><em> [</em><em>real</em><em>, </em><em>complex</em><em>, </em><em>in</em><em>]</em> – matrix value to be inserted</p></li>
+<li><p><strong>i</strong><em> [</em><em>integer</em><em>, </em><em>in</em><em>]</em> – row index of the matrix value to be inserted</p></li>
+<li><p><strong>j</strong><em> [</em><em>integer</em><em>, </em><em>in</em><em>]</em> – column index of the matrix value to be inserted</p></li>
+<li><p><strong>mpicomm</strong><em> [</em><em>integer</em><em>]</em> – MPI global communicator</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_sparse_matrix/sp_dump_matrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_sparse_matrix/</span></span><span class="sig-name descname"><span class="pre">sp_dump_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sparse</span></em>, <em class="sig-param"><span class="pre">matrix</span></em>, <em class="sig-param"><span class="pre">mpicomm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_sparse_matrix/sp_dump_matrix" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Dump the <a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_matrix_csr</span></code></a> into a dense matrix.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sparse</strong><em> [</em><a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em>sparse_matrix_csr</em></a><em>, </em><em>in</em><em>]</em></p></li>
+<li><p><strong>matrix</strong> (*,*)<em> [</em><em>real</em><em>, </em><em>complex</em><em>, </em><em>inout</em><em>]</em> – dense matrix corresponding to <code class="xref f f-var docutils literal notranslate"><span class="pre">sparse</span></code> having the same type.</p></li>
+<li><p><strong>mpicomm</strong><em> [</em><em>integer</em><em>]</em> – MPI global communicator</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_sparse_matrix/sp_set_mpi_matrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_sparse_matrix/</span></span><span class="sig-name descname"><span class="pre">sp_set_mpi_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mpicomm</span></em>, <em class="sig-param"><span class="pre">sparse</span></em>, <em class="sig-param"><span class="pre">istart</span></em>, <em class="sig-param"><span class="pre">iend</span></em>, <em class="sig-param"><span class="pre">ishift</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_sparse_matrix/sp_set_mpi_matrix" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Set up the MPI parameters in the <a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><code class="xref f f-var docutils literal notranslate"><span class="pre">sparse_matrix_csr</span></code></a> for automatic spread of the values across the threads</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mpicomm</strong><em> [</em><em>integer</em><em>]</em> – MPI global communicator</p></li>
+<li><p><strong>sparse</strong><em> [</em><a class="reference internal" href="#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em>sparse_matrix_csr</em></a><em>, </em><em>inout</em><em>]</em></p></li>
+<li><p><strong>istart</strong><em> [</em><em>integer</em><em>]</em> – starting index for the MPI decomposition of the sparse matrix</p></li>
+<li><p><strong>iend</strong><em> [</em><em>integer</em><em>]</em> – ending index for the MPI decomposition of the sparse matrix</p></li>
+<li><p><strong>ishift</strong><em> [</em><em>integer</em><em>]</em> – shift index for the MPI decomposition of the sparse matrix</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../general/04_ed_setup.html" class="btn btn-neutral float-left" title="Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="02_ed_eigenspace.html" class="btn btn-neutral float-right" title="EigenSpace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

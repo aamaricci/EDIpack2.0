@@ -1,0 +1,855 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Variables &mdash; EDIpack2.0 beta 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7574a189" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f68cc3da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Auxiliary Functions" href="03_ed_aux_funx.html" />
+    <link rel="prev" title="Input Variables" href="01_ed_input_vars.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/anderson.html">Single Impurity Anderson problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/dmft.html">ED solver for Dynamical Mean-Field Theory</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/3band.html">Multi-band physics from ED-DMFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ahm.html">A dive into superconductivity: attractive Hubbard model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/bhz.html">A simple topological model: interacting Bernevig-Hughes-Zhang model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/exciton.html">Breaking spin SU(2): in-plane excitonic phase in quantum spin Hall insulators</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2.0</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../edipack2.html">General</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Global Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_ed_setup.html">Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#sparse-matrix">Sparse Matrix</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../classes/01_ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#eigenspace">EigenSpace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../classes/02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#sectors">Sectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#bath">Bath</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html">Bath Auxiliary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_aux/00_ed_vars_global.html">Bath data structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_aux/01_ed_bath_aux.html">Bath Auxiliary routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_aux/02_ed_bath_dim.html">Bath Dimension routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html#bath-dmft">Bath DMFT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_dmft/01_ed_bath_dmft.html">DMFT Bath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_dmft/02_ed_bath_user.html">User Bath symmetry operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bath_dmft/03_ed_bath_replica.html">Bath Replica routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html#bath-functions">Bath Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_functions/ed_bath_functions.html">Bath frequency-dependent routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bath.html#bath-fit">Bath Fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bath_fit/ed_bath_fit.html">Bath <span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#exact-diagonalization">Exact Diagonalization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../diag.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../normal/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../normal/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../diag.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../superc/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../superc/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../diag.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/01_diag.html">Exact Diagonalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/02_hamiltonian.html">Hamiltonian</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#green-s-functions">Green’s functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../greensfunctions.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../normal/03_greensfunctions.html">Green’s Function calculation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../normal/04_chifunctions.html">Susceptibilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../greensfunctions.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../superc/03_greensfunctions.html">Green’s Function calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../greensfunctions.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/03_greensfunctions.html">Green’s Function calculation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#observables">Observables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../observables.html">Normal mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../normal/05_observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../observables.html#superconductive-mode">Superconductive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../superc/05_observables.html">Observables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../observables.html#non-su-2-mode">Non-SU(2) mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nonsu2/05_observables.html">Observables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#input-output">Input/Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#edipack2">EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../edipackmodule.html">EDIpack2: Fortran API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html#browse-source-code">Browse Source Code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_aux_funx.html">ed_aux_funx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath.html">ed_bath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_aux.html">ed_bath_aux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_dim.html">ed_bath_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_fit.html">ed_bath_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_functions.html">ed_bath_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_replica.html">ed_bath_replica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_user.html">ed_bath_user</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_dens.html">ed_chi_dens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_exct.html">ed_chi_exct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_functions.html">ed_chi_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_pair.html">ed_chi_pair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_spin.html">ed_chi_spin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag.html">ed_diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_nonsu2.html">ed_diag_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_normal.html">ed_diag_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_superc.html">ed_diag_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_eigenspace.html">ed_eigenspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_common.html">ed_fit_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_general.html">ed_fit_general</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_hybrid.html">ed_fit_hybrid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_normal.html">ed_fit_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_replica.html">ed_fit_replica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_nonsu2.html">ed_gf_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_normal.html">ed_gf_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_superc.html">ed_gf_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_greens_functions.html">ed_greens_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian.html">ed_hamiltonian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2.html">ed_hamiltonian_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_common.html">ed_hamiltonian_nonsu2_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_direct_hxv.html">ed_hamiltonian_nonsu2_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_stored_hxv.html">ed_hamiltonian_nonsu2_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal.html">ed_hamiltonian_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_common.html">ed_hamiltonian_normal_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_direct_hxv.html">ed_hamiltonian_normal_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_stored_hxv.html">ed_hamiltonian_normal_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc.html">ed_hamiltonian_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_common.html">ed_hamiltonian_superc_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_direct_hxv.html">ed_hamiltonian_superc_direct_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_stored_hxv.html">ed_hamiltonian_superc_stored_hxv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_input_vars.html">ed_input_vars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_io.html">ed_io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_main.html">ed_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables.html">ed_observables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_nonsu2.html">ed_observables_nonsu2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_normal.html">ed_observables_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_superc.html">ed_observables_superc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sector.html">ed_sector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_setup.html">ed_setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sparse_matrix.html">ed_sparse_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_vars_global.html">ed_vars_global</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_version.html">ed_version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/edipack2.html">edipack2</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../edipy2.html">Python API for EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.beta"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Jh"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.dmft_error"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.ed_total_ud"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.ed_twin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.eps"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Jx"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Jp"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Lfloat"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Lmats"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.LOGfile"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Lpos"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Ltau"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nbath"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nloop"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Norb"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nph"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.nread"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nspin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Nsuccess"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.sb_field"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Uloc"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.Ust"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.wini"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.wfin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.xmin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.xmax"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/globvars.html#edipy2.global_env.xmu"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api/functions.html">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/2_bath.html">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/2_bath.html#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.build_gimp"><code class="docutils literal notranslate"><span class="pre">build_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.build_sigma"><code class="docutils literal notranslate"><span class="pre">build_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/3_inputoutput.html#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../python_api/funcs/4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">External Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/aamaricci/EDIpack2.0">EDIpack2.0 on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/SciFortran/SciFortran">SciFortran on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../edipack2.html">General</a></li>
+      <li class="breadcrumb-item active">Global Variables</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/structure/general/02_ed_vars_global.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="global-variables">
+<h1>Global Variables<a class="headerlink" href="#global-variables" title="Link to this heading"></a></h1>
+<svg id="moduleed_vars_globalUsesGraph" width="542pt" height="211pt"
+ viewBox="0.00 0.00 541.58 210.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_vars_global~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 206.77)">
+<title>module~~ed_vars_global~~UsesGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-206.77 537.58,-206.77 537.58,4 -4,4"/>
+<!-- module~ed_vars_global -->
+<g id="module~~ed_vars_global~~UsesGraph_node1" class="node">
+<title>module~ed_vars_global</title>
+<polygon fill="none" stroke="black" points="533.58,-142.77 426.06,-142.77 426.06,-120 533.58,-120 533.58,-142.77"/>
+<text text-anchor="middle" x="479.82" y="-127.03" font-family="Helvetica,sans-Serif" font-size="10.50">ED_VARS_GLOBAL</text>
+</g>
+<!-- SF_CONSTANTS -->
+<g id="module~~ed_vars_global~~UsesGraph_node2" class="node">
+<title>SF_CONSTANTS</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="378.43,-202.77 283.66,-202.77 283.66,-180 378.43,-180 378.43,-202.77"/>
+<text text-anchor="middle" x="331.05" y="-187.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
+</g>
+<!-- module~ed_vars_global&#45;&gt;SF_CONSTANTS -->
+<g id="module~~ed_vars_global~~UsesGraph_edge1" class="edge">
+<title>module~ed_vars_global&#45;&gt;SF_CONSTANTS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M449.82,-143.24C427.41,-152.4 396.15,-165.18 371.46,-175.27"/>
+<polygon fill="#000000" stroke="#000000" points="370.32,-171.96 362.39,-178.98 372.97,-178.44 370.32,-171.96"/>
+</g>
+<!-- SF_IOTOOLS -->
+<g id="module~~ed_vars_global~~UsesGraph_node3" class="node">
+<title>SF_IOTOOLS</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="90.27,-186.77 12.75,-186.77 12.75,-164 90.27,-164 90.27,-186.77"/>
+<text text-anchor="middle" x="51.51" y="-171.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
+</g>
+<!-- module~ed_vars_global&#45;&gt;SF_IOTOOLS -->
+<g id="module~~ed_vars_global~~UsesGraph_edge2" class="edge">
+<title>module~ed_vars_global&#45;&gt;SF_IOTOOLS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M330.05,-152.38C249.93,-152.59 157.24,-162.17 101.83,-168.9"/>
+<polygon fill="#000000" stroke="#000000" points="101.58,-165.4 92.09,-170.1 102.44,-172.35 101.58,-165.4"/>
+</g>
+<!-- SF_MPI -->
+<g id="module~~ed_vars_global~~UsesGraph_node4" class="node">
+<title>SF_MPI</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="214.53,-83.77 160.53,-83.77 160.53,-61 214.53,-61 214.53,-83.77"/>
+<text text-anchor="middle" x="187.53" y="-68.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_MPI</text>
+</g>
+<!-- module~ed_vars_global&#45;&gt;SF_MPI -->
+<g id="module~~ed_vars_global~~UsesGraph_edge3" class="edge">
+<title>module~ed_vars_global&#45;&gt;SF_MPI</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M330.05,-72.39C295.72,-63.26 255.03,-64.44 226.11,-67.2"/>
+<polygon fill="#000000" stroke="#000000" points="225.95,-63.7 216.38,-68.25 226.7,-70.66 225.95,-63.7"/>
+</g>
+<!-- module~ed_input_vars -->
+<g id="module~~ed_vars_global~~UsesGraph_node5" class="node">
+<title>module~ed_input_vars</title>
+<g id="a_module~~ed_vars_global~~UsesGraph_node5"><a xlink:href="../module/ed_input_vars.html" xlink:title="ED_INPUT_VARS">
+<polygon fill="#337ab7" stroke="#337ab7" points="236.04,-124.77 139.02,-124.77 139.02,-102 236.04,-102 236.04,-124.77"/>
+<text text-anchor="middle" x="187.53" y="-109.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_INPUT_VARS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_vars_global&#45;&gt;module~ed_input_vars -->
+<g id="module~~ed_vars_global~~UsesGraph_edge4" class="edge">
+<title>module~ed_vars_global&#45;&gt;module~ed_input_vars</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M330.05,-152.38C293.49,-152.48 253.46,-140.22 225.34,-129.42"/>
+<polygon fill="#000000" stroke="#000000" points="226.79,-126.24 216.21,-125.79 224.21,-132.74 226.79,-126.24"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M425.75,-142.62C397.97,-147.57 363.32,-152.3 332.05,-152.38"/>
+</g>
+<!-- module~ed_sparse_matrix -->
+<g id="module~~ed_vars_global~~UsesGraph_node6" class="node">
+<title>module~ed_sparse_matrix</title>
+<g id="a_module~~ed_vars_global~~UsesGraph_node6"><a xlink:href="../module/ed_sparse_matrix.html" xlink:title="ED_SPARSE_MATRIX">
+<polygon fill="#337ab7" stroke="#337ab7" points="390.06,-123.77 272.04,-123.77 272.04,-101 390.06,-101 390.06,-123.77"/>
+<text text-anchor="middle" x="331.05" y="-108.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_SPARSE_MATRIX</text>
+</a>
+</g>
+</g>
+<!-- module~ed_vars_global&#45;&gt;module~ed_sparse_matrix -->
+<g id="module~~ed_vars_global~~UsesGraph_edge5" class="edge">
+<title>module~ed_vars_global&#45;&gt;module~ed_sparse_matrix</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M425.83,-124.53C418.02,-123.51 409.87,-122.46 401.78,-121.41"/>
+<polygon fill="#000000" stroke="#000000" points="402.29,-117.95 391.93,-120.14 401.4,-124.89 402.29,-117.95"/>
+</g>
+<!-- mpi -->
+<g id="module~~ed_vars_global~~UsesGraph_node7" class="node">
+<title>mpi</title>
+<g id="a_module~~ed_vars_global~~UsesGraph_node7"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="214.53,-42.77 160.53,-42.77 160.53,-20 214.53,-20 214.53,-42.77"/>
+<text text-anchor="middle" x="187.53" y="-27.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~ed_vars_global&#45;&gt;mpi -->
+<g id="module~~ed_vars_global~~UsesGraph_edge6" class="edge">
+<title>module~ed_vars_global&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M330.05,-72.39C294.37,-62.9 253.93,-51.08 225.45,-42.57"/>
+<polygon fill="#000000" stroke="#000000" points="226.81,-39.32 216.23,-39.8 224.8,-46.03 226.81,-39.32"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M454.78,-119.58C426.21,-106.07 376.77,-84.27 332.05,-72.39"/>
+</g>
+<!-- module~ed_input_vars&#45;&gt;SF_IOTOOLS -->
+<g id="module~~ed_vars_global~~UsesGraph_edge7" class="edge">
+<title>module~ed_input_vars&#45;&gt;SF_IOTOOLS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M163.32,-125.27C146.66,-133.67 123.62,-145.06 103.02,-154.38 99.5,-155.98 95.81,-157.6 92.12,-159.2"/>
+<polygon fill="#000000" stroke="#000000" points="90.99,-155.87 83.15,-163 93.72,-162.32 90.99,-155.87"/>
+</g>
+<!-- SF_PARSE_INPUT -->
+<g id="module~~ed_vars_global~~UsesGraph_node8" class="node">
+<title>SF_PARSE_INPUT</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="103.02,-22.77 0,-22.77 0,0 103.02,0 103.02,-22.77"/>
+<text text-anchor="middle" x="51.51" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_PARSE_INPUT</text>
+</g>
+<!-- module~ed_input_vars&#45;&gt;SF_PARSE_INPUT -->
+<g id="module~~ed_vars_global~~UsesGraph_edge8" class="edge">
+<title>module~ed_input_vars&#45;&gt;SF_PARSE_INPUT</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M152.76,-101.6C147.84,-99.02 143.08,-95.97 139.02,-92.39 115.71,-71.8 126.56,-52.71 103.02,-32.39 101.59,-31.15 100.07,-29.98 98.49,-28.87"/>
+<polygon fill="#000000" stroke="#000000" points="100.62,-26.06 90.24,-23.95 97.04,-32.07 100.62,-26.06"/>
+</g>
+<!-- SF_VERSION -->
+<g id="module~~ed_vars_global~~UsesGraph_node9" class="node">
+<title>SF_VERSION</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="90.27,-145.77 12.75,-145.77 12.75,-123 90.27,-123 90.27,-145.77"/>
+<text text-anchor="middle" x="51.51" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_VERSION</text>
+</g>
+<!-- module~ed_input_vars&#45;&gt;SF_VERSION -->
+<g id="module~~ed_vars_global~~UsesGraph_edge9" class="edge">
+<title>module~ed_input_vars&#45;&gt;SF_VERSION</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M138.52,-120.91C126.57,-122.78 113.74,-124.79 101.73,-126.67"/>
+<polygon fill="#000000" stroke="#000000" points="101.35,-123.19 92.02,-128.19 102.44,-130.1 101.35,-123.19"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~ed_vars_global~~UsesGraph_node10" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~ed_vars_global~~UsesGraph_node10"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89.89,-104.77 13.12,-104.77 13.12,-82 89.89,-82 89.89,-104.77"/>
+<text text-anchor="middle" x="51.51" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~ed_input_vars&#45;&gt;iso_c_binding -->
+<g id="module~~ed_vars_global~~UsesGraph_edge10" class="edge">
+<title>module~ed_input_vars&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M138.52,-106.22C126.46,-104.42 113.49,-102.49 101.39,-100.68"/>
+<polygon fill="#000000" stroke="#000000" points="102,-97.23 91.59,-99.22 100.97,-104.16 102,-97.23"/>
+</g>
+<!-- module~ed_version -->
+<g id="module~~ed_vars_global~~UsesGraph_node11" class="node">
+<title>module~ed_version</title>
+<g id="a_module~~ed_vars_global~~UsesGraph_node11"><a xlink:href="../module/ed_version.html" xlink:title="ED_VERSION">
+<polygon fill="#337ab7" stroke="#337ab7" points="90.64,-63.77 12.37,-63.77 12.37,-41 90.64,-41 90.64,-63.77"/>
+<text text-anchor="middle" x="51.51" y="-48.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_VERSION</text>
+</a>
+</g>
+</g>
+<!-- module~ed_input_vars&#45;&gt;module~ed_version -->
+<g id="module~~ed_vars_global~~UsesGraph_edge11" class="edge">
+<title>module~ed_input_vars&#45;&gt;module~ed_version</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M159,-101.6C152.41,-98.68 145.43,-95.49 139.02,-92.39 122.74,-84.5 119.39,-81.09 103.02,-73.39 99.71,-71.83 96.26,-70.26 92.77,-68.73"/>
+<polygon fill="#000000" stroke="#000000" points="94.32,-65.59 83.75,-64.86 91.56,-72.02 94.32,-65.59"/>
+</g>
+<!-- module~ed_sparse_matrix&#45;&gt;SF_MPI -->
+<g id="module~~ed_vars_global~~UsesGraph_edge12" class="edge">
+<title>module~ed_sparse_matrix&#45;&gt;SF_MPI</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M288.35,-100.6C268.55,-95 245.06,-88.36 225.85,-82.93"/>
+<polygon fill="#000000" stroke="#000000" points="226.83,-79.57 216.25,-80.22 224.92,-86.31 226.83,-79.57"/>
+</g>
+<!-- module~ed_sparse_matrix&#45;&gt;module~ed_input_vars -->
+<g id="module~~ed_vars_global~~UsesGraph_edge13" class="edge">
+<title>module~ed_sparse_matrix&#45;&gt;module~ed_input_vars</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M271.67,-112.8C263.79,-112.85 255.7,-112.91 247.81,-112.97"/>
+<polygon fill="#000000" stroke="#000000" points="247.92,-109.47 237.95,-113.04 247.97,-116.46 247.92,-109.47"/>
+</g>
+<!-- module~ed_sparse_matrix&#45;&gt;mpi -->
+<g id="module~~ed_vars_global~~UsesGraph_edge14" class="edge">
+<title>module~ed_sparse_matrix&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M298.63,-100.59C289.71,-96.65 280.21,-91.84 272.04,-86.39 253.74,-74.16 254.37,-64.57 236.04,-52.39 232.61,-50.1 228.89,-47.97 225.09,-46"/>
+<polygon fill="#000000" stroke="#000000" points="226.91,-42.99 216.38,-41.84 223.9,-49.31 226.91,-42.99"/>
+</g>
+</g>
+</svg>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>The module <code class="xref f f-mod docutils literal notranslate"><span class="pre">ED_VARS_GLOBAL</span></code> contains all the simple types and
+variables shared throughout the code.</p>
+<p class="rubric" id="f/ed_vars_global">Quick access</p>
+<dl class="field-list simple">
+<dt class="field-odd">Types<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#f/ed_vars_global/gfchannel" title="f/ed_vars_global/gfchannel"><code class="xref f f-type docutils literal notranslate"><span class="pre">gfchannel</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/gfmatrix" title="f/ed_vars_global/gfmatrix"><code class="xref f f-type docutils literal notranslate"><span class="pre">gfmatrix</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/gfspectrum" title="f/ed_vars_global/gfspectrum"><code class="xref f f-type docutils literal notranslate"><span class="pre">gfspectrum</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/h_operator" title="f/ed_vars_global/h_operator"><code class="xref f f-type docutils literal notranslate"><span class="pre">h_operator</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sector" title="f/ed_vars_global/sector"><code class="xref f f-type docutils literal notranslate"><span class="pre">sector</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sector_map" title="f/ed_vars_global/sector_map"><code class="xref f f-type docutils literal notranslate"><span class="pre">sector_map</span></code></a></p>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#f/ed_vars_global/ed_file_suffix" title="f/ed_vars_global/ed_file_suffix"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_file_suffix</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/imphloc" title="f/ed_vars_global/imphloc"><code class="xref f f-var docutils literal notranslate"><span class="pre">imphloc</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/neigen_sector" title="f/ed_vars_global/neigen_sector"><code class="xref f f-var docutils literal notranslate"><span class="pre">neigen_sector</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/nlevels" title="f/ed_vars_global/nlevels"><code class="xref f f-var docutils literal notranslate"><span class="pre">nlevels</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/ns" title="f/ed_vars_global/ns"><code class="xref f f-var docutils literal notranslate"><span class="pre">ns</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/ns_orb" title="f/ed_vars_global/ns_orb"><code class="xref f f-var docutils literal notranslate"><span class="pre">ns_orb</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/ns_ud" title="f/ed_vars_global/ns_ud"><code class="xref f f-var docutils literal notranslate"><span class="pre">ns_ud</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/nsectors" title="f/ed_vars_global/nsectors"><code class="xref f f-var docutils literal notranslate"><span class="pre">nsectors</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0" title="f/ed_vars_global/sph0"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0d" title="f/ed_vars_global/sph0d"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0d</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0dws" title="f/ed_vars_global/sph0dws"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0dws</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0e_eph" title="f/ed_vars_global/sph0e_eph"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0e_eph</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0nd" title="f/ed_vars_global/sph0nd"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0nd</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0ph_eph" title="f/ed_vars_global/sph0ph_eph"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0ph_eph</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/sph0ups" title="f/ed_vars_global/sph0ups"><code class="xref f f-var docutils literal notranslate"><span class="pre">sph0ups</span></code></a></p>
+</dd>
+<dt class="field-odd">Routines<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#f/ed_vars_global/allocate_gfmatrix" title="f/ed_vars_global/allocate_gfmatrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">allocate_gfmatrix()</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/deallocate_gfmatrix" title="f/ed_vars_global/deallocate_gfmatrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">deallocate_gfmatrix()</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/read_gfmatrix" title="f/ed_vars_global/read_gfmatrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">read_gfmatrix()</span></code></a>, <a class="reference internal" href="#f/ed_vars_global/write_gfmatrix" title="f/ed_vars_global/write_gfmatrix"><code class="xref f f-func docutils literal notranslate"><span class="pre">write_gfmatrix()</span></code></a></p>
+</dd>
+</dl>
+<p class="rubric">Used modules</p>
+<ul class="simple">
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_constants</span></code></p></li>
+<li><dl class="simple">
+<dt><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_iotools</span></code></dt><dd><ul>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/free_unit()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/reg()</span></code></p></li>
+<li><p><code class="xref f f-func docutils literal notranslate"><span class="pre">sf_iotools/str()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix" title="f/ed_sparse_matrix"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sparse_matrix</span></code></a></p></li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars" title="f/ed_input_vars"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_input_vars</span></code></a></dt><dd><ul>
+<li><p><a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars/ed_verbose" title="f/ed_input_vars/ed_verbose"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_input_vars/ed_verbose</span></code></a></p></li>
+<li><p><a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars/logfile" title="f/ed_input_vars/logfile"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_input_vars/logfile</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">mpi</span></code></p></li>
+<li><p><code class="xref f f-mod docutils literal notranslate"><span class="pre">sf_mpi</span></code></p></li>
+</ul>
+<p class="rubric">Types</p>
+<ul>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/h_operator">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">h_operator</span></span><a class="headerlink" href="#f/ed_vars_global/h_operator" title="Link to this definition"></a></dt>
+<dd><p>The matrix storing in the basis [<a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars/nspin" title="f/ed_input_vars/nspin"><code class="xref f f-var docutils literal notranslate"><span class="pre">nspin</span></code></a> , <a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars/nspin" title="f/ed_input_vars/nspin"><code class="xref f f-var docutils literal notranslate"><span class="pre">nspin</span></code></a> , <a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars/norb" title="f/ed_input_vars/norb"><code class="xref f f-var docutils literal notranslate"><span class="pre">norb</span></code></a> , <a class="reference internal" href="01_ed_input_vars.html#f/ed_input_vars/norb" title="f/ed_input_vars/norb"><code class="xref f f-var docutils literal notranslate"><span class="pre">norb</span></code></a> ] each element of the Matrix basis decomposing the replica/general bath Hamiltonian <span class="math notranslate nohighlight">\(H_p=\sum_{i=1}^{N_{basis}} \lambda_i(p) O_i\)</span>, where <span class="math notranslate nohighlight">\(N_{basis}\)</span> is the dimension of the user defined basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">o</span> (*,*,*,*)<em> [</em><em>complex</em><em>, </em><em>allocatable</em><em>]</em> – Replica/General hamiltonian</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/sector_map">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sector_map</span></span><a class="headerlink" href="#f/ed_vars_global/sector_map" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">map</span> (*)<em> [</em><em>integer</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">status</span><em> [</em><em>logical</em><em>, </em><em>optional/default=.false.</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/sector">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sector</span></span><a class="headerlink" href="#f/ed_vars_global/sector" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">dim</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">dimdw</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">dimdws</span> (*)<em> [</em><em>integer</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">dimel</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">dimph</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">dimup</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">dimups</span> (*)<em> [</em><em>integer</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">h</span> (*)<em> [</em><a class="reference internal" href="#f/ed_vars_global/sector_map" title="f/ed_vars_global/sector_map"><em>sector_map</em></a><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">index</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">ndw</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">ndws</span> (*)<em> [</em><em>integer</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">nlanc</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">ntot</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">nup</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">nups</span> (*)<em> [</em><em>integer</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">status</span><em> [</em><em>logical</em><em>, </em><em>optional/default=.false.</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">sz</span><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">twojz</span><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/gfspectrum">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">gfspectrum</span></span><a class="headerlink" href="#f/ed_vars_global/gfspectrum" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">poles</span> (*)<em> [</em><em>real</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">weight</span> (*)<em> [</em><em>real</em><em>, </em><em>allocatable</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/gfchannel">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">gfchannel</span></span><a class="headerlink" href="#f/ed_vars_global/gfchannel" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">channel</span> (*)<em> [</em><a class="reference internal" href="#f/ed_vars_global/gfspectrum" title="f/ed_vars_global/gfspectrum"><em>gfspectrum</em></a><em>, </em><em>allocatable</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/gfmatrix">
+<em class="property"><span class="pre">type</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">gfmatrix</span></span><a class="headerlink" href="#f/ed_vars_global/gfmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="sig-name descname">state</span> (*)<em> [</em><a class="reference internal" href="#f/ed_vars_global/gfchannel" title="f/ed_vars_global/gfchannel"><em>gfchannel</em></a><em>, </em><em>allocatable</em><em>]</em></p></li>
+<li><p><span class="sig-name descname">status</span><em> [</em><em>logical</em><em>, </em><em>optional/default=.false.</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Variables</p>
+<ul>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/ed_file_suffix">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">ed_file_suffix</span></span><em> <span class="pre">[</span></em><em><span class="pre">character(len=32)</span></em><em><span class="pre">,</span></em><em><span class="pre">optional/default=&quot;&quot;</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/ed_file_suffix" title="Link to this definition"></a></dt>
+<dd><p>suffix string attached to the output files.</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/imphloc">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">imphloc</span></span> <span class="pre">(</span><span class="pre">*,*,*,*</span><span class="pre">)</span><em> <span class="pre">[</span></em><em><span class="pre">complex</span></em><em><span class="pre">,</span></em><em><span class="pre">allocatable</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/imphloc" title="Link to this definition"></a></dt>
+<dd><p>local hamiltonian</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/neigen_sector">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">neigen_sector</span></span> <span class="pre">(</span><span class="pre">*</span><span class="pre">)</span><em> <span class="pre">[</span></em><em><span class="pre">integer</span></em><em><span class="pre">,</span></em><em><span class="pre">allocatable</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/neigen_sector" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/nlevels">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">nlevels</span></span><em> <span class="pre">[</span></em><em><span class="pre">integer</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/nlevels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/ns">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">ns</span></span><em> <span class="pre">[</span></em><em><span class="pre">integer</span></em><em><span class="pre">,</span></em><em><span class="pre">save</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/ns" title="Link to this definition"></a></dt>
+<dd><p>Number of levels per spin</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/ns_orb">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">ns_orb</span></span><em> <span class="pre">[</span></em><em><span class="pre">integer</span></em><em><span class="pre">,</span></em><em><span class="pre">save</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/ns_orb" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/ns_ud">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">ns_ud</span></span><em> <span class="pre">[</span></em><em><span class="pre">integer</span></em><em><span class="pre">,</span></em><em><span class="pre">save</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/ns_ud" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/nsectors">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">nsectors</span></span><em> <span class="pre">[</span></em><em><span class="pre">integer</span></em><em><span class="pre">,</span></em><em><span class="pre">save</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/nsectors" title="Link to this definition"></a></dt>
+<dd><p>Number of sectors</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0</span></span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0d">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0d</span></span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0d" title="Link to this definition"></a></dt>
+<dd><p>diagonal part</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0dws">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0dws</span></span> <span class="pre">(</span><span class="pre">*</span><span class="pre">)</span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">,</span></em><em><span class="pre">allocatable</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0dws" title="Link to this definition"></a></dt>
+<dd><p>reduced UP and DW parts</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0e_eph">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0e_eph</span></span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0e_eph" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0nd">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0nd</span></span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0nd" title="Link to this definition"></a></dt>
+<dd><p>non-diagonal part</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0ph_eph">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0ph_eph</span></span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0ph_eph" title="Link to this definition"></a></dt>
+<dd><p>electron-phonon interaction</p>
+</dd></dl>
+
+</li>
+<li><dl class="f variable">
+<dt class="sig sig-object f" id="f/ed_vars_global/sph0ups">
+<span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">sph0ups</span></span> <span class="pre">(</span><span class="pre">*</span><span class="pre">)</span><em> <span class="pre">[</span></em><a class="reference internal" href="../classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix/sparse_matrix_csr" title="f/ed_sparse_matrix/sparse_matrix_csr"><em><span class="pre">sparse_matrix_csr</span></em></a><em><span class="pre">,</span></em><em><span class="pre">allocatable</span></em><em><span class="pre">]</span></em><a class="headerlink" href="#f/ed_vars_global/sph0ups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/allocate_gfmatrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">allocate_gfmatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">nstate</span></em>, <em class="sig-param"><span class="pre">istate</span></em>, <em class="sig-param"><span class="pre">nchan</span></em>, <em class="sig-param"><span class="pre">ichan</span></em>, <em class="sig-param"><span class="pre">nexc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_vars_global/allocate_gfmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong><em> [</em><a class="reference internal" href="#f/ed_vars_global/gfmatrix" title="f/ed_vars_global/gfmatrix"><em>gfmatrix</em></a><em>]</em></p></li>
+<li><p><strong>nstate</strong><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><strong>istate</strong><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><strong>nchan</strong><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><strong>ichan</strong><em> [</em><em>integer</em><em>]</em></p></li>
+<li><p><strong>nexc</strong><em> [</em><em>integer</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/deallocate_gfmatrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">deallocate_gfmatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_vars_global/deallocate_gfmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self</strong> (various shapes)<em> [</em><a class="reference internal" href="#f/ed_vars_global/gfmatrix" title="f/ed_vars_global/gfmatrix"><em>gfmatrix</em></a><em>]</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/write_gfmatrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">write_gfmatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_vars_global/write_gfmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong><em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>file</strong><em> [</em><em>character(len=*)</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt class="sig sig-object f" id="f/ed_vars_global/read_gfmatrix">
+<em class="property"><span class="pre">interface</span>&#160; </em><span class="sig-prename descclassname"><span class="pre">ed_vars_global/</span></span><span class="sig-name descname"><span class="pre">read_gfmatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self</span></em>, <em class="sig-param"><span class="pre">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#f/ed_vars_global/read_gfmatrix" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong><em> [</em><em>real</em><em>]</em></p></li>
+<li><p><strong>file</strong><em> [</em><em>character(len=*)</em><em>]</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="01_ed_input_vars.html" class="btn btn-neutral float-left" title="Input Variables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="03_ed_aux_funx.html" class="btn btn-neutral float-right" title="Auxiliary Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
