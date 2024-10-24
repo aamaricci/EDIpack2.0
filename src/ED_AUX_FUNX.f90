@@ -13,15 +13,15 @@ MODULE ED_AUX_FUNX
   !> ED SET HLOC
   interface ed_set_Hloc
      !This subroutine sets the local Hamiltonian of the impurity problem. 
-     !The local hamiltonian can have different shapes (:f:var:`Nso` = :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`Nlso` = :f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`)
+     !The local hamiltonian can have different shapes:
      !
-     !   * [:f:var:`Nso` , :f:var:`Nso`]: single-impurity case, rank-2 array
-     !   * [:f:var:`nspin` , :f:var:`nspin` , :f:var:`norb` , :f:var:`orb`]: single-impurity case, rank-4 array
-     !   * [:f:var:`Nlso`, :f:var:`Nlso` ]: real-space DMFT case, rank-2 array.
-     !   * [:f:var:`nlat` , :f:var:`Nso`, :f:var:`Nso` ]: real-space RDMFT case, rank-3 array.
-     !   * [:f:var:`nlat` , :f:var:`nspin` , :f:var:`nspin` , :f:var:`norb` , :f:var:`orb` ]: real-space RDMFT case, rank-5 array.
+     !   * [|Nso| , |Nso| ]: single-impurity case, rank-2 array
+     !   * [|Nspin| , |Nspin| , |Norb| , |Norb| ]: single-impurity case, rank-4 array
+     !   * [|Nlso|, |Nlso| ]: real-space DMFT case, rank-2 array.
+     !   * [|Nlat| , |Nso| , |Nso| ]: real-space RDMFT case, rank-3 array.
+     !   * [|Nlat| , |Nspin| , |Nspin| , |Norb| , |Norb| ]: real-space RDMFT case, rank-5 array.
      !
-     !In the case of real-space DMFT, the number of impurities :f:var:`nlat` must be provided.
+     !In the case of real-space DMFT, the number of impurities |Nlat| must be provided.
      !
      module procedure :: ed_set_Hloc_single_N2
      module procedure :: ed_set_Hloc_single_N4

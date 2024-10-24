@@ -12,17 +12,39 @@ MODULE ED_BATH_AUX
 
 
   interface get_Whyb_matrix
+     !
+     ! This subroutine build up the hybridization matrix :math:`W_{\sigma\sigma^{'}}` used in the :f:var:`ed_mode` = nonsu2 with :f:var:`bath_type` = hybrid. The input can have different shape and type:
+     !
+     !   * :f:var:`u` , :f:var:`v` with dimensions [ |Nspin| , |Norb| ]  
+     !   * :f:var:`u` , :f:var:`v` with dimensions [ |Nspin| , |Norb| , :f:var:`nbath`]  
+     !   * :f:var:`dmft_bath` 
+     !
      module procedure get_Whyb_matrix_1orb
      module procedure get_Whyb_matrix_Aorb
      module procedure get_Whyb_matrix_dmft_bath
   end interface get_Whyb_matrix
 
+
   interface is_identity
+     !
+     ! This subroutine checks if a matrix :math:`\hat{O}`  in the basis of the :code:`replica` or :code:`general` baths is the identity.
+     ! 
+     ! The input matrix can have different shapes:
+     !    *  [ |Nnambu| . |Nspin| . |Norb| , |Nnambu| . |Nspin| . |Norb| ]
+     !    *  [ |Nnambu| . |Nspin| , |Nnambu| . |Nspin| , |Norb| , |Norb| ]
+     !
      module procedure ::  is_identity_so
      module procedure ::  is_identity_nn
   end interface is_identity
 
   interface is_diagonal
+     !
+     ! This subroutine checks if a matrix :math:`\hat{O}`  in the basis of the :code:`replica` or :code:`general` baths is diagonal.
+     ! 
+     ! The input matrix can have different shapes:
+     !    *  [ |Nnambu| . |Nspin| . |Norb| , |Nnambu| . |Nspin| . |Norb| ]
+     !    *  [ |Nnambu| . |Nspin| , |Nnambu| . |Nspin| , |Norb| , |Norb| ]
+     !
      module procedure ::  is_diagonal_so
      module procedure ::  is_diagonal_nn
   end interface is_diagonal
@@ -34,11 +56,6 @@ contains
 
 
 
-  !##################################################################
-  !
-  !     HREPLICA AUX FUNCTIONS:
-  !
-  !##################################################################
   subroutine Hreplica_site(site)
     integer :: site
     if(site<1.OR.site>size(Hreplica_lambda_ineq,1))stop "ERROR Hreplica_site: site not in [1,Nlat]"
@@ -47,9 +64,12 @@ contains
   end subroutine Hreplica_site
 
 
-  !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
+
   function Hreplica_build(lambdavec) result(H)
-    real(8),dimension(:),optional                             :: lambdavec ![Nsym]
+    !
+    !This function is used to reconstruct the local bath Hamiltonian from basis expansion given the vector of :math:`\vec{\lambda}` parameters :math:`h^p=\sum_i \lambda^p_i O_i`. The resulting Hamiltonian has dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| ]
+    !
+    real(8),dimension(:),optional                             :: lambdavec !the input vector of bath parameters
     real(8),dimension(:),allocatable                          :: lambda
     integer                                                   :: isym
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
@@ -66,7 +86,6 @@ contains
     enddo
   end function Hreplica_build
 
-  !Create bath mask
   function Hreplica_mask(wdiag,uplo) result(Hmask)
     logical,optional                                          :: wdiag,uplo
     logical                                                   :: wdiag_,uplo_
@@ -77,7 +96,7 @@ contains
     wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
     uplo_ =.false.;if(present(uplo))  uplo_=uplo
     !
-    H = Hreplica_build(Hreplica_lambda(Nbath,:)) !The mask should be replica-independent
+    H = Hreplica_build(Hreplica_lambda(Nbath,:)) 
     Hmask=.false.
     where(abs(H)>1d-6)Hmask=.true.
     !
@@ -110,11 +129,6 @@ contains
 
 
 
-  !##################################################################
-  !
-  !     HGENERAL AUX FUNCTIONS:
-  !
-  !##################################################################
   subroutine Hgeneral_site(site)
     integer :: site
     if(site<1.OR.site>size(Hgeneral_lambda_ineq,1))stop "ERROR Hgeneral_site: site not in [1,Nlat]"
@@ -122,10 +136,11 @@ contains
     Hgeneral_lambda(:,:)  = Hgeneral_lambda_ineq(site,:,:)
   end subroutine Hgeneral_site
 
-
-  !reconstruct [Nspin,Nspin,Norb,Norb] hamiltonian from basis expansion given [lambda]
   function Hgeneral_build(lambdavec) result(H)
-    real(8),dimension(:),optional                             :: lambdavec ![Nsym]
+    !
+    !This function is used to reconstruct the local bath Hamiltonian from basis expansion given the vector of :math:`\vec{\lambda}` parameters :math:`h^p=\sum_i \lambda^p_i O_i`. The resulting Hamiltonian has dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| ]
+    !
+    real(8),dimension(:),optional                             :: lambdavec  !the input vector of bath parameters
     real(8),dimension(:),allocatable                          :: lambda
     integer                                                   :: isym
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
@@ -142,12 +157,6 @@ contains
     enddo
   end function Hgeneral_build
 
-
-
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : Create bath mask
-  !+-------------------------------------------------------------------+
   function Hgeneral_mask(wdiag,uplo) result(Hmask)
     logical,optional                                          :: wdiag,uplo
     logical                                                   :: wdiag_,uplo_
@@ -158,7 +167,7 @@ contains
     wdiag_=.false.;if(present(wdiag))wdiag_=wdiag
     uplo_ =.false.;if(present(uplo))  uplo_=uplo
     !
-    H = Hgeneral_build(Hgeneral_lambda(Nbath,:)) !The mask should be general-independent
+    H = Hgeneral_build(Hgeneral_lambda(Nbath,:))
     Hmask=.false.
     where(abs(H)>1d-6)Hmask=.true.
     !
@@ -189,54 +198,34 @@ contains
 
 
 
-  !##################################################################
-  !
-  !     W_hyb PROCEDURES
-  !
-  !##################################################################
-  !+-----------------------------------------------------------------------------+!
-  !PURPOSE: build up the all-spin hybridization matrix W_{ss`}
-  !+-----------------------------------------------------------------------------+!
+
+
+
+
+
+
+
+
   function get_Whyb_matrix_1orb(v,u) result(w)
     real(8),dimension(Nspin,Nbath)       :: v,u
     real(8),dimension(Nspin,Nspin,Nbath) :: w
     integer                              :: ispin
-    !
-    ! if(ed_para)then
-    !    do ispin=1,Nspin
-    !       w(ispin,ispin,:) = v(1,:)
-    !    enddo
-    !    w(1,Nspin,:) = u(1,:)
-    !    w(Nspin,1,:) = u(1,:)
-    ! else
     do ispin=1,Nspin
        w(ispin,ispin,:) = v(ispin,:)
     enddo
     w(1,Nspin,:) = u(1,:)
     w(Nspin,1,:) = u(2,:)
-    ! endif
-    !
   end function get_Whyb_matrix_1orb
 
   function get_Whyb_matrix_Aorb(v,u) result(w)
     real(8),dimension(Nspin,Norb,Nbath)       :: v,u
     real(8),dimension(Nspin,Nspin,Norb,Nbath) :: w
     integer                                   :: ispin
-    !
-    ! if(ed_para)then
-    !    do ispin=1,Nspin
-    !       w(ispin,ispin,:,:) = v(1,:,:)
-    !    enddo
-    !    w(1,Nspin,:,:) = u(1,:,:)
-    !    w(Nspin,1,:,:) = u(1,:,:)
-    ! else
     do ispin=1,Nspin
        w(ispin,ispin,:,:) = v(ispin,:,:)
     enddo
     w(1,Nspin,:,:) = u(1,:,:)
     w(Nspin,1,:,:) = u(2,:,:)
-    ! endif
-    !
   end function get_Whyb_matrix_Aorb
 
   function get_Whyb_matrix_dmft_bath(dmft_bath_) result(w)
@@ -244,20 +233,11 @@ contains
     real(8),dimension(Nspin,Nspin,Norb,Nbath) :: w
     integer                                   :: ispin
     !
-    ! if(ed_para)then
-    !    do ispin=1,Nspin
-    !       w(ispin,ispin,:,:) = dmft_bath_%v(1,:,:)
-    !    enddo
-    !    w(1,Nspin,:,:) = dmft_bath_%u(1,:,:)
-    !    w(Nspin,1,:,:) = dmft_bath_%u(1,:,:)
-    ! else
     do ispin=1,Nspin
        w(ispin,ispin,:,:) = dmft_bath_%v(ispin,:,:)
     enddo
     w(1,Nspin,:,:) = dmft_bath_%u(1,:,:)
     w(Nspin,1,:,:) = dmft_bath_%u(2,:,:)
-    ! endif
-    !
   end function get_Whyb_matrix_dmft_bath
 
 
@@ -387,234 +367,3 @@ contains
 
 END MODULE ED_BATH_AUX
 
-
-
-
-
-
-
-
-
-
-! public :: get_bath_component_dimension
-! public :: get_bath_component
-! public :: set_bath_component
-! public :: copy_bath_component
-! !
-
-
-
-! !+-------------------------------------------------------------------+
-! !PURPOSE  : Inquire the correct bath size to allocate the
-! ! the bath array in the calling program.
-! !
-! ! Get size of each dimension of the component array.
-! ! The Result is an rank 1 integer array Ndim with dimension:
-! ! 3 for get_component_size_bath
-! ! 2 for get_spin_component_size_bath & get_orb_component_size_bath
-! ! 1 for get_spin_orb_component_size_bath
-! !+-------------------------------------------------------------------+
-! function get_bath_component_dimension(type) result(Ndim)
-!   character(len=1) :: type
-!   integer          :: Ndim(3)
-!   call  check_bath_component(type)
-!   select case(bath_type)
-!   case default
-!      Ndim=[Nspin,Norb,Nbath]
-!   case('hybrid')
-!      select case(ed_mode)
-!      case default
-!         select case(type)
-!         case('e')
-!            Ndim=[Nspin,1,Nbath]
-!         case('v')
-!            Ndim=[Nspin,Norb,Nbath]
-!         end select
-!      case ("superc")
-!         select case(type)
-!         case('e','d')
-!            Ndim=[Nspin,1,Nbath]
-!         case('v')
-!            Ndim=[Nspin,Norb,Nbath]
-!         end select
-!      case ("nonsu2")
-!         select case(type)
-!         case('e')
-!            Ndim=[Nspin,1,Nbath]
-!         case('v','u')
-!            Ndim=[Nspin,Norb,Nbath]
-!         end select
-!      end select
-!   end select
-! end function get_bath_component_dimension
-
-
-! !+-----------------------------------------------------------------------------+!
-! !PURPOSE: check that the input array hsa the correct dimensions specified
-! ! for the choice of itype and possiblty ispin and/or iorb.
-! !+-----------------------------------------------------------------------------+!
-! subroutine assert_bath_component_size(array,type,string1,string2)
-!   real(8),dimension(:,:,:) :: array
-!   character(len=1)         :: type
-!   character(len=*)         :: string1,string2
-!   integer                  :: Ndim(3)
-!   Ndim = get_bath_component_dimension(type)
-!   call assert_shape(Array,Ndim,reg(string1),reg(string2))
-! end subroutine assert_bath_component_size
-
-
-
-
-
-
-
-
-! !+-----------------------------------------------------------------------------+!
-! !PURPOSE: Get a specified itype,ispin,iorb component of the user bath.
-! ! The component is returned into an Array of rank D
-! ! get_full_component_bath    : return the entire itype component (D=3)
-! ! get_spin_component_bath    : return the itype component for the select ispin (D=2)
-! ! get_spin_orb_component_bath: return the itype component for the select ispin & iorb (D=1)
-! !+-----------------------------------------------------------------------------+!
-! subroutine get_bath_component(array,bath_,type)
-!   real(8),dimension(:,:,:) :: array
-!   real(8),dimension(:)     :: bath_
-!   character(len=1)         :: type
-!   logical                  :: check
-!   type(effective_bath)     :: dmft_bath_
-!   !
-!   check= check_bath_dimension(bath_)
-!   if(.not.check)stop "get_component_bath error: wrong bath dimensions"
-!   call allocate_dmft_bath(dmft_bath_)
-!   call set_dmft_bath(bath_,dmft_bath_)
-!   call assert_bath_component_size(array,type,"get_bath_component","Array")
-!   call check_bath_component(type)
-!   select case(ed_mode)
-!   case default
-!      select case(type)
-!      case('e')
-!         Array = dmft_bath_%e(:,:,:)
-!      case('v')
-!         Array = dmft_bath_%v(:,:,:)
-!      end select
-!   case ("superc")
-!      select case(type)
-!      case('e')
-!         Array = dmft_bath_%e(:,:,:)
-!      case('d')
-!         Array = dmft_bath_%d(:,:,:)
-!      case('v')
-!         Array = dmft_bath_%v(:,:,:)
-!      end select
-!   case ("nonsu2")
-!      select case(type)
-!      case('e')
-!         Array = dmft_bath_%e(:,:,:)
-!      case('v')
-!         Array = dmft_bath_%v(:,:,:)
-!      case('u')
-!         Array = dmft_bath_%u(:,:,:)
-!      end select
-!   end select
-!   call deallocate_dmft_bath(dmft_bath_)
-! end subroutine get_bath_component
-
-
-! !+-----------------------------------------------------------------------------+!
-! !PURPOSE: Set a specified itype,ispin,iorb component of the user bath.
-! !+-----------------------------------------------------------------------------+!
-! subroutine set_bath_component(array,bath_,type)
-!   real(8),dimension(:,:,:) :: array
-!   real(8),dimension(:)     :: bath_
-!   character(len=1)         :: type
-!   logical                  :: check
-!   type(effective_bath)     :: dmft_bath_
-!   !
-!   check= check_bath_dimension(bath_)
-!   if(.not.check)stop "set_component_bath error: wrong bath dimensions"
-!   call allocate_dmft_bath(dmft_bath_)
-!   call set_dmft_bath(bath_,dmft_bath_)
-!   call assert_bath_component_size(array,type,"set_bath_component","Array")
-!   call check_bath_component(type)
-!   select case(ed_mode)
-!   case default
-!      select case(type)
-!      case('e')
-!         dmft_bath_%e(:,:,:) = Array
-!      case('v')
-!         dmft_bath_%v(:,:,:) = Array
-!      end select
-!   case ("superc")
-!      select case(type)
-!      case('e')
-!         dmft_bath_%e(:,:,:) = Array
-!      case('d')
-!         dmft_bath_%d(:,:,:) = Array
-!      case('v')
-!         dmft_bath_%v(:,:,:) = Array
-!      end select
-!   case ("nonsu2")
-!      select case(type)
-!      case('e')
-!         dmft_bath_%e(:,:,:) = Array
-!      case('v')
-!         dmft_bath_%v(:,:,:) = Array
-!      case('u')
-!         dmft_bath_%u(:,:,:) = Array
-!      end select
-!   end select
-!   call get_dmft_bath(dmft_bath_,bath_)
-!   call deallocate_dmft_bath(dmft_bath_)
-! end subroutine set_bath_component
-
-
-
-! !+-----------------------------------------------------------------------------+!
-! !PURPOSE: Copy a specified component of IN bath to the OUT bath.
-! !+-----------------------------------------------------------------------------+!
-! subroutine copy_bath_component(bathIN,bathOUT,type)
-!   real(8),dimension(:)     :: bathIN,bathOUT
-!   character(len=1)         :: type
-!   logical                  :: check
-!   type(effective_bath)     :: dIN,dOUT
-!   !
-!   check= check_bath_dimension(bathIN)
-!   if(.not.check)stop "copy_component_bath error: wrong bath dimensions IN"
-!   check= check_bath_dimension(bathOUT)
-!   if(.not.check)stop "copy_component_bath error: wrong bath dimensions OUT"
-!   call allocate_dmft_bath(dIN)
-!   call allocate_dmft_bath(dOUT)
-!   call set_dmft_bath(bathIN,dIN)
-!   call set_dmft_bath(bathOUT,dOUT)
-!   call check_bath_component(type)
-!   select case(ed_mode)
-!   case default
-!      select case(type)
-!      case('e')
-!         dOUT%e(:,:,:)  = dIN%e(:,:,:)
-!      case('v')
-!         dOUT%v(:,:,:)  = dIN%v(:,:,:)
-!      end select
-!   case ("superc")
-!      select case(type)
-!      case('e')
-!         dOUT%e(:,:,:)  = dIN%e(:,:,:)
-!      case('d')
-!         dOUT%d(:,:,:)  = dIN%d(:,:,:)
-!      case('v')
-!         dOUT%v(:,:,:)  = dIN%v(:,:,:)
-!      end select
-!   case ("nonsu2")
-!      select case(type)
-!      case('e')
-!         dOUT%e(:,:,:)  = dIN%e(:,:,:)
-!      case('v')
-!         dOUT%v(:,:,:)  = dIN%v(:,:,:)
-!      case('u')
-!         dOUT%u(:,:,:)  = dIN%u(:,:,:)
-!      end select
-!   end select
-!   call get_dmft_bath(dOUT,bathOUT)
-!   call deallocate_dmft_bath(dIN)
-!   call deallocate_dmft_bath(dOUT)
-! end subroutine copy_bath_component

@@ -19,6 +19,12 @@ MODULE ED_BATH_DIM
   !
   !##################################################################
   interface get_bath_dimension
+     !
+     ! Returns the dimension :f:var:`bath_size` to which the user should allocate the user bath array to contains all the parameters according to the provided input variables. The value is obtained counting all the electronic levels of the system compatible with the operational mode :f:var:`ed_mode`, the bath topology specified by :f:var:`bath_type`, the values of :f:var:`norb`, :f:var:`nbath` and :f:var:`nspin`.
+     !
+     ! If :f:var:`bath_type` is replica/general then a input matrix :f:var:`h_nn` can be used to count the number of parameters, corresponding to its non-zero elements. In alternative the bath size can be estimated by the number of parameters in the linear decomposition of the bath local Hamiltonian :f:var:`nsym` such that :math:`h^p=sum_{i=1}^{N_{sym}}\lambda^p_i O_i}`. 
+     !
+     !
      module procedure ::  get_bath_dimension_direct
      module procedure ::  get_bath_dimension_symmetries
   end interface get_bath_dimension
@@ -38,7 +44,7 @@ contains
   ! the bath array in the calling program.
   !+-------------------------------------------------------------------+
   function get_bath_dimension_direct(H_nn) result(bath_size)
-    complex(8),optional,intent(in) :: H_nn(:,:,:,:)
+    complex(8),optional,intent(in) :: H_nn(:,:,:,:) !optional input matrix with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| ] used to count the number of bath parameters in replica/general values of :f:var:`bath_type`. 
     integer                        :: bath_size,ndx,ispin,iorb,jspin,jorb,io,jo,Maxspin
     complex(8),allocatable         :: H(:,:,:,:)
     !
@@ -187,10 +193,12 @@ contains
   !PURPOSE  : Check if the dimension of the bath array are consistent
   !+-------------------------------------------------------------------+
   function check_bath_dimension(bath_) result(bool)
+    !
+    ! Checks the  user bath :f:var:`bath_` on input has the correct dimensions according to the choice of input parameters for the calculations. 
+    !
     real(8),dimension(:)           :: bath_
     integer                        :: Ntrue,i
     logical                        :: bool
-    !complex(8),allocatable         :: Hreplica(:,:,:,:,:)![Nspin][:][Norb][:][Nsym]
     select case (bath_type)
     case default
        Ntrue = get_bath_dimension()
@@ -202,6 +210,7 @@ contains
     bool  = ( size(bath_) == Ntrue )
   end function check_bath_dimension
 
+  
 
 END MODULE ED_BATH_DIM
 
