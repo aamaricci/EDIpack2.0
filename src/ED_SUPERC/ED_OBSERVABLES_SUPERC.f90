@@ -524,6 +524,7 @@ contains
     endif
 #endif
     !
+    ed_Eint = ed_Epot
     ed_Epot = ed_Epot + ed_Ehartree
     !
     if(ed_verbose>=3)then

@@ -667,6 +667,7 @@ contains
     endif
 #endif
     !
+    ed_Eint = ed_Epot !without Hartree. This variable was previously unassigned
     ed_Epot = ed_Epot + ed_Ehartree
     !
     if(ed_verbose>=3)then
