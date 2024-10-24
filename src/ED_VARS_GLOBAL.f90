@@ -195,7 +195,7 @@ MODULE ED_VARS_GLOBAL
 
   !Effective Bath used in the ED code (this is opaque to user)
   !=========================================================
-  type(effective_bath)                               :: dmft_bath
+  type(effective_bath)                               :: dmft_bath !instance of :f:var`effective_bath` used to store the quantum impurity effective bath in the rest of the code 
 
 
   !Global Nambu factor for SC calculations (Nspin=1 but this index is 2 to

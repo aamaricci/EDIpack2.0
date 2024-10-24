@@ -10,7 +10,7 @@ MODULE ED_BATH_AUX
   implicit none
 
 
-  !Aux:
+
   interface get_Whyb_matrix
      module procedure get_Whyb_matrix_1orb
      module procedure get_Whyb_matrix_Aorb

@@ -1,5 +1,5 @@
-Bath User routines
-============================
+User Bath symmetry operations
+=================================
 
 These functions let the user modify the bath
 

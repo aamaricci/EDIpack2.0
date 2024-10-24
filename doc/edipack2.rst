@@ -7,8 +7,15 @@ General
 
 This include a set of modules which contains input variables
 :f:mod:`ed_input_vars`, global ones and shared classes/data structure in
-:f:mod:`ed_vars_global`, global memory (de)allocation :f:mod:`ed_setup` as well as
+:f:mod:`ed_vars_global`, global memory (de)allocation and evaluation
+of symmetry sectors dimensions :f:mod:`ed_setup` as well as
 generic functions which are used throughout the code :f:mod:`ed_aux_funx`.
+
+:f:mod:`ed_vars_global`  contains the definition of simple data
+structures, such as  :f:type:`gfmatrix`  storing all weights and poles of the Green's functions or
+:f:type:`effective_bath` gathering the different bath components
+according to value of :f:var:`bath_type` and :f:var:`ed_mode`.
+   
 
 .. toctree::
    :maxdepth: 2
@@ -17,19 +24,11 @@ generic functions which are used throughout the code :f:mod:`ed_aux_funx`.
    structure/general/*
 
 
-Classes
+Sparse Matrix
 ###########################
 
-Some simple data structures contained in :f:mod:`ed_vars_global` have
-been discussed in :doc:`structure/general/02_ed_vars_global`, such as  :f:type:`gfmatrix` 
-type storing all weights and poles of the Green's functions or
-:f:type:`effective_bath` gathering the different bath components
-according to value of :f:var:`bath_type` and :f:var:`ed_mode`.
-However other tasks in the code requires more elaborated classes which
-are implemented in two main modules.
-
-The first is :f:mod:`ed_sparse_matrix` describing Compact Row Stored
-sparse matrices used to store sparse Hamiltonians in each symmetry
+The module  :f:mod:`ed_sparse_matrix` contains the implementation of a
+suitable Compact Row Stored sparse matrix, used to store sparse Hamiltonians in each symmetry
 sector. The data structure essentially corresponds to an array of
 rows as dynamical vectors, one for the values and one for the columns index of
 the non-zero elements of the matrix. This enables :math:`O(1)`
@@ -38,19 +37,30 @@ automatic rows split balanced among the different threads and a
 further subdivision of the columns/values in local and non-local
 blocks.   
 
-The second class is :f:mod:`ed_eigenspace` which describes an ordered
-single linked list efficiently storing the lower part of the energy
-spectrum, including eigenvectors, eigenvalues, symmetry sector and
-twin states (states in sectors with exchanged quantum numbers which do
-have same energy).
 
 
 .. toctree::
    :maxdepth: 2
-   :glob:
 
-   structure/classes/*
+   structure/classes/01_ed_sparse_matrix
 
+
+   
+
+EigenSpace
+###########################
+
+In  :f:mod:`ed_eigenspace` we implement an ordered
+single linked list to efficiently store the lower part of the energy
+spectrum, including eigenvectors, eigenvalues, symmetry sector index and
+twin states, i.e. states in sectors with exchanged quantum numbers which do
+have same energy. 
+
+
+.. toctree::
+   :maxdepth: 2
+
+   structure/classes/02_ed_eigenspace
 
    
 Sectors
@@ -90,7 +100,8 @@ recall are:
    structure/ed_sector
 
 
-Bath
+
+Bath 
 ###########################
 
 The construction and the handling of the bath is a crucial part of the
@@ -98,124 +109,110 @@ description of the generic single impurity Anderson problem.
 In `EDIpack2.0` we implemented different bath topologies, which can be
 selected using the variable :f:var:`bath_type` = 
 :code:`normal, hybrid, replica, general` according to the nature of the problem at hand.
-The bath is described in terms of two set of parameters: the local
-hamiltonian :math:`\hat{h}^p` and the hybridization :math:`\hat{V}^p`,
-for :math:`p=1,\dots,N_{bath}`. The first describes the local
-properties of each bath element (be that a single electronic level or
-a more complex structure made of few levels), the second describes the
-coupling with the impurity.
 
-Depending on the nature of such two parameters we can distinguish
-different cases corresponding to the value of :f:var:`bath_type`. 
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/bath
+   
 
 
-For :f:var:`bath_type` = :code:`normal` a number :f:var:`nbath` of electronic
-levels are coupled directly to each orbital level of the impurity
-site.  Thus, :math:`\hat{V}^p=V^p_{a}\delta_{ab}` and
-:math:`\hat{h}^p\equiv \epsilon^p_a\delta_{ab}` are both diagonal in
-the orbital index.
-For :f:var:`ed_mode` = :code:`superc` the bath includes a set of parameters
-:math:`\Delta_p` describing the superconductive amplitude on each bath
-level. 
 
 
-For :f:var:`bath_type` = :code:`hybrid` a number :code:`nbath` of electronic
-levels are all coupled to any orbital level of the impurity
-site.  Thus, :math:`\hat{V}^p=V^p_{ab}` is a matrix in the orbital
-index whereas :math:`\hat{h}^p\equiv \epsilon^p_a\delta_{ab}` remains
-diagonal.
-For :f:var:`ed_mode` = :code:`superc` the bath includes a set of parameters
-:math:`\Delta_p` describing the superconductive amplitude on each bath
-level. 
 
-
-For :f:var:`bath_type` = :code:`replica` a number :code:`nbath` of copies of the
-impurity structure are  coupled to the impurity itself.  Each bath
-element is made of a number :math:`N_{orb}` of electronic levels,
-i.e. the number of orbitals in the impurity site. Each bath element is
-coupled to the impurity with an amplitude
-:math:`\hat{V}^p=V^p_{a}\delta_{ab}`, while it is described by a local
-Hamiltonian :math:`\hat{h}^p = \sum_{m=1}^{M} \lambda^p_m O_m`.
-The set  :math:`\{O\}_m` is a user defined matrix basis for the impurity
-Hamiltonian or, equally, for the local Hamiltonian of the lattice
-problem. The numbers  :math:`\lambda^p_m\in{\mathbb R}` are
-variational parameters.  
-
-For :f:var:`bath_type` = :code:`general` a number :f:var:`nbath` of copies of the
-impurity structure are  coupled to the impurity itself.  Each bath
-element is made of a number :math:`N_{orb}` of electronic levels,
-i.e. the number of orbitals in the impurity site. However, contrary to
-the previous case, each bath element is
-coupled to the impurity with a set of  amplitudes values
-:math:`\hat{V}^p=V^p_{ab}`, e.g. one value for each degree of freedom
-contained in the bath element.  
-
-.. note::
-   The enumeration of the total bath electronic levels is different
-   among the different cases. This number is automatically evaluated
-   upon calling :f:func:`get_bath_dimension`, see
-   :doc:`structure/bath/ed_bath_dim`.
-
-
-.. note::
-   The :code:`replica, general` bath topologies are available also for
-   the superconductive case :f:var:`ed_mode` = :code:`superc`. In this case the
-   structure of the matrix basis should be set to the proper
-   multi-orbital Nambu basis, so that off-diagonal blocks corresponds
-   to anomalous components.
 
    
 
-In :doc:`structure/bath/ed_bath_functions` we implement on-the-fly construction of
-the Hybridization functions :math:`\Delta(z) = \sum_p
-\hat{V}^p\left[z-\hat{h}^p \right]^{-1}\hat{V}^p` as well as the
-non-interacting Anderson Green's functions
-:math:`G_0(z) = \left[z +\mu - H_{loc} - \Delta(z) \right]^{-1}` for
-all different cases.
 
-Finally, in :doc:`structure/bath/ed_bath_fit` we provide to the
-user a generic function :f:func:`ed_chi2_fitgf` performing the
-minimization of a user provided Weiss field against the corresponding
-model of non-interacting Anderson Green's function with the aim of
-updating the bath parameters.
+Exact Diagonalization
+###########################
+
+This part of the `EDIpack2.0` code implements the exact
+diagonalization of the general, single-site, multi-orbital quantum
+impurity problem using  different operational modes,  corresponding to the
+choice of the specific symmetry implemented in the code, i.e. which
+quantum numbers are to be conserved. The operational modes are selected
+by the variable :f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
+:f:mod:`ed_sector` for more info about the symmetries implemented in
+the code.
+
+To keep the code simple we implemented the three different channels in
+distinct class of modules, essentially performing all the main
+operations required for the construction of the sector Hamiltonian,
+their diagonalization, the evaluation of the impurity Green's functions,
+the impurity susceptibilities and observables.  
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/diag
+   
 
 
+
+Green's functions 
+###########################
+This part of the `EDIpack2.0` code implements the calculation of the
+impurity interacting Green's functions, self-energy functions and
+impurity susceptibilities. Calculations are performed in  each operational mode,  corresponding to the
+choice of the specific symmetry implemented in the code, i.e. which
+quantum numbers are to be conserved. The operational modes are selected
+by the variable :f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
+:f:mod:`ed_sector` for more info about the symmetries implemented in
+the code.
 
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   structure/bath/*
+   structure/greensfunctions
+
+
+Observables
+###########################
+
+This part of the `EDIpack2.0` code implements the calculation of the
+impurity observables and static correlations, such as density,
+internal energy or double occupation. Calculations are performed in
+each operational mode,  corresponding to the choice of the specific
+symmetry implemented in the code, i.e. which quantum numbers are to be
+conserved. The operational modes are selected by the variable
+:f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
+:f:mod:`ed_sector` for more info about the symmetries implemented
+in the code.
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/observables
+
+
+
 
 Input/Output
 ###########################
 
+This module provides access to the results of the exact
+diagonalization. All quantities such as dynamical response functions,
+self-energy components  or impurity observables  can be retrieved  
+using specific functions. Additionally we provide procedure to perform
+on-the-fly re-calculation of the impurity Green's functions and
+self-energy on a given arbitrary set of points in the complex
+frequency domain.    
+
 .. toctree::
    :maxdepth: 1
-   :glob:
 
-   structure/io/*
-
+   structure/io/ed_io
 
 
    
-Main
-###########################
-
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   structure/hamiltonian
-   structure/diag
-   structure/greensfunctions
-   structure/chifunctions
-   structure/observables
-
-
-EDIpack2 FORTRAN module
+EDIpack2
 ###########################
 
 .. toctree::
