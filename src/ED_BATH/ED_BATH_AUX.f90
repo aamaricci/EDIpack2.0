@@ -9,6 +9,16 @@ MODULE ED_BATH_AUX
   USE ED_AUX_FUNX
   implicit none
 
+  public :: hreplica_build                   !INTERNAL (for effective_bath)
+  public :: hreplica_mask                    !INTERNAL (for effective_bath)
+  public :: hreplica_site                    !INTERNAL (for effective_bath)
+  !
+  public :: hgeneral_build                   !INTERNAL (for effective_bath)
+  public :: hgeneral_mask                    !INTERNAL (for effective_bath)
+  public :: hgeneral_site                    !INTERNAL (for effective_bath)
+
+
+
 
 
   interface get_Whyb_matrix

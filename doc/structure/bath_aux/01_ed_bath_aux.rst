@@ -11,7 +11,7 @@ Bath Auxiliary routines
 Auxiliary functions for the bath
 
 .. f:automodule::   ed_bath_aux
-   :members: get_Whyb_matrix, is_identity, is_diagonal, Hreplica_build, Hgeneral_build
+   :members: get_Whyb_matrix, is_identity, is_diagonal, hreplica_build, hgeneral_build
 
 
 
