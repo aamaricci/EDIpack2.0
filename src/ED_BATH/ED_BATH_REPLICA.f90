@@ -36,13 +36,6 @@ MODULE ED_BATH_REPLICA
   !     REPLICA AND GENERAL BATH ROUTINES:
   !
   !##################################################################
-  public :: hreplica_build                   !INTERNAL (for effective_bath)
-  public :: hreplica_mask                    !INTERNAL (for effective_bath)
-  public :: hreplica_site                    !INTERNAL (for effective_bath)
-  !
-  public :: hgeneral_build                   !INTERNAL (for effective_bath)
-  public :: hgeneral_mask                    !INTERNAL (for effective_bath)
-  public :: hgeneral_site                    !INTERNAL (for effective_bath)
 
   public :: set_Hreplica
   public :: set_Hgeneral
