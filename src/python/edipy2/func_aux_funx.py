@@ -12,11 +12,11 @@ def set_hloc(self,hloc,Nlat=None):
        :type hloc: np.array(dtype=complex)
        :param hloc: Local Hamiltonian matrix. This can have the following shapes:
        
-        * :code:`[ed.Nspin*ed.Norb,ed.Nspin*ed.Norb]`: single-impurity case, 2-dimensional array
-        * :code:`[ed.Nspin,ed.Nspin,ed.Norb,ed.Norb]`: single-impurity case, 4-dimensional array
-        * :code:`[Nlat*ed.Nspin*ed.Norb,Nlat*ed.Nspin*ed.Norb]`: real-space DMFT case, 2-dimensional array.
-        * :code:`[Nlat,Nspin*ed.Norb,ed.Nspin*ed.Norb]`: single-impurity case, 3-dimensional array.
-        * :code:`[Nlat,ed.Nspin,ed.Nspin,ed.Norb,ed.Norb]`: single-impurity case, 5-dimensional array.
+        * [ :data:`Nspin` :math:`\\cdot` :data:`Norb` , :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: single-impurity case, 2-dimensional array
+        * [ :data:`Nspin` , :data:`Nspin` , :data:`Norb` , :data:`Norb` ]: single-impurity case, 4-dimensional array
+        * [ :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: real-space DMFT case, 2-dimensional array.
+        * [ :code:`Nlat` , :data:`Nspin` :math:`\\cdot` :data:`Norb` , :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: single-impurity case, 3-dimensional array.
+        * [ :code:`Nlat` , :data:`Nspin` , :data:`Nspin` , :data:`Norb` , :data:`Norb` ]: single-impurity case, 5-dimensional array.
        
         The array is ordered in F convention inside the function.
         
@@ -89,10 +89,10 @@ def set_hloc(self,hloc,Nlat=None):
 def search_variable(self,var,ntmp,converged):
     """
      
-     This function checks the value of the read density :code:`ntmp` against the desired value :code:`ed.nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
+     This function checks the value of the read density :code:`ntmp` against the desired value :data:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
    
      :type var: float
-     :param var: the variable to be adjusted (usually :code:`ed.xmu`)
+     :param var: the variable to be adjusted (usually :data:`xmu` )
 
      :type ntmp: float
      :param ntmp: the density value at the given iteration
