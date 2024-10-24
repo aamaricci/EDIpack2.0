@@ -279,6 +279,17 @@ EDIpack2
    :glob:
 
    structure/edipackmodule
+   
+
+Browse Source Code
+###########################
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   browsesource/module/*
+
 
 
 ..
