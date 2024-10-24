@@ -1,12 +1,12 @@
 subroutine ed_get_eimp_n1(self)
-  real(8),dimension(:) :: self
+  real(8),dimension(:) :: self !energy components array
   call assert_shape(self,[4],'ed_get_eimp','eimp')
   self = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
 end subroutine ed_get_eimp_n1
 
 subroutine ed_get_eimp_n2(self,Nlat)
   real(8),dimension(:,:) :: self
-  integer                :: Nlat
+  integer                :: Nlat !number of inequivalent impurity sites for real-space DMFT
   !
   if(.not.allocated(e_ineq))stop "ed_get_eimp error: e_ineq not allocated"
   if(Nlat>size(e_ineq,1))stop "ed_get_eimp error: required N_sites > evaluated N_sites"
@@ -18,13 +18,13 @@ end subroutine ed_get_eimp_n2
 
 
 subroutine ed_get_epot_n0(self)
-  real(8) :: self
+  real(8) :: self !value of :f:var:`ed_epot`
   self = ed_Epot
 end subroutine ed_get_epot_n0
 
 subroutine ed_get_epot_n1(self,Nlat)
   real(8),dimension(:) :: self
-  integer              :: Nlat
+  integer              :: Nlat !number of inequivalent impurity sites for real-space DM
   !
   if(.not.allocated(e_ineq))stop "ed_get_epot error: e_ineq not allocated"
   if(Nlat>size(e_ineq,1))stop "ed_get_epot error: required N_sites > evaluated N_sites"
@@ -36,13 +36,13 @@ end subroutine ed_get_epot_n1
 
 
 subroutine ed_get_eint_n0(self)
-  real(8) :: self
+  real(8) :: self !value of :f:var:`ed_int`
   self = ed_Eint
 end subroutine ed_get_eint_n0
 
 subroutine ed_get_eint_n1(self,Nlat)
   real(8),dimension(:) :: self
-  integer              :: Nlat
+  integer              :: Nlat !number of inequivalent impurity sites for real-space DM
   !
   if(.not.allocated(e_ineq))stop "ed_get_eint error: e_ineq not allocated"
   if(Nlat>size(e_ineq,1))stop "ed_get_eint error: required N_sites > evaluated N_sites"
@@ -55,13 +55,13 @@ end subroutine ed_get_eint_n1
 
 
 subroutine ed_get_ehartree_n0(self)
-  real(8) :: self
+  real(8) :: self !value of :f:var:`ed_ehartree`
   self = ed_Ehartree
 end subroutine ed_get_ehartree_n0
 
 subroutine ed_get_ehartree_n1(self,Nlat)
   real(8),dimension(:) :: self
-  integer              :: Nlat
+  integer              :: Nlat !number of inequivalent impurity sites for real-space DM
   !
   if(.not.allocated(e_ineq))stop "ed_get_ehartree error: e_ineq not allocated"
   if(Nlat>size(e_ineq,1))stop "ed_get_ehartree error: required N_sites > evaluated N_sites"
@@ -73,13 +73,13 @@ end subroutine ed_get_ehartree_n1
 
 
 subroutine ed_get_eknot_n0(self)
-  real(8)          :: self
+  real(8)          :: self !value of :f:var:`ed_eknot`
   self = ed_Eknot
 end subroutine ed_get_eknot_n0
 
 subroutine ed_get_eknot_n1(self,Nlat)
   real(8),dimension(:) :: self
-  integer              :: Nlat
+  integer              :: Nlat !number of inequivalent impurity sites for real-space DM
   !
   if(.not.allocated(e_ineq))stop "ed_get_eknot error: e_ineq not allocated"
   if(Nlat>size(e_ineq,1))stop "ed_get_eknot error: required N_sites > evaluated N_sites"
