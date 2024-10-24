@@ -201,7 +201,7 @@ MODULE ED_IO
 !  * :f:var:`ed_epot` = energy contribution from the interaction terms, **including** the Hartree term
 !  * :f:var:`ed_eint` = energy contribution from the interaction terms, **excluding** the Hartree term
 !  * :f:var:`ed_ehartree` = :math:`-\frac{U}{2} \sum_{i} \langle n_{i\uparrow} + n_{i\downarrow} \rangle 
-!    -\frac{2U^{'}-J_{H}}{2} \sum_{i \neq j} \langle n_{i\uparrow}+n_{i\downarrow} + n_{i\downarrow}+n_{j\downarrow} \rangle
+!    -\frac{2U^{'}-J_{H}}{2} \sum_{i < j} \langle n_{i\uparrow}+n_{i\downarrow} + n_{i\downarrow}+n_{j\downarrow} \rangle
 !    +\frac{U}{4} + \frac{2U^{'}-J_{H}}{2}` for :math:`i,j` orbitals
 !  * :f:var:`ed_eknot` = kinetic term from the **local** 1-body Hamiltonian
 !
@@ -216,7 +216,7 @@ MODULE ED_IO
 
   interface ed_get_epot
 !This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_epot` = energy contribution from the interaction terms, **including** the Hartree term.
+!:f:var:`ed_epot`, the energy contribution from the interaction terms, **including** the Hartree term.
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
@@ -228,7 +228,7 @@ MODULE ED_IO
 
   interface ed_get_eint
 !This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!energy contribution from the interaction terms, **excluding** the Hartree term.
+!:f:var:`ed_int`, the energy contribution from the interaction terms, **excluding** the Hartree term.
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
@@ -239,11 +239,8 @@ MODULE ED_IO
   end interface ed_get_eint
 
   interface ed_get_ehartree
-!This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_ehartree` = :math:`-\frac{U}{2} \sum_{i} \langle n_{i\uparrow} + n_{i\downarrow} \rangle 
-!-\frac{2U^{'}-J_{H}}{2} \sum_{i \neq j} \langle n_{i\uparrow} + n_{i\downarrow} + n_{i\downarrow} + n_{j\downarrow} \rangle
-!+\frac{U}{4} + \frac{2U^{'}-J_{H}}{2}` for :math:`i,j` orbitals.
-!The returned array can have the following dimensions:
+!This subroutine gets from the EDIpack2 library and passes to the user the value of the Hartree potential 
+!:f:var:`ed_ehartree`. The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
 !  * [:f:var:`nlat`]: for real-space DMFT with :f:var:`nlat` impurities
@@ -253,8 +250,8 @@ MODULE ED_IO
   end interface ed_get_ehartree
 
   interface ed_get_eknot
-!This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_eknot` = kinetic term from the **local** 1-body Hamiltonian
+!This subroutine gets from the EDIpack2 library and passes to the user the value
+!:f:var:`ed_eknot`, the kinetic term from the **local** 1-body Hamiltonian
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
@@ -270,10 +267,10 @@ MODULE ED_IO
 !These are the expectation values of the two-body operators associated with the density-density inter-orbital interaction (with opposite and parallel spins), 
 !spin-exchange and pair-hopping.
 !
-!  * :f:var:`ed_dust` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
-!  * :f:var:`ed_dund` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
-!  * :f:var:`ed_dse` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
-!  * :f:var:`ed_dph` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!  * :f:var:`ed_dust` = :math:`\sum_{i < j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
+!  * :f:var:`ed_dund` = :math:`\sum_{i < j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
+!  * :f:var:`ed_dse` = :math:`\sum_{i < j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!  * :f:var:`ed_dph` = :math:`\sum_{i < j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
 !
 !The returned array can have the following dimensions:
 !
@@ -286,7 +283,7 @@ MODULE ED_IO
 
   interface ed_get_dust
 !This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_dust` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
+!:f:var:`ed_dust` = :math:`\sum_{i < j} n_{i\uparrow}n_{j\downarrow} + n_{i\downarrow}n_{j\uparrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
@@ -298,7 +295,7 @@ MODULE ED_IO
 
   interface ed_get_dund
 !This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_dund` = :math:`\sum_{i \neq j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
+!:f:var:`ed_dund` = :math:`\sum_{i < j} n_{i\uparrow}n_{j\uparrow}  + n_{i\downarrow}n_{j\downarrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
@@ -310,7 +307,7 @@ MODULE ED_IO
 
   interface ed_get_dse
 !This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_dse` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!:f:var:`ed_dse` = :math:`\sum_{i < j} c^{\dagger}_{i\uparrow}c^{\dagger}_{j\uparrow}c_{i\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
@@ -322,7 +319,7 @@ MODULE ED_IO
 
   interface ed_get_dph
 !This subroutine gets from the EDIpack2 library and passes to the user the value of 
-!:f:var:`ed_dph` = :math:`\sum_{i \neq j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
+!:f:var:`ed_dph` = :math:`\sum_{i < j} c^{\dagger}_{i\uparrow}c^{\dagger}_{i\downarrow}c_{j\downarrow}c_{j\uparrow}` for :math:`i,j` orbitals
 !The returned array can have the following dimensions:
 !
 !  * scalar: for single-site DMFT
