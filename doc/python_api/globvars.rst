@@ -1,9 +1,9 @@
 Global variables
 =================
 
-These are global variables of the edipy2 module. They form a subset of the global variables of the EDIpack2 library. Along with all the other global variables, they can be set in the input file, and are read when calling the :func:`read_input` function.
+These are global variables of the edipy2 module. They form a subset of the global variables of the EDIpack2 library. Along with all the other global variables, they can be set in the input file, and are read when calling the :func:`edipy2.global_env.read_input` function.
 
-The exposed global variables can be accessed as methods of the :class:`global_env` class.
+The exposed global variables can be accessed as methods of the :class:`edipy2.global_env` class.
 
 .. code-block:: python
 
@@ -16,126 +16,126 @@ The exposed global variables can be accessed as methods of the :class:`global_en
     np.arange(ed.Nspin)
 
 
-.. data:: beta
+.. data:: edipy2.global_env.beta
 
    Value of the inverse temperature, at T=0 is used as a IR cut-off
    
    :type: float
    :default: 1000.0
 
-.. data:: Jh
+.. data:: edipy2.global_env.Jh
 
    Value of the Hund's coupling
    
    :type: float
    :default: 0.0
    
-.. data:: dmft_error
+.. data:: edipy2.global_env.dmft_error
 
    Error threshold for DMFT convergence
    
    :type: float
    :default: 1e-05
    
-.. data:: ed_total_ud
+.. data:: edipy2.global_env.ed_total_ud
 
    Flag to select which type of quantum numbers have to be considered: T (default) total Nup-Ndw, F orbital based Nup-Ndw
    
    :type: bool
    :default: True
    
-.. data:: ed_twin
+.. data:: edipy2.global_env.ed_twin
 
    Flag to reduce (T) or not (F,default) the number of visited sector using twin symmetry
    
    :type: bool
    :default: False
    
-.. data:: eps
+.. data:: edipy2.global_env.eps
 
    Broadening on the float-axis
    
    :type: float
    :default: 1e-02
 
-.. data:: Jx
+.. data:: edipy2.global_env.Jx
 
    Value of the spin exchange coupling
    
    :type: float
    :default: 0.0
 
-.. data:: Jp
+.. data:: edipy2.global_env.Jp
 
    Value of the pair hopping coupling
    
    :type: float
    :default: 0.0
    
-.. data:: Lfloat
+.. data:: edipy2.global_env.Lfloat
 
    Number of frequencies, float frequency axis
    
    :type: int
    :default: 5000
 
-.. data:: Lmats
+.. data:: edipy2.global_env.Lmats
 
    Number of frequencies, Matsubara axis
    
    :type: int
    :default: 4096
   
-.. data:: LOGfile
+.. data:: edipy2.global_env.LOGfile
 
    Log unit
    
    :type: int
    :default: 6
    
-.. data:: Lpos
+.. data:: edipy2.global_env.Lpos
 
    Number of points for the lattice PDF
    
    :type: int
    :default: 100
    
-.. data:: Ltau
+.. data:: edipy2.global_env.Ltau
 
    Number of imaginary time points
    
    :type: int
    :default: 1024
 
-.. data:: Nbath
+.. data:: edipy2.global_env.Nbath
 
    Number of bath levels. See the specifics of the bath geometries
    
    :type: int
    :default: 6
    
-.. data:: Nloop
+.. data:: edipy2.global_env.Nloop
 
    Maximum number of DMFT loops
    
    :type: int
    :default: 100
 
-.. data:: Norb
+.. data:: edipy2.global_env.Norb
 
    Number of correlated orbitals. Maximum 5 orbitals are supported
    
    :type: int
    :default: 1
 
-.. data:: Nph
+.. data:: edipy2.global_env.Nph
 
    Max number of phonons allowed (cut off)
    
    :type: int
    :default: 0
    
-.. data:: nread
+.. data:: edipy2.global_env.nread
 
    Value of the target density for fixed density calculations.
    If valued 0, it is discarded.
@@ -143,7 +143,7 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    :type: float
    :default: 0.0
 
-.. data:: Nspin
+.. data:: edipy2.global_env.Nspin
 
    Number of explicitly defined spin degrees of freedom. If Nspin=1, the two spin block of the Hamiltonian, Green's function, Self-Energy and so on are assumed equal.
    If Nspin=2 they may differ (e.g. for non-SU(2) or magnetic systems).
@@ -152,14 +152,14 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    :type: int
    :default: 1
    
-.. data:: Nsuccess
+.. data:: edipy2.global_env.Nsuccess
 
    Number of successive iterations below threshold for convergence
    
    :type: int
    :default: 1
    
-.. data:: sb_field
+.. data:: edipy2.global_env.sb_field
 
    Value of a symmetry breaking field for magnetic solutions
    
@@ -167,42 +167,42 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    :default: 0.1
 
 
-.. data:: Uloc
+.. data:: edipy2.global_env.Uloc
 
    Values of the local interaction per orbital (max 5). If less values are provided, the array is filled in increasing order
    
    :type: float
    :default: [2.0, 0.0, 0.0, 0.0, 0.0]
    
-.. data:: Ust
+.. data:: edipy2.global_env.Ust
 
    Value of the inter-orbital interaction term
    
    :type: float
    :default: 0.0
    
-.. data:: wini
+.. data:: edipy2.global_env.wini
 
    Value of the smallest float-axis frequency
    
    :type: float
    :default: -5.0
    
-.. data:: wfin
+.. data:: edipy2.global_env.wfin
 
    Value of the largest float-axis frequency
    
    :type: float
    :default: -5.0
    
-.. data:: xmin
+.. data:: edipy2.global_env.xmin
 
    Value for the smallest position for the lattice PDF
    
    :type: float
    :default: -3.0
 
-.. data:: xmax
+.. data:: edipy2.global_env.xmax
 
    Value for the largest position for the lattice PDF
    
@@ -210,7 +210,7 @@ The exposed global variables can be accessed as methods of the :class:`global_en
    :default: 3.0
 
    
-.. data:: xmu
+.. data:: edipy2.global_env.xmu
 
    Value of the chemical potential. If HFMODE = T, xmu=0 satisfied the half-filling condition
    

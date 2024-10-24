@@ -20,7 +20,7 @@ def get_bath_dimension(self):
 def set_hreplica(self,hvec,lambdavec):
     """
 
-       This function is specific to :code:`BATH_TYPE=REPLICA`. It sets the basis of matrices\
+       This function is specific to :code:`bath_type=replica`. It sets the basis of matrices\
        and scalar parameters that, upon linear combination, make up the bath replica.
         
        :type hvec: np.array(dtype=complex)
@@ -29,10 +29,10 @@ def set_hreplica(self,hvec,lambdavec):
        That way the bath replica matrix is updated while preserving symmetries\
        of the user's choosing. The array can have the following shapes:
 
-        * :code:`[(Nnambu)*ed.Nspin*ed.Norb, (Nnambu)*ed.Nspin*ed.Norb, Nsym]`:\
+        * [ :code:`(Nnambu)` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`(Nnambu)` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Nsym` ]:\
         3-dimensional, where Nnambu refers to the superconducting case and Nsym \
         is the number of matrices that make up the linear combination 
-        * :code:`[(Nnambu)*ed.Nspin*, (Nnambu)*ed.Nspin, ed.Norb, ed.Norb, Nsym]`:\
+        * [:code:`(Nnambu)` :math:`\\cdot` :data:`Nspin` , :code:`(Nnambu)`  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`Nsym` ]:\
         5-dimensional, where Nnambu refers to the superconducting case and Nsym is \
         the number of matrices that make up the linear combination 
         
@@ -41,9 +41,9 @@ def set_hreplica(self,hvec,lambdavec):
        This, along with the hybridizations V, are the fitting parameters of \
        the bath. The array has the following shape
        
-        * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional,\
+        * [ :data:`Nbath` , :code:`Nsym` ]: for single-impurity DMFT, 2-dimensional,\
         where Nsym is the number of matrices that make up the linear combination 
-        * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional,\
+        * [ :code:`Nlat`,  :data:`Nbath` , :code:`Nsym` ]: for real-space DMFT, 3-dimensional,\
         where Nlat is the number of inequivalent impurity sites and Nsym is\
         the number of matrices that make up the linear combination 
 
@@ -120,10 +120,10 @@ def set_hgeneral(self,hvec,lambdavec):
        That way the bath replica matrix is updated while preserving symmetries\
        of the user's choosing. The array can have the following shapes:
 
-        * :code:`[(Nnambu)*ed.Nspin*ed.Norb, (Nnambu)*ed.Nspin*ed.Norb, Nsym]`:\
+        * [:code:`(Nnambu)` :math:`\\cdot`:data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`(Nnambu)` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Nsym` ]:\
         3-dimensional, where Nnambu refers to the superconducting case and Nsym \
         is the number of matrices that make up the linear combination 
-        * :code:`[(Nnambu)*ed.Nspin*, (Nnambu)*ed.Nspin, ed.Norb, ed.Norb, Nsym]`:\
+        * [:code:`(Nnambu)` :math:`\\cdot` :data:`Nspin` , :code:`(Nnambu)` :math:`\\cdot` :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`Nsym` ]:\
         5-dimensional, where Nnambu refers to the superconducting case and Nsym is \
         the number of matrices that make up the linear combination 
         
@@ -132,9 +132,9 @@ def set_hgeneral(self,hvec,lambdavec):
        This, along with the hybridizations V, are the fitting parameters of \
        the bath. The array has the following shape
        
-        * :code:`[ed.Nbath, Nsym]`: for single-impurity DMFT, 2-dimensional,\
+        * [ :data:`Nbath` , :code:`Nsym` ]: for single-impurity DMFT, 2-dimensional,\
         where Nsym is the number of matrices that make up the linear combination 
-        * :code:`[Nlat, ed.Nbath, Nsym]`: for real-space DMFT, 3-dimensional,\
+        * [ :code:`Nlat`,  :data:`Nbath` , :code:`Nsym` ]: for real-space DMFT, 3-dimensional,\
         where Nlat is the number of inequivalent impurity sites and Nsym is\
         the number of matrices that make up the linear combination 
 
@@ -465,26 +465,26 @@ def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None,l=None):
        
        :type e: np.array(dtype=float)
        :param e: an array for the bath levels (:code:`ED_MODE = NORMAL, NONSU2, SUPERC`) \
-       It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` bath, \
-       :code:`[ed.Nspin, ed.Nbath]` for :code:`HYBRID` bath 
+       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` bath, \
+       [ :data:`Nspin` ,  :data:`Nbath` ] for :code:`HYBRID` bath 
        
        :type v: np.array(dtype=float)
        :param v: an array for the bath hybridizations (:code:`ED_MODE = NORMAL, NONSU2, SUPERC`). \
-       It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath. \
-       For :code:`REPLICA` bath it has dimension :code:`[ed.Nbath]` and for :code:`GENERAL` bath it has dimension :code:`[ed.Nbath,ed.Nspin*ed.Norb]`
+       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` and :code:`HYBRID` bath. \
+       For :code:`REPLICA` bath it has dimension [ :data:`Nbath` ] and for :code:`GENERAL` bath it has dimension [ :data:`Nbath` , :data:`Nspin` :math:`\\cdot` :data:`Norb` ]
        
        :type d: np.array(dtype=float)
        :param d: an array for the bath anomalous enery levels(:code:`ED_MODE = SUPERC`). \
-       It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` bath, \
-       :code:`[ed.Nspin, ed.Nbath]` for :code:`HYBRID` bath
+       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` bath, \
+       [ :data:`Nspin` ,  :data:`Nbath` ] for :code:`HYBRID` bath
        
        :type u: np.array(dtype=float)
        :param u: an array for the bath spin off-diagonal hybridization (:code:`ED_MODE = NONSU2`). \
-       It has dimension :code:`[ed.Nspin, ed.Norb, ed.Nbath]` for :code:`NORMAL` and :code:`HYBRID` bath
+       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` and :code:`HYBRID` bath
 
        :type l: np.array(dtype=float)
        :param l: an array for the linear coefficients of the Replica matrix linear combination (:code:`ED_BATH_TYPE = REPLICA,GENERAL`). \
-       It has dimension :code:`[ed.Nbath,Nsym]`, the latter being the number of terms on the linear combination
+       It has dimension [ :data:`Nbath` ,Nsym]`, the latter being the number of terms on the linear combination
 
        :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d,l` are provided, none is provided, the shapes are inconsistent \
         or the inputs are inconsistent with :code:`ED_BATH_TYPE` and :code:`ED_MODE`.
@@ -955,7 +955,7 @@ def bath_inspect(self,bath=None,e=None,v=None,d=None,u=None,l=None):
                 if np.shape(l) != (aux_nbath,self.Nsym):
                     raise ValueError("l must be (Nbath,Nsym)")
                 if np.shape(v) != (aux_nbath,aux_nspin*aux_norb):
-                    raise ValueError("v must be (Nbath,ed.Nspin*ed.Norb)")
+                    raise ValueError("v must be (Nbath,Nspin*Norb)")
                 
                 Nb = self.get_bath_dimension()
                 bath = np.zeros(Nb)

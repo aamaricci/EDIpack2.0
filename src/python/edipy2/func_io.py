@@ -19,19 +19,19 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n"):
        
         * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
         * :code:`3`: in the single-impurity case, it will return an array of the \
-        shape :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Nfrequencies=ed.Lmats/ed.Lreal]`. \
+        shape [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , Nfrequencies=ed.Lmats/ed.Lreal]. \
         In the real-space DMFT case, it will return an array of the shape \
-        :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, Nfrequencies=Lmats/Lreal]`. \
+        [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Lmats` / :data:`Lreal` ]. \
         :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
         If :code:`ilat` is set, ValueError is returned.
         * :code:`4`: in the real-space DMFT case, it will return an array \
-        of the shape :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Nfrequencies=ed.Lmats/ed.Lreal]`. \
+        of the shape [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :data:`Lmats` / :data:`Lreal` ]. \
         :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
         If :code:`ilat` is set, the output will have one dimension less.
         * :code:`5`: in the single-impurity case, it will return an array \
-        of the shape :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Nfrequencies=Lmats/Lreal]`.
+        of the shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` ,  :data:`Lmats` / :data:`Lreal` ].
         * :code:`6`: in the real-space DMFT case, it will return an array \
-        of the shape :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Nfrequencies=ed.Lmats/ed.Lreal]`. \
+        of the shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :data:`Lmats` / :data:`Lreal` ]. \
         :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
         If :code:`ilat` is set, the output will have one dimension less.
        
@@ -155,19 +155,19 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
        
         * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
         * :code:`3`: in the single-impurity case, it will return an array of the shape \
-        :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Nfrequencies=ed.Lmats/ed.Lreal]`. \
+        [ :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :data:`Lmats` / :data:`Lreal` ]. \
         In the real-space DMFT case, it will return an array of the shape \
-        :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, Nfrequencies=Lmats/Lreal]`. \
+        [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Lmats` / :data:`Lreal` ]. \
         :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
         If :code:`ilat` is set, ValueError is returned.
         * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
-        :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Nfrequencies=ed.Lmats/ed.Lreal]`. \
+        [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :data:`Lmats` / :data:`Lreal` ]. \
         :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
         If :code:`ilat` is set, the output will have one dimension less.
         * :code:`5`: in the single-impurity case, it will return an array \
-        of the shape :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Nfrequencies=Lmats/Lreal]`.
+        of the shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` ,  :data:`Lmats` / :data:`Lreal` ].
         * :code:`6`: in the real-space DMFT case, it will return an array of \
-        the shape :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Nfrequencies=ed.Lmats/ed.Lreal]`. \
+        the shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :data:`Lmats` / :data:`Lreal` ]. \
         :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
         If :code:`ilat` is set, the output will have one dimension less.
        
@@ -289,7 +289,7 @@ def get_dens(self,ilat=None,iorb=None):
     :type iorb: int
     :param iorb: the orbital index. If none is provided, the whole density vector is returned
    
-    :return: the full charge density tensor has dimensions [Nlat,Norb]. Depending on \
+    :return: the full charge density tensor has dimensions [ :code:`Nlat` ,Norb]. Depending on \
     which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
     :rtype: float **or** np.array(dtype=float) 
     
@@ -347,7 +347,7 @@ def get_mag(self,icomp=None,ilat=None,iorb=None):
        :type iorb: int
        :param iorb: the orbital index. If none is provided, the whole density vector is returned
        
-       :return: the full magnetization tensor has dimensions [Nlat,3,Norb]. Depending on \
+       :return: the full magnetization tensor has dimensions [ :code:`Nlat` ,3,Norb]. Depending on \
        which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
        :rtype: float **or** np.array(dtype=float) 
        
@@ -421,7 +421,7 @@ def get_docc(self,ilat=None,iorb=None):
    :type iorb: int
    :param iorb: the orbital index. If none is provided, the whole density vector is returned
    
-   :return: the full double-occupation tensor has dimensions [Nlat,Norb]. Depending on \
+   :return: the full double-occupation tensor has dimensions [ :code:`Nlat` ,Norb]. Depending on \
    which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
    :rtype: float **or** np.array(dtype=float)
    
@@ -479,7 +479,7 @@ def get_eimp(self,ilat=None,ikind=None):
         * :code:`3`: ed_Ehartree: Hartree part of interaction energy
         * :code:`4`: ed_Eknot: on-site part of the kinetic term
        
-       :return: the full local energy tensor has dimensions [Nlat,4]. Depending on \
+       :return: the full local energy tensor has dimensions [ :code:`Nlat` ,4]. Depending on \
        which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
        :rtype: float **or** np.array(dtype=float)    
     """
@@ -535,19 +535,19 @@ def build_sigma(self,zeta,ilat=None,ishape=None,typ="n"):
    
      * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
      * :code:`3`: in the single-impurity case, it will return an array of the shape \
-     :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, len(zeta)]`. In the real-space DMFT case, \
+     [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT case, \
      it will return an array of the shape \
-     :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, len(zeta)]`. \
+     [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. \
      :code:`Nlat` will be determined from the module by assessing the \
      shape of Hloc. If :code:`ilat` is set, ValueError is returned.
      * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
-     :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, len(zeta)`. :code:`Nlat` will \
+     [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` `. :code:`Nlat` will \
      be determined from the module by assessing the shape of Hloc. If :code:`ilat` is \
      set, the output will have one dimension less.
      * :code:`5`: in the single-impurity case, it will return an array of the \
-     shape :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, len(zeta)]`.
+     shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`len(zeta)` ].
      * :code:`6`: in the real-space DMFT case, it will return an array of the \
-     shape :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, len(zeta)]`. \
+     shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`len(zeta)` ]. \
      :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
      If :code:`ilat` is set, the output will have one dimension less.
         
@@ -679,19 +679,19 @@ def build_gimp(self,zeta,ilat=None,ishape=None,typ="n"):
    
       * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
       * :code:`3`: in the single-impurity case, it will return an array of the shape \
-      :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, len(zeta)]`. In the real-space DMFT \
+      [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT \
       case, it will return an array of the shape \
-      :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, len(zeta)]`. \
+      [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. \
       :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
       If :code:`ilat` is set, ValueError is returned.
       * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
-      :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, len(zeta)`. :code:`Nlat` will \
+      [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. :code:`Nlat` will \
       be determined from the module by assessing the shape of Hloc. If :code:`ilat` \
       is set, the output will have one dimension less.
       * :code:`5`: in the single-impurity case, it will return an array of the shape \
-      :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, len(zeta)]`.
+      [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`len(zeta)` ].
       * :code:`6`: in the real-space DMFT case, it will return an array of the shape \
-      :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, len(zeta)]`. :code:`Nlat` \
+      [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`len(zeta)` ]. :code:`Nlat` \
       will be determined from the module by assessing the shape of Hloc. If :code:`ilat` \
       is set, the output will have one dimension less.
         

@@ -33,20 +33,20 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
        The dimension of :code:`bath` can be
      
        * :code:`Nb`: if single-impurity, the output of :func:`get_bath_gimension`
-       * :code:`[Nlat,Nb]`: if real-space DMFT
+       * :code:`[Nlat ,Nb]`: if real-space DMFT
        
        Accordingly, the dimension of g (and f) can be:
        
        * :code:`3`: in the single-impurity case,  an array of \
-       the shape :code:`[ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Lfit]`. 
+       the shape [ :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]. 
        * :code:`3`: in the real-space DMFT case, an array of \
-       the shape :code:`[Nlat*ed.Nspin*ed.Norb, Nlat*ed.Nspin*ed.Norb, Lfit]`
+       the shape [ :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]
        * :code:`4`: in the real-space DMFT case, an array of \
-       the shape :code:`[Nlat, ed.Nspin*ed.Norb, ed.Nspin*ed.Norb, Lfit]`
+       the shape [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]
        * :code:`5`: in the single-impurity case, an array of \
-       the shape :code:`[ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Lfit]`
+       the shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`Lfit` ]
        * :code:`6`: in the real-space DMFT case, an array of \
-       the shape :code:`[Nlat, ed.Nspin, ed.Nspin, ed.Norb, ed.Norb, Lfit]`
+       the shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`Lfit` ]
        
        where :code:`Lfit` is a given number of frequencies.
 
@@ -54,7 +54,7 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
      
       :type ispin: int 
       :param ispin: spin species to be fitted. For the normal \
-      and superconducting cases, if :code:`ed.Nspin=2`, the fitting function \
+      and superconducting cases, if :data:`Nspin` = :code:`2`, the fitting function \
       needs to be called twice. Only the corresponding elements of :code:`bath` \
       will be updated each time. For the non-SU(2) case, this argument is irrelevant, \
       since all the elements of the Weiss/Delta function need to be fitted.
