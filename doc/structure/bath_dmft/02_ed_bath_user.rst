@@ -3,7 +3,7 @@ User Bath symmetry operations
 
 
 .. raw:: html
-   :file:  02_ed_bath_user.html
+   :file:  ../graphs/bath_dmft/02_ed_bath_user.html
 
 |
 

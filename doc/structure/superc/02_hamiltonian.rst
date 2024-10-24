@@ -2,7 +2,7 @@ Hamiltonian
 ============================
 
 .. raw:: html
-   :file:  02_hamiltonian.html
+   :file:  ../graphs/superc/02_hamiltonian.html
 
 |
 

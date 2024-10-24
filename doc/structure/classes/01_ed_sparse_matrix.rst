@@ -2,7 +2,7 @@ Sparse Matrices
 =======================
 
 .. raw:: html
-   :file:  01_ed_sparse_matrix.html
+   :file:  ../graphs/classes/01_ed_sparse_matrix.html
 
 |
 

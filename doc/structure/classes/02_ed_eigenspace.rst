@@ -3,7 +3,7 @@ EigenSpace
 
 
 .. raw:: html
-   :file:  02_ed_eigenspace.html
+   :file:  ../graphs/classes/02_ed_eigenspace.html
 
 |
 

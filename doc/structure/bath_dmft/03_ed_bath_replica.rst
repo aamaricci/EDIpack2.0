@@ -3,7 +3,7 @@ Bath Replica routines
 
 
 .. raw:: html
-   :file:  03_ed_bath_replica.html
+   :file:  ../graphs/bath_dmft/03_ed_bath_replica.html
 
 |
 

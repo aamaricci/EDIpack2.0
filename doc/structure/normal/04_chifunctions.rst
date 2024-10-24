@@ -2,7 +2,7 @@ Susceptibilities
 ============================
 
 .. raw:: html
-   :file:  04_chifunctions.html
+   :file:  ../graphs/normal/04_chifunctions.html
 
 |
 

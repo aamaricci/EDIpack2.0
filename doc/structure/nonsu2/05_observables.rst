@@ -2,7 +2,7 @@ Observables
 ============================
 
 .. raw:: html
-   :file:  05_observables.html
+   :file:  ../graphs/nonsu2/05_observables.html
 
 |
 

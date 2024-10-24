@@ -177,12 +177,12 @@ Exact Diagonalization
 
 
 .. raw:: html
-   :file:  structure/diag.html
+   :file:  structure/graphs/diag.html
 
 |
 
 .. raw:: html
-   :file:  structure/hamiltonian.html
+   :file:  structure/graphs/hamiltonian.html
 
 |
 

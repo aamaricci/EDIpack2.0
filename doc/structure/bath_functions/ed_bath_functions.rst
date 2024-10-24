@@ -2,7 +2,7 @@ Bath frequency-dependent routines
 ===================================
 
 .. raw:: html
-   :file:  ed_bath_functions.html
+   :file:  ../graphs/bath_functions/ed_bath_functions.html
 
 |
 

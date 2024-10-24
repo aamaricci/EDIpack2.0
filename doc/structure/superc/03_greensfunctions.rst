@@ -2,7 +2,7 @@ Green's Function calculation
 ============================
 
 .. raw:: html
-   :file:  03_greensfunctions.html
+   :file:  ../graphs/superc/03_greensfunctions.html
 
 |
 

@@ -2,7 +2,7 @@ Global Variables
 =======================
 
 .. raw:: html
-   :file:  02_ed_vars_global.html
+   :file:  ../graphs/general/02_ed_vars_global.html
 
 |
 

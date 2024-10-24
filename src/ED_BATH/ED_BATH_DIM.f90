@@ -22,7 +22,7 @@ MODULE ED_BATH_DIM
      !
      ! Returns the dimension :f:var:`bath_size` to which the user should allocate the user bath array to contains all the parameters according to the provided input variables. The value is obtained counting all the electronic levels of the system compatible with the operational mode :f:var:`ed_mode`, the bath topology specified by :f:var:`bath_type`, the values of :f:var:`norb`, :f:var:`nbath` and :f:var:`nspin`.
      !
-     ! If :f:var:`bath_type` is replica/general then a input matrix :f:var:`h_nn` can be used to count the number of parameters, corresponding to its non-zero elements. In alternative the bath size can be estimated by the number of parameters in the linear decomposition of the bath local Hamiltonian :f:var:`nsym` such that :math:`h^p=sum_{i=1}^{N_{sym}}\lambda^p_i O_i}`. 
+     ! If :f:var:`bath_type` is replica/general then a input matrix :f:var:`h_nn` can be used to count the number of parameters, corresponding to its non-zero elements. In alternative the bath size can be estimated by the number of parameters in the linear decomposition of the bath local Hamiltonian :f:var:`nsym` such that :math:`h^p=\sum_{i=1}^{N_{sym}}\lambda^{p}_{i} O_{i}`. 
      !
      !
      module procedure ::  get_bath_dimension_direct

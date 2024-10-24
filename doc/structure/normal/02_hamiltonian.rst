@@ -2,7 +2,7 @@ Hamiltonian
 ============================
 
 .. raw:: html
-   :file:  02_hamiltonian.html
+   :file:  ../graphs/normal/02_hamiltonian.html
 
 |
 

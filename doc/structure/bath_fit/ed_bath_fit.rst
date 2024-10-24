@@ -3,7 +3,7 @@ Bath :math:`\chi^2` Fit
 
 
 .. raw:: html
-   :file:  ed_bath_fit.html
+   :file:  ../graphs/bath_fit/ed_bath_fit.html
 
 |
 

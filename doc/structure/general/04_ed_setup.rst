@@ -2,7 +2,7 @@ Setup
 =======================
 
 .. raw:: html
-   :file:  04_ed_setup.html
+   :file:  ../graphs/general/04_ed_setup.html
 
 |
 

@@ -2,7 +2,7 @@ Quantum Numbers Sectors
 ============================
 
 .. raw:: html
-   :file:  ed_sector1.html
+   :file:  graphs/ed_sector1.html
 
 |
 
@@ -83,6 +83,6 @@ algorithm  (:math:`N` being the total number of electronic levels):
 |
 
 .. raw:: html
-   :file:  ed_sector2.html
+   :file:  graphs/ed_sector2.html
 
 |

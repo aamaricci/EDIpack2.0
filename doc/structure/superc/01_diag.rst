@@ -2,7 +2,7 @@ Exact Diagonalization
 ============================
 
 .. raw:: html
-   :file:  01_diag.html
+   :file:  ../graphs/superc/01_diag.html
 
 |
 

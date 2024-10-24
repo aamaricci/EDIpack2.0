@@ -2,7 +2,7 @@ Bath Dimension routines
 ============================
 
 .. raw:: html
-   :file:  02_ed_bath_dim.html
+   :file:  ../graphs/bath_aux/02_ed_bath_dim.html
 
 |
 

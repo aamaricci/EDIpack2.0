@@ -3,7 +3,7 @@ Observables
 
 
 .. raw:: html
-   :file:  05_observables.html
+   :file:  ../graphs/superc/05_observables.html
 
 |
 

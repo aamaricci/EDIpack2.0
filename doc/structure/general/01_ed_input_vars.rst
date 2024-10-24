@@ -2,7 +2,7 @@ Input Variables
 =======================
 
 .. raw:: html
-   :file:  01_ed_input_vars.html
+   :file:  ../graphs/general/01_ed_input_vars.html
 
 |
 

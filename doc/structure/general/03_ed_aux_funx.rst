@@ -2,7 +2,7 @@ Auxiliary Functions
 =======================
 
 .. raw:: html
-   :file:  03_ed_aux_funx.html
+   :file:  ../graphs/general/03_ed_aux_funx.html
 
 |
 

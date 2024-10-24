@@ -3,7 +3,7 @@ EDIpack2: Fortran API
 
 
 .. raw:: html
-   :file:  edipackmodule.html
+   :file:  graphs/edipackmodule.html
 
 |
 
