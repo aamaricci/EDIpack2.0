@@ -44,7 +44,7 @@ MODULE ED_BATH_USER
 
   interface orb_symmetrize_bath
      !
-     ! Function to impose a orbital symmetry to the parameters of the bath. Enforces an orbital non-polarized solution. It  two orbital indices :f:var:`orb1` and :f:var:`orb2: are passed symmetry is imposed only among such two orbitals
+     ! Function to impose a orbital symmetry to the parameters of the bath. Enforces an orbital non-polarized solution. If two orbital indices :f:var:`orb1` and :f:var:`orb2` are passed symmetry is imposed only among such two orbitals
      !
      !.. warning::
      !
