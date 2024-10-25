@@ -1,10 +1,11 @@
 Hamiltonian
 ============================
 
-.. raw:: html
-   :file:  ../graphs/normal/02_hamiltonian.html
+..
+ .. raw:: html
+    :file:  ../graphs/normal/02_hamiltonian.html
 
-|
+ |
 
 
 

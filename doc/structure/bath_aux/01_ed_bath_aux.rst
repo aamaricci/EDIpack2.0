@@ -1,10 +1,10 @@
 Bath Auxiliary routines
 ============================
+..
+ .. raw:: html
+    :file:  ../graphs/bath_aux/01_ed_bath_aux.html
 
-.. raw:: html
-   :file:  ../graphs/bath_aux/01_ed_bath_aux.html
-
-|
+ |
 
 
 

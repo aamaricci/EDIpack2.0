@@ -175,16 +175,16 @@ variational parameters.
 Exact Diagonalization
 ###########################
 
+..
+ .. raw:: html
+    :file:  structure/graphs/diag.html
 
-.. raw:: html
-   :file:  structure/graphs/diag.html
+ |
 
-|
+ .. raw:: html
+    :file:  structure/graphs/hamiltonian.html
 
-.. raw:: html
-   :file:  structure/graphs/hamiltonian.html
-
-|
+ |
 
 
 This part of the `EDIpack2.0` code implements the exact

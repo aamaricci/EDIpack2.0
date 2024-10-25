@@ -1,10 +1,11 @@
 Global Variables
 =======================
 
-.. raw:: html
-   :file:  ../graphs/general/02_ed_vars_global.html
+..
+ .. raw:: html
+    :file:  ../graphs/general/02_ed_vars_global.html
 
-|
+ |
 
 
 The module :f:mod:`ED_VARS_GLOBAL` contains all the simple types and

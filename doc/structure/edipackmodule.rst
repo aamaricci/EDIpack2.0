@@ -1,11 +1,11 @@
 EDIpack2: Fortran API
 ==========================
 
+..
+ .. raw:: html
+    :file:  graphs/edipackmodule.html
 
-.. raw:: html
-   :file:  graphs/edipackmodule.html
-
-|
+ |
 
 
 :mod:`EDIPACK2` is the top module of the `EDIpack2.0`. It provides access to the all the relevant procedures of the library, realizing the Fortran API. The user needs to invoke use of this module to get access to `EDIpack2.0` as:

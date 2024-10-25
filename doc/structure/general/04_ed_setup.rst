@@ -1,10 +1,11 @@
 Setup
 =======================
 
-.. raw:: html
-   :file:  ../graphs/general/04_ed_setup.html
+..
+ .. raw:: html
+    :file:  ../graphs/general/04_ed_setup.html
 
-|
+ |
 
 The module :f:mod:`ED_SETUP` performs the initial set up of the Exact
 Diagonalization calculation, executes all internal consistency checks and allocates the required memory.

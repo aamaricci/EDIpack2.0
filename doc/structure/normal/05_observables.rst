@@ -1,10 +1,11 @@
 Observables
 ============================
 
-.. raw:: html
-   :file:  ../graphs/normal/05_observables.html
+..
+ .. raw:: html
+    :file:  ../graphs/normal/05_observables.html
 
-|
+ |
 
 
 

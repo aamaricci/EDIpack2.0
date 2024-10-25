@@ -1,10 +1,11 @@
 Bath Dimension routines
 ============================
 
-.. raw:: html
-   :file:  ../graphs/bath_aux/02_ed_bath_dim.html
+..
+ .. raw:: html
+    :file:  ../graphs/bath_aux/02_ed_bath_dim.html
 
-|
+ |
 
 
 Check / operate on bath dimensions

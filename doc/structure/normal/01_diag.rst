@@ -1,10 +1,10 @@
 Exact Diagonalization
 ============================
+..
+ .. raw:: html
+    :file:  ../graphs/normal/01_diag.html
 
-.. raw:: html
-   :file:  ../graphs/normal/01_diag.html
-
-|
+ |
 
 
 

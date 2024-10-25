@@ -1,10 +1,11 @@
 Green's Function calculation
 ============================
 
-.. raw:: html
-   :file:  ../graphs/normal/03_greensfunctions.html
+..
+ .. raw:: html
+    :file:  ../graphs/normal/03_greensfunctions.html
 
-|
+ |
 
 
 
