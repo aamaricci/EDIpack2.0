@@ -1,11 +1,11 @@
 User Bath symmetry operations
 =================================
 
+..
+ .. raw:: html
+    :file:  ../graphs/bath_dmft/02_ed_bath_user.html
 
-.. raw:: html
-   :file:  ../graphs/bath_dmft/02_ed_bath_user.html
-
-|
+ |
 
 
 

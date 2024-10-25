@@ -1,10 +1,11 @@
 Bath frequency-dependent routines
 ===================================
 
-.. raw:: html
-   :file:  ../graphs/bath_functions/ed_bath_functions.html
+..
+ .. raw:: html
+    :file:  ../graphs/bath_functions/ed_bath_functions.html
 
-|
+ |
 
 Delta and Weiss functions
 

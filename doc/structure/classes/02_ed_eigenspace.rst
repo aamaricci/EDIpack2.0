@@ -1,11 +1,11 @@
 EigenSpace 
 =======================
 
+..
+ .. raw:: html
+    :file:  ../graphs/classes/02_ed_eigenspace.html
 
-.. raw:: html
-   :file:  ../graphs/classes/02_ed_eigenspace.html
-
-|
+ |
 
 A dedicated data structure to efficiently store the low part of the
 Fock space spectrum using all symmetries.    

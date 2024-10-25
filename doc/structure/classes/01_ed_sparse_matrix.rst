@@ -1,10 +1,11 @@
 Sparse Matrices 
 =======================
 
-.. raw:: html
-   :file:  ../graphs/classes/01_ed_sparse_matrix.html
+..
+ .. raw:: html
+    :file:  ../graphs/classes/01_ed_sparse_matrix.html
 
-|
+ |
 
 
 This class defines a data structure to efficiently store sparse

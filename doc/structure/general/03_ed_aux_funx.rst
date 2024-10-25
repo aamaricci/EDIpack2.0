@@ -1,10 +1,11 @@
 Auxiliary Functions
 =======================
 
-.. raw:: html
-   :file:  ../graphs/general/03_ed_aux_funx.html
+..
+ .. raw:: html
+    :file:  ../graphs/general/03_ed_aux_funx.html
 
-|
+ |
 
 The module :f:mod:`ED_AUX_FUNX` contains all the auxiliary procedures needed in different parts of the code.
 
