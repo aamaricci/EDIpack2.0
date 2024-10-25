@@ -1,11 +1,12 @@
 #!/bin/bash
 
 mkdir -p module
+rm module/*
 
 cd graphs
 
 #satisfy my ocd
-for i in $(ls); do
+for i in *.html; do
   sed -e "s/white/\#fcfcfc/g" $i > $i.new
   mv $i.new $i
 done
