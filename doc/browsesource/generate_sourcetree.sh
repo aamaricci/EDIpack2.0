@@ -11,7 +11,7 @@ rm list2
 for file in $(cat list); do
   name=$(echo $file | sed -e "s/\.rst//g")
   name_upper=$(echo $name | tr '[:lower:]' '[:upper:]' | sed -e "s/HXV/HxV/g")
-  relativepath=$(find ../../ -type f -name "*${name_upper}*" | awk -Fsrc '{print $2}')
+  relativepath=$(find ../../ -type f -name "*${name_upper}.*90" | awk -Fsrc '{print $2}')
   githubpath="https://github.com/aamaricci/EDIpack2.0/tree/master/src${relativepath}"
   
   echo $name_upper > module/$file
