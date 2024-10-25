@@ -23,6 +23,8 @@ for file in $(cat list); do
     echo "   :file:  ../graphs/${name}.html" >> module/$file
   echo " " >> module/$file
     echo "|" >> module/$file
+  else
+    echo "Not found graph for $name"
   fi
   echo " " >> module/$file
   echo "\`Open source file <${githubpath}>\`_ on GitHub" >> module/$file
