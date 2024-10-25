@@ -123,6 +123,16 @@ EDIpy2
 :doc:`edipy2`
      Installation and basic use of `EDIpy2`: the `python` API of `EDIpack2.0`
 
+
+
+Browse Source Code
+============================
+
+:doc:`browsecode`
+     Browse the `EDIpack2.0` structure
+
+
+
 .. Hidden TOCs
 
 .. toctree::
@@ -155,7 +165,14 @@ EDIpy2
    :hidden:
 
    edipy2
-   
+
+.. toctree::
+   :caption: Browse code
+   :maxdepth: 2
+   :hidden:
+
+   browsecode
+
 .. toctree::
    :caption: External Links
    
