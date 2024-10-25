@@ -13,8 +13,9 @@ on the user side.
    bath_aux/00_ed_vars_global
    bath_aux/01_ed_bath_aux
    bath_aux/02_ed_bath_dim
-
-
+   bath_aux/03_ed_bath_user
+   bath_aux/04_ed_bath_replica
+	      
 Bath DMFT
 ###########################
 
@@ -29,8 +30,6 @@ construction of symmetry sectors Hamiltonian.
    :maxdepth: 1
 
    bath_dmft/01_ed_bath_dmft
-   bath_dmft/02_ed_bath_user
-   bath_dmft/03_ed_bath_replica
 
 
 Bath Functions
@@ -49,18 +48,3 @@ all different cases selected by :f:var:`ed_mode` and :f:var:`bath_type`.
    bath_functions/ed_bath_functions
 
    
-Bath Fit
-###########################
-
-In :f:mod:`ed_bath_fit` we provide to the user a generic function
-:f:func:`ed_chi2_fitgf` performing the minimization of a user provided
-Weiss field against the corresponding model of non-interacting
-Anderson Green's function with the aim of updating the user bath parameters.
-
-
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   bath_fit/ed_bath_fit

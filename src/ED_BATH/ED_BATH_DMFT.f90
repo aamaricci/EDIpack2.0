@@ -44,6 +44,42 @@ contains
   !PURPOSE  : Allocate the ED bath
   !+-------------------------------------------------------------------+
   subroutine allocate_dmft_bath(dmft_bath_)
+    !
+    ! Allocate the  :f:var:`effective_bath` input  :f:var:`dmft_bath_` according to the values of the global input parameters |Nspin| , |Norb|, |Nbath|, |ed_mode| and |bath_type|.
+    !
+    ! The correct components of the :f:var:`effective_bath` data structure are allocated.   
+    !
+    ! .. list-table:: allocated components of :f:var:`dmft_bath_`
+    !    :widths: auto
+    !    :header-rows: 1
+    !    :stub-columns: 1
+    !
+    !    * - 
+    !      - :code:`normal`
+    !      - :code:`superc`
+    !      - :code:`nonsu2`
+    !
+    !    * - :code:`normal`
+    !      - :f:var:`e` , :f:var:`v`            
+    !      - :f:var:`e` , :f:var:`v`, :f:var:`d`
+    !      - :f:var:`e` , :f:var:`v`, :f:var:`u`
+    !
+    !    * - :code:`hybrid`
+    !      - :f:var:`e` , :f:var:`v`            
+    !      - :f:var:`e` , :f:var:`v`, :f:var:`d`
+    !      - :f:var:`e` , :f:var:`v`, :f:var:`u`
+    !
+    !    * - :code:`replica`
+    !      - :f:var:`nbasis` , :f:var:`item`  , :f:var:`item` % :f:var:`lambda`
+    !      - :f:var:`nbasis` , :f:var:`item`  , :f:var:`item` % :f:var:`lambda`
+    !      - :f:var:`nbasis` , :f:var:`item`  , :f:var:`item` % :f:var:`lambda`
+    !
+    !    * - :code:`general`
+    !      - :f:var:`nbasis` , :f:var:`item`  , :f:var:`item` % :f:var:`lambda` , :f:var:`item` % :f:var:`vg`
+    !      - :f:var:`nbasis` , :f:var:`item`  , :f:var:`item` % :f:var:`lambda` , :f:var:`item` % :f:var:`vg`
+    !      - :f:var:`nbasis` , :f:var:`item`  , :f:var:`item` % :f:var:`lambda` , :f:var:`item` % :f:var:`vg`
+    !
+    !
     type(effective_bath) :: dmft_bath_
     integer              :: Nsym,ibath
 #ifdef _DEBUG
@@ -120,6 +156,9 @@ contains
   !PURPOSE  : Deallocate the ED bath
   !+-------------------------------------------------------------------+
   subroutine deallocate_dmft_bath(dmft_bath_)
+    !
+    ! Deallocate the  :f:var:`effective_bath` input  :f:var:`dmft_bath_` 
+    !
     type(effective_bath) :: dmft_bath_
     integer              :: ibath,isym
 #ifdef _DEBUG
@@ -158,6 +197,19 @@ contains
   !reading previous (converged) solution
   !+------------------------------------------------------------------+
   subroutine init_dmft_bath(dmft_bath_,used)
+    !
+    ! Initialize the :f:var:`effective_bath` input :f:var:`dmft_bath_`.
+    ! The energy parameters :f:var:`e` are constructed using a centered :f:var:`nbath` discretization of the flat band of width 2 :f:var:`ed_hw_bath`.
+    ! The hybridization parameters :f:var:`v` are set to :math:`\tfrac{1}{\sqrt{nbath}`.
+    ! The superconducting parameters :f:var:`d`, if any, are set to :f:var:`deltasc`
+    ! The spin-flip parameters :f:var:`u`, if any, are set equal to :f:var:`v`.
+    ! The replica/general local bath Hamiltonians are built out of the initial values of :math:`\vec{\lambda}`, using the matrix decomposition.
+    !
+    !.. note::
+    !
+    !   If the file :f:var:`hfile` with the correct :f:var:`ed_file_suffix` and :f:var:`hsuffix` is found in the running directory, the bath is initilized by reading the from the file.
+    !
+    !
     type(effective_bath) :: dmft_bath_
     logical,optional     :: used
     integer              :: Nbasis
@@ -410,6 +462,9 @@ contains
   ! [(Ek_iorb,Vk_iorb)_iorb=1,Norb]_ispin=1,Nspin
   !+-------------------------------------------------------------------+
   subroutine write_dmft_bath(dmft_bath_,unit)
+    !
+    ! Write the :f:var:`effective_bath` on input to std.output or to a file associated to the [optional] unit.
+    !
     type(effective_bath) :: dmft_bath_
     integer,optional     :: unit
     integer              :: unit_
@@ -571,6 +626,9 @@ contains
   ! procedure and formatting:
   !+-------------------------------------------------------------------+
   subroutine save_dmft_bath(dmft_bath_,file,used)
+    !
+    ! Save the :f:var:`effective_bath` to a file with .used or .restart extension according to input.
+    !
     type(effective_bath)      :: dmft_bath_
     character(len=*),optional :: file
     character(len=256)        :: file_
@@ -602,6 +660,9 @@ contains
   ! bath-array
   !+-------------------------------------------------------------------+
   subroutine set_dmft_bath(bath_,dmft_bath_)
+    !
+    ! Set the :f:var:`effective_bath` components from the input user bath :f:var:`bath_` , i.e. it dumps the user bath to the internal data structure. 
+    !
     real(8),dimension(:)   :: bath_
     type(effective_bath)   :: dmft_bath_
     integer                :: stride,io,jo,i
@@ -808,6 +869,9 @@ contains
   !PURPOSE  : copy the bath components back to a 1-dim array
   !+-------------------------------------------------------------------+
   subroutine get_dmft_bath(dmft_bath_,bath_)
+    !
+    ! Set the user input bath :f:var:`bath_` from the components of the :f:var:`effective_bath` :f:var:`dmft_bath_` , i.e. it dumps the internal data structure to the user bath. 
+    !
     type(effective_bath)   :: dmft_bath_
     real(8),dimension(:)   :: bath_
     real(8)                :: hrep_aux(Nspin*Norb,Nspin*Norb)

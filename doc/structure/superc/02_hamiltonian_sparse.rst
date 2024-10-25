@@ -1,11 +1,9 @@
-Hamiltonian
-============================
+Stored Hamiltonian :math:`H\times\vec{v}`  
+==============================================
 
 
-How the Fock space Hamiltonian is constructed
 
-
-.. f:automodule::  ed_hamiltonian_normal
+.. f:automodule::  ed_hamiltonian_superc_stored_hxv
 
 
 

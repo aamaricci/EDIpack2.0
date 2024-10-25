@@ -1,14 +1,6 @@
 Quantum Numbers Sectors
 ============================
 
-..
- .. raw:: html
-    :file:  graphs/ed_sector1.html
-
- |
-
-
-
 The :mod:`ed_sector` represents a key part of the ED code. Here the
 symmetry sectors corresponding to a given set of quantum numbers
 :math:`\vec{Q}` are
@@ -80,11 +72,3 @@ algorithm  (:math:`N` being the total number of electronic levels):
 
 
 
-
-|
-
-..
- .. raw:: html
-    :file:  graphs/ed_sector2.html
-
- |

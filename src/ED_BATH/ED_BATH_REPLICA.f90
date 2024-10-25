@@ -16,19 +16,41 @@ MODULE ED_BATH_REPLICA
   private
 
   interface set_Hreplica
+     !
+     ! This function sets the matrix basis :math:`\{ \hat{O}_i \}_{i=1,\dots,N_{sym}}` used to decompose the single bath hamiltonian :math:`h^p`. It also sets the initial values of the variational parameters :math:`\vec{\lambda}` in the :f:var:`replica` ath type.
+     !
+     ! Input: :f:var:`Hvec` 
+     !  * rank-5, dimensions: [ |Nns| , |Nns|, |Norb| , |Norb| , |Nsym| ]
+     !  * rank-3, dimensions: [ |Nnso| , |Nnso|, |Nsym| ]
+     !
+     ! Input: :f:var:`lambdavec`
+     !  * rank-2, dimensions: [ |Nbath| , |Nsym| ]
+     !  * rank-3, dimensions: [ |Nlat| , |Nbath| , |Nsym| ]
+     !
      module procedure init_Hreplica_symmetries_d5
      module procedure init_Hreplica_symmetries_d3
      module procedure init_Hreplica_symmetries_lattice_d5
      module procedure init_Hreplica_symmetries_lattice_d3
-     module procedure init_Hreplica_symmetries_legacy  ! (deprecation-cycle)
+     module procedure init_Hreplica_symmetries_legacy
   end interface set_Hreplica
 
   interface set_Hgeneral
+     !
+     ! This function sets the matrix basis :math:`\{ \hat{O}_i \}_{i=1,\dots,N_{sym}}` used to decompose the single bath hamiltonian :math:`h^p`. It also sets the initial values of the variational parameters :math:`\vec{\lambda}` in the :f:var:`general` ath type.
+     !
+     ! Input: :f:var:`Hvec` 
+     !  * rank-5, dimensions: [ |Nns| , |Nns|, |Norb| , |Norb| , |Nsym| ]
+     !  * rank-3, dimensions: [ |Nnso| , |Nnso|, |Nsym| ]
+     !
+     ! Input: :f:var:`lambdavec`
+     !  * rank-2, dimensions: [ |Nbath| , |Nsym| ]
+     !  * rank-3, dimensions: [ |Nlat| , |Nbath| , |Nsym| ]
+     !
      module procedure init_Hgeneral_symmetries_d5
      module procedure init_Hgeneral_symmetries_d3
      module procedure init_Hgeneral_symmetries_lattice_d5
      module procedure init_Hgeneral_symmetries_lattice_d3
-     module procedure init_Hgeneral_symmetries_legacy  ! (deprecation-cycle)
+     module procedure init_Hgeneral_symmetries_legacy
   end interface set_Hgeneral
 
   !##################################################################

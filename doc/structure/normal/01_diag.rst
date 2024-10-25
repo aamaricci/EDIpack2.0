@@ -1,11 +1,16 @@
 Exact Diagonalization
 ============================
-..
- .. raw:: html
-    :file:  ../graphs/normal/01_diag.html
-
- |
-
-
 
 How Exact Diagonalization/Arpack/Lanczos is performed
+
+
+.. f:automodule::  ed_diag_normal
+
+
+
+.. |Nbath| replace:: :f:var:`nbath`
+.. |Nlat| replace:: :f:var:`nlat`
+.. |Nspin| replace:: :f:var:`nspin`
+.. |Norb| replace:: :f:var:`norb`
+.. |Nso| replace:: :f:var:`nspin` . :f:var:`norb`
+.. |Nlso| replace:: :f:var:`nlat`. :f:var:`nspin` . :f:var:`norb`

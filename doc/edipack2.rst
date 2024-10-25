@@ -175,17 +175,6 @@ variational parameters.
 Exact Diagonalization
 ###########################
 
-..
- .. raw:: html
-    :file:  structure/graphs/diag.html
-
- |
-
- .. raw:: html
-    :file:  structure/graphs/hamiltonian.html
-
- |
-
 
 This part of the `EDIpack2.0` code implements the exact
 diagonalization of the general, single-site, multi-orbital quantum
@@ -206,7 +195,7 @@ the impurity susceptibilities and observables.
    :maxdepth: 1
    :glob:
 
-   structure/diag
+   structure/index_diag
    
 
 
@@ -227,7 +216,7 @@ the code.
    :maxdepth: 1
    :glob:
 
-   structure/greensfunctions
+   structure/index_greensfunctions
 
 
 Observables
@@ -248,7 +237,7 @@ in the code.
    :maxdepth: 1
    :glob:
 
-   structure/observables
+   structure/index_observables
 
 
 
@@ -270,7 +259,23 @@ frequency domain.
    structure/io/ed_io
 
 
-   
+
+
+:math:`\chi^2` Fit
+###########################
+
+In  this module we provide to the user a generic function
+:f:func:`ed_chi2_fitgf` performing the minimization of a user provided
+Weiss field against the corresponding model of non-interacting
+Anderson Green's function with the aim of updating the user bath parameters.
+
+
+.. toctree::
+   :maxdepth: 1
+
+   structure/fit
+
+
 EDIpack2
 ###########################
 

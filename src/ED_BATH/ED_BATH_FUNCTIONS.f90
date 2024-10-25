@@ -19,25 +19,65 @@ MODULE ED_BATH_FUNCTIONS
   !
   !\DELTA, THE HYBRIDIZATION FUNCTION
   interface delta_bath_function
+     !
+     ! Evaluates the normal hybridization function :math:`\Delta(x)`.
+     !
+     ! Output:
+     !   * :f:var:`delta` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
+     !
      module procedure delta_bath_array
   end interface delta_bath_function
+
   interface Fdelta_bath_function
+     !
+     ! Evaluates the anomalouse hybridization function :math:`\Theta(x)`.
+     !
+     ! Output:
+     !   * :f:var:`fdelta` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
+     !
      module procedure Fdelta_bath_array
   end interface Fdelta_bath_function
   !
   !NON-INTERACTING GREEN'S FUNCTION 
   interface g0and_bath_function
+     !
+     ! Evaluates the normal non-interacting Green's function :math:`G_0(x)`.
+     !
+     ! Output:
+     !   * :f:var:`g0and` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
+     !
      module procedure g0and_bath_array
   end interface g0and_bath_function
+
   interface f0and_bath_function
+     !
+     ! Evaluates the anomalous non-interacting Green's function :math:`F_0(x)`.
+     !
+     ! Output:
+     !   * :f:var:`f0and` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
+     !
+
      module procedure f0and_bath_array
   end interface f0and_bath_function
   !
   !INVERSE NON-INTERACTING GREEN'S FUNCTION 
   interface invg0_bath_function
+     !
+     ! Evaluates the inverse of the normal non-interacting Green's function :math:`G^{-1}_0(x)`.
+     !
+     ! Output:
+     !   * :f:var:`g0and` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
+     !
      module procedure invg0_bath_array
   end interface invg0_bath_function
+
   interface invf0_bath_function
+     !
+     ! Evaluates the inverse of the anomalous non-interacting Green's function :math:`F^{-1}_0(x)`.
+     !
+     ! Output:
+     !   * :f:var:`f0and` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
+     !
      module procedure invf0_bath_array
   end interface invf0_bath_function
 
@@ -55,9 +95,9 @@ contains
 
 
   function delta_bath_array(x,dmft_bath_,axis) result(Delta)
-    complex(8),dimension(:),intent(in)                                :: x
-    type(effective_bath)                                              :: dmft_bath_
-    character(len=*),optional                                         :: axis    
+    complex(8),dimension(:),intent(in)                                :: x          !complex  array for the frequency
+    type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
+    character(len=*),optional                                         :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Delta
     integer                                                           :: i,ih,L
     integer                                                           :: iorb,jorb,ispin,jspin,ibath
@@ -304,8 +344,8 @@ contains
 
   !ANOMALous:
   function fdelta_bath_array(x,dmft_bath_,axis) result(Fdelta)
-    complex(8),dimension(:),intent(in)                                :: x
-    type(effective_bath)                                              :: dmft_bath_
+    complex(8),dimension(:),intent(in)                                :: x!complex  array for the frequency
+    type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Fdelta
     integer                                                           :: iorb,ispin,jorb,ibath
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)            :: Vk
@@ -316,7 +356,7 @@ contains
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
     complex(8),dimension(Nnambu*Norb,Nnambu*Norb)                     :: JJ
-    character(len=*),optional                                         :: axis    
+    character(len=*),optional                                         :: axis    !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis
     character(len=4)                                                  :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -456,14 +496,14 @@ contains
 
 
   function g0and_bath_array(x,dmft_bath_,axis) result(G0and)
-    complex(8),dimension(:),intent(in)                  :: x
-    type(effective_bath)                                :: dmft_bath_
+    complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
+    type(effective_bath)                                :: dmft_bath!the current :f:var:`effective_bath` instance_
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and,Delta,Fdelta
     integer                                             :: iorb,jorb,ispin,jspin,io,jo,Nso,i,L
     real(8),dimension(size(x))                          :: det
     complex(8),dimension(size(x))                       :: fg,ff
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
-    character(len=*),optional                           :: axis    
+    character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -641,14 +681,14 @@ contains
 
   !ANOMALous:
   function f0and_bath_array(x,dmft_bath_,axis) result(F0and)
-    complex(8),dimension(:),intent(in)                  :: x
-    type(effective_bath)                                :: dmft_bath_
+    complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
+    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and,Delta,Fdelta
     integer                                             :: iorb,jorb,ispin,i,L
     real(8),dimension(size(x))                          :: det
     complex(8),dimension(size(x))                       :: fg,ff
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
-    character(len=*),optional                           :: axis    
+    character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -758,12 +798,12 @@ contains
 
 
   function invg0_bath_array(x,dmft_bath_,axis) result(G0and)
-    complex(8),dimension(:),intent(in)                  :: x
-    type(effective_bath)                                :: dmft_bath_
+    complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
+    type(effective_bath)                                :: dmft_bath!the current :f:var:`effective_bath` instance_
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and,Delta
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
     integer                                             :: i,iorb,jorb,ispin,jspin,io,jo,Nso,L
-    character(len=*),optional                           :: axis    
+    character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -889,11 +929,11 @@ contains
 
   !ANOMALous:
   function invf0_bath_array(x,dmft_bath_,axis) result(F0and)
-    complex(8),dimension(:),intent(in)                  :: x
-    type(effective_bath)                                :: dmft_bath_
+    complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
+    type(effective_bath)                                :: dmft_bath!the current :f:var:`effective_bath` instance_
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and,Fdelta
     integer                                             :: iorb,jorb,ispin,L
-    character(len=*),optional                           :: axis    
+    character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)

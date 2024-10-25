@@ -22,16 +22,36 @@ MODULE ED_BATH_USER
   !##################################################################
   !explicit symmetries:
   interface break_symmetry_bath
+     !
+     ! Function to impose a specific symmetry breaking pattern into the energy levels of the bath. A common case is to find magnetic solution by breaking spin degeneracy of the levels.
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
+     !
      module procedure break_symmetry_bath_site
      module procedure break_symmetry_bath_lattice
   end interface break_symmetry_bath
 
   interface spin_symmetrize_bath
+     !
+     ! Function to impose a spin symmetry to the parameters of the bath. Enforces a non-magnetic solution
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure spin_symmetrize_bath_site
      module procedure spin_symmetrize_bath_lattice
   end interface spin_symmetrize_bath
 
   interface orb_symmetrize_bath
+     !
+     ! Function to impose a orbital symmetry to the parameters of the bath. Enforces an orbital non-polarized solution. It  two orbital indices :f:var:`orb1` and :f:var:`orb2: are passed symmetry is imposed only among such two orbitals
+     !
+     !.. warning::
+     !
+     !   This operation requires the orbital to be degenerate.
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure orb_symmetrize_bath_site
      module procedure orb_symmetrize_bath_lattice
      module procedure orb_symmetrize_bath_site_o1o2
@@ -39,26 +59,51 @@ MODULE ED_BATH_USER
   end interface orb_symmetrize_bath
 
   interface orb_equality_bath
+     !
+     ! Function to impose a orbital equality on the parameters of the bath. 
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure orb_equality_bath_site
      module procedure orb_equality_bath_lattice
   end interface orb_equality_bath
 
   interface ph_symmetrize_bath
+     !
+     ! Function to impose particle-hole symmetry to the parameters of the bath. 
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure ph_symmetrize_bath_site
      module procedure ph_symmetrize_bath_lattice
   end interface ph_symmetrize_bath
 
   interface ph_trans_bath
+     !
+     ! Function to perform particle-hole transformation to the parameters of the bath. 
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure ph_trans_bath_site
      module procedure ph_trans_bath_lattice
   end interface ph_trans_bath
 
   interface enforce_normal_bath
+     !
+     ! Function to impose normal solution to the parameters of the bath, i.e. suppressed superconductivity if any.
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure enforce_normal_bath_site
      module procedure enforce_normal_bath_lattice
   end interface enforce_normal_bath
-  
+
   interface save_array_as_bath
+     !
+     ! Write the bath parameters to a file following the convention of the internal data structure :f:var:`effective_bath`. 
+     !
+     ! * :f:var:`bath` is rank-1 [:] or rank-2 [:, :f:var:`Nlat` ] array type: double precision with assumed size
+     !
      module procedure save_array_as_bath_site
      module procedure save_array_as_bath_lattice
   end interface save_array_as_bath
@@ -110,11 +155,16 @@ contains
   ! - given a dmft bath pull/push the nonsu2 components
   !+-------------------------------------------------------------------+
   subroutine impose_equal_lambda(bath_,ibath,lambdaindex_vec)
-    real(8),dimension(:) :: bath_
+    !
+    ! Function to impose  :math:`\vec{\lambda}` parameters to be equal to a given average of a subset of values :f:var:`lambdaindex_vec` and for a specific bath element :f:var:`ibath` if :f:var:`bath_type` = :code:`replica` , :code:`general`. 
+    !
+    !
+    real(8),dimension(:) :: bath_      !user bath array
     type(effective_bath) :: dmft_bath_
     real(8)              :: val
-    integer,dimension(:) :: lambdaindex_vec
-    integer              :: i,N,ibath
+    integer,dimension(:) :: lambdaindex_vec !(sub)set of indices :math:`i` of :math:`\lambda_i` to be averaged out
+    integer              :: ibath           !index of the bath element
+    integer              :: i,N
     !
     call allocate_dmft_bath(dmft_bath_)
     call set_dmft_bath(bath_,dmft_bath_)
@@ -172,11 +222,11 @@ contains
 
 
   subroutine break_symmetry_bath_site(bath_,field,sign,save)
-    real(8),dimension(:)   :: bath_
-    type(effective_bath)   :: dmft_bath_
-    real(8)                :: field
-    real(8)                :: sign
-    logical,optional       :: save
+    real(8),dimension(:)   :: bath_      !user bath array
+    type(effective_bath)   :: dmft_bath_ 
+    real(8)                :: field      !tiny symmetry breaking field 
+    real(8)                :: sign       !sign of the field
+    logical,optional       :: save       !optional flag to save the output bath
     logical                :: save_
     if(bath_type=="replica")stop "break_symmetry_bath_site ERROR: can not be used with bath_type=replica"
     if(bath_type=="general")stop "break_symmetry_bath_site ERROR: can not be used with bath_type=general"
@@ -533,7 +583,7 @@ contains
     call get_dmft_bath(dmft_bath_,bath_)
     call deallocate_dmft_bath(dmft_bath_)
   end subroutine enforce_normal_bath_site
-  
+
   subroutine enforce_normal_bath_lattice(bath_,save)
     real(8),dimension(:,:) :: bath_
     logical,optional       :: save
@@ -581,7 +631,7 @@ contains
   !+------------------------------------------------------------------+
   !PURPOSE  : given a array, save it as a bath. Do nothing else.
   !+------------------------------------------------------------------+
-  
+
   subroutine save_array_as_bath_site(bath_)
     real(8),dimension(:)   :: bath_
     type(effective_bath)   :: dmft_bath_
@@ -590,7 +640,7 @@ contains
     call save_dmft_bath(dmft_bath_)
     call deallocate_dmft_bath(dmft_bath_)
   end subroutine save_array_as_bath_site
-  
+
   subroutine save_array_as_bath_lattice(bath_)
     real(8),dimension(:,:) :: bath_
     integer                :: Nsites,ilat

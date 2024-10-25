@@ -1,11 +1,12 @@
-Hamiltonian
+Density Susceptibility
 ============================
 
 
-How the Fock space Hamiltonian is constructed
+How susceptibilities are calculated
 
 
-.. f:automodule::  ed_hamiltonian_normal
+
+.. f:automodule::  ed_chi_dens
 
 
 
