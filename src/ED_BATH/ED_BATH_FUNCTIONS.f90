@@ -497,7 +497,7 @@ contains
 
   function g0and_bath_array(x,dmft_bath_,axis) result(G0and)
     complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
-    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance_
+    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and,Delta,Fdelta
     integer                                             :: iorb,jorb,ispin,jspin,io,jo,Nso,i,L
     real(8),dimension(size(x))                          :: det
@@ -799,7 +799,7 @@ contains
 
   function invg0_bath_array(x,dmft_bath_,axis) result(G0and)
     complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
-    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance_
+    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and,Delta
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
     integer                                             :: i,iorb,jorb,ispin,jspin,io,jo,Nso,L
@@ -930,7 +930,7 @@ contains
   !ANOMALous:
   function invf0_bath_array(x,dmft_bath_,axis) result(F0and)
     complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
-    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance_
+    type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and,Fdelta
     integer                                             :: iorb,jorb,ispin,L
     character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    

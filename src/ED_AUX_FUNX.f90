@@ -131,6 +131,9 @@ MODULE ED_AUX_FUNX
   !MPI PROCEDURES
 #ifdef _MPI
   interface scatter_vector_MPI
+     !
+     ! Scatter the vector :math:`\vec{V}` into the smaller parts :math:`\vec{V}_{t}` on each thread such that :math:`\sum_{t}{\rm size}(\vec{V}_t) = {\rm size}(\vec{V})`
+     !
      module procedure :: d_scatter_vector_MPI
      module procedure :: c_scatter_vector_MPI
   end interface scatter_vector_MPI
@@ -146,6 +149,9 @@ MODULE ED_AUX_FUNX
   end interface gather_vector_MPI
 
   interface allgather_vector_MPI
+     !
+     ! All threads gather the other portions :math:`\vec{V}_{t}` of the vector :math:`\vec{V}` and reduce it into a local copy. 
+     !
      module procedure :: d_allgather_vector_MPI
      module procedure :: c_allgather_vector_MPI
   end interface allgather_vector_MPI

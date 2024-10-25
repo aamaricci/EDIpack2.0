@@ -7,12 +7,17 @@ MODULE ED_DIAG
   implicit none
   private
 
-  !>Diag hamiltonian
   public  :: diagonalize_impurity
 
 contains
 
   subroutine  diagonalize_impurity()
+    !
+    ! Call the correct impurity diagonalization procedure according to the value of :f:var:`ed_mode`.
+    !
+    ! * :f:var:`normal` : :f:var:`diagonalize_impurity_normal`
+    ! * :f:var:`superc` : :f:var:`diagonalize_impurity_superc`
+    ! * :f:var:`nonsu2` : :f:var:`diagonalize_impurity_nonsu2`
     !
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG diagonalize_impurity: Start digonalization"

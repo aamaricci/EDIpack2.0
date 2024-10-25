@@ -36,6 +36,28 @@ contains
   ! GS, build the Green's functions calling all the necessary routines
   !+------------------------------------------------------------------+
   subroutine diagonalize_impurity_normal()
+    !
+    ! This procedure performs the diagonalization of the Hamiltonian in each symmetry sector for :f:var:`ed_mode` = :f:var:`normal` , i.e. for quantum number :math:`\vec{Q}=[\vec{N}_\uparrow,\vec{N}_\downarrow]`.
+    !
+    !
+    ! The diagonalization proceeds in three steps.
+    !
+    ! #. Setup the diagonalization of selected sectors only if the file :f:var:`sectorfile` exists.
+    !
+    ! #. Perform a cycle over all the symmetry sectors :math:`{\cal S}(\vec{Q})`
+    !
+    !   * Decide if the sector should be diagonalized, i.e. if this is a twin sector and :f:var:`ed_twin` is True.
+    !
+    !   * Setup the Arpack/Lanczos parameters :f:var:`neigen` , :f:var:`nblock` , :f:var:`nitermax`
+    !
+    !   * Construct the sector Hamiltonian and/or just associate the correct matrix-vector product in :f:var:`build_hv_sector_normal`
+    !
+    !   * call :f:var:`sp_eigh` (Arpack) or :f:var:`sp_lanc_eigh` (Lanczos) or :f:var:`eigh` (Lapack) according to the dimension of the sector and the value of :f:var:`lanc_method`
+    !
+    !   * Retrieve the eigen-states and save them to :f:var:`state_list`
+    !
+    ! #. Analyze the :f:var:`state_list` , find the overall groundstate :math:`|\psi_0\rangle` , trim the list using the :f:var:`cutoff` :math:`\epsilon` to that :math:`e^{-\beta E_{max}} < \epsilon` , create an histogram of the states requested to each sector and use it to increase or decrease those number according to the contribution of each sector to the spectrum.
+    !
     call ed_pre_diag
     call ed_diag_d
     call ed_post_diag

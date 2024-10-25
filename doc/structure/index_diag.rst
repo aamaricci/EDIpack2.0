@@ -33,6 +33,7 @@ operator.
 
    normal/01_diag
    normal/02_hamiltonian
+   normal/02_hamiltonian_common
    normal/02_hamiltonian_sparse
    normal/02_hamiltonian_direct
 
