@@ -10,7 +10,7 @@ mkdir -p $MOD
 #Generate the  .html images by stripping the svg part from the src files
 cd $SRC
 pwd 
-for file in *;do
+for file in *.html;do
     echo $file
     sed -n "/<svg id/,/<\/svg>/p" $file > $MOM/$GRAPH/$file
 done
