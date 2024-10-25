@@ -187,6 +187,15 @@ MODULE ED_IO
   end interface ed_get_docc
 
   interface ed_get_phi
+ !This subroutine gets from the EDIpack2 library the value of the superconducting order parameter :math:`\phi` ( :f:var:`ed_mode` = :code:`superc` ) and passes it to the user.
+ !
+ !The :f:var:`self` variable can have the following dimensions:
+ ! 
+ !  * scalar: if :f:var:`iorb` is provided for single-impurity DMFT, :math:`\phi` for that orbital
+ !  * [:f:var:`norb`]: if no optional variable is provided for single-impurity DMFT, :math:`\phi` for all orbitals
+ !  * [:f:var:`nlat`]: if :f:var:`iorb` (default = 1) is provided for real-space DMFT with :f:var:`nlat` impurities, :math:`\phi` for that orbital for all impurity sites
+ !  * [:f:var:`nlat`, :f:var:`norb`]: if :f:var:`nlat` is provided for real-space DMFT, :math:`\phi` for all impurity sites and orbitals
+ !
      module procedure :: ed_get_phisc_n0
      module procedure :: ed_get_phisc_n1
      module procedure :: ed_get_phisc_n2

@@ -1,6 +1,6 @@
 subroutine ed_get_phisc_n0(self,iorb)
-  real(8)          :: self
-  integer,optional :: iorb
+  real(8)          :: self ! :math:`\phi` value or array of values
+  integer,optional :: iorb ! orbital index
   integer          :: iorb_
   iorb_=1;if(present(iorb))iorb_=iorb
   if(iorb_>Norb)stop "ed_get_phisc error: orbital index > N_orbital"
@@ -9,7 +9,8 @@ end subroutine ed_get_phisc_n0
 
 subroutine ed_get_phisc_n1(self,iorb,Nlat)
   real(8),dimension(:) :: self
-  integer,optional     :: iorb,Nlat
+  integer,optional     :: iorb
+  integer,optional     :: Nlat ! number of inequivalent impurity sites for real-space DMFT
   integer              :: iorb_
   iorb_=1;if(present(iorb))iorb_=iorb
   if(iorb_>Norb)stop "ed_get_phisc error: orbital index > N_orbital"
