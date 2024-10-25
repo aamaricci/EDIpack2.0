@@ -1,0 +1,622 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for EDIpack2">
+    <meta name="author" content="" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>ED_OBSERVABLES_NORMAL &ndash; EDIpack2</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">EDIpack2 </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>ED_OBSERVABLES_NORMAL
+      <small>Module</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 2.6% of total for modules and submodules.">705 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/ED_OBSERVABLES_NORMAL.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/ed_observables_normal.f90.html'>ED_OBSERVABLES_NORMAL.f90</a></li>
+            <li class="breadcrumb-item active" aria-current="page">ED_OBSERVABLES_NORMAL</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+        <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+    <em>None</em>
+
+  </div>
+
+    </div>
+
+    <div class="col-md-9" id='text'>
+      
+<br>          <div class="card mb-4">
+      <h3 class="card-header card-title bg-light">Uses</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <ul class="list-inline">
+                  <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_ARRAYS.html'>SF_ARRAYS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
+                  <li class="list-inline-item"><a href='ed_sector.html'>ED_SECTOR</a></li>
+                  <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_LINALG.html'>SF_LINALG</a></li>
+                  <li class="list-inline-item"><a href='ed_hamiltonian_normal.html'>ED_HAMILTONIAN_NORMAL</a></li>
+                  <li class="list-inline-item"><a href='ed_bath.html'>ED_BATH</a></li>
+                  <li class="list-inline-item"><a href='ed_setup.html'>ED_SETUP</a></li>
+              </ul>
+            </li>
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: module~~ed_observables_normal~~UsesGraph Pages: 1 -->
+<svg id="moduleed_observables_normalUsesGraph" width="356pt" height="482pt"
+ viewBox="0.00 0.00 355.79 481.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_observables_normal~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 477.77)">
+<title>module~~ed_observables_normal~~UsesGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-477.77 351.79,-477.77 351.79,4 -4,4"/>
+<!-- module~ed_observables_normal -->
+<g id="module~~ed_observables_normal~~UsesGraph_node1" class="node">
+<title>module~ed_observables_normal</title>
+<polygon fill="none" stroke="black" points="347.79,-247.77 189.27,-247.77 189.27,-225 347.79,-225 347.79,-247.77"/>
+<text text-anchor="middle" x="268.53" y="-232.03" font-family="Helvetica,sans-Serif" font-size="10.50">ED_OBSERVABLES_NORMAL</text>
+</g>
+<!-- SF_ARRAYS -->
+<g id="module~~ed_observables_normal~~UsesGraph_node2" class="node">
+<title>SF_ARRAYS</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node2"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_ARRAYS.html" xlink:title="SF_ARRAYS">
+<polygon fill="#337ab7" stroke="#337ab7" points="113.15,-473.77 40.13,-473.77 40.13,-451 113.15,-451 113.15,-473.77"/>
+<text text-anchor="middle" x="76.64" y="-458.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_ARRAYS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;SF_ARRAYS -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge1" class="edge">
+<title>module~ed_observables_normal&#45;&gt;SF_ARRAYS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M264.44,-248.23C254.65,-283.43 220.84,-388.23 153.27,-441.38 144.93,-447.94 134.67,-452.46 124.43,-455.56"/>
+<polygon fill="#000000" stroke="#000000" points="123.69,-452.14 114.88,-458.03 125.44,-458.91 123.69,-452.14"/>
+</g>
+<!-- SF_CONSTANTS -->
+<g id="module~~ed_observables_normal~~UsesGraph_node3" class="node">
+<title>SF_CONSTANTS</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node3"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html" xlink:title="SF_CONSTANTS">
+<polygon fill="#337ab7" stroke="#337ab7" points="124.02,-432.77 29.25,-432.77 29.25,-410 124.02,-410 124.02,-432.77"/>
+<text text-anchor="middle" x="76.64" y="-417.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;SF_CONSTANTS -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge2" class="edge">
+<title>module~ed_observables_normal&#45;&gt;SF_CONSTANTS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M262.83,-247.98C250.04,-278.05 211.59,-359.05 153.27,-400.38 147.65,-404.37 141.3,-407.59 134.73,-410.21"/>
+<polygon fill="#000000" stroke="#000000" points="134.03,-406.75 125.73,-413.34 136.33,-413.36 134.03,-406.75"/>
+</g>
+<!-- SF_IOTOOLS -->
+<g id="module~~ed_observables_normal~~UsesGraph_node4" class="node">
+<title>SF_IOTOOLS</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node4"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html" xlink:title="SF_IOTOOLS">
+<polygon fill="#337ab7" stroke="#337ab7" points="115.4,-391.77 37.88,-391.77 37.88,-369 115.4,-369 115.4,-391.77"/>
+<text text-anchor="middle" x="76.64" y="-376.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;SF_IOTOOLS -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge3" class="edge">
+<title>module~ed_observables_normal&#45;&gt;SF_IOTOOLS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M259.94,-248.22C243.54,-272.79 202.32,-329.54 153.27,-359.38 145.24,-364.27 136.05,-368.05 126.9,-370.96"/>
+<polygon fill="#000000" stroke="#000000" points="125.97,-367.58 117.31,-373.68 127.88,-374.32 125.97,-367.58"/>
+</g>
+<!-- SF_LINALG -->
+<g id="module~~ed_observables_normal~~UsesGraph_node5" class="node">
+<title>SF_LINALG</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node5"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_LINALG.html" xlink:title="SF_LINALG">
+<polygon fill="#337ab7" stroke="#337ab7" points="110.9,-350.77 42.38,-350.77 42.38,-328 110.9,-328 110.9,-350.77"/>
+<text text-anchor="middle" x="76.64" y="-335.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_LINALG</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;SF_LINALG -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge4" class="edge">
+<title>module~ed_observables_normal&#45;&gt;SF_LINALG</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M254.45,-248.17C234.19,-265.84 193.35,-299.19 153.27,-318.38 143.61,-323.01 132.76,-326.78 122.35,-329.77"/>
+<polygon fill="#000000" stroke="#000000" points="121.53,-326.37 112.77,-332.33 123.34,-333.13 121.53,-326.37"/>
+</g>
+<!-- module~ed_aux_funx -->
+<g id="module~~ed_observables_normal~~UsesGraph_node6" class="node">
+<title>module~ed_aux_funx</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node6"><a xlink:href="../module/ed_aux_funx.html" xlink:title="ED_AUX_FUNX">
+<polygon fill="#337ab7" stroke="#337ab7" points="120.27,-309.77 33,-309.77 33,-287 120.27,-287 120.27,-309.77"/>
+<text text-anchor="middle" x="76.64" y="-294.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_AUX_FUNX</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_aux_funx -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge5" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_aux_funx</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M236.7,-248.14C213.83,-256.7 181.79,-268.32 153.27,-277.38 146.28,-279.6 138.89,-281.82 131.58,-283.93"/>
+<polygon fill="#000000" stroke="#000000" points="130.72,-280.54 122.05,-286.63 132.63,-287.27 130.72,-280.54"/>
+</g>
+<!-- module~ed_bath -->
+<g id="module~~ed_observables_normal~~UsesGraph_node7" class="node">
+<title>module~ed_bath</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node7"><a xlink:href="../module/ed_bath.html" xlink:title="ED_BATH">
+<polygon fill="#337ab7" stroke="#337ab7" points="106.02,-268.77 47.25,-268.77 47.25,-246 106.02,-246 106.02,-268.77"/>
+<text text-anchor="middle" x="76.64" y="-253.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_bath -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge6" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_bath</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M188.92,-245.08C164.41,-247.79 138.41,-250.66 117.7,-252.95"/>
+<polygon fill="#000000" stroke="#000000" points="117.54,-249.45 107.99,-254.03 118.31,-256.41 117.54,-249.45"/>
+</g>
+<!-- module~ed_eigenspace -->
+<g id="module~~ed_observables_normal~~UsesGraph_node8" class="node">
+<title>module~ed_eigenspace</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node8"><a xlink:href="../module/ed_eigenspace.html" xlink:title="ED_EIGENSPACE">
+<polygon fill="#337ab7" stroke="#337ab7" points="125.9,-227.77 27.38,-227.77 27.38,-205 125.9,-205 125.9,-227.77"/>
+<text text-anchor="middle" x="76.64" y="-212.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_EIGENSPACE</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_eigenspace -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge7" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_eigenspace</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M188.92,-228.11C171.68,-226.29 153.69,-224.4 137.33,-222.67"/>
+<polygon fill="#000000" stroke="#000000" points="138.12,-219.24 127.8,-221.67 137.38,-226.2 138.12,-219.24"/>
+</g>
+<!-- module~ed_hamiltonian_normal -->
+<g id="module~~ed_observables_normal~~UsesGraph_node9" class="node">
+<title>module~ed_hamiltonian_normal</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node9"><a xlink:href="../module/ed_hamiltonian_normal.html" xlink:title="ED_HAMILTONIAN_NORMAL">
+<polygon fill="#337ab7" stroke="#337ab7" points="153.27,-186.77 0,-186.77 0,-164 153.27,-164 153.27,-186.77"/>
+<text text-anchor="middle" x="76.64" y="-171.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_HAMILTONIAN_NORMAL</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_hamiltonian_normal -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge8" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_hamiltonian_normal</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M235.7,-224.61C212.89,-216.32 181.35,-205.19 153.27,-196.38 146.7,-194.33 139.78,-192.26 132.89,-190.27"/>
+<polygon fill="#000000" stroke="#000000" points="134.2,-187.01 123.63,-187.64 132.29,-193.74 134.2,-187.01"/>
+</g>
+<!-- module~ed_input_vars -->
+<g id="module~~ed_observables_normal~~UsesGraph_node10" class="node">
+<title>module~ed_input_vars</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node10"><a xlink:href="../module/ed_input_vars.html" xlink:title="ED_INPUT_VARS">
+<polygon fill="#337ab7" stroke="#337ab7" points="125.15,-145.77 28.13,-145.77 28.13,-123 125.15,-123 125.15,-145.77"/>
+<text text-anchor="middle" x="76.64" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_INPUT_VARS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_input_vars -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge9" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_input_vars</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M254.43,-224.76C234.13,-207.31 193.24,-174.38 153.27,-155.38 147.81,-152.79 141.97,-150.46 136.04,-148.39"/>
+<polygon fill="#000000" stroke="#000000" points="137.38,-145.14 126.79,-145.39 135.23,-151.8 137.38,-145.14"/>
+</g>
+<!-- module~ed_sector -->
+<g id="module~~ed_observables_normal~~UsesGraph_node11" class="node">
+<title>module~ed_sector</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node11"><a xlink:href="../module/ed_sector.html" xlink:title="ED_SECTOR">
+<polygon fill="#337ab7" stroke="#337ab7" points="113.9,-104.77 39.38,-104.77 39.38,-82 113.9,-82 113.9,-104.77"/>
+<text text-anchor="middle" x="76.64" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_SECTOR</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_sector -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge10" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_sector</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M259.91,-224.65C243.47,-200.28 202.17,-144 153.27,-114.39 144.72,-109.2 134.85,-105.27 125.13,-102.29"/>
+<polygon fill="#000000" stroke="#000000" points="126.32,-98.99 115.75,-99.72 124.47,-105.74 126.32,-98.99"/>
+</g>
+<!-- module~ed_setup -->
+<g id="module~~ed_observables_normal~~UsesGraph_node12" class="node">
+<title>module~ed_setup</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node12"><a xlink:href="../module/ed_setup.html" xlink:title="ED_SETUP">
+<polygon fill="#337ab7" stroke="#337ab7" points="109.77,-63.77 43.5,-63.77 43.5,-41 109.77,-41 109.77,-63.77"/>
+<text text-anchor="middle" x="76.64" y="-48.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_SETUP</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_setup -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge11" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_setup</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M262.81,-224.86C249.97,-194.98 211.41,-114.47 153.27,-73.39 143.75,-66.66 132.16,-62.09 120.93,-58.97"/>
+<polygon fill="#000000" stroke="#000000" points="121.93,-55.62 111.39,-56.68 120.3,-62.42 121.93,-55.62"/>
+</g>
+<!-- module~ed_vars_global -->
+<g id="module~~ed_observables_normal~~UsesGraph_node13" class="node">
+<title>module~ed_vars_global</title>
+<g id="a_module~~ed_observables_normal~~UsesGraph_node13"><a xlink:href="../module/ed_vars_global.html" xlink:title="ED_VARS_GLOBAL">
+<polygon fill="#337ab7" stroke="#337ab7" points="130.4,-22.77 22.88,-22.77 22.88,0 130.4,0 130.4,-22.77"/>
+<text text-anchor="middle" x="76.64" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_VARS_GLOBAL</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables_normal&#45;&gt;module~ed_vars_global -->
+<g id="module~~ed_observables_normal~~UsesGraph_edge12" class="edge">
+<title>module~ed_observables_normal&#45;&gt;module~ed_vars_global</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M264.42,-224.59C254.58,-189.56 220.64,-85.27 153.27,-32.39 149.53,-29.45 145.41,-26.93 141.07,-24.75"/>
+<polygon fill="#000000" stroke="#000000" points="142.62,-21.61 132.05,-20.89 139.87,-28.04 142.62,-21.61"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsesGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsesGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="485pt" height="31pt"
+ viewBox="0.00 0.00 485.13 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 481.13,-26.77 481.13,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-22.77 0,-22.77 0,0 54,0 54,-22.77"/>
+<text text-anchor="middle" x="27" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="137.76,-22.77 72.24,-22.77 72.24,0 137.76,0 137.76,-22.77"/>
+<text text-anchor="middle" x="105" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="218.63,-22.77 155.37,-22.77 155.37,0 218.63,0 218.63,-22.77"/>
+<text text-anchor="middle" x="187" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="291,-22.77 237,-22.77 237,0 291,0 291,-22.77"/>
+<text text-anchor="middle" x="264" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="363,-22.77 309,-22.77 309,0 363,0 363,-22.77"/>
+<text text-anchor="middle" x="336" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="477.13,-22.77 380.87,-22.77 380.87,0 477.13,0 477.13,-22.77"/>
+<text text-anchor="middle" x="429" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+          <div class="card">
+      <h3 class="card-header card-title bg-light">Used by</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: module~~ed_observables_normal~~UsedByGraph Pages: 1 -->
+<svg id="moduleed_observables_normalUsedByGraph" width="503pt" height="31pt"
+ viewBox="0.00 0.00 502.58 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_observables_normal~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<title>module~~ed_observables_normal~~UsedByGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 498.58,-26.77 498.58,4 -4,4"/>
+<!-- module~ed_observables_normal -->
+<g id="module~~ed_observables_normal~~UsedByGraph_node1" class="node">
+<title>module~ed_observables_normal</title>
+<polygon fill="none" stroke="black" points="158.52,-22.77 0,-22.77 0,0 158.52,0 158.52,-22.77"/>
+<text text-anchor="middle" x="79.26" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_OBSERVABLES_NORMAL</text>
+</g>
+<!-- module~ed_observables -->
+<g id="module~~ed_observables_normal~~UsedByGraph_node2" class="node">
+<title>module~ed_observables</title>
+<g id="a_module~~ed_observables_normal~~UsedByGraph_node2"><a xlink:href="../module/ed_observables.html" xlink:title="ED_OBSERVABLES">
+<polygon fill="#337ab7" stroke="#337ab7" points="302.04,-22.77 194.52,-22.77 194.52,0 302.04,0 302.04,-22.77"/>
+<text text-anchor="middle" x="248.28" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_OBSERVABLES</text>
+</a>
+</g>
+</g>
+<!-- module~ed_observables&#45;&gt;module~ed_observables_normal -->
+<g id="module~~ed_observables_normal~~UsedByGraph_edge1" class="edge">
+<title>module~ed_observables&#45;&gt;module~ed_observables_normal</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M194.43,-11.39C186.68,-11.39 178.52,-11.39 170.27,-11.39"/>
+<polygon fill="#000000" stroke="#000000" points="170.52,-7.89 160.52,-11.39 170.51,-14.89 170.52,-7.89"/>
+</g>
+<!-- module~ed_main -->
+<g id="module~~ed_observables_normal~~UsedByGraph_node3" class="node">
+<title>module~ed_main</title>
+<g id="a_module~~ed_observables_normal~~UsedByGraph_node3"><a xlink:href="../module/ed_main.html" xlink:title="ED_MAIN">
+<polygon fill="#337ab7" stroke="#337ab7" points="396.06,-22.77 338.04,-22.77 338.04,0 396.06,0 396.06,-22.77"/>
+<text text-anchor="middle" x="367.05" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_MAIN</text>
+</a>
+</g>
+</g>
+<!-- module~ed_main&#45;&gt;module~ed_observables -->
+<g id="module~~ed_observables_normal~~UsedByGraph_edge2" class="edge">
+<title>module~ed_main&#45;&gt;module~ed_observables</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M337.78,-11.39C330.45,-11.39 322.25,-11.39 313.87,-11.39"/>
+<polygon fill="#000000" stroke="#000000" points="313.92,-7.89 303.92,-11.39 313.92,-14.89 313.92,-7.89"/>
+</g>
+<!-- module~edipack2 -->
+<g id="module~~ed_observables_normal~~UsedByGraph_node4" class="node">
+<title>module~edipack2</title>
+<g id="a_module~~ed_observables_normal~~UsedByGraph_node4"><a xlink:href="../module/edipack2.html" xlink:title="EDIPACK2">
+<polygon fill="#337ab7" stroke="#337ab7" points="494.58,-22.77 432.06,-22.77 432.06,0 494.58,0 494.58,-22.77"/>
+<text text-anchor="middle" x="463.32" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EDIPACK2</text>
+</a>
+</g>
+</g>
+<!-- module~edipack2&#45;&gt;module~ed_main -->
+<g id="module~~ed_observables_normal~~UsedByGraph_edge3" class="edge">
+<title>module~edipack2&#45;&gt;module~ed_main</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M431.71,-11.39C424.06,-11.39 415.73,-11.39 407.7,-11.39"/>
+<polygon fill="#000000" stroke="#000000" points="407.78,-7.89 397.78,-11.39 407.78,-14.89 407.78,-7.89"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsedByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsedByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="485pt" height="31pt"
+ viewBox="0.00 0.00 485.13 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 481.13,-26.77 481.13,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-22.77 0,-22.77 0,0 54,0 54,-22.77"/>
+<text text-anchor="middle" x="27" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="137.76,-22.77 72.24,-22.77 72.24,0 137.76,0 137.76,-22.77"/>
+<text text-anchor="middle" x="105" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="218.63,-22.77 155.37,-22.77 155.37,0 218.63,0 218.63,-22.77"/>
+<text text-anchor="middle" x="187" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="291,-22.77 237,-22.77 237,0 291,0 291,-22.77"/>
+<text text-anchor="middle" x="264" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="363,-22.77 309,-22.77 309,0 363,0 363,-22.77"/>
+<text text-anchor="middle" x="336" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="477.13,-22.77 380.87,-22.77 380.87,0 477.13,0 477.13,-22.77"/>
+<text text-anchor="middle" x="429" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+      <br>
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              EDIpack2
+              &copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  </body>
+</html>

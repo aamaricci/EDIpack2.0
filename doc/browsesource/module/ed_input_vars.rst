@@ -1,5 +1,10 @@
-ed_input_vars
+ED_INPUT_VARS
 =====================================
  
 .. raw:: html
    :file:  ../graphs/ed_input_vars.html
+ 
+|
+ 
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_INPUT_VARS.f90>`_ on GitHub
+ 

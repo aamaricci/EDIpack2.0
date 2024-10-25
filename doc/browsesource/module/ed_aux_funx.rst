@@ -1,5 +1,10 @@
-ed_aux_funx
+ED_AUX_FUNX
 =====================================
  
 .. raw:: html
    :file:  ../graphs/ed_aux_funx.html
+ 
+|
+ 
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_AUX_FUNX.f90>`_ on GitHub
+ 

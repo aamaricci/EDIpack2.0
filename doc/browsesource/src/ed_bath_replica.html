@@ -1,0 +1,588 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for EDIpack2">
+    <meta name="author" content="" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>ED_BATH_REPLICA &ndash; EDIpack2</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">EDIpack2 </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>ED_BATH_REPLICA
+      <small>Module</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 1.8% of total for modules and submodules.">484 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/ED_BATH_REPLICA.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/ed_bath_replica.f90.html'>ED_BATH_REPLICA.f90</a></li>
+            <li class="breadcrumb-item active" aria-current="page">ED_BATH_REPLICA</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+        <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+    <em>None</em>
+
+  </div>
+
+    </div>
+
+    <div class="col-md-9" id='text'>
+      
+<br>          <div class="card mb-4">
+      <h3 class="card-header card-title bg-light">Uses</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <ul class="list-inline">
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_ARRAYS.html'>SF_ARRAYS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
+                  <li class="list-inline-item"><a href='ed_bath_dim.html'>ED_BATH_DIM</a></li>
+                  <li class="list-inline-item">ED_BATH_DMFT</li>
+                  <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_LINALG.html'>SF_LINALG</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_MISC.html'>SF_MISC</a></li>
+                  <li class="list-inline-item"><a href='ed_bath_aux.html'>ED_BATH_AUX</a></li>
+              </ul>
+            </li>
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: module~~ed_bath_replica~~UsesGraph Pages: 1 -->
+<svg id="moduleed_bath_replicaUsesGraph" width="261pt" height="441pt"
+ viewBox="0.00 0.00 260.54 440.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_bath_replica~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 436.77)">
+<title>module~~ed_bath_replica~~UsesGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-436.77 256.54,-436.77 256.54,4 -4,4"/>
+<!-- module~ed_bath_replica -->
+<g id="module~~ed_bath_replica~~UsesGraph_node1" class="node">
+<title>module~ed_bath_replica</title>
+<polygon fill="none" stroke="black" points="252.54,-227.77 143.52,-227.77 143.52,-205 252.54,-205 252.54,-227.77"/>
+<text text-anchor="middle" x="198.03" y="-212.03" font-family="Helvetica,sans-Serif" font-size="10.50">ED_BATH_REPLICA</text>
+</g>
+<!-- ED_BATH_DMFT -->
+<g id="module~~ed_bath_replica~~UsesGraph_node2" class="node">
+<title>ED_BATH_DMFT</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="101.14,-432.77 6.37,-432.77 6.37,-410 101.14,-410 101.14,-432.77"/>
+<text text-anchor="middle" x="53.76" y="-417.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH_DMFT</text>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;ED_BATH_DMFT -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge1" class="edge">
+<title>module~ed_bath_replica&#45;&gt;ED_BATH_DMFT</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M194.48,-228.06C186.91,-260.06 161.66,-350.1 107.52,-400.38 106.3,-401.52 105.01,-402.59 103.67,-403.61"/>
+<polygon fill="#000000" stroke="#000000" points="102.08,-400.48 95.46,-408.76 105.8,-406.41 102.08,-400.48"/>
+</g>
+<!-- SF_ARRAYS -->
+<g id="module~~ed_bath_replica~~UsesGraph_node3" class="node">
+<title>SF_ARRAYS</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node3"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_ARRAYS.html" xlink:title="SF_ARRAYS">
+<polygon fill="#337ab7" stroke="#337ab7" points="90.27,-391.77 17.25,-391.77 17.25,-369 90.27,-369 90.27,-391.77"/>
+<text text-anchor="middle" x="53.76" y="-376.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_ARRAYS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;SF_ARRAYS -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge2" class="edge">
+<title>module~ed_bath_replica&#45;&gt;SF_ARRAYS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M192.67,-228.13C182.13,-255.03 152.73,-321.68 107.52,-359.38 105.33,-361.21 102.97,-362.89 100.5,-364.43"/>
+<polygon fill="#000000" stroke="#000000" points="99.06,-361.23 91.89,-369.03 102.36,-367.41 99.06,-361.23"/>
+</g>
+<!-- SF_CONSTANTS -->
+<g id="module~~ed_bath_replica~~UsesGraph_node4" class="node">
+<title>SF_CONSTANTS</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node4"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html" xlink:title="SF_CONSTANTS">
+<polygon fill="#337ab7" stroke="#337ab7" points="101.14,-350.77 6.37,-350.77 6.37,-328 101.14,-328 101.14,-350.77"/>
+<text text-anchor="middle" x="53.76" y="-335.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;SF_CONSTANTS -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge3" class="edge">
+<title>module~ed_bath_replica&#45;&gt;SF_CONSTANTS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M189.54,-228.08C175.68,-248.89 144.09,-292.57 107.52,-318.38 105.49,-319.82 103.35,-321.17 101.14,-322.45"/>
+<polygon fill="#000000" stroke="#000000" points="99.8,-319.2 92.48,-326.87 102.98,-325.44 99.8,-319.2"/>
+</g>
+<!-- SF_IOTOOLS -->
+<g id="module~~ed_bath_replica~~UsesGraph_node5" class="node">
+<title>SF_IOTOOLS</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node5"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html" xlink:title="SF_IOTOOLS">
+<polygon fill="#337ab7" stroke="#337ab7" points="92.52,-309.77 15,-309.77 15,-287 92.52,-287 92.52,-309.77"/>
+<text text-anchor="middle" x="53.76" y="-294.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;SF_IOTOOLS -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge4" class="edge">
+<title>module~ed_bath_replica&#45;&gt;SF_IOTOOLS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M181.84,-228.27C164.54,-241.44 135.09,-262.73 107.52,-277.38 104.48,-279 101.3,-280.56 98.05,-282.06"/>
+<polygon fill="#000000" stroke="#000000" points="96.79,-278.79 89.02,-285.99 99.59,-285.21 96.79,-278.79"/>
+</g>
+<!-- SF_LINALG -->
+<g id="module~~ed_bath_replica~~UsesGraph_node6" class="node">
+<title>SF_LINALG</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node6"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_LINALG.html" xlink:title="SF_LINALG">
+<polygon fill="#337ab7" stroke="#337ab7" points="88.02,-268.77 19.5,-268.77 19.5,-246 88.02,-246 88.02,-268.77"/>
+<text text-anchor="middle" x="53.76" y="-253.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_LINALG</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;SF_LINALG -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge5" class="edge">
+<title>module~ed_bath_replica&#45;&gt;SF_LINALG</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M155.88,-228.24C138.07,-233.38 117.2,-239.39 99.06,-244.62"/>
+<polygon fill="#000000" stroke="#000000" points="98.26,-241.21 89.62,-247.34 100.2,-247.93 98.26,-241.21"/>
+</g>
+<!-- SF_MISC -->
+<g id="module~~ed_bath_replica~~UsesGraph_node7" class="node">
+<title>SF_MISC</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node7"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_MISC.html" xlink:title="SF_MISC">
+<polygon fill="#337ab7" stroke="#337ab7" points="82.39,-227.77 25.12,-227.77 25.12,-205 82.39,-205 82.39,-227.77"/>
+<text text-anchor="middle" x="53.76" y="-212.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_MISC</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;SF_MISC -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge6" class="edge">
+<title>module~ed_bath_replica&#45;&gt;SF_MISC</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M143.24,-216.38C126.82,-216.38 109.07,-216.38 93.82,-216.38"/>
+<polygon fill="#000000" stroke="#000000" points="94.21,-212.89 84.21,-216.39 94.21,-219.89 94.21,-212.89"/>
+</g>
+<!-- module~ed_aux_funx -->
+<g id="module~~ed_bath_replica~~UsesGraph_node8" class="node">
+<title>module~ed_aux_funx</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node8"><a xlink:href="../module/ed_aux_funx.html" xlink:title="ED_AUX_FUNX">
+<polygon fill="#337ab7" stroke="#337ab7" points="97.39,-186.77 10.12,-186.77 10.12,-164 97.39,-164 97.39,-186.77"/>
+<text text-anchor="middle" x="53.76" y="-171.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_AUX_FUNX</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;module~ed_aux_funx -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge7" class="edge">
+<title>module~ed_bath_replica&#45;&gt;module~ed_aux_funx</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M155.88,-204.53C140.54,-200.11 122.93,-195.03 106.75,-190.37"/>
+<polygon fill="#000000" stroke="#000000" points="107.85,-187.04 97.27,-187.64 105.91,-193.77 107.85,-187.04"/>
+</g>
+<!-- module~ed_bath_aux -->
+<g id="module~~ed_bath_replica~~UsesGraph_node9" class="node">
+<title>module~ed_bath_aux</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node9"><a xlink:href="../module/ed_bath_aux.html" xlink:title="ED_BATH_AUX">
+<polygon fill="#337ab7" stroke="#337ab7" points="96.64,-145.77 10.87,-145.77 10.87,-123 96.64,-123 96.64,-145.77"/>
+<text text-anchor="middle" x="53.76" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH_AUX</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;module~ed_bath_aux -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge8" class="edge">
+<title>module~ed_bath_replica&#45;&gt;module~ed_bath_aux</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M181.84,-204.5C164.54,-191.33 135.09,-170.04 107.52,-155.38 104.48,-153.77 101.3,-152.21 98.05,-150.71"/>
+<polygon fill="#000000" stroke="#000000" points="99.59,-147.56 89.02,-146.78 96.79,-153.98 99.59,-147.56"/>
+</g>
+<!-- module~ed_bath_dim -->
+<g id="module~~ed_bath_replica~~UsesGraph_node10" class="node">
+<title>module~ed_bath_dim</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node10"><a xlink:href="../module/ed_bath_dim.html" xlink:title="ED_BATH_DIM">
+<polygon fill="#337ab7" stroke="#337ab7" points="95.89,-104.77 11.62,-104.77 11.62,-82 95.89,-82 95.89,-104.77"/>
+<text text-anchor="middle" x="53.76" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH_DIM</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;module~ed_bath_dim -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge9" class="edge">
+<title>module~ed_bath_replica&#45;&gt;module~ed_bath_dim</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M189.54,-204.69C175.68,-183.88 144.09,-140.2 107.52,-114.39 105.49,-112.95 103.35,-111.6 101.14,-110.32"/>
+<polygon fill="#000000" stroke="#000000" points="102.98,-107.33 92.48,-105.9 99.8,-113.57 102.98,-107.33"/>
+</g>
+<!-- module~ed_input_vars -->
+<g id="module~~ed_bath_replica~~UsesGraph_node11" class="node">
+<title>module~ed_input_vars</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node11"><a xlink:href="../module/ed_input_vars.html" xlink:title="ED_INPUT_VARS">
+<polygon fill="#337ab7" stroke="#337ab7" points="102.27,-63.77 5.25,-63.77 5.25,-41 102.27,-41 102.27,-63.77"/>
+<text text-anchor="middle" x="53.76" y="-48.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_INPUT_VARS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;module~ed_input_vars -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge10" class="edge">
+<title>module~ed_bath_replica&#45;&gt;module~ed_input_vars</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M192.67,-204.64C182.13,-177.74 152.73,-111.09 107.52,-73.39 106.04,-72.15 104.47,-70.98 102.84,-69.87"/>
+<polygon fill="#000000" stroke="#000000" points="104.74,-66.92 94.33,-64.96 101.24,-72.98 104.74,-66.92"/>
+</g>
+<!-- module~ed_vars_global -->
+<g id="module~~ed_bath_replica~~UsesGraph_node12" class="node">
+<title>module~ed_vars_global</title>
+<g id="a_module~~ed_bath_replica~~UsesGraph_node12"><a xlink:href="../module/ed_vars_global.html" xlink:title="ED_VARS_GLOBAL">
+<polygon fill="#337ab7" stroke="#337ab7" points="107.52,-22.77 0,-22.77 0,0 107.52,0 107.52,-22.77"/>
+<text text-anchor="middle" x="53.76" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_VARS_GLOBAL</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_replica&#45;&gt;module~ed_vars_global -->
+<g id="module~~ed_bath_replica~~UsesGraph_edge11" class="edge">
+<title>module~ed_bath_replica&#45;&gt;module~ed_vars_global</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M194.48,-204.71C186.91,-172.71 161.66,-82.67 107.52,-32.39 106.3,-31.25 105.01,-30.18 103.67,-29.16"/>
+<polygon fill="#000000" stroke="#000000" points="105.8,-26.36 95.46,-24.01 102.08,-32.29 105.8,-26.36"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsesGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsesGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="485pt" height="31pt"
+ viewBox="0.00 0.00 485.13 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 481.13,-26.77 481.13,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-22.77 0,-22.77 0,0 54,0 54,-22.77"/>
+<text text-anchor="middle" x="27" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="137.76,-22.77 72.24,-22.77 72.24,0 137.76,0 137.76,-22.77"/>
+<text text-anchor="middle" x="105" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="218.63,-22.77 155.37,-22.77 155.37,0 218.63,0 218.63,-22.77"/>
+<text text-anchor="middle" x="187" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="291,-22.77 237,-22.77 237,0 291,0 291,-22.77"/>
+<text text-anchor="middle" x="264" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="363,-22.77 309,-22.77 309,0 363,0 363,-22.77"/>
+<text text-anchor="middle" x="336" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="477.13,-22.77 380.87,-22.77 380.87,0 477.13,0 477.13,-22.77"/>
+<text text-anchor="middle" x="429" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+          <div class="card">
+      <h3 class="card-header card-title bg-light">Used by</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: module~~ed_bath_replica~~UsedByGraph Pages: 1 -->
+<svg id="moduleed_bath_replicaUsedByGraph" width="279pt" height="72pt"
+ viewBox="0.00 0.00 279.29 71.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_bath_replica~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 67.77)">
+<title>module~~ed_bath_replica~~UsedByGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-67.77 275.29,-67.77 275.29,4 -4,4"/>
+<!-- module~ed_bath_replica -->
+<g id="module~~ed_bath_replica~~UsedByGraph_node1" class="node">
+<title>module~ed_bath_replica</title>
+<polygon fill="none" stroke="black" points="109.02,-42.77 0,-42.77 0,-20 109.02,-20 109.02,-42.77"/>
+<text text-anchor="middle" x="54.51" y="-27.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_BATH_REPLICA</text>
+</g>
+<!-- module~ed_bath -->
+<g id="module~~ed_bath_replica~~UsedByGraph_node2" class="node">
+<title>module~ed_bath</title>
+<g id="a_module~~ed_bath_replica~~UsedByGraph_node2"><a xlink:href="../module/ed_bath.html" xlink:title="ED_BATH">
+<polygon fill="#337ab7" stroke="#337ab7" points="237.54,-63.77 178.77,-63.77 178.77,-41 237.54,-41 237.54,-63.77"/>
+<text text-anchor="middle" x="208.16" y="-48.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath&#45;&gt;module~ed_bath_replica -->
+<g id="module~~ed_bath_replica~~UsedByGraph_edge1" class="edge">
+<title>module~ed_bath&#45;&gt;module~ed_bath_replica</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M178.27,-48.39C161.96,-46.13 140.88,-43.21 120.79,-40.43"/>
+<polygon fill="#000000" stroke="#000000" points="121.34,-36.97 110.95,-39.06 120.38,-43.9 121.34,-36.97"/>
+</g>
+<!-- module~ed_bath_functions -->
+<g id="module~~ed_bath_replica~~UsedByGraph_node3" class="node">
+<title>module~ed_bath_functions</title>
+<g id="a_module~~ed_bath_replica~~UsedByGraph_node3"><a xlink:href="../module/ed_bath_functions.html" xlink:title="ED_BATH_FUNCTIONS">
+<polygon fill="#337ab7" stroke="#337ab7" points="271.29,-22.77 145.02,-22.77 145.02,0 271.29,0 271.29,-22.77"/>
+<text text-anchor="middle" x="208.16" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH_FUNCTIONS</text>
+</a>
+</g>
+</g>
+<!-- module~ed_bath_functions&#45;&gt;module~ed_bath_replica -->
+<g id="module~~ed_bath_replica~~UsedByGraph_edge2" class="edge">
+<title>module~ed_bath_functions&#45;&gt;module~ed_bath_replica</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M144.6,-19.64C136.61,-20.69 128.43,-21.77 120.41,-22.83"/>
+<polygon fill="#000000" stroke="#000000" points="120.17,-19.33 110.71,-24.1 121.09,-26.27 120.17,-19.33"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsedByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsedByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="485pt" height="31pt"
+ viewBox="0.00 0.00 485.13 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 481.13,-26.77 481.13,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-22.77 0,-22.77 0,0 54,0 54,-22.77"/>
+<text text-anchor="middle" x="27" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="137.76,-22.77 72.24,-22.77 72.24,0 137.76,0 137.76,-22.77"/>
+<text text-anchor="middle" x="105" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="218.63,-22.77 155.37,-22.77 155.37,0 218.63,0 218.63,-22.77"/>
+<text text-anchor="middle" x="187" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="291,-22.77 237,-22.77 237,0 291,0 291,-22.77"/>
+<text text-anchor="middle" x="264" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="363,-22.77 309,-22.77 309,0 363,0 363,-22.77"/>
+<text text-anchor="middle" x="336" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="477.13,-22.77 380.87,-22.77 380.87,0 477.13,0 477.13,-22.77"/>
+<text text-anchor="middle" x="429" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+      <br>
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              EDIpack2
+              &copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  </body>
+</html>
