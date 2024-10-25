@@ -1,13 +1,23 @@
 #!/bin/bash
 
+mkdir -p module
+
 cd graphs
-grep  -ri "../module" * | awk -F/ '/"/{ print $3 }' | awk '{print $1}' | sed -e "s/\"//g" > ../list2
+
+#satisfy my ocd
+for i in $(ls); do
+  sed -e "s/white/\#fcfcfc/g" $i > $i.new
+  mv $i.new $i
+done
+
+#list of html filenames
+grep  -ri "../module" * | awk -F/ '/"/{ print $3 }' | awk '{print $1}' | sed -e "s/\"//g" > ../list
 cd ..
 sort -u list > list2
 sed -e "s/html/rst/g" list2 > list
 rm list2
 
-
+#generate .rst
 for file in $(cat list); do
   name=$(echo $file | sed -e "s/\.rst//g")
   name_upper=$(echo $name | tr '[:lower:]' '[:upper:]' | sed -e "s/HXV/HxV/g")

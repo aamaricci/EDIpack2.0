@@ -1,20 +1,19 @@
 ed_aux_funx.rst
-ed_bath.rst
 ed_bath_aux.rst
 ed_bath_dim.rst
 ed_bath_fit.rst
 ed_bath_functions.rst
-ed_bath_replica.rst
 ed_bath.rst
+ed_bath_replica.rst
 ed_bath_user.rst
 ed_chi_dens.rst
 ed_chi_exct.rst
 ed_chi_functions.rst
 ed_chi_pair.rst
 ed_chi_spin.rst
+ed_diag.rst
 ed_diag_nonsu2.rst
 ed_diag_normal.rst
-ed_diag.rst
 ed_diag_superc.rst
 ed_eigenspace.rst
 ed_fit_common.rst
@@ -26,36 +25,30 @@ ed_gf_nonsu2.rst
 ed_gf_normal.rst
 ed_gf_superc.rst
 ed_greens_functions.rst
-<<<<<<< HEAD
 ed_hamiltonian.rst
-ed_hamiltonian_nonsu2.rst
-=======
->>>>>>> ae33e89a38aaff351e752391e840ec472ccfe70f
 ed_hamiltonian_nonsu2_common.rst
 ed_hamiltonian_nonsu2_direct_hxv.rst
+ed_hamiltonian_nonsu2.rst
 ed_hamiltonian_nonsu2_stored_hxv.rst
-ed_hamiltonian_normal.rst
 ed_hamiltonian_normal_common.rst
 ed_hamiltonian_normal_direct_hxv.rst
+ed_hamiltonian_normal.rst
 ed_hamiltonian_normal_stored_hxv.rst
-<<<<<<< HEAD
-ed_hamiltonian_superc.rst
-=======
-ed_hamiltonian.rst
->>>>>>> ae33e89a38aaff351e752391e840ec472ccfe70f
 ed_hamiltonian_superc_common.rst
 ed_hamiltonian_superc_direct_hxv.rst
+ed_hamiltonian_superc.rst
 ed_hamiltonian_superc_stored_hxv.rst
 ed_input_vars.rst
 ed_io.rst
+edipack2.rst
 ed_main.rst
+ed_observables.rst
 ed_observables_nonsu2.rst
 ed_observables_normal.rst
-ed_observables.rst
 ed_observables_superc.rst
 ed_sector.rst
 ed_setup.rst
 ed_sparse_matrix.rst
 ed_vars_global.rst
 ed_version.rst
-edipack2.rst
+scifortran.github.io
