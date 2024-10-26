@@ -1,21 +1,22 @@
-Global
-###########################
+..
+   Global
+   ###########################
 
-This module provide a single interface to the different
-diagonalization procedure for each  operational modes described below.
+   This module provide a single interface to the different
+   Hamiltonian setup procedures for each operational modes described below.
 
-.. toctree::
-   :maxdepth: 2
-   :glob:
+   .. toctree::
+      :maxdepth: 2
+      :glob:
 
-   diag
+      hamiltonian
 
 
 Normal mode
 ###########################
 
-This set of modules implements the exact diagonalization of the single
-impurity problems assuming :math:`\vec{Q}=\left[\vec{N}_\uparrow,\vec{N}_\downarrow \right]`.
+This set of modules implements the Hamiltonian setup for each symmetry
+sector assuming :math:`\vec{Q}=\left[\vec{N}_\uparrow,\vec{N}_\downarrow \right]`.
 Where :math:`\vec{N}_\sigma=N_\sigma` if the total number of electrons
 with spin :math:`\sigma` is conserved (:f:var:`ed_total_ud` = T ) or
 :math:`\vec{N}_\sigma=[ N_{1\sigma},\dots,N_{N_{orb}\sigma} ]` if the
@@ -31,14 +32,17 @@ operator.
    :maxdepth: 2
    :glob:
 
-   normal/01_diag
+   normal/02_hamiltonian
+   normal/02_hamiltonian_common
+   normal/02_hamiltonian_sparse
+   normal/02_hamiltonian_direct
 
 
 Superconductive mode
 ###############################
 
-This set of modules implements the exact diagonalization of the single
-impurity problems assuming 
+This set of modules implements the Hamiltonian setup for each symmetry
+sector  assuming 
 :math:`\vec{Q}\equiv S_z=N_\uparrow-N_\downarrow`.
 
 This case corresponds to the superconductive phase with :math:`s-`
@@ -49,7 +53,9 @@ wave pairing.
    :maxdepth: 2
    :glob:
 
-   superc/01_diag
+   superc/02_hamiltonian
+   superc/02_hamiltonian_sparse
+   superc/02_hamiltonian_direct
 
 
 
@@ -57,8 +63,8 @@ wave pairing.
 Non-SU(2) mode
 ###############################
 
-This set of modules implements the exact diagonalization of the single
-impurity problems assuming 
+This set of modules implements the Hamiltonian setup for each symmetry
+sector  assuming 
 :math:`\vec{Q}\equiv N_{tot}=N_\uparrow+N_\downarrow`.
 
 This case corresponds to the normal phase in the absence of spin
@@ -69,4 +75,6 @@ conservation, as for instance in presence of Spin-Orbit coupling.
    :maxdepth: 2
    :glob:
 
-   nonsu2/01_diag
+   nonsu2/02_hamiltonian
+   nonsu2/02_hamiltonian_sparse
+   nonsu2/02_hamiltonian_direct

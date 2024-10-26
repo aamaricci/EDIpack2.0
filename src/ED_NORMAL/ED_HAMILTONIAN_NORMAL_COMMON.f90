@@ -50,10 +50,23 @@ contains
   !               ALL-2-ALL-V VECTOR MPI TRANSPOSITION 
   !####################################################################
 #ifdef _MPI
-  subroutine vector_transpose_MPI(nrow,qcol,a,ncol,qrow,b)    
-    integer                            :: nrow,ncol,qrow,qcol
-    real(8)                            :: a(nrow,qcol)
-    real(8)                            :: b(ncol,qrow)
+  subroutine vector_transpose_MPI(nrow,qcol,a,ncol,qrow,b)
+    !
+    ! Performs the parallel transposition of the vector :f:var:`a` , as a matrix of dimensions [:f:var:`nrow`, :f:var:`qcol`],
+    ! using MPI :code:`AlltoAllV` procedure, which transfers data such that the j-block, sent from the process i, is
+    ! received by process j and placed as block i. This parallel transposition involves the minimum amount of data transfer
+    ! necessary to execute the matrix-vector product, removing the communicational congestion and unlocking optimal parallel scaling.
+    !
+    ! See `j.cpc.2021.108261`_ for a detailed description of the algorithm implemented in this procedure. 
+    !
+    !.. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
+    !
+    integer                            :: nrow !Global number of rows 
+    integer                            :: ncol !Global number of columns
+    integer                            :: qrow !Local number of rows on each thread
+    integer                            :: qcol !Local number of columns on each thread
+    real(8)                            :: a(nrow,qcol) ! Input vector to be transposed
+    real(8)                            :: b(ncol,qrow) ! Output vector :math:`b = v^T` 
     integer,allocatable,dimension(:,:) :: send_counts,send_offset
     integer,allocatable,dimension(:,:) :: recv_counts,recv_offset
     integer                            :: counts,Ntot

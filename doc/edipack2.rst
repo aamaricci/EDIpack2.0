@@ -170,7 +170,28 @@ variational parameters.
    structure/bath
    
 
+Hamiltonian setup
+###########################
 
+This part of the `EDIpack2.0` code implements the setup of the
+sector Hamiltonian in each  operational modes,  corresponding to the
+choice of one of the  symmetries implemented in the code selected by the variable :f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
+:f:mod:`ed_sector` for more info about the symmetries implemented in
+the code.
+
+Any of three different mode is implemented in a distinct class of
+modules performing all the  operations required for the construction
+of the Hamiltonian and the definition of the corresponding matrix
+vector product, required by the Arpack/Lanczos. 
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/index_hamiltonian
+
+
+   
 
 Exact Diagonalization
 ###########################
@@ -178,18 +199,14 @@ Exact Diagonalization
 
 This part of the `EDIpack2.0` code implements the exact
 diagonalization of the general, single-site, multi-orbital quantum
-impurity problem using  different operational modes,  corresponding to the
-choice of the specific symmetry implemented in the code, i.e. which
-quantum numbers are to be conserved. The operational modes are selected
-by the variable :f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
-:f:mod:`ed_sector` for more info about the symmetries implemented in
-the code.
+impurity problem in each of the specific symmetry implemented in the
+code. The operational modes are selected by the variable
+:f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
+:f:mod:`ed_sector` for more info about the symmetries implemented
+in the code.
 
-To keep the code simple we implemented the three different channels in
-distinct class of modules, essentially performing all the main
-operations required for the construction of the sector Hamiltonian,
-their diagonalization, the evaluation of the impurity Green's functions,
-the impurity susceptibilities and observables.  
+As above, we implemented the three different channels in
+distinct class of modules. 
 
 .. toctree::
    :maxdepth: 1

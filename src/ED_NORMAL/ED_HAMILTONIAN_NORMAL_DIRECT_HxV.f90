@@ -19,9 +19,13 @@ contains
 
 
   subroutine directMatVec_normal_main(Nloc,vin,Hv)
-    integer                                        :: Nloc
-    real(8),dimension(Nloc)                        :: vin
-    real(8),dimension(Nloc)                        :: Hv
+    !
+    ! Serial version of the direct, on-the-fly matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm for :f:var:`ed_total_ud` = :code:`True` 
+    ! This procedures evaluates the non-zero terms of any part of the global Hamiltonian and applies them to the input vector using serial algorithm.  
+    !
+    integer                                        :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    real(8),dimension(Nloc)                        :: vin  !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)                        :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
     real(8),dimension(:),allocatable               :: vt,Hvt
     integer,dimension(2*Ns_Ud)                     :: Indices,Jndices ![2-2*Norb]
     integer,dimension(Ns_Ud,Ns_Orb)                :: Nups,Ndws       ![1,Ns]-[Norb,1+Nbath]
@@ -31,7 +35,7 @@ contains
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    if(Nloc/=getdim(isector))stop "directMatVec_cc ERROR: Nloc != dim(isector)"
+    if(Nloc/=getdim(isector))stop "directMatVec_cc ERROR: Nloc /= dim(isector)"
     !
     !Get diagonal hybridization, bath energy
     if(allocated(diag_hybr))deallocate(diag_hybr)
@@ -110,9 +114,13 @@ contains
 
 
   subroutine directMatVec_normal_orbs(Nloc,vin,Hv)
-    integer                                        :: Nloc
-    real(8),dimension(Nloc)                        :: vin
-    real(8),dimension(Nloc)                        :: Hv
+    !
+    ! Serial version of the direct, on-the-fly matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm for :f:var:`ed_total_ud` = :code:`False` 
+    ! This procedures evaluates the non-zero terms of any part of the global Hamiltonian and applies them to the input vector using serial algorithm.  
+    !
+    integer                                        :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    real(8),dimension(Nloc)                        :: vin  !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)                        :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
     real(8),dimension(:),allocatable               :: vt,Hvt
     integer                                        :: isector
     integer,dimension(2*Ns_Ud)                     :: Indices,Jndices ![2-2*Norb]
@@ -123,7 +131,7 @@ contains
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    if(Nloc/=getdim(isector))stop "directMatVec_cc ERROR: Nloc != dim(isector)"
+    if(Nloc/=getdim(isector))stop "directMatVec_cc ERROR: Nloc /= dim(isector)"
     !
     !Get diagonal hybridization, bath energy
     if(allocated(diag_hybr))deallocate(diag_hybr)
@@ -201,9 +209,14 @@ contains
 
 #ifdef _MPI
   subroutine directMatVec_MPI_normal_main(Nloc,vin,Hv)
-    integer                                        :: Nloc,N
-    real(8),dimension(Nloc)                        :: Vin
-    real(8),dimension(Nloc)                        :: Hv
+    !
+    ! MPI parallel version of the direct, on-the-fly matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in P-Arpack/P-Lanczos algorithm for :f:var:`ed_total_ud` = :code:`True` 
+    ! This procedures evaluates the non-zero terms of any part of the global Hamiltonian and applies them to a part of the vector own by the thread using parallel algorithm.  
+    !
+    integer                                        :: Nloc !Local dimension of the vector chunk. :code:`size(v)=Nloc` with :math:`\sum_p` :f:var:`Nloc` = :f:var:`Dim`
+    real(8),dimension(Nloc)                        :: vin  !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)                        :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
+    integer                                        :: N
     real(8),dimension(:),allocatable               :: vt,Hvt
     !
     integer,dimension(2*Ns_Ud)                     :: Indices,Jndices ![2-2*Norb]
@@ -241,7 +254,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v!(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -253,7 +266,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))!(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -321,9 +334,15 @@ contains
 
 
   subroutine directMatVec_MPI_normal_Orbs(Nloc,vin,Hv)
-    integer                                        :: Nloc
-    real(8),dimension(Nloc)                        :: Vin
-    real(8),dimension(Nloc)                        :: Hv
+    !
+    !
+    ! MPI parallel version of the direct, on-the-fly matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in P-Arpack/P-Lanczos algorithm for :f:var:`ed_total_ud` = :code:`False` 
+    ! This procedures evaluates the non-zero terms of any part of the global Hamiltonian and applies them to a part of the vector own by the thread using parallel algorithm.  
+    !
+    integer                                        :: Nloc !Local dimension of the vector chunk. :code:`size(v)=Nloc` with :math:`\sum_p` :f:var:`Nloc` = :f:var:`Dim`
+    real(8),dimension(Nloc)                        :: vin  !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)                        :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
+    !
     real(8),dimension(:),allocatable               :: vt,Hvt
     !
     integer,dimension(2*Ns_Ud)                     :: Indices,Jndices ![2-2*Norb]
@@ -360,7 +379,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v!(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -372,7 +391,7 @@ contains
           Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
           do ispin=1,Nspin
              do iorb=1,Norb
-                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))!(ispin)
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo

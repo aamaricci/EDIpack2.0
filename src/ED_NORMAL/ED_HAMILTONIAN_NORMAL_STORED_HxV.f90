@@ -22,7 +22,19 @@ contains
 
 
   subroutine ed_buildh_normal_main(Hmat)
-    real(8),dimension(:,:),optional                :: Hmat
+    !
+    ! Builds the sector Hamiltonian :math:`H` and save each term in a suitable sparse matrix instance for :f:var:`ed_total_ed` = :code:`True`. If the dimension :f:var:`dim` of the sector are smaller than :f:var:`lanc_dim_threshold` the global matrix is dumped to the optional variable :f:var:`hmat`.
+    !
+    ! The sparse matrices are:
+    !  * :math:`H_d \rightarrow` :f:var:`sph0d` : diagonal part of the electronic Hamiltonian
+    !  * :math:`H_\uparrow \rightarrow` :f:var:`sph0ups` : :math:`\uparrow` spin terms of the eletronic Hamiltonian 
+    !  * :math:`H_\downarrow \rightarrow` :f:var:`sph0dws` : :math:`\downarrow`  spin terms of the eletronic Hamiltonian
+    !  * :math:`H_{nd} \rightarrow` :f:var:`sph0nd` : non-diagonal part of the eletronic Hamiltonian
+    !  * :math:`H_{ph} \rightarrow` :f:var:`sph0_ph` : phonon part of the of the global Hamiltonian
+    !  * :math:`H_{e-eph} \rightarrow` :f:var:`sph0e_eph` : electron part of the electron-phonon term of the global Hamiltonian
+    !  * :math:`H_{ph_eph} \rightarrow` :f:var:`sph0e_ph` : phonon part of the electron-phonon term of the global Hamiltonian
+    !
+    real(8),dimension(:,:),optional                :: Hmat !optional dense matrix
     integer                                        :: isector
     real(8),dimension(:,:),allocatable             :: Htmp_up,Htmp_dw,Hrdx,Hmat_tmp
     real(8),dimension(:,:),allocatable             :: Htmp_ph,Htmp_eph_e,Htmp_eph_ph
@@ -237,7 +249,21 @@ contains
 
 
   subroutine ed_buildh_normal_orbs(Hmat)
-    real(8),dimension(:,:),optional                :: Hmat
+    !
+    ! Builds the sector Hamiltonian :math:`H` and save each term in a suitable sparse matrix instance for :f:var:`ed_total_ed` = :code:`False`. If the dimension :f:var:`dim` of the sector are smaller than :f:var:`lanc_dim_threshold` the global matrix is dumped to the optional variable :f:var:`hmat`. 
+    !
+    ! The sparse matrices are:
+    !  * :math:`H_d \rightarrow` :f:var:`sph0d` : diagonal part of the electronic Hamiltonian
+    !  * :math:`\vec{H}_\uparrow \rightarrow` :f:var:`sph0ups` : :math:`\uparrow` spin terms of the eletronic Hamiltonian 
+    !  * :math:`\vec{H}_\downarrow \rightarrow` :f:var:`sph0dws` : :math:`\downarrow`  spin terms of the eletronic Hamiltonian
+    !  * :math:`H_{nd} \rightarrow` :f:var:`sph0nd` : non-diagonal part of the eletronic Hamiltonian
+    !  * :math:`H_{ph} \rightarrow` :f:var:`sph0_ph` : phonon part of the of the global Hamiltonian
+    !  * :math:`H_{e-eph} \rightarrow` :f:var:`sph0e_eph` : electron part of the electron-phonon term of the global Hamiltonian
+    !  * :math:`H_{ph_eph} \rightarrow` :f:var:`sph0e_ph` : phonon part of the electron-phonon term of the global Hamiltonian
+    !
+    ! where :math:`\vec{H}_\sigma = [H^1_\sigma,\dots,H^{Norb}_\sigma]` are the orbital and spin resolved Hamiltonian matrices.
+    !
+    real(8),dimension(:,:),optional                :: Hmat !optional dense matrix 
     integer                                        :: isector
     integer                                        :: mDimUp,mDimDw
     real(8),dimension(:,:),allocatable             :: Hmat_tmp,Htmp_ph,Htmp_eph_e,Htmp_eph_ph 
@@ -453,9 +479,13 @@ contains
   ! - MPI
   !+------------------------------------------------------------------+
   subroutine spMatVec_normal_main(Nloc,v,Hv)
-    integer                         :: Nloc
-    real(8),dimension(Nloc)         :: v
-    real(8),dimension(Nloc)         :: Hv
+    !
+    ! Serial version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm for :f:var:`ed_total_ud` = :code:`True` 
+    ! This procedures applies one by one each term of the global Hamiltonian to an input vector using the stored sparse matrices.  
+    !
+    integer                         :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    real(8),dimension(Nloc)         :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)         :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
     real(8)                         :: val
     integer                         :: i,iup,idw,j,jup,jdw,jj,i_el,j_el
     !
@@ -549,9 +579,13 @@ contains
   end subroutine spMatVec_normal_main
 
   subroutine spMatVec_normal_orbs(Nloc,v,Hv)
-    integer                    :: Nloc
-    real(8),dimension(Nloc)    :: v
-    real(8),dimension(Nloc)    :: Hv
+    !
+    ! Serial version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm for :f:var:`ed_total_ud` = :code:`False` 
+    ! This procedures applies one by one each term of the global Hamiltonian to an input vector using the stored sparse matrices.
+    !
+    integer                    :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    real(8),dimension(Nloc)    :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)    :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
     real(8)                    :: val
     integer                    :: i,iup,idw,j,jup,jdw,jj,i_el,j_el
     integer                    :: iud
@@ -631,9 +665,13 @@ contains
 
 #ifdef _MPI
   subroutine spMatVec_mpi_normal_main(Nloc,v,Hv)
-    integer                          :: Nloc
-    real(8),dimension(Nloc)          :: v
-    real(8),dimension(Nloc)          :: Hv
+    !
+    ! MPI parallel version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in P-Arpack/P-Lanczos algorithm for :f:var:`ed_total_ud` = :code:`True`. 
+    ! This procedures applies one by one each term of the global Hamiltonian to a part of the vector own by the thread using the stored sparse matrices.
+    !
+    integer                          :: Nloc !Local dimension of the vector chunk. :code:`size(v)=Nloc` with :math:`\sum_p` :f:var:`Nloc` = :f:var:`Dim`
+    real(8),dimension(Nloc)          :: v    !input vector part (passed by P-Arpack/P-Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)          :: Hv   !output vector (required by P-Arpack/P-Lanczos) :math:`\vec{w}`
     !
     integer                          :: N
     real(8),dimension(:),allocatable :: vt,Hvt
@@ -650,7 +688,7 @@ contains
     !
     !Evaluate the local contribution: Hv_loc = Hloc*v
     Hv=0d0
-    do i=1,Nloc                 !==spH0%Nrow
+    do i=1,Nloc                
        i_el = mod(i-1,DimUp*MpiQdw) + 1
        ! do j_el=1,spH0d%row(i_el)%Size
        val = spH0d%row(i_el)%dvals(1)!(j_el)
@@ -757,9 +795,13 @@ contains
 
 
   subroutine spMatVec_mpi_normal_orbs(Nloc,v,Hv)
-    integer                          :: Nloc
-    real(8),dimension(Nloc)          :: v
-    real(8),dimension(Nloc)          :: Hv
+    !
+    ! MPI parallel version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in P-Arpack/P-Lanczos algorithm for :f:var:`ed_total_ud` = :code:`False`. 
+    ! This procedures applies one by one each term of the global Hamiltonian to a part of the vector own by the thread using the stored sparse matrices.
+    !
+    integer                          :: Nloc !Local dimension of the vector chunk. :code:`size(v)=Nloc` with :math:`\sum_p` :f:var:`Nloc` = :f:var:`Dim`
+    real(8),dimension(Nloc)          :: v    !input vector part (passed by P-Arpack/P-Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc)          :: Hv   !output vector (required by P-Arpack/P-Lanczos) :math:`\vec{w}`
     !
     integer                          :: N
     real(8),dimension(:),allocatable :: vt,Hvt
@@ -778,7 +820,7 @@ contains
     !
     !Evaluate the local contribution: Hv_loc = Hloc*v
     Hv=0d0
-    do i=1,Nloc                 !==spH0%Nrow
+    do i=1,Nloc                 
        i_el = mod(i-1,DimUp*MpiQdw) + 1
        !
        do j=1,spH0d%row(i_el)%Size
