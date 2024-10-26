@@ -64,7 +64,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 4.2% of total for modules and submodules.">1118 statements</a>
+                 title=" 4.1% of total for modules and submodules.">1118 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -107,7 +107,19 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal_stored_hxv.html#proc-ed_buildh_normal_main">ed_buildh_normal_main</a>
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal_stored_hxv.html#proc-ed_buildh_normal_orbs">ed_buildh_normal_orbs</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,14 +128,14 @@
   
   
 
-    <em>None</em>
 
   </div>
 
     </div>
 
     <div class="col-md-9" id='text'>
-      
+      <p>Sparse Matric constructors
+Sparse Mat-Vec product using stored sparse matrix</p>
 <br>          <div class="card mb-4">
       <h3 class="card-header card-title bg-light">Uses</h3>
       <div class="card-body">
@@ -730,6 +742,102 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-ed_buildh_normal_main"></span> <h3>public  subroutine <a href='../proc/ed_buildh_normal_main.html'>ed_buildh_normal_main</a>(Hmat)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>H_Imp: Diagonal Elements, i.e. local part
+ H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
+ H_Bath: local bath energy contribution.
+ H_imp: Off-diagonal elements, i.e. non-local part. 
+ H_Bath: inter-orbital bath hopping contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)
+ H_imp: Off-diagonal elements, i.e. non-local part. 
+ H_Bath: inter-orbital bath hopping contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hmat~3"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional,</td>            <td>
+              dimension(:,:)
+            </td>
+            <td>::</td>
+            <td><strong>Hmat</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-ed_buildh_normal_orbs"></span> <h3>public  subroutine <a href='../proc/ed_buildh_normal_orbs.html'>ed_buildh_normal_orbs</a>(Hmat)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>H_Imp: Diagonal Elements, i.e. local part
+ H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
+ H_Bath: local bath energy contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hmat~4"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional,</td>            <td>
+              dimension(:,:)
+            </td>
+            <td>::</td>
+            <td><strong>Hmat</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 

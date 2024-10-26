@@ -11,23 +11,17 @@ MODULE ED_BATH_DMFT
   USE ED_BATH_AUX
   USE ED_BATH_DIM 
   implicit none
+  
+  ! private
 
-  private
 
-
-  !##################################################################
-  !
-  !     DMFT BATH ROUTINES:
-  !
-  !##################################################################
-  public :: allocate_dmft_bath               !INTERNAL (for effective_bath)
-  public :: deallocate_dmft_bath             !INTERNAL (for effective_bath)
-  public :: init_dmft_bath                   !INTERNAL (for effective_bath)
-  public :: write_dmft_bath                  !INTERNAL (for effective_bath)
-  public :: save_dmft_bath                   !INTERNAL (for effective_bath)
-  public :: set_dmft_bath                    !INTERNAL (for effective_bath)
-  public :: get_dmft_bath                    !INTERNAL (for effective_bath)
-
+  ! public :: allocate_dmft_bath
+  ! public :: deallocate_dmft_bath
+  ! public :: init_dmft_bath
+  ! public :: write_dmft_bath
+  ! public :: save_dmft_bath
+  ! public :: set_dmft_bath
+  ! public :: get_dmft_bath
 
 
 
@@ -35,14 +29,6 @@ contains
 
 
 
-  !##################################################################
-  !
-  !     DMFT BATH ROUTINES:
-  !
-  !##################################################################
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : Allocate the ED bath
-  !+-------------------------------------------------------------------+
   subroutine allocate_dmft_bath(dmft_bath_)
     !
     ! Allocate the  :f:var:`effective_bath` input  :f:var:`dmft_bath_` according to the values of the global input parameters |Nspin| , |Norb|, |Nbath|, |ed_mode| and |bath_type|.
@@ -192,10 +178,6 @@ contains
 
 
 
-  !+------------------------------------------------------------------+
-  !PURPOSE  : Initialize the DMFT loop, builindg H parameters and/or
-  !reading previous (converged) solution
-  !+------------------------------------------------------------------+
   subroutine init_dmft_bath(dmft_bath_,used)
     !
     ! Initialize the :f:var:`effective_bath` input :f:var:`dmft_bath_`.
@@ -259,7 +241,7 @@ contains
        !Get spin-flip hybridizations
        if(ed_mode=="nonsu2")then
           do i=1,Nbath
-             dmft_bath_%u(:,:,i) = dmft_bath_%v(:,:,i)!*ed_vsf_ratio
+             dmft_bath_%u(:,:,i) = dmft_bath_%v(:,:,i)  ! x ed_vsf_ratio
           enddo
        endif
        !
@@ -456,11 +438,6 @@ contains
 
 
 
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : write out the bath to a given unit with
-  ! the following column formatting:
-  ! [(Ek_iorb,Vk_iorb)_iorb=1,Norb]_ispin=1,Nspin
-  !+-------------------------------------------------------------------+
   subroutine write_dmft_bath(dmft_bath_,unit)
     !
     ! Write the :f:var:`effective_bath` on input to std.output or to a file associated to the [optional] unit.
@@ -621,10 +598,6 @@ contains
 
 
 
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : save the bath to a given file using the write bath
-  ! procedure and formatting:
-  !+-------------------------------------------------------------------+
   subroutine save_dmft_bath(dmft_bath_,file,used)
     !
     ! Save the :f:var:`effective_bath` to a file with .used or .restart extension according to input.
@@ -655,10 +628,6 @@ contains
 
 
 
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : set the bath components from a given user provided
-  ! bath-array
-  !+-------------------------------------------------------------------+
   subroutine set_dmft_bath(bath_,dmft_bath_)
     !
     ! Set the :f:var:`effective_bath` components from the input user bath :f:var:`bath_` , i.e. it dumps the user bath to the internal data structure. 
@@ -865,9 +834,6 @@ contains
 
 
 
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : copy the bath components back to a 1-dim array
-  !+-------------------------------------------------------------------+
   subroutine get_dmft_bath(dmft_bath_,bath_)
     !
     ! Set the user input bath :f:var:`bath_` from the components of the :f:var:`effective_bath` :f:var:`dmft_bath_` , i.e. it dumps the internal data structure to the user bath. 

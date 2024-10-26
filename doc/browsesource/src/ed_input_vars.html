@@ -107,7 +107,19 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_input_vars.html#proc-substring_delete">substring_delete</a>
+            <a class="list-group-item" href="../module/ed_input_vars.html#proc-s_chop">s_chop</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,7 +128,6 @@
   
   
 
-    <em>None</em>
 
   </div>
 
@@ -130,11 +141,11 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_c_binding'>iso_c_binding</a></li>
-                  <li class="list-inline-item"><a href='ed_version.html'>ED_VERSION</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
                   <li class="list-inline-item"><a href='https://github.com/SciFortran/SciFortran/blob/master/src/SF_PARSE_INPUT/SF_PARSE_INPUT.f90'>SF_PARSE_INPUT</a></li>
+                  <li class="list-inline-item"><a href='ed_version.html'>ED_VERSION</a></li>
                   <li class="list-inline-item"><a href='https://github.com/SciFortran/SciFortran/blob/master/src/scifor_version.in'>SF_VERSION</a></li>
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_c_binding'>iso_c_binding</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -313,11 +324,13 @@ modules which it uses.
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <table class="graph">
-<tr><td class="root" rowspan="71">ED_INPUT_VARS</td><td rowspan="2" class="triangle-left"></td><td class="dashedBottom">w</td><td rowspan="2" class="node" bgcolor="#337AB7"><a href="../module/ed_aux_funx.html">ED_AUX_FUNX</a></td></tr>
+<tr><td class="root" rowspan="73">ED_INPUT_VARS</td><td rowspan="2" class="triangle-left"></td><td class="dashedBottom">w</td><td rowspan="2" class="node" bgcolor="#337AB7"><a href="../module/ed_aux_funx.html">ED_AUX_FUNX</a></td></tr>
 <tr><td class="dashedTop">w</td></tr>
 <tr><td rowspan="2" class="triangle-left"></td><td class="dashedBottom">w</td><td rowspan="2" class="node" bgcolor="#337AB7"><a href="../module/ed_bath_aux.html">ED_BATH_AUX</a></td></tr>
 <tr><td class="dashedTop">w</td></tr>
 <tr><td rowspan="2" class="triangle-left"></td><td class="dashedBottom">w</td><td rowspan="2" class="node" bgcolor="#337AB7"><a href="../module/ed_bath_dim.html">ED_BATH_DIM</a></td></tr>
+<tr><td class="dashedTop">w</td></tr>
+<tr><td rowspan="2" class="triangle-left"></td><td class="dashedBottom">w</td><td rowspan="2" class="node" bgcolor="#337AB7"><a href="../module/ed_bath_dmft.html">ED_BATH_DMFT</a></td></tr>
 <tr><td class="dashedTop">w</td></tr>
 <tr><td rowspan="2" class="triangle-left"></td><td class="dashedBottom">w</td><td rowspan="2" class="node" bgcolor="#337AB7"><a href="../module/ed_bath_fit.html">ED_BATH_FIT</a></td></tr>
 <tr><td class="dashedTop">w</td></tr>
@@ -468,6 +481,135 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-substring_delete"></span> <h3>public  subroutine <a href='../proc/substring_delete.html'>substring_delete</a>(s, sub)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>S_S_DELETE2 recursively removes a substring from a string.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-s"></span>
+              character(len=*)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>s</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-sub"></span>
+              character(len=*)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>sub</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-s_chop"></span> <h3>public  subroutine <a href='../proc/s_chop.html'>s_chop</a>(s, ilo, ihi)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>S_CHOP "chops out" a portion of a string, and closes up the hole.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-s~2"></span>
+              character(len=*)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>s</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ilo"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ilo</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ihi~2"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ihi</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 

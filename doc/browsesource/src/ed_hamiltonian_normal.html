@@ -64,7 +64,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 0.7% of total for modules and submodules.">175 statements</a>
+                 title=" 0.6% of total for modules and submodules.">175 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -107,7 +107,18 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal.html#proc-build_hv_sector_normal">build_Hv_sector_normal</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,23 +127,23 @@
   
   
 
-    <em>None</em>
 
   </div>
 
     </div>
 
     <div class="col-md-9" id='text'>
-      
+      <p>Build sparse hamiltonian of the sector
+ Tridiag sparse Hamiltonian of the sector</p>
 <br>          <div class="card mb-4">
       <h3 class="card-header card-title bg-light">Uses</h3>
       <div class="card-body">
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='ed_hamiltonian_normal_direct_hxv.html'>ED_HAMILTONIAN_NORMAL_DIRECT_HxV</a></li>
-                  <li class="list-inline-item"><a href='ed_hamiltonian_normal_stored_hxv.html'>ED_HAMILTONIAN_NORMAL_STORED_HxV</a></li>
                   <li class="list-inline-item"><a href='ed_hamiltonian_normal_common.html'>ED_HAMILTONIAN_NORMAL_COMMON</a></li>
+                  <li class="list-inline-item"><a href='ed_hamiltonian_normal_stored_hxv.html'>ED_HAMILTONIAN_NORMAL_STORED_HxV</a></li>
+                  <li class="list-inline-item"><a href='ed_hamiltonian_normal_direct_hxv.html'>ED_HAMILTONIAN_NORMAL_DIRECT_HxV</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -802,6 +813,65 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-build_hv_sector_normal"></span> <h3>public  subroutine <a href='../proc/build_hv_sector_normal.html'>build_Hv_sector_normal</a>(isector, Hmat)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>PREAMBLE: check that split of the DW is performed with the minimum #cpu: no idle cpus allowed (with zero elements)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-isector~53"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>isector</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hmat~6"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional,</td>            <td>
+              dimension(:,:)
+            </td>
+            <td>::</td>
+            <td><strong>Hmat</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 

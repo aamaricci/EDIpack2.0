@@ -107,7 +107,18 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_hamiltonian_nonsu2_stored_hxv.html#proc-ed_buildh_nonsu2_main">ed_buildH_nonsu2_main</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,14 +127,14 @@
   
   
 
-    <em>None</em>
 
   </div>
 
     </div>
 
     <div class="col-md-9" id='text'>
-      
+      <p>Sparse Matric constructors</p>
+<p>Sparse Mat-Vec product using stored sparse matrix</p>
 <br>          <div class="card mb-4">
       <h3 class="card-header card-title bg-light">Uses</h3>
       <div class="card-body">
@@ -637,6 +648,65 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-ed_buildh_nonsu2_main"></span> <h3>public  subroutine <a href='../proc/ed_buildh_nonsu2_main.html'>ed_buildH_nonsu2_main</a>(isector, Hmat)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>H_Imp: Diagonal Elements, i.e. local part</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-isector~3"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>isector</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hmat"></span>
+              complex(kind=8),
+            </td>
+<td></td>
+              <td>optional,</td>            <td>
+              dimension(:,:)
+            </td>
+            <td>::</td>
+            <td><strong>Hmat</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 

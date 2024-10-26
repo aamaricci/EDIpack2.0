@@ -64,7 +64,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 3.1% of total for modules and submodules.">835 statements</a>
+                 title=" 3.0% of total for modules and submodules.">835 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -107,7 +107,18 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_observables_nonsu2.html#proc-observables_nonsu2">observables_nonsu2</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,7 +127,6 @@
   
   
 
-    <em>None</em>
 
   </div>
 
@@ -130,18 +140,18 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
-                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_ARRAYS.html'>SF_ARRAYS</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
-                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
                   <li class="list-inline-item"><a href='ed_sector.html'>ED_SECTOR</a></li>
-                  <li class="list-inline-item"><a href='ed_hamiltonian_nonsu2.html'>ED_HAMILTONIAN_NONSU2</a></li>
-                  <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_ARRAYS.html'>SF_ARRAYS</a></li>
+                  <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
                   <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_LINALG.html'>SF_LINALG</a></li>
+                  <li class="list-inline-item"><a href='ed_hamiltonian_nonsu2.html'>ED_HAMILTONIAN_NONSU2</a></li>
                   <li class="list-inline-item"><a href='ed_bath.html'>ED_BATH</a></li>
                   <li class="list-inline-item"><a href='ed_setup.html'>ED_SETUP</a></li>
+                  <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -572,6 +582,40 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-observables_nonsu2"></span> <h3>public  subroutine <a href='../proc/observables_nonsu2.html'>observables_nonsu2</a>()  
+</h3></div>
+    <div class="card-body">
+          
+  <p>v_up&gt; = O_uu|v&gt;
+v_dw&gt; = O_dd|v&gt;
+ Theta_uu = <v_up|v_up>
+ Theta_dd = <v_dw|v_dw>
+v_up&gt; = (C_aup + C_bup)|&gt;
+v_dw&gt; = (C_adw + C_bdw)|&gt;
+v_ud&gt; = O_ud|v&gt;
+v_du&gt; = O_du|v&gt;
+ Theta_ud = <v_ud|v_ud>
+ Theta_du = <v_du|v_du>
+v_ud&gt; = (C_aup + C_bdw)|&gt;
+v_du&gt; = (C_adw + C_bup)|&gt;
+w_ud&gt; = K_ud|v&gt;
+w_du&gt; = K_du|v&gt;
+ Omega_ud = <v_ud|v_ud>
+ Omega_du = <v_du|v_du>
+w_ud&gt; = (C_aup - xi<em>C_bdw)|&gt;
+w_du&gt; = (C_adw - i</em>C_bup)|&gt;</p>
+
+  <h4>Arguments</h4>
+    <em>None</em>
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 

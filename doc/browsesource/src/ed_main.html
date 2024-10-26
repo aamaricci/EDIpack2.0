@@ -103,7 +103,21 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#inters-0"
+         aria-expanded="false" aria-controls="inters-0">
+         <h4 class="card-header bg-primary text-white">Interfaces</h4>
+      </a>
+      <div id="inters-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_main.html#interface-ed_init_solver">ed_init_solver</a>
+            <a class="list-group-item" href="../module/ed_main.html#interface-ed_solve">ed_solve</a>
+            <a class="list-group-item" href="../module/ed_main.html#interface-ed_rebuild_gf">ed_rebuild_gf</a>
+            <a class="list-group-item" href="../module/ed_main.html#interface-ed_finalize_solver">ed_finalize_solver</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,7 +130,6 @@
   
   
 
-    <em>None</em>
 
   </div>
 
@@ -130,20 +143,20 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
-                  <li class="list-inline-item"><a href='ed_greens_functions.html'>ED_GREENS_FUNCTIONS</a></li>
-                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
-                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
-                  <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_TIMER.html'>SF_TIMER</a></li>
                   <li class="list-inline-item"><a href='ed_hamiltonian.html'>ED_HAMILTONIAN</a></li>
-                  <li class="list-inline-item"><a href='ed_diag.html'>ED_DIAG</a></li>
-                  <li class="list-inline-item"><a href='ed_observables.html'>ED_OBSERVABLES</a></li>
-                  <li class="list-inline-item"><a href='ed_bath.html'>ED_BATH</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_MISC.html'>SF_MISC</a></li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_TIMER.html'>SF_TIMER</a></li>
+                  <li class="list-inline-item"><a href='ed_greens_functions.html'>ED_GREENS_FUNCTIONS</a></li>
                   <li class="list-inline-item"><a href='ed_chi_functions.html'>ED_CHI_FUNCTIONS</a></li>
+                  <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_MISC.html'>SF_MISC</a></li>
+                  <li class="list-inline-item"><a href='ed_bath.html'>ED_BATH</a></li>
+                  <li class="list-inline-item"><a href='ed_diag.html'>ED_DIAG</a></li>
                   <li class="list-inline-item"><a href='ed_setup.html'>ED_SETUP</a></li>
+                  <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
+                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
+                  <li class="list-inline-item"><a href='ed_observables.html'>ED_OBSERVABLES</a></li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -570,6 +583,447 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Interfaces</h2>
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-ed_init_solver"></span>
+      <h3>public        interface <a href='../interface/ed_init_solver.html'>ed_init_solver</a> 
+      </h3>
+    </div>
+      <div class="card-body">
+        <p>INIT ED SOLVER</p>
+      </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_init_solver_single(bath)  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bath"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>bath</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_init_solver_lattice(bath)  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bath~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              dimension(:,:)
+            </td>
+            <td>::</td>
+            <td><strong>bath</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+    </ul>
+  </div>
+
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-ed_solve"></span>
+      <h3>public        interface <a href='../interface/ed_solve.html'>ed_solve</a> 
+      </h3>
+    </div>
+      <div class="card-body">
+        <p>ED SOLVER</p>
+      </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_solve_single(bath, sflag, fmpi)  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bath~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>bath</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-sflag"></span>
+              logical,
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>sflag</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fmpi"></span>
+              logical,
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fmpi</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_solve_lattice(bath, mpi_lanc, Uloc_ii, Ust_ii, Jh_ii, Jp_ii, Jx_ii, iflag)  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bath~4"></span>
+              real(kind=8)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bath</strong>(:,:)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mpi_lanc"></span>
+              logical,
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>mpi_lanc</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-uloc_ii"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Uloc_ii</strong>(size(bath,1),Norb)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ust_ii"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Ust_ii</strong>(size(bath,1))</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-jh_ii"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Jh_ii</strong>(size(bath,1))</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-jp_ii"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Jp_ii</strong>(size(bath,1))</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-jx_ii"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Jx_ii</strong>(size(bath,1))</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-iflag~2"></span>
+              logical,
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>iflag</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+    </ul>
+  </div>
+
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-ed_rebuild_gf"></span>
+      <h3>public        interface <a href='../interface/ed_rebuild_gf.html'>ed_rebuild_gf</a> 
+      </h3>
+    </div>
+      <div class="card-body">
+        <p>ED REBUILD GF</p>
+      </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_rebuild_gf_single()  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+    <em>None</em>
+
+          </li>
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_rebuild_gf_lattice(Nlat)  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nlat"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nlat</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+    </ul>
+  </div>
+
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-ed_finalize_solver"></span>
+      <h3>public        interface <a href='../interface/ed_finalize_solver.html'>ed_finalize_solver</a> 
+      </h3>
+    </div>
+      <div class="card-body">
+        <p>FINALIZE SOLVER AND CLEANUP ENVIRONMENT</p>
+      </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_finalize_solver_single()  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+    <em>None</em>
+
+          </li>
+          <li class="list-group-item">
+                <h3>
+    private  subroutine ed_finalize_solver_lattice(Nineq)  
+
+    </h3>
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nineq~3"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nineq</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+    </ul>
+  </div>
+
+        </section>
+        <br>
 
 
 

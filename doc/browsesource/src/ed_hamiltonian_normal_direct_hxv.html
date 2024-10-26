@@ -64,7 +64,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 5.2% of total for modules and submodules.">1382 statements</a>
+                 title=" 5.0% of total for modules and submodules.">1382 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -107,7 +107,21 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal_direct_hxv.html#proc-directmatvec_normal_main">directMatVec_normal_main</a>
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal_direct_hxv.html#proc-directmatvec_normal_orbs">directMatVec_normal_orbs</a>
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal_direct_hxv.html#proc-directmatvec_mpi_normal_main">directMatVec_MPI_normal_main</a>
+            <a class="list-group-item" href="../module/ed_hamiltonian_normal_direct_hxv.html#proc-directmatvec_mpi_normal_orbs">directMatVec_MPI_normal_Orbs</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -116,14 +130,13 @@
   
   
 
-    <em>None</em>
 
   </div>
 
     </div>
 
     <div class="col-md-9" id='text'>
-      
+      <p>Sparse Mat-Vec direct on-the-fly product</p>
 <br>          <div class="card mb-4">
       <h3 class="card-header card-title bg-light">Uses</h3>
       <div class="card-body">
@@ -730,6 +743,312 @@ modules which it uses.
 
 
 
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-directmatvec_normal_main"></span> <h3>public  subroutine <a href='../proc/directmatvec_normal_main.html'>directMatVec_normal_main</a>(Nloc, vin, Hv)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>HxV_imp: Diagonal Elements, i.e. local part
+ H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
+ H_Bath: local bath energy contribution.
+ H_imp: Off-diagonal elements, i.e. non-local part. 
+ H_Bath: inter-orbital bath hopping contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)
+ H_imp: Off-diagonal elements, i.e. non-local part. 
+ H_Bath: inter-orbital bath hopping contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nloc~19"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nloc</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vin~7"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>vin</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hv~11"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>Hv</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-directmatvec_normal_orbs"></span> <h3>public  subroutine <a href='../proc/directmatvec_normal_orbs.html'>directMatVec_normal_orbs</a>(Nloc, vin, Hv)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
+ H_Bath: local bath energy contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nloc~20"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nloc</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vin~8"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>vin</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hv~12"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>Hv</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-directmatvec_mpi_normal_main"></span> <h3>public  subroutine <a href='../proc/directmatvec_mpi_normal_main.html'>directMatVec_MPI_normal_main</a>(Nloc, Vin, Hv)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>HxV_imp: Diagonal Elements, i.e. local part
+ H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
+ H_Bath: local bath energy contribution.
+ H_imp: Off-diagonal elements, i.e. non-local part. 
+ H_Bath: inter-orbital bath hopping contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)
+ H_imp: Off-diagonal elements, i.e. non-local part. 
+ H_Bath: inter-orbital bath hopping contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nloc~21"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nloc</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vin"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>Vin</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hv~13"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>Hv</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-directmatvec_mpi_normal_orbs"></span> <h3>public  subroutine <a href='../proc/directmatvec_mpi_normal_orbs.html'>directMatVec_MPI_normal_Orbs</a>(Nloc, Vin, Hv)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>H_Int: Kanamori interaction part. non-local S-E and P-H terms commented below.
+ H_Bath: local bath energy contribution.
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)
+H_hyb: hopping terms for a given spin (imp &lt;--&gt; bath)</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nloc~22"></span>
+              integer
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nloc</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vin~2"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>Vin</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hv~14"></span>
+              real(kind=8),
+            </td>
+<td></td>
+              <td></td>            <td>
+              dimension(Nloc)
+            </td>
+            <td>::</td>
+            <td><strong>Hv</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 
