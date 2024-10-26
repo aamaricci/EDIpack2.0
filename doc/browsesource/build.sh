@@ -39,13 +39,19 @@ for ifile in *.html; do
   mv $ifile.new $ifile
 done
 
-#edipack2.0 in consistent blue. Regex is different
+#edipack2.0 in consistent blue. Use both regex
 for ifile in *.html; do
   #if there's link
   awk '/title="ED/ {print; next_line=1; next} next_line {gsub(/#c061cb/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
   #if there's no link
   awk '/title="ED/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#2980b9"); flag=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's link
+  awk '/<title>ED/ {print; next_line=1; next} next_line {gsub(/#c061cb/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's no link
+  awk '/<title>ED/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#2980b9"); flag=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
 done
 
