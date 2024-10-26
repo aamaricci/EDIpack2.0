@@ -611,7 +611,7 @@ contains
   end subroutine ed_read_impSigma_single
 
   subroutine ed_read_impSigma_lattice(Nineq)
-    integer :: Nineq
+    integer :: Nineq !number of inequivalent impurity sites for real-space DMFT
     integer :: ilat
     !
     if(allocated(Smats_ineq))deallocate(Smats_ineq)
