@@ -128,11 +128,29 @@ MODULE ED_IO
 
   !Build Gand/Delta from a user bath
   interface ed_get_g0and
+!| This subroutine returns to the user the normal non-interacting Green's function :math:`G_0(x)` and
+! the anomalous non-interacting Green's function :math:`F_0(x)` on a given set of frequencies. It does so
+! by calling :f:func:`g0and_bath_function` and :f:func:`g0and_bath_function`.
+!
+!The non-interacting Green's function is an array having the following possible dimensions:
+! 
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :code:`size(x)`]  
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :code:`size(x)`]
+!
      module procedure :: ed_get_g0and_n3
      module procedure :: ed_get_g0and_n5
   end interface ed_get_g0and
 
   interface ed_get_delta
+!| This subroutine returns to the user the normal hybridization function :math:`\Delta(x)` and
+! the anomalous hybridization function :math:`\Theta(x)` on a given set of frequencies. It does so
+! by calling :f:func:`delta_bath_function` and :f:func:`fdelta_bath_function`.
+!
+!The hybridization function is an array having the following possible dimensions:
+! 
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :code:`size(x)`]  
+!  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :code:`size(x)`]
+!
      module procedure :: ed_get_delta_n3
      module procedure :: ed_get_delta_n5
   end interface ed_get_delta

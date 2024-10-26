@@ -97,7 +97,7 @@ contains
   function delta_bath_array(x,dmft_bath_,axis) result(Delta)
     complex(8),dimension(:),intent(in)                                :: x          !complex  array for the frequency
     type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
-    character(len=*),optional                                         :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis
+    character(len=*),optional                                         :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Delta
     integer                                                           :: i,ih,L
     integer                                                           :: iorb,jorb,ispin,jspin,ibath
@@ -356,7 +356,7 @@ contains
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
     complex(8),dimension(Nnambu*Norb,Nnambu*Norb)                     :: JJ
-    character(len=*),optional                                         :: axis    !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis
+    character(len=*),optional                                         :: axis    !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     character(len=4)                                                  :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -503,7 +503,7 @@ contains
     real(8),dimension(size(x))                          :: det
     complex(8),dimension(size(x))                       :: fg,ff
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
-    character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
+    character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -688,7 +688,7 @@ contains
     real(8),dimension(size(x))                          :: det
     complex(8),dimension(size(x))                       :: fg,ff
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
-    character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
+    character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -803,7 +803,7 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and,Delta
     complex(8),dimension(:,:),allocatable               :: fgorb,zeta
     integer                                             :: i,iorb,jorb,ispin,jspin,io,jo,Nso,L
-    character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
+    character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)
@@ -933,7 +933,7 @@ contains
     type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and,Fdelta
     integer                                             :: iorb,jorb,ispin,L
-    character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara, :code:`'r'` for Real-axis    
+    character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     character(len=4)                                    :: axis_
     !
     axis_="mats";if(present(axis))axis_=str(axis)

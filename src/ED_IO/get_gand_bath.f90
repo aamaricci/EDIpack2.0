@@ -1,9 +1,9 @@
 subroutine ed_get_g0and_n3(x,bath_,G0and,axis,type)
-  complex(8),dimension(:),intent(in)                  :: x
-  real(8),dimension(:)                                :: bath_
-  complex(8),dimension(:,:,:)                            :: G0and
-  character(len=*),optional                           :: axis
-  character(len=*),optional                           :: type
+  complex(8),dimension(:),intent(in)                  :: x !complex array of frequencies
+  real(8),dimension(:)                                :: bath_ !user-accessible bath array
+  complex(8),dimension(:,:,:)                         :: G0and !non-interacting Green's function
+  character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis 
+  character(len=*),optional                           :: type !string indicating the desired function, :code:`'n'` for normal (default), :code:`'a'` for anomalous
   !
   type(effective_bath)                                :: dmft_bath_
   logical                                             :: check
@@ -70,11 +70,11 @@ end subroutine ed_get_g0and_n5
 
 
 subroutine ed_get_delta_n3(x,bath_,delta,axis,type)
-  complex(8),dimension(:),intent(in)                  :: x
-  real(8),dimension(:)                                :: bath_
-  complex(8),dimension(:,:,:)                            :: delta
-  character(len=*),optional                           :: axis
-  character(len=*),optional                           :: type
+  complex(8),dimension(:),intent(in)                  :: x !complex array of frequencies
+  real(8),dimension(:)                                :: bath_ !user-accessible bath array
+  complex(8),dimension(:,:,:)                            :: delta !hybridization function
+  character(len=*),optional                           :: axis !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis 
+  character(len=*),optional                           :: type !string indicating the desired function, :code:`'n'` for normal (default), :code:`'a'` for anomalous
   !
   type(effective_bath)                                :: dmft_bath_
   logical                                             :: check
