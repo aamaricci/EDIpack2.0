@@ -29,22 +29,34 @@ for i in *.html; do
   mv $i.new $i
 done
 
-#edipack2.0 in consistent blue
+#generic blocks in purple
 for ifile in *.html; do
-  awk '/title="ED/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
+  #if there's link
+  awk '/<title>/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#c061cb"); next_line=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's no link
+  awk '/<title>/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#337ab7/, "#c061cb"); flag=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+done
+
+#edipack2.0 in consistent blue. Regex is different
+for ifile in *.html; do
+  #if there's link
+  awk '/title="ED/ {print; next_line=1; next} next_line {gsub(/#c061cb/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's no link
+  awk '/title="ED/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#2980b9"); flag=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
 done
 
 
 #scifortran blocks in green 
 for ifile in *.html; do
-  awk '/title="SF/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#26a269"); next_line=0} 1' $ifile > $ifile.new
+  #if there's link
+  awk '/<title>SF_/ {print; next_line=1; next} next_line {gsub(/#c061cb/, "#26a269"); next_line=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
-done
-
-#other blocks in purple
-for ifile in *.html; do
-  awk '/title="[a-z]/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#c061cb"); next_line=0} 1' $ifile > $ifile.new
+  #if there's no link
+  awk '/<title>SF_/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#26a269"); flag=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
 done
 
