@@ -31,14 +31,14 @@ done
 
 #edipack2.0 in consistent blue
 for ifile in *.html; do
-  awk '/title="ED_/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
+  awk '/title="ED/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
 done
 
 
 #scifortran blocks in green 
 for ifile in *.html; do
-  awk '/title="SF_/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#26a269"); next_line=0} 1' $ifile > $ifile.new
+  awk '/title="SF/ {print; next_line=1; next} next_line {gsub(/#337ab7/, "#26a269"); next_line=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
 done
 
