@@ -361,11 +361,38 @@ MODULE ED_IO
   
 
   interface ed_get_density_matrix
+!This subroutine returns to the user the impurity density matrix.
+!The density matrix is an array having the following possible dimensions:
+! 
+!  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`]  for single-impurity DMFT
+!  * [:code:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`] for real-space DMFT
+!
      module procedure :: ed_get_density_matrix_single
      module procedure :: ed_get_density_matrix_lattice
   end interface ed_get_density_matrix
 
   interface ed_read_impSigma
+!This subroutine reads the impurity Sigmas from files in the execution folder and stores them in the global variables 
+! 
+!  * :f:var:`impsmats` normal self-energy, matsubara axis
+!  * :f:var:`impsreal` normal self-energy, real frequency axis
+!  * :f:var:`impsamats` anomalous self-energy, matsubara axis
+!  * :f:var:`impsareal` anomalous self-energy, real frequency axis
+!  * :f:var:`smats_ineq` normal self-energy, matsubara axis, real-space DMFT
+!  * :f:var:`sreal_ineq` normal self-energy, real frequency axis, real-space DMFT
+!  * :f:var:`samats_ineq` anomalous self-energy, matsubara axis, real-space DMFT
+!  * :f:var:`sareal_ineq` anomalous self-energy, real frequency axis, real-space DMFT
+!
+!The files have to be formatted to be compatible with the EDIpack2 library, that is :math:`[\omega,\mathrm{Im}\Sigma,\mathrm{Re}\Sigma]` .
+!One file per self-energy component, with the name
+!
+!  * :code:`"impSigma_l"//str(iorb)//str(jorb)//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal self-energy, matsubara axis
+!  * :code:`"impSigma_l"//str(iorb)//str(jorb)//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal self-energy, real frequency axis
+!  * :code:`"impSelf_l"//str(iorb)//str(jorb)//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, matsubara axis
+!  * :code:`impSelf_l"//str(iorb)//str(jorb)//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, real frequency axis
+!
+!The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
+!
      module procedure :: ed_read_impSigma_single
      module procedure :: ed_read_impSigma_lattice
   end interface ed_read_impSigma
