@@ -374,22 +374,22 @@ MODULE ED_IO
   interface ed_read_impSigma
 !This subroutine reads the impurity Sigmas from files in the execution folder and stores them in the global variables 
 ! 
-!  * :f:var:`impsmats` normal self-energy, matsubara axis
+!  * :f:var:`impsmats` normal self-energy, Matsubara axis
 !  * :f:var:`impsreal` normal self-energy, real frequency axis
-!  * :f:var:`impsamats` anomalous self-energy, matsubara axis
+!  * :f:var:`impsamats` anomalous self-energy, Matsubara axis
 !  * :f:var:`impsareal` anomalous self-energy, real frequency axis
-!  * :f:var:`smats_ineq` normal self-energy, matsubara axis, real-space DMFT
+!  * :f:var:`smats_ineq` normal self-energy, Matsubara axis, real-space DMFT
 !  * :f:var:`sreal_ineq` normal self-energy, real frequency axis, real-space DMFT
-!  * :f:var:`samats_ineq` anomalous self-energy, matsubara axis, real-space DMFT
+!  * :f:var:`samats_ineq` anomalous self-energy, Matsubara axis, real-space DMFT
 !  * :f:var:`sareal_ineq` anomalous self-energy, real frequency axis, real-space DMFT
 !
 !The files have to be formatted to be compatible with the EDIpack2 library, that is :math:`[\omega,\mathrm{Im}\Sigma,\mathrm{Re}\Sigma]` .
 !One file per self-energy component, with the name
 !
-!  * :code:`"impSigma_l"//str(iorb)//str(jorb)//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal self-energy, matsubara axis
-!  * :code:`"impSigma_l"//str(iorb)//str(jorb)//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal self-energy, real frequency axis
-!  * :code:`"impSelf_l"//str(iorb)//str(jorb)//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, matsubara axis
-!  * :code:`impSelf_l"//str(iorb)//str(jorb)//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, real frequency axis
+!  * :code:`"impSigma_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal self-energy, Matsubara axis
+!  * :code:`"impSigma_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal self-energy, real frequency axis
+!  * :code:`"impSelf_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, Matsubara axis
+!  * :code:`"impSelf_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, real frequency axis
 !
 !The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
 !
@@ -424,9 +424,7 @@ MODULE ED_IO
   public :: ed_get_neigen_total
   !  
   public :: ed_get_density_matrix
-  public :: ed_get_quantum_SOC_operators_single
-  public :: ed_get_quantum_SOC_operators_lattice
-
+  public :: ed_get_quantum_SOC_operators
 
   !****************************************************************************************!
   !****************************************************************************************!
@@ -500,7 +498,6 @@ contains
   include "get_phi.f90"
   include "get_energy.f90"
   include "get_doubles.f90"
-  include "get_neigen.f90"
 
 
 
@@ -516,6 +513,17 @@ contains
   !+------------------------------------------------------------------+
   include "print_impSigma.f90"
   subroutine ed_print_impSigma
+!This subroutine print the impurity self-energy on plain text files in the execution folder.
+!The files are formatted like :math:`[\omega,\mathrm{Im}\Sigma,\mathrm{Re}\Sigma]` .
+!One file per self-energy component, with the name
+!
+!  * :code:`"impSigma_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal self-energy, Matsubara axis
+!  * :code:`"impSigma_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal self-energy, real frequency axis
+!  * :code:`"impSelf_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, Matsubara axis
+!  * :code:`"impSelf_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous self-energy, real frequency axis
+!
+!The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
+!
     call allocate_grids
     select case(ed_mode)
     case ("normal");call print_impSigma_normal
@@ -529,6 +537,17 @@ contains
 
   include "print_impG.f90"
   subroutine ed_print_impG
+!This subroutine print the impurity Green's function on plain text files in the execution folder.
+!The files are formatted like :math:`[\omega,\mathrm{Im}G,\mathrm{Re}G]` .
+!One file per Green'sfunction component, with the name
+!
+!  * :code:`"impG_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal G, Matsubara axis
+!  * :code:`"impG_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal G, real frequency axis
+!  * :code:`"impF_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous G, Matsubara axis
+!  * :code:`"impF_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous G, real frequency axis
+!
+!The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
+!
     call allocate_grids
     select case(ed_mode)
     case ("normal");call print_impG_normal
@@ -542,6 +561,17 @@ contains
 
   include "print_impG0.f90"
   subroutine ed_print_impG0
+!This subroutine print the non-interacting impurity Green's function on plain text files in the execution folder.
+!The files are formatted like :math:`[\omega,\mathrm{Im}G_{0},\mathrm{Re}G_{0}]` .
+!One file per Green's function component, with the name
+!
+!  * :code:`"impG0_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal G, Matsubara axis
+!  * :code:`"impG0_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal G, real frequency axis
+!  * :code:`"impF0_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous G, Matsubara axis
+!  * :code:`"impF0_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous G, real frequency axis
+!
+!The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
+!
     call allocate_grids
     select case(ed_mode)
     case ("normal");call print_impG0_normal
@@ -553,6 +583,10 @@ contains
   end subroutine ed_print_impG0
 
   subroutine ed_print_impD
+!This subroutine print the impurity phonon self-energy on the files
+!  * :code:`"impDph_iw.ed"`  matsubara axis
+!  * :code:`impDph_realw.ed"` real frequency axis
+!
     call allocate_grids()
     !Print the impurity functions:
     call splot("impDph_iw.ed"   ,vm,impDmats_ph(:))
@@ -563,6 +597,17 @@ contains
 
   include "print_impChi.f90"
   subroutine ed_print_impChi
+!This subroutine prints the susceptibilities.
+!The files are formatted like :math:`[\omega,\mathrm{Im}\\chi,\mathrm{Re}\\chi]` .
+!Which susceptibilities are printed depends on the values of :f:var:`chispin_flag` (spin), :f:var:`chidens_flag` (charge), :f:var:`chipair_flag` (pairing), :f:var:`chiexct_flag` (exciton).
+!One file per component. The name of the files are
+!
+!  * :code:`"[spin/dens/pair/exct]Chi_[singlet/tripletXY,tripletZ]_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_tau"//reg(ed_file_suffix)//".ed"` imaginary time
+!  * :code:`"[spin/dens/pair/exct]Chi_[singlet/tripletXY,tripletZ]_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` Matsubara axis
+!  * :code:`"[spin/dens/pair/exct]Chi_[singlet/tripletXY,tripletZ]_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` real frequency axis axis
+!
+!The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
+!
     call allocate_grids
     if(chispin_flag)call print_chi_spin
     if(chidens_flag)call print_chi_dens
@@ -573,7 +618,11 @@ contains
 
 
   subroutine ed_print_impGmatrix(file)
-    character(len=*),optional :: file
+!This subroutine prints weights and poles of the impurity Green's function by calling :f:func:`write_GFmatrix`. These are stored
+!one a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+!which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+!
+    character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
     character(len=256)        :: file_
     if(.not.allocated(impGmatrix))stop "ED_PRINT_IMPGFMATRIX ERROR: impGmatrix not allocated!"
     file_="gfmatrix";if(present(file))file_=str(file)
@@ -652,6 +701,42 @@ contains
     file_="gfmatrix";if(present(file))file_=str(file)
     call read_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
   end subroutine ed_read_impGmatrix
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : get SOC operators
+  !+-------------------------------------------------------------------+
+
+  subroutine ed_get_quantum_soc_operators()
+  !This subroutine gets and prints the values of the components :math:`\overrightarrow{L}`, :math:`\overrightarrow{S}`, :math:`\overrightarrow{J}`
+  !in the chosen basis depending on :f:var:`jz_basis`, and prints them on the files :code:`"L_imp_"//reg(str(ndx))//".dat"` , 
+  !:code:`"S_imp_"//reg(str(ndx))//".dat"` and :code:`"J_imp_"//reg(str(ndx))//".dat"` , where :code:`ndx` is the inequivalent
+  !impurity site for real-space DMFT (if that is the case). The ordering of the results in the output files is described by comments
+  !in the files themselves
+  !
+    if (allocated(imp_density_matrix_ineq)) then
+      call ed_get_quantum_soc_operators_lattice()
+    else
+      call ed_get_quantum_SOC_operators_single()
+    endif
+  end subroutine ed_get_quantum_soc_operators
+  
+  !+----------------------------------------------------------------------------+
+  !PURPOSE  : get number of spectrum eigenstates for inequivalent impurity sites
+  !+----------------------------------------------------------------------------+ 
+  
+  
+  subroutine ed_get_neigen_total(nlii,Nlat) 
+  !In the case of inequivalent impurity sites, this function returns the number of eigenstates per impurity
+  !site in the ED spectrum.
+  integer                      :: Nlat !number of inequivalent impurity sites for real-space DMFT
+  integer,dimension(Nlat)      :: nlii !array containing the number of eigenstates per inequivalent impurity site
+  nlii=0d0
+  if(allocated(neigen_total_ineq))then
+     if(Nlat>size(neigen_total_ineq)) stop "ed_get_neigen_total error: required N_sites > evaluated N_sites"
+     nlii=neigen_total_ineq
+  endif
+end subroutine ed_get_neigen_total
 
 
 END MODULE ED_IO
