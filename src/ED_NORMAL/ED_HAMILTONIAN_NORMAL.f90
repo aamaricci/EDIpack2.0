@@ -44,18 +44,18 @@ contains
     !      - :f:var:`ed_sparse_H` = :code:`F`
     !
     !    * - :f:var:`ed_total_ud` = :code:`T`
-    !      - | call :f:var:`ed_buildh_normal_main`
-    !        | serial: :f:var:`spHtimesV_p` :code:`=>` :f:var:`spMatVec_normal_main` 
-    !        | MPI:    :f:var:`spHtimesV_p` :code:`=>` :f:var:`spMatVec_MPI_normal_main`
-    !      - | serial: :f:var:`spHtimesV_p` :code:`=>` :f:var:`directMatVec_normal_main` 
-    !        | MPI:    :f:var:`spHtimesV_p` :code:`=>` :f:var:`directMatVec_MPI_normal_main`
+    !      - | call :f:func:`ed_buildh_normal_main`
+    !        | serial: :f:func:`sphtimesv_p` :code:`=>` :f:func:`spmatvec_normal_main` 
+    !        | MPI:    :f:func:`sphtimesv_p` :code:`=>` :f:func:`spmatvec_mpi_normal_main`
+    !      - | serial: :f:func:`sphtimesv_p` :code:`=>` :f:func:`directmatvec_normal_main` 
+    !        | MPI:    :f:func:`sphtimesv_p` :code:`=>` :f:func:`directmatvec_mpi_normal_main`
     !
     !    * - :f:var:`ed_total_ud` = :code:`F`
-    !      - | call :f:var:`ed_buildh_normal_orbs`
-    !        | serial: :f:var:`spHtimesV_p` :code:`=>` :f:var:`spMatVec_normal_orbs` 
-    !        | MPI:    :f:var:`spHtimesV_p` :code:`=>` :f:var:`spMatVec_MPI_normal_orbs`
-    !      - | serial: :f:var:`spHtimesV_p` :code:`=>` :f:var:`directMatVec_normal_orbs` 
-    !        | MPI:    :f:var:`spHtimesV_p` :code:`=>` :f:var:`directMatVec_MPI_normal_orbs`
+    !      - | call :f:func:`ed_buildh_normal_orbs`
+    !        | serial: :f:func:`sphtimesv_p` :code:`=>` :f:func:`spmatvec_normal_orbs` 
+    !        | MPI:    :f:func:`sphtimesv_p` :code:`=>` :f:func:`spmatvec_mpi_normal_orbs`
+    !      - | serial: :f:func:`sphtimesv_p` :code:`=>` :f:func:`directmatvec_normal_orbs` 
+    !        | MPI:    :f:func:`sphtimesv_p` :code:`=>` :f:func:`directmatvec_mpi_normal_orbs`
     !
     !
     integer                         :: isector !Index of the actual sector to be analyzed

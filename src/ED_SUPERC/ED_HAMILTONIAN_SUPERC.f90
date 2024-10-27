@@ -30,8 +30,31 @@ contains
   !                 MAIN ROUTINES: BUILD/DELETE SECTOR
   !####################################################################
   subroutine build_Hv_sector_superc(isector,Hmat)
-    integer                            :: isector,SectorDim
-    complex(8),dimension(:,:),optional :: Hmat
+    !
+    ! Builds the matrix-vector product :math:`H\times \vec{v}` in the current sector.
+    !
+    !   #. Building the sector through :f:func:`build_sector` for :f:var:`isector`
+    !   #. Retrieve all dimensions of the sectors, setup the MPI split in parallel mode.
+    !   #. If total sector dimension is < :f:var:`lanc_dim_threshold` then Hamiltonian is stored into dense matrix for Lapack diagonalization
+    !   #. Else we proceeds according to the followins scheme:
+    !
+    !.. list-table:: Build Hamiltonian, :math:`H\times\vec{v}` products.
+    !    :widths: auto
+    !    :header-rows: 1
+    !
+    !    * - :f:var:`ed_sparse_h` = :code:`T`
+    !      - :f:var:`ed_sparse_h` = :code:`F`
+    !
+    !    * - | call :f:var:`ed_buildh_superc_main`
+    !        | serial: :f:func:`sphtimesv_p` :code:`=>` :f:func:`spmatvec_superc_main` 
+    !        | MPI:    :f:func:`sphtimesv_p` :code:`=>` :f:func:`spmatvec_mpi_superc_main`
+    !      - | serial: :f:func:`sphtimesv_p` :code:`=>` :f:func:`directmatvec_superc_main` 
+    !        | MPI:    :f:func:`sphtimesv_p` :code:`=>` :f:func:`directmatvec_mpi_superc_main`
+    !
+    !
+    integer                            :: isector !Index of the actual sector to be analyzed
+    complex(8),dimension(:,:),optional :: Hmat    !Dense matrix to store the sector Hamiltonian is dim < :f:var:`lanc_dim_threshold`
+    integer                            :: SectorDim
     integer                            :: irank
     integer                            :: i,j,Dim,DimEl
     !
@@ -116,6 +139,10 @@ contains
 
   
   subroutine delete_Hv_sector_superc()
+    !
+    ! Delete the all the memory used to construct the sector Hamiltonian and the corresponding matrix vector products.
+    ! The sector is deleted, all the dimensions and MPI splitting variables are reset to zero. All the sparse matrices are deallocated having gone out of scope. The abstract interface pointer :f:var:`spHtimesV_p` for the matrix-vector product is nullified. 
+    !
     integer :: iud
     !
 #ifdef _DEBUG
@@ -167,9 +194,12 @@ contains
   
 
   function vecDim_Hv_sector_superc(isector) result(vecDim)
-    integer :: isector
+    !
+    ! Returns the dimensions :f:var:`vecdim` of the vectors used in the Arpack/Lanczos produces given the current sector index :f:var:`isector` . If parallel mode is active the returned dimension corresponds to the correct chunk for each thread.
+    !
+    integer :: isector          !current sector index
+    integer :: vecDim           !vector or vector chunck dimension  
     integer :: Dim,DimEl
-    integer :: vecDim
     !
     Dim   = getdim(isector)
     DimEl = Dim/(nph+1)
@@ -199,6 +229,20 @@ contains
 
   
   subroutine tridiag_Hv_sector_superc(isector,vvinit,alanc,blanc,norm2)
+    !
+    !
+    ! Returns the parameters :math:`\vec{\alpha}` and :math:`\vec{\beta}` , respectively :f:var:`alanc` and :f:var:`blanc` , of the partial tridiagonalization of the sector Hamiltonian on a Krylov basis with starting vector :f:var:`vvinit`.
+    !
+    ! Input:
+    !  * :f:var:`isector`
+    !  * :f:var:`vvinit`
+    !
+    ! Output:
+    !  * :f:var:`alanc` corresponding to :math:`\vec{\alpha}`
+    !  * :f:var:`blanc` corresponding to :math:`\vec{\beta}`
+    !  * :f:var:`norm2` the norm of the input vector  :math:`\langle {\rm vvinit}|{\rm vvinit}\rangle` 
+    !
+    !
     integer                             :: isector
     complex(8),dimension(:)             :: vvinit
     real(8),dimension(:),allocatable    :: alanc,blanc

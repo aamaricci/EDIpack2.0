@@ -28,8 +28,31 @@ contains
   !                 MAIN ROUTINES: BUILD/DELETE SECTOR
   !####################################################################
   subroutine build_Hv_sector_nonsu2(isector,Hmat)
-    integer                            :: isector,SectorDim
-    complex(8),dimension(:,:),optional :: Hmat
+    !
+    ! Builds the matrix-vector product :math:`H\times \vec{v}` in the current sector.
+    !
+    !   #. Building the sector through :f:func:`build_sector` for :f:var:`isector`
+    !   #. Retrieve all dimensions of the sectors, setup the MPI split in parallel mode.
+    !   #. If total sector dimension is < :f:var:`lanc_dim_threshold` then Hamiltonian is stored into dense matrix for Lapack diagonalization
+    !   #. Else we proceeds according to the followins scheme:
+    !
+    !.. list-table:: Build Hamiltonian, :math:`H\times\vec{v}` products.
+    !    :widths: auto
+    !    :header-rows: 1
+    !
+    !    * - :f:var:`ed_sparse_h` = :code:`T`
+    !      - :f:var:`ed_sparse_h` = :code:`F`
+    !
+    !    * - | call :f:var:`ed_buildh_nonsu2_main`
+    !        | serial: :f:var:`sphtimesv_p` :code:`=>` :f:var:`spmatvec_nonsu2_main` 
+    !        | MPI:    :f:var:`sphtimesv_p` :code:`=>` :f:var:`spmatvec_mpi_nonsu2_main`
+    !      - | serial: :f:var:`sphtimesv_p` :code:`=>` :f:var:`directmatvec_nonsu2_main` 
+    !        | MPI:    :f:var:`sphtimesv_p` :code:`=>` :f:var:`directmatvec_mpi_nonsu2_main`
+    !
+    !
+    integer                            :: isector !Index of the actual sector to be analyzed
+    complex(8),dimension(:,:),optional :: Hmat    !Dense matrix to store the sector Hamiltonian is dim < :f:var:`lanc_dim_threshold`
+    integer                            :: SectorDim
     integer                            :: irank
     integer                            :: i,j,Dim
     !
@@ -108,6 +131,10 @@ contains
   
 
   subroutine delete_Hv_sector_nonsu2()
+    !
+    ! Delete the all the memory used to construct the sector Hamiltonian and the corresponding matrix vector products.
+    ! The sector is deleted, all the dimensions and MPI splitting variables are reset to zero. All the sparse matrices are deallocated having gone out of scope. The abstract interface pointer :f:var:`spHtimesV_p` for the matrix-vector product is nullified. 
+    !
     integer :: iud
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")"DEBUG delete_Hv_sector_NONSU2: delete H*v info"
@@ -144,9 +171,13 @@ contains
 
 
   function vecDim_Hv_sector_nonsu2(isector) result(vecDim)
-    integer :: isector
+    !
+    !
+    ! Returns the dimensions :f:var:`vecdim` of the vectors used in the Arpack/Lanczos produces given the current sector index :f:var:`isector` . If parallel mode is active the returned dimension corresponds to the correct chunk for each thread.
+    !
+    integer :: isector          !current sector index
+    integer :: vecDim           !vector or vector chunck dimension  
     integer :: Dim
-    integer :: vecDim
     !
     Dim  = getdim(isector)
     !
@@ -172,6 +203,21 @@ contains
 
 
   subroutine tridiag_Hv_sector_nonsu2(isector,vvinit,alanc,blanc,norm2)
+    !
+    !
+    !
+    ! Returns the parameters :math:`\vec{\alpha}` and :math:`\vec{\beta}` , respectively :f:var:`alanc` and :f:var:`blanc` , of the partial tridiagonalization of the sector Hamiltonian on a Krylov basis with starting vector :f:var:`vvinit`.
+    !
+    ! Input:
+    !  * :f:var:`isector`
+    !  * :f:var:`vvinit`
+    !
+    ! Output:
+    !  * :f:var:`alanc` corresponding to :math:`\vec{\alpha}`
+    !  * :f:var:`blanc` corresponding to :math:`\vec{\beta}`
+    !  * :f:var:`norm2` the norm of the input vector  :math:`\langle {\rm vvinit}|{\rm vvinit}\rangle` 
+    !
+    !
     integer                             :: isector
     complex(8),dimension(:)             :: vvinit
     real(8),dimension(:),allocatable    :: alanc,blanc

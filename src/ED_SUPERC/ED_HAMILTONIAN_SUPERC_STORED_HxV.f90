@@ -26,8 +26,21 @@ contains
   !             BUILD SPARSE HAMILTONIAN of the SECTOR
   !####################################################################
   subroutine ed_buildH_superc_main(isector,Hmat)
+    !
+    !
+    ! Builds the sector Hamiltonian :math:`H` and save each term in a suitable sparse matrix instance for :f:var:`ed_total_ed` = :code:`True`. If the dimension :f:var:`dim` of the sector are smaller than :f:var:`lanc_dim_threshold` the global matrix is dumped to the optional variable :f:var:`hmat`.
+    !
+    ! All the different electronic terms  are collected in the same sparse matrix, possibly using rows splitting and local / non-local blocks according to the :f:var:`MPI_Allgatherv` algorithm: 
+    !  * :math:`H_{\rm int} \rightarrow` :f:var:`sph0` : interaction part of the electronic Hamiltonian
+    !  * :math:`H_{\rm imp} \rightarrow` :f:var:`sph0` : impurity part of the eletronic Hamiltonian 
+    !  * :math:`H_{\rm bath} \rightarrow` :f:var:`sph0`: bath levels part of the eletronic Hamiltonian
+    !  * :math:`H_{\rm hyb} \rightarrow` :f:var:`sph0` : impurity - bath coupling part of the eletronic Hamiltonian
+    !  * :math:`H_{ph} \rightarrow` :f:var:`sph0_ph` : phonon part of the of the global Hamiltonian
+    !  * :math:`H_{e-eph} \rightarrow` :f:var:`sph0e_eph` : electron part of the electron-phonon term of the global Hamiltonian
+    !  * :math:`H_{ph-eph} \rightarrow` :f:var:`sph0e_ph` : phonon part of the electron-phonon term of the global Hamiltonian
+    !
     integer                                                         :: isector
-    complex(8),dimension(:,:),optional                              :: Hmat
+    complex(8),dimension(:,:),optional                              :: Hmat  !optional dense matrix
     complex(8),dimension(:,:),allocatable                           :: Htmp_e,Htmp_ph,Htmp_eph_e,Htmp_eph_ph
     integer,dimension(Nlevels)                                      :: ib
     integer,dimension(Ns)                                           :: ibup,ibdw
@@ -221,9 +234,13 @@ contains
   ! - MPI cmplx(H)*cmplx(V)
   !+------------------------------------------------------------------+
   subroutine spMatVec_superc_main(Nloc,v,Hv)
-    integer                         :: Nloc
-    complex(8),dimension(Nloc)      :: v
-    complex(8),dimension(Nloc)      :: Hv
+    !
+    ! Serial version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm.
+    ! This procedures applies one by one each term of the global Hamiltonian to an input vector using the stored sparse matrices.  
+    !
+    integer                         :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    complex(8),dimension(Nloc)      :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    complex(8),dimension(Nloc)      :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
     complex(8)                      :: val
     integer                         :: i,j,iph,jp, i_el,j_el
     !
@@ -271,9 +288,14 @@ contains
 
 #ifdef _MPI
   subroutine spMatVec_mpi_superc_main(Nloc,v,Hv)
-    integer                             :: Nloc
-    complex(8),dimension(Nloc)          :: v
-    complex(8),dimension(Nloc)          :: Hv
+    !
+    !
+    ! MPI parallel version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in P-Arpack/P-Lanczos algorithm.
+    ! This procedures applies one by one each term of the global Hamiltonian to a part of the vector own by the thread using the stored sparse matrices.
+    !
+    integer                             :: Nloc !Local dimension of the vector chunk. :code:`size(v)=Nloc` with :math:`\sum_p` :f:var:`Nloc` = :f:var:`Dim`
+    complex(8),dimension(Nloc)          :: v    !input vector part (passed by P-Arpack/P-Lanczos) :math:`\vec{v}`
+    complex(8),dimension(Nloc)          :: Hv   !!output vector (required by P-Arpack/P-Lanczos) :math:`\vec{w}`
     complex(8)                          :: val
     integer                             :: i,j,mpiIerr,iph,jp, i_el,j_el
     integer                             :: N,MpiShift

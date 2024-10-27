@@ -19,9 +19,14 @@ contains
 
 
   subroutine directMatVec_superc_main(Nloc,vin,Hv)
-    integer                                                         :: Nloc, i_el, j_el, iph, jj
-    complex(8),dimension(Nloc)                                      :: vin
-    complex(8),dimension(Nloc)                                      :: Hv
+    !
+    ! Serial version of the direct, on-the-fly matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm.
+    ! This procedures evaluates the non-zero terms of any part of the global Hamiltonian and applies them to the input vector using serial algorithm.  
+    !
+    integer                                                         :: Nloc  !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    complex(8),dimension(Nloc)                                      :: vin   !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    complex(8),dimension(Nloc)                                      :: Hv    !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
+    integer                                                         :: i_el, j_el, iph, jj
     integer                                                         :: isector
     integer,dimension(Nlevels)                                      :: ib
     integer,dimension(Ns)                                           :: ibup,ibdw  
@@ -37,7 +42,7 @@ contains
     Dim   = Hsector%Dim
     DimEl = Hsector%DimEl
     !
-    if(Nloc/=dim)stop "directMatVec_cc ERROR: Nloc != dim(isector)"
+    if(Nloc/=dim)stop "directMatVec_cc ERROR: Nloc /= dim(isector)"
     !
     !Get diagonal hybridization, bath energy
     if(allocated(diag_hybr))deallocate(diag_hybr)
@@ -84,7 +89,6 @@ contains
     end select
     !
     Hv=zero
-    !-----------------------------------------------!
     states: do i=1,Dim
        i_el = mod(i-1,DimEl) +1
        iph  = (i-1)/DimEl +1
@@ -117,7 +121,6 @@ contains
           include "direct/HxV_eph.f90"
        endif
     enddo states
-    !-----------------------------------------------!
     !
   end subroutine directMatVec_superc_main
 
@@ -125,9 +128,16 @@ contains
 
 #ifdef _MPI
   subroutine directMatVec_MPI_superc_main(Nloc,v,Hv)
+    !
+    ! MPI parallel version of the direct, on-the-fly matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in P-Arpack/P-Lanczos algorithm.
+    ! This procedures evaluates the non-zero terms of any part of the global Hamiltonian and applies them to a part of the vector own by the thread using parallel algorithm.  
+    !
+    integer                                                         :: Nloc !Local dimension of the vector chunk. :code:`size(v)=Nloc` with :math:`\sum_p` :f:var:`Nloc` = :f:var:`Dim`
+    complex(8),dimension(Nloc)                                      :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    complex(8),dimension(Nloc)                                      :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
+
     integer                                                         :: Nloc, i_el, j_el, iph, jj
-    complex(8),dimension(Nloc)                                      :: v
-    complex(8),dimension(Nloc)                                      :: Hv
+
     integer                                                         :: N
     complex(8),dimension(:),allocatable                             :: vin
     integer,allocatable,dimension(:)                                :: Counts,Offset
@@ -217,7 +227,6 @@ contains
     !
     Hv=zero
     !
-    !-----------------------------------------------!
     states: do i=MpiIstart,MpiIend
        i_el = mod(i-1,DimEl) +1
        iph  = (i-1)/DimEl +1
@@ -250,7 +259,6 @@ contains
           include "direct/HxV_eph.f90"
        endif
     enddo states
-    !-----------------------------------------------!
     !
   end subroutine directMatVec_MPI_superc_main
 #endif
