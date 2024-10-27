@@ -136,7 +136,7 @@ contains
     complex(8),dimension(Nloc)                                      :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
     complex(8),dimension(Nloc)                                      :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
 
-    integer                                                         :: Nloc, i_el, j_el, iph, jj
+    integer                                                         :: i_el, j_el, iph, jj
 
     integer                                                         :: N
     complex(8),dimension(:),allocatable                             :: vin
