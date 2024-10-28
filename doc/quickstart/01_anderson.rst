@@ -11,7 +11,7 @@ corresponding non-interacting  Green's function :math:`G_0(z) =
 
 We construct a discretized bath by fitting such function on the
 Matsubara frequencies  :math:`G_0(i\omega_n)` using the methods in
-:ref:`structure/fit`. Finally we input this bath into the :f:func:`ed_solve` solver of `EDIpack2.0` in presence of local interaction on the impurity.  
+:ref:`fit`. Finally we input this bath into the :f:func:`ed_solve` solver of `EDIpack2.0` in presence of local interaction on the impurity.  
 
 
 The initialization of the code is:
