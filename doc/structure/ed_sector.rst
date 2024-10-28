@@ -68,7 +68,7 @@ algorithm  (:math:`N` being the total number of electronic levels):
 
 
 .. f:automodule::   ed_sector
-   :members: build_sector, map_allocate,get_sector,get_quantumnumbers,get_dim
+   :members: build_sector,map_allocate,get_sector,get_quantumnumbers,get_dim
 
 
 
