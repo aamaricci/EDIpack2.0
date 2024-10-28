@@ -45,9 +45,17 @@ contains
   !+------------------------------------------------------------------+
   !                        NORMAL
   !+------------------------------------------------------------------+
-  !PURPOSE  : Evaluate the Green's function of the impurity electrons
-  ! & phonons D = -<x(\tau)x(0)> with x = (b + b^+)
+
   subroutine build_gf_normal()
+    !
+    !Evaluates the impurity electrons Green's function :math:`G(z)` and the phonons one :math:`D(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ] and rank-1 array :f:var:`impdmats`, :f:var:`impdreal`.    
+    !
+    !The off-diagonal components of :math:`G_{ab}` with :math:`a \neq b` are obtained using algebraic manipulation, see `j.cpc.2021.108261`_. 
+    !
+    !The weights and the poles obtained in this procedure are saved in a hierarchical data structure (for every state, every channel (creation or annihilation of excitations) and every degree of freedom) :f:var:`impgmatrix` of type :f:var:`gfmatrix`. 
+    !
+    ! .. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
+    !
     integer                                     :: iorb,jorb,ispin,jspin,i
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
@@ -149,6 +157,9 @@ contains
   
 
   subroutine rebuild_gf_normal()
+    !
+    ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
+    !
     integer                                     :: iorb,jorb,ispin,jspin,i
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
@@ -743,6 +754,9 @@ contains
 
 
   subroutine build_sigma_normal
+    !
+    ! Obtains the self-energy function :math:`\Sigma` on the current Matsubara and Real-axis intervals using impurity Dyson equation   :math:`\hat{\Sigma}(z) = \hat{G}^{-1}_0(z) - \hat{G}^{-1}(z)`. 
+    !
     integer                                           :: i,ispin,iorb
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: invG0mats,invGmats
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: invG0real,invGreal

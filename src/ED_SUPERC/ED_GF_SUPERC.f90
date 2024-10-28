@@ -46,9 +46,17 @@ contains
   !+------------------------------------------------------------------+
   !                        SUPERC
   !+------------------------------------------------------------------+
-  !PURPOSE  : Evaluate the Green's function of the impurity electrons
-  ! & phonons D = -<x(\tau)x(0)> with x = (b + b^+)
   subroutine build_gf_superc()
+    !
+    !
+    !Evaluates the impurity electrons Green's functions :math:`G(z)` and :math:`F(z)` and the phonons one :math:`D(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` , :f:var:`impfmats` , :f:var:`impfreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ] and rank-1 array :f:var:`impdmats`, :f:var:`impdreal`.    
+    !
+    !The off-diagonal components of :math:`G_{ab}` with :math:`a \neq b` as well as the anomalous Green's functions :math:`F_{ab}(z)\, \forall a,b` are obtained using algebraic manipulation to ensure working with hermitian conjugate operators in the dynamical Lanczos procedure.  
+    !
+    !The weights and the poles obtained in this procedure are saved in a hierarchical data structure (for every state, every channel (creation or annihilation of excitations, normal or anomalous) and every degree of freedom) :f:var:`impgmatrix` of type :f:var:`gfmatrix`. 
+    !
+    ! .. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
+    !
     integer    :: iorb,jorb,ispin,i,isign
     complex(8) :: barGmats(Norb,Lmats),barGreal(Norb,Lreal)
     !
@@ -158,8 +166,15 @@ contains
     deallocate(auxGmats,auxGreal)
   end subroutine build_gf_superc
 
+
+
+
+  
   
   subroutine rebuild_gf_superc()
+    !
+    ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
+    !
     integer    :: iorb,jorb,ispin,i,isign
     complex(8) :: barGmats(Norb,Lmats),barGreal(Norb,Lreal)
     !
@@ -225,7 +240,7 @@ contains
           do jorb=1,Norb
              write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
              call rebuild_gf_superc_Fmix(iorb,jorb)
-             
+
              impFmats(ispin,ispin,iorb,jorb,:) = 0.5d0*( impGmats(ispin,ispin,iorb,jorb,:) - &
                   (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) - (one-xi)*barGmats(jorb,:) )
              impFreal(ispin,ispin,iorb,jorb,:) = 0.5d0*( impGreal(ispin,ispin,iorb,jorb,:) - &
@@ -1068,6 +1083,10 @@ contains
   !PURPOSE  : Build the Self-energy functions, SUPERC case
   !+------------------------------------------------------------------+
   subroutine build_sigma_superc
+    !
+    ! Obtains the self-energy function :math:`\Sigma` on the current Matsubara and Real-axis intervals using impurity Dyson equation  :math:`\hat{\hat{\Sigma}}(z) = \hat{\hat{G}}^{-1}_0(z) - \hat{\hat{G}}^{-1}(z)`. 
+    !
+    !
     integer                                               :: i,ispin,iorb
     real(8)                                               :: det_mats(Lmats)
     complex(8)                                            :: det_real(Lreal)
