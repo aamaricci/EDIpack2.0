@@ -46,6 +46,7 @@ release = u'beta 0.0.1'
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
     'myst_parser',
@@ -63,6 +64,13 @@ myst_enable_extensions = [
     "html_admonition", # Admonitions like `.. note::` or `.. warning::`
     "html_image",      # Better control over image options
 ]
+
+#intersphinx mapping
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scifor': ('https://scifortran.github.io/SciFortran/', None),
+}
 
 # Enable auto-generation of ToC
 myst_heading_anchors = 3  # To generate heading anchors for up to level 3
