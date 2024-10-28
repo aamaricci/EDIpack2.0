@@ -41,7 +41,7 @@ The solver needs to be initialized via
 
 .. code-block:: python
 
-    ed.init_solver()
+    bath = ed.init_solver()
     
 Optionally, such as when real-space DMFT is used, the bath can be already allocated as an array, the dimension of which has to be given by the output of :code:`Nb` = :func:`ed.get_bath_dimension` for single-impurity DMFT and :code:`[Nlat,Nb]` for real-space DMFT, where :code:`Nlat` is the number of inequivalent impurities
 
@@ -55,7 +55,7 @@ The self-energy needs to be retrieved in order to calculate the local lattice Gr
 
 .. code-block:: python
 
-    ed.get_sigma(axis="m")
+    Sigma = ed.get_sigma(axis="m")
     
 The local Green's function calculation is left to the user, as well as that of the Weiss field or the Delta function, to be fitted by the new bath.
 This latter step happens via 
