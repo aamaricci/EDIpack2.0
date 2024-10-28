@@ -25,6 +25,24 @@ MODULE ED_BATH_FIT
   private
 
   interface ed_chi2_fitgf
+  !This subroutine realizes the chisquare fit of the Weiss field or hybridization function via
+  !an impurity model non-interacting Green's function. The bath levels (levels/internal structure
+  !and hybridization strength) are supplied by the user in the :f:var:`bath` array
+  !and are the parameters of the fit.
+  !The function(s) to fit can have different shapes:
+  !
+  !  * [:f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin`:math:`\cdot`:f:var:`norb`, :f:var:`lfit` ]  
+  !  * [:f:var:`nlat` :math:`\cdot` :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nlat` :math:`\cdot` :f:var:`nspin` 
+  !    :math:`\cdot` :f:var:`norb`, :f:var:`lfit`  ]  
+  !  * [:f:var:`nlat`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`nspin` :math:`\cdot` :f:var:`norb`, :f:var:`lfit` ] 
+  !  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lfit` ]
+  !  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lfit` ]
+  !
+  !where :f:var:`nlat` is the number of impurity sites in real-space DMFT. Accordingly, the bath array or arrays have rank 2 or 3.
+  !Some global variables directly influence the way the fit is performed and can be modified in the input file. See :f:mod:`ed_input_vars`
+  !for the description of :f:var:`lfit`, :f:var:`cg_method` , :f:var:`cg_grad`, :f:var:`cg_ftol`, :f:var:`cg_stop` , :f:var:`cg_niter` ,
+  !:f:var:`cg_weight` , :f:var:`cg_scheme` , :f:var:`cg_pow` , :f:var:`cg_minimize_ver` , :f:var:`cg_minimize_hh` .      
+  !
      module procedure chi2_fitgf_single_normal_n3
      module procedure chi2_fitgf_single_normal_n5
      module procedure chi2_fitgf_single_superc_n3
@@ -50,10 +68,11 @@ contains
   !   * CHI2_FITGF_GENERIC_NORMAL_NOSPIN interface to fixed spin input
   !+----------------------------------------------------------------------+
   subroutine chi2_fitgf_single_normal_n3(g,bath,ispin,iorb,fmpi)
-    complex(8),dimension(:,:,:)                       :: g
-    real(8),dimension(:)                              :: bath    
-    integer,optional                                  :: ispin,iorb
-    logical,optional                                  :: fmpi
+    complex(8),dimension(:,:,:)                       :: g !normal Weiss field or hybridization function to fit
+    real(8),dimension(:)                              :: bath !bath parameters array
+    integer,optional                                  :: ispin !spin component to be fitted (default = :code:`1` ). Only used if :f:var:`ed_mode` = :code:`normal` and :f:var:`bath_type` = :code:`normal, hybrid`
+    integer,optional                                  :: iorb !orbital to be fitted
+    logical,optional                                  :: fmpi !flag to automatically broadcast the fit over the MPI communicator (default = :code:`.true.` )
     !
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: fg
     integer                                           :: ispin_,Liw
@@ -252,7 +271,8 @@ contains
 
 
   subroutine chi2_fitgf_single_superc_n3(g,f,bath,ispin,iorb,fmpi)
-    complex(8),dimension(:,:,:)                         :: g,f
+    complex(8),dimension(:,:,:)                         :: g
+    complex(8),dimension(:,:,:)                         :: f !anomalous Weiss field or hybridibazion function to fit (only if :f:var:`ed_mode` = :code:`superc` )
     real(8),dimension(:)                                :: bath
     integer,optional                                    :: ispin,iorb
     logical,optional                                    :: fmpi
