@@ -599,7 +599,7 @@ contains
   subroutine ed_print_impChi
 !This subroutine prints the susceptibilities.
 !The files are formatted like :math:`[\omega,\mathrm{Im}\\chi,\mathrm{Re}\\chi]` .
-!Which susceptibilities are printed depends on the values of :f:var:`chispin_flag` (spin), :f:var:`chidens_flag` (charge), :f:var:`chipair_flag` (pairing), :f:var:`chiexct_flag` (exciton).
+!Which susceptibilities are printed depends on the values of :f:var:`chispin_flag` (spin), :f:var:`chidens_flag` (charge), :f:var:`chipair_flag` (pair), :f:var:`chiexct_flag` (exciton).
 !One file per component. The name of the files are
 !
 !  * :code:`"[spin/dens/pair/exct]Chi_[singlet/tripletXY,tripletZ]_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_tau"//reg(ed_file_suffix)//".ed"` imaginary time
