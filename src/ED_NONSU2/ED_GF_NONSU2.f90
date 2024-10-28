@@ -53,6 +53,16 @@ contains
   !                            NONSU2
   !+------------------------------------------------------------------+
   subroutine build_gf_nonsu2()
+    !
+    !
+    !Evaluates the impurity electrons Green's functions :math:`G(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` , :f:var:`impfmats` , :f:var:`impfreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ]
+    !
+    !The off-diagonal components of :math:`G_{ab\sigma\sigma'}` with :math:`a \neq b` and :math:`\sigma,\sigma'=\uparrow, \downarrow` are obtained using algebraic manipulation to ensure working with hermitian conjugate operators in the dynamical Lanczos procedure.  
+    !
+    !The weights and the poles obtained in this procedure are saved in a hierarchical data structure (for every state, every channel (creation or annihilation of excitations, normal or anomalous) and every degree of freedom) :f:var:`impgmatrix` of type :f:var:`gfmatrix`. 
+    !
+    ! .. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
+    !
     integer                                     :: iorb,jorb,ispin,jspin,i,io,jo
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
@@ -244,6 +254,9 @@ contains
 
 
   subroutine rebuild_gf_nonsu2()
+    !
+    ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
+    !
     integer                                     :: iorb,jorb,ispin,jspin,i,io,jo
     logical                                     :: MaskBool
     logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
@@ -255,14 +268,14 @@ contains
     Hmask= .true.
     if(.not.ed_all_g)then
        select case(bath_type)
-          case("replica")
-             Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-          case("general")
-             Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
-          case default
-             stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
-          end select
-       endif
+       case("replica")
+          Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       case("general")
+          Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       case default
+          stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+       end select
+    endif
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -869,6 +882,10 @@ contains
   !PURPOSE  : Build the Self-energy functions, NONSU2 case
   !+------------------------------------------------------------------+
   subroutine build_sigma_nonsu2
+    !
+    ! Obtains the self-energy function :math:`\Sigma` on the current Matsubara and Real-axis intervals using impurity Dyson equation  :math:`\hat{\Sigma}(z) = \hat{G}^{-1}_0(z) - \hat{G}^{-1}(z)`
+    !
+    !
     integer                                           :: i,j,isign,unit(7),iorb,jorb,ispin,jspin,io,jo
     complex(8)                                        :: fg0
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: invG0mats

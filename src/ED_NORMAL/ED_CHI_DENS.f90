@@ -41,6 +41,11 @@ contains
   ! \chi_ab = <n_a(\tau)n_b(0)>
   !+------------------------------------------------------------------+
   subroutine build_chi_dens_normal()
+    !
+    ! Evaluates the impurity Spin susceptibility :math:`\chi^{n}=\langle T_\tau n_a(\tau) n_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
+    !
+    ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos.
+    !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
          "DEBUG build_Chi_dens_normal: build dens-Chi"

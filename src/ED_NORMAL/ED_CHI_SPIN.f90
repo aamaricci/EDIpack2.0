@@ -37,13 +37,16 @@ contains
 
   !+------------------------------------------------------------------+
   !                            SPIN
-  !PURPOSE  : Evaluate the Spin susceptibility \Chi_spin for a 
-  ! single orbital: \chi = <S_a(\tau)S_a(0)>
   ! note: as S_a is hermitian particle and holes contributions
   ! are identical so work out only one lanczos tridiag. work out the 
   ! reduction for both values of isign in the same call.
   !+------------------------------------------------------------------+
   subroutine build_chi_spin_normal()
+    !
+    ! Evaluates the impurity Spin susceptibility :math:`\chi^z=\langle T_\tau S^z_a(\tau) S^z_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
+    !
+    ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
+    !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
          "DEBUG build_Chi_spin_normal: build spin-Chi"

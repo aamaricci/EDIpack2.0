@@ -44,6 +44,12 @@ contains
   ! Triplet: \sum_{\sigma\rho} C^+_{a\sigma} \tau_{\sigma\rho} C_{b\rho}
   !+------------------------------------------------------------------+
   subroutine build_chi_exct_normal()
+    !
+    !
+    ! Evaluates the impurity exciton-exciton susceptibility :math:`\chi^{X}_{ab}=\langle T_\tau X^\dagger_{ab}(\tau) X_{ab}\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis, the imaginary time :math:`\tau` as well as the singlet and triplet components of the operator. 
+    !
+    ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
+    !
     if(Norb>1)then
 #ifdef _DEBUG
        if(ed_verbose>1)write(Logfile,"(A)")&
