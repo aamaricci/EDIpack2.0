@@ -293,13 +293,21 @@ Anderson Green's function with the aim of updating the user bath parameters.
    structure/fit
 
 
-EDIpack2
+EDIpack2.0
 ###########################
+
+The two topmost modules of the `EDIpack2.0` library which wrap up the
+solver into three functions according to three steps: initialization,
+solution and finalization. The :f:mod:`edipack2` represents the user
+interface or Fortran API of the library, giving access to all the
+requried procedures and variables needed to solve a quantum impurity
+problem.  
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
+   structure/main
    structure/edipackmodule
    
 

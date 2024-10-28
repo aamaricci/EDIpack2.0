@@ -19,6 +19,12 @@ module ED_MAIN
 
   !>INIT ED SOLVER
   interface ed_init_solver
+     !
+     ! Initialize the Exact Diagonalization solver of `EDIpack2.0`. This procedure reserves and allocates all the  memory required by the solver, performs all the consistency check and initializes the bath instance guessing or reading from a file.      
+     !
+     ! Input:
+     !  * :f:var:`bath` : a double precision array of rank-1 [ :f:var:`nb` ] for a single impurity or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the R-DMFT case.   
+     !
      module procedure :: ed_init_solver_single
      module procedure :: ed_init_solver_lattice
   end interface ed_init_solver
@@ -26,6 +32,25 @@ module ED_MAIN
 
   !> ED SOLVER
   interface ed_solve
+     !
+     ! Launch the Exact Diagonalizaton solver for the single-site and multiple-site (R-DMFT) quantum impurity problem.
+     !
+     ! Input:
+     !  * :f:var:`bath` : a double precision array of rank-1 [ :f:var:`nb` ] for a single impurity or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the R-DMFT case.
+     !
+     ! The solution is achieved in this sequence:
+     !
+     !  #. setup the MPI environment, if any 
+     !  #. Set the internal bath instance :f:var:`dmft_bath` copying from the user provided input :f:var:`bath`
+     !  #. Get the low energy spectrum: call :f:func:`diagonalize_impurity`
+     !  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = T)
+     !  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = T)
+     !  #. Get the impurity observables: call :f:func:`observables_impurity`
+     !  #. Get the impurity local energy: call :f:func:`local_energy_impurity`
+     !  #. Delete MPI environment and deallocate used structures :f:var:`state_list` and :f:var:`dmft_bath`
+     !
+     ! For many inequivalent sites and :f:var:`mpi_lanc` = F then this cycle is performed for any site attributed to a given thread. 
+     !
      module procedure :: ed_solve_single
      module procedure :: ed_solve_lattice
   end interface ed_solve
@@ -33,12 +58,18 @@ module ED_MAIN
 
   !> ED REBUILD GF
   interface ed_rebuild_gf
+     !
+     ! Re-build the impurity Green's functions using the stored weights and poles from :f:var:`impgmatrix` data structure
+     !
      module procedure :: ed_rebuild_gf_single
      module procedure :: ed_rebuild_gf_lattice
   end interface ed_rebuild_gf
 
   !> FINALIZE SOLVER AND CLEANUP ENVIRONMENT
   interface ed_finalize_solver
+     ! 
+     ! Finalize the Exact Diagonalization solver, clean up all the allocated memory. 
+     !
      module procedure :: ed_finalize_solver_single
      module procedure :: ed_finalize_solver_lattice
   end interface ed_finalize_solver
@@ -48,8 +79,8 @@ module ED_MAIN
   public :: ed_init_solver
   public :: ed_solve
   public :: ed_rebuild_gf
-  
-  
+
+
   !Boolean to redo setup. Reset by ed_finalize_solver
   logical,save :: isetup=.true.
 
@@ -62,7 +93,7 @@ contains
   !+-----------------------------------------------------------------------------+!
   ! PURPOSE: allocate and initialize one or multiple baths -+!
   subroutine ed_init_solver_single(bath)
-    real(8),dimension(:),intent(inout) :: bath
+    real(8),dimension(:),intent(inout) :: bath !user bath input array
     logical                            :: check
     integer                            :: i
     !
@@ -99,7 +130,7 @@ contains
   end subroutine ed_init_solver_single
 
   subroutine ed_init_solver_lattice(bath)
-    real(8),dimension(:,:),intent(inout) :: bath ![Nlat][:]
+    real(8),dimension(:,:),intent(inout) :: bath !user bath input array
     integer                              :: ilat,Nineq
     !
     if(allocated(dens_ineq))deallocate(dens_ineq)
@@ -195,9 +226,9 @@ contains
   ! lattice site using ED. 
   !+-----------------------------------------------------------------------------+!
   subroutine ed_solve_single(bath,sflag,fmpi)
-    real(8),dimension(:),intent(in)     :: bath
-    logical,optional                    :: sflag
-    logical,optional                    :: fmpi       !impose serial execution (if mpi is used elsewhere)
+    real(8),dimension(:),intent(in)     :: bath  !user bath input array
+    logical,optional                    :: sflag !get observables only flag
+    logical,optional                    :: fmpi  !serial execution flag
     logical                             :: fmpi_
     logical                             :: check,iflag
     !
@@ -245,14 +276,14 @@ contains
 
 
   subroutine ed_solve_lattice(bath,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,iflag)
-    real(8)                             :: bath(:,:) ![Nlat][Nb]
-    logical,optional                    :: mpi_lanc
-    real(8),optional                    :: Uloc_ii(size(bath,1),Norb)
-    real(8),optional                    :: Ust_ii(size(bath,1))
-    real(8),optional                    :: Jh_ii(size(bath,1))
-    real(8),optional                    :: Jp_ii(size(bath,1))
-    real(8),optional                    :: Jx_ii(size(bath,1))
-    logical,optional                    :: iflag
+    real(8)                             :: bath(:,:) !user bath input array
+    logical,optional                    :: mpi_lanc  !MPI structure flag: F = mpi over sites, T= mpi for the diagonalization
+    real(8),optional                    :: Uloc_ii(size(bath,1),Norb) !local interaction :f:var:`uloc`
+    real(8),optional                    :: Ust_ii(size(bath,1)) !local interaction :f:var:`ust`
+    real(8),optional                    :: Jh_ii(size(bath,1))  !local Hund's coupling :f:var:`jh`
+    real(8),optional                    :: Jp_ii(size(bath,1))  !local pair hopping :f:var:`jp`
+    real(8),optional                    :: Jx_ii(size(bath,1))  !local spin flip :f:var:`jx`
+    logical,optional                    :: iflag                !get  observables only flag
     !
     !MPI  auxiliary vars
     complex(8)                          :: Smats_tmp(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
@@ -548,7 +579,7 @@ contains
   !+-----------------------------------------------------------------------------+!
   !                              Multiple sites                                   !
   !+-----------------------------------------------------------------------------+!
-  
+
   subroutine ed_finalize_solver_lattice(Nineq)
     integer                              :: ilat,Nineq
     !
@@ -583,158 +614,158 @@ contains
 
 
 
-!##################################################################
-!##################################################################
-!##################################################################
-!##################################################################
+  !##################################################################
+  !##################################################################
+  !##################################################################
+  !##################################################################
 
 
 
 
-!+-----------------------------------------------------------------------------+!
-!PURPOSE: rebuild impurity GF for a single or many sites
-!+-----------------------------------------------------------------------------+!
- subroutine ed_rebuild_gf_single()
-   !
-   if(.not.allocated(impHloc))stop "ed_rebuild_gf error: Hloc not allocated. Call ed_set_Hloc first."
-   !
-   if(MpiMaster)call save_input_file(str(ed_input_file))
-   !
-   call allocate_dmft_bath(dmft_bath)
-   call init_dmft_bath(dmft_bath,used=.true.)
-   call write_dmft_bath(dmft_bath)
-   !
-   !
-   call rebuildGF_impurity()
-   !
-   !
-   call deallocate_dmft_bath(dmft_bath)
-   !
-   nullify(spHtimesV_cc)
-   nullify(spHtimesV_p)
- end subroutine ed_rebuild_gf_single
- 
- subroutine ed_rebuild_gf_lattice(Nlat)
-   integer                                       :: Nlat
-   !MPI  auxiliary vars
-   complex(8),dimension(:,:,:,:,:,:),allocatable :: Smats_tmp,Sreal_tmp
-   complex(8),dimension(:,:,:,:,:,:),allocatable :: SAmats_tmp,SAreal_tmp
-   complex(8),dimension(:,:,:,:,:,:),allocatable :: Gmats_tmp,Greal_tmp
-   complex(8),dimension(:,:,:,:,:,:),allocatable :: Fmats_tmp,Freal_tmp
-   ! 
-   integer                                       :: i,j,ilat,iorb,jorb,ispin,jspin
-   logical                                       :: check_dim
-   character(len=5)                              :: tmp_suffix
-   !
-   integer                                       :: MPI_ID=0
-   integer                                       :: MPI_SIZE=1
-   logical                                       :: MPI_MASTER=.true.
-   !
-   integer                                       :: mpi_err 
-   !
+  !+-----------------------------------------------------------------------------+!
+  !PURPOSE: rebuild impurity GF for a single or many sites
+  !+-----------------------------------------------------------------------------+!
+  subroutine ed_rebuild_gf_single()
+    !
+    if(.not.allocated(impHloc))stop "ed_rebuild_gf error: Hloc not allocated. Call ed_set_Hloc first."
+    !
+    if(MpiMaster)call save_input_file(str(ed_input_file))
+    !
+    call allocate_dmft_bath(dmft_bath)
+    call init_dmft_bath(dmft_bath,used=.true.)
+    call write_dmft_bath(dmft_bath)
+    !
+    !
+    call rebuildGF_impurity()
+    !
+    !
+    call deallocate_dmft_bath(dmft_bath)
+    !
+    nullify(spHtimesV_cc)
+    nullify(spHtimesV_p)
+  end subroutine ed_rebuild_gf_single
+
+  subroutine ed_rebuild_gf_lattice(Nlat)
+    integer                                       :: Nlat
+    !MPI  auxiliary vars
+    complex(8),dimension(:,:,:,:,:,:),allocatable :: Smats_tmp,Sreal_tmp
+    complex(8),dimension(:,:,:,:,:,:),allocatable :: SAmats_tmp,SAreal_tmp
+    complex(8),dimension(:,:,:,:,:,:),allocatable :: Gmats_tmp,Greal_tmp
+    complex(8),dimension(:,:,:,:,:,:),allocatable :: Fmats_tmp,Freal_tmp
+    ! 
+    integer                                       :: i,j,ilat,iorb,jorb,ispin,jspin
+    logical                                       :: check_dim
+    character(len=5)                              :: tmp_suffix
+    !
+    integer                                       :: MPI_ID=0
+    integer                                       :: MPI_SIZE=1
+    logical                                       :: MPI_MASTER=.true.
+    !
+    integer                                       :: mpi_err 
+    !
 #ifdef _MPI    
-   if(check_MPI())then
-      MPI_ID     = get_Rank_MPI()
-      MPI_SIZE   = get_Size_MPI()
-      MPI_MASTER = get_Master_MPI()
-   endif
+    if(check_MPI())then
+       MPI_ID     = get_Rank_MPI()
+       MPI_SIZE   = get_Size_MPI()
+       MPI_MASTER = get_Master_MPI()
+    endif
 #endif
-   !
-   if(.not.allocated(Hloc_ineq))stop "ed_rebuild_gf error: Hloc_ineq not allocated. Call ed_set_Hloc first."
-   !
-   !
-   if(allocated(Smats_ineq))deallocate(Smats_ineq)
-   if(allocated(SAmats_ineq))deallocate(SAmats_ineq)
-   if(allocated(Gmats_ineq))deallocate(Gmats_ineq)
-   if(allocated(Fmats_ineq))deallocate(Fmats_ineq)
-   allocate(Smats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(SAmats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(Gmats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(Fmats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   Smats_ineq    = zero ; SAmats_ineq   = zero 
-   Gmats_ineq    = zero ; Fmats_ineq    = zero
-   if(allocated(Sreal_ineq))deallocate(Sreal_ineq)
-   if(allocated(SAreal_ineq))deallocate(SAreal_ineq)
-   if(allocated(Greal_ineq))deallocate(Greal_ineq)
-   if(allocated(Freal_ineq))deallocate(Freal_ineq)
-   allocate(Sreal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   allocate(SAreal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   allocate(Greal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   allocate(Freal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   Sreal_ineq    = zero ; SAreal_ineq   = zero 
-   Greal_ineq    = zero ; Freal_ineq    = zero
-   !
-   allocate(Smats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(Sreal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   allocate(SAmats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(SAreal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   allocate(Gmats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(Greal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   allocate(Fmats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
-   allocate(Freal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
-   Smats_tmp  = zero ; Sreal_tmp  = zero ; SAmats_tmp = zero ; SAreal_tmp = zero
-   Gmats_tmp  = zero ; Greal_tmp  = zero ; Fmats_tmp  = zero ; Freal_tmp  = zero
-   !
-   if(MPI_MASTER)call start_timer(unit=LOGfile)
-   do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
-      write(LOGfile,*)"CPU: "//str(MPI_ID)//" SOLVES INEQ SITE: "//str(ilat,Npad=4)
-      !
-      call ed_set_suffix(ilat)
-      call ed_set_Hloc(Hloc_ineq(ilat,:,:,:,:))
-      call ed_rebuild_gf_single()
-      !
-      Smats_tmp(ilat,:,:,:,:,:)  = impSmats
-      SAmats_tmp(ilat,:,:,:,:,:) = impSAmats
-      Gmats_tmp(ilat,:,:,:,:,:)  = impGmats
-      Fmats_tmp(ilat,:,:,:,:,:)  = impFmats
-      Sreal_tmp(ilat,:,:,:,:,:)  = impSreal
-      SAreal_tmp(ilat,:,:,:,:,:) = impSAreal
-      Greal_tmp(ilat,:,:,:,:,:)  = impGreal
-      Freal_tmp(ilat,:,:,:,:,:)  = impFreal
-   enddo
+    !
+    if(.not.allocated(Hloc_ineq))stop "ed_rebuild_gf error: Hloc_ineq not allocated. Call ed_set_Hloc first."
+    !
+    !
+    if(allocated(Smats_ineq))deallocate(Smats_ineq)
+    if(allocated(SAmats_ineq))deallocate(SAmats_ineq)
+    if(allocated(Gmats_ineq))deallocate(Gmats_ineq)
+    if(allocated(Fmats_ineq))deallocate(Fmats_ineq)
+    allocate(Smats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(SAmats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(Gmats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(Fmats_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    Smats_ineq    = zero ; SAmats_ineq   = zero 
+    Gmats_ineq    = zero ; Fmats_ineq    = zero
+    if(allocated(Sreal_ineq))deallocate(Sreal_ineq)
+    if(allocated(SAreal_ineq))deallocate(SAreal_ineq)
+    if(allocated(Greal_ineq))deallocate(Greal_ineq)
+    if(allocated(Freal_ineq))deallocate(Freal_ineq)
+    allocate(Sreal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(SAreal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(Greal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(Freal_ineq(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    Sreal_ineq    = zero ; SAreal_ineq   = zero 
+    Greal_ineq    = zero ; Freal_ineq    = zero
+    !
+    allocate(Smats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(Sreal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(SAmats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(SAreal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(Gmats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(Greal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(Fmats_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(Freal_tmp(Nlat,Nspin,Nspin,Norb,Norb,Lreal))
+    Smats_tmp  = zero ; Sreal_tmp  = zero ; SAmats_tmp = zero ; SAreal_tmp = zero
+    Gmats_tmp  = zero ; Greal_tmp  = zero ; Fmats_tmp  = zero ; Freal_tmp  = zero
+    !
+    if(MPI_MASTER)call start_timer(unit=LOGfile)
+    do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
+       write(LOGfile,*)"CPU: "//str(MPI_ID)//" SOLVES INEQ SITE: "//str(ilat,Npad=4)
+       !
+       call ed_set_suffix(ilat)
+       call ed_set_Hloc(Hloc_ineq(ilat,:,:,:,:))
+       call ed_rebuild_gf_single()
+       !
+       Smats_tmp(ilat,:,:,:,:,:)  = impSmats
+       SAmats_tmp(ilat,:,:,:,:,:) = impSAmats
+       Gmats_tmp(ilat,:,:,:,:,:)  = impGmats
+       Fmats_tmp(ilat,:,:,:,:,:)  = impFmats
+       Sreal_tmp(ilat,:,:,:,:,:)  = impSreal
+       SAreal_tmp(ilat,:,:,:,:,:) = impSAreal
+       Greal_tmp(ilat,:,:,:,:,:)  = impGreal
+       Freal_tmp(ilat,:,:,:,:,:)  = impFreal
+    enddo
 #ifdef _MPI    
-   if(check_MPI())call Barrier_MPI()
+    if(check_MPI())call Barrier_MPI()
 #endif
-   if(MPI_MASTER)call stop_timer
-   call ed_reset_suffix
-   !
-   !
+    if(MPI_MASTER)call stop_timer
+    call ed_reset_suffix
+    !
+    !
 #ifdef _MPI
-   if(check_MPI())then
-      call AllReduce_MPI(MPI_COMM_WORLD,Smats_tmp,Smats_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,Sreal_tmp,Sreal_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,SAmats_tmp,SAmats_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,SAreal_tmp,SAreal_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,Gmats_tmp,Gmats_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,Greal_tmp,Greal_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,Fmats_tmp,Fmats_ineq)
-      call AllReduce_MPI(MPI_COMM_WORLD,Freal_tmp,Freal_ineq)
-   else
-      Smats_ineq  = Smats_tmp
-      Sreal_ineq  = Sreal_tmp
-      SAmats_ineq = SAmats_tmp
-      SAreal_ineq = SAreal_tmp
-      Gmats_ineq  = Gmats_tmp
-      Greal_ineq  = Greal_tmp
-      Fmats_ineq  = Fmats_tmp
-      Freal_ineq  = Freal_tmp
-   endif
+    if(check_MPI())then
+       call AllReduce_MPI(MPI_COMM_WORLD,Smats_tmp,Smats_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,Sreal_tmp,Sreal_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,SAmats_tmp,SAmats_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,SAreal_tmp,SAreal_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,Gmats_tmp,Gmats_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,Greal_tmp,Greal_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,Fmats_tmp,Fmats_ineq)
+       call AllReduce_MPI(MPI_COMM_WORLD,Freal_tmp,Freal_ineq)
+    else
+       Smats_ineq  = Smats_tmp
+       Sreal_ineq  = Sreal_tmp
+       SAmats_ineq = SAmats_tmp
+       SAreal_ineq = SAreal_tmp
+       Gmats_ineq  = Gmats_tmp
+       Greal_ineq  = Greal_tmp
+       Fmats_ineq  = Fmats_tmp
+       Freal_ineq  = Freal_tmp
+    endif
 #else
-   Smats_ineq  = Smats_tmp
-   Sreal_ineq  = Sreal_tmp
-   SAmats_ineq = SAmats_tmp
-   SAreal_ineq = SAreal_tmp
-   Gmats_ineq  = Gmats_tmp
-   Greal_ineq  = Greal_tmp
-   Fmats_ineq  = Fmats_tmp
-   Freal_ineq  = Freal_tmp
+    Smats_ineq  = Smats_tmp
+    Sreal_ineq  = Sreal_tmp
+    SAmats_ineq = SAmats_tmp
+    SAreal_ineq = SAreal_tmp
+    Gmats_ineq  = Gmats_tmp
+    Greal_ineq  = Greal_tmp
+    Fmats_ineq  = Fmats_tmp
+    Freal_ineq  = Freal_tmp
 #endif
- end subroutine ed_rebuild_gf_lattice
- 
- 
+  end subroutine ed_rebuild_gf_lattice
 
 
- 
+
+
+
 end module ED_MAIN
 
 
