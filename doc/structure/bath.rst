@@ -19,7 +19,7 @@ on the user side.
 Bath DMFT
 ###########################
 
-In :f:mod:`ed_bath_dmft` we implement operations on the  :f:var:`effective_bath` data
+In :f:mod:`ed_bath_dmft` we implement operations on the  :f:type:`effective_bath` data
 structure: a suitable representation of the effective bath used
 internally in the code. We refer to the generic shared instance of this bath
 as :f:var:`dmft_bath`.  Depending on the value :f:var:`bath_type` this quantity collect
