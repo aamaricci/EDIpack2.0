@@ -96,9 +96,9 @@ of parameters specified in the input file (see below)
 Here is a snapshot of the results obtained for :math:`U=1.0, 10.0`.
 
    
-.. image:: 01_anderson_fig.pdf
+.. image:: 01_anderson_fig.svg
    :class: with-border
-	   
+	     
 In the top panel we report the impurity spectral functions :math:`-\Im
 G^{im}(\omega)/\pi` compared to the  Bethe density of states (filled
 curve). In the bottom panel we show the real part of the
