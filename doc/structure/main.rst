@@ -1,5 +1,5 @@
-Main 
-=======================
+Impurity Problem Solution Routines 
+====================================
 
 The module :f:mod:`ED_MAIN` contains the functions that initializes,
 launch and finalize the `EDIpack2.0` solver for the quantum impurity

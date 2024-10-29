@@ -12,9 +12,9 @@ module ED_EIGENSPACE
 
 
   type sparse_estate
-     !
-     ! A single element of the linked list :f:var:`sparse_espace`. The :f:var:`sparse_estate` gather all the information relative to a single eigen-state of the Hamiltonian spectrum. It includes a logical :f:var:`itwin` and pointer :f:var:`twin` to identiy  the equivalent state in the twin sector, i.e. a degenerate state with opposite quantum numbers, without actually storing the eigenvector. 
-     !
+!
+!A single element of the linked list :f:var:`sparse_espace`. The :f:var:`sparse_estate` gather all the information relative to a single eigen-state of the Hamiltonian spectrum. It includes a logical :f:var:`itwin` and pointer :f:var:`twin` to identiy  the equivalent state in the twin sector, i.e. a degenerate state with opposite quantum numbers, without actually storing the eigenvector. 
+!
      integer                             :: sector        !Symmetry sector index
      real(8)                             :: e             !energy of the eigen-state, used to order the list
      real(8),dimension(:),allocatable    :: dvec          !double precision eigen-vector
@@ -25,9 +25,9 @@ module ED_EIGENSPACE
   end type sparse_estate
 
   type sparse_espace
-     !
-     ! Ordered single linked list storing the lower part of the Hamiltonian spectrum state by state. 
-     !
+!
+!Ordered single linked list storing the lower part of the Hamiltonian spectrum state by state. 
+!
      integer                     :: size               !The current size of the list
      real(8)                     :: emax               !The maximum energy of the list, fixed by the condition :math:`e^{-\beta {\rm emax}}<` :f:var:`cutoff`
      real(8)                     :: emin               !The minimum energy of the list, i.e. the groundstate energy
@@ -37,26 +37,26 @@ module ED_EIGENSPACE
 
 
   interface es_insert_state
-     !
-     ! Insert a :f:var:`sparse_estate` into the :f:var:`sparse_espace` using :f:var:`e`, :f:var:`vec`, :f:var:`sector` and optionally a :f:var:`itwin` label
-     !
+!
+!Insert a :f:var:`sparse_estate` into the :f:var:`sparse_espace` using :f:var:`e`, :f:var:`vec`, :f:var:`sector` and optionally a :f:var:`itwin` label
+!
      module procedure :: es_insert_state_d
      module procedure :: es_insert_state_c
   end interface es_insert_state
 
   interface es_add_state
-     !
-     ! Insert a :f:var:`sparse_estate` into the :f:var:`sparse_espace` using :f:var:`e`, :f:var:`vec`, :f:var:`sector` and optionally a :f:var:`itwin` label optionally  filling the list  respecting the energy threshold limit. 
-     !
+!
+!Insert a :f:var:`sparse_estate` into the :f:var:`sparse_espace` using :f:var:`e`, :f:var:`vec`, :f:var:`sector` and optionally a :f:var:`itwin` label optionally  filling the list  respecting the energy threshold limit. 
+!
      module procedure :: es_add_state_d
      module procedure :: es_add_state_c
   end interface es_add_state
 
 
   interface es_return_dvector
-     !
-     ! Returns the double precision vector of a given :f:var:`sparse_estate` indicated by the position :f:var:`n` in the list. If MPI execution is active the vector is returned already split in chunks assigned to each thread according to the current parallel algorithm. Should the :f:var:`sparse_estate` correspond to a twin state, the vector is reconstructed on the fly using :f:var:`twin` pointer and suitable reordering (as the basis of the two symmetry sector with opposite quantum numbers do have different ordering in general).     
-     !
+!
+!Returns the double precision vector of a given :f:var:`sparse_estate` indicated by the position :f:var:`n` in the list. If MPI execution is active the vector is returned already split in chunks assigned to each thread according to the current parallel algorithm. Should the :f:var:`sparse_estate` correspond to a twin state, the vector is reconstructed on the fly using :f:var:`twin` pointer and suitable reordering (as the basis of the two symmetry sector with opposite quantum numbers do have different ordering in general).     
+!
      module procedure :: es_return_dvector_default
 #ifdef _MPI
      module procedure :: es_return_dvector_mpi
@@ -64,9 +64,9 @@ module ED_EIGENSPACE
   end interface es_return_dvector
 
   interface es_return_cvector
-     !
-     ! Returns the double complex vector of a given :f:var:`sparse_estate` indicated by the position :f:var:`n` in the list. If MPI execution is active the vector is returned already split in chunks assigned to each thread according to the current parallel algorithm. Should the :f:var:`sparse_estate` correspond to a twin state, the vector is reconstructed on the fly using :f:var:`twin` pointer and suitable reordering (as the basis of the two symmetry sector with opposite quantum numbers do have different ordering in general).     
-     !
+!
+!Returns the double complex vector of a given :f:var:`sparse_estate` indicated by the position :f:var:`n` in the list. If MPI execution is active the vector is returned already split in chunks assigned to each thread according to the current parallel algorithm. Should the :f:var:`sparse_estate` correspond to a twin state, the vector is reconstructed on the fly using :f:var:`twin` pointer and suitable reordering (as the basis of the two symmetry sector with opposite quantum numbers do have different ordering in general).     
+!
      module procedure :: es_return_cvector_default
 #ifdef _MPI
      module procedure :: es_return_cvector_mpi
@@ -174,7 +174,8 @@ contains        !some routine to perform simple operation on the lists
   !PURPOSE  : destroy the list of states
   !+------------------------------------------------------------------+
   subroutine es_delete_espace(space)
-    type(sparse_espace),intent(inout) :: space
+!Destroys the list of states.
+    type(sparse_espace),intent(inout) :: space !the eigenspace to clear
     type(sparse_estate),pointer       :: p,c
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")"DEBUG es_delete_espace"
