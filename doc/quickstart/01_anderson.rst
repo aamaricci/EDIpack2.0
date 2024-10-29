@@ -22,13 +22,15 @@ The initialization of the code is:
       USE EDIPACK2
       USE SCIFOR
       implicit none
-      integer,parameter                       :: Le=5000  !
-      real(8),parameter                       :: D=1d0  !
-      integer                                 :: Nb,Nso  !
-      real(8),dimension(Le)                   :: Dbands  !
-      real(8),dimension(Le)                   :: Ebands  !
-      real(8),allocatable                     :: Bath(:)  !
-      complex(8),allocatable,dimension(:,:,:) :: Weiss  !
+      ! Bethe lattice half-bandwidth = energy unit
+      real(8),parameter                       :: D=1d0
+      ! Bath size and Nso=Nspin*Norb (here =1)
+      integer                                 :: Nb,Nso
+      ! User bath, allocatable see below
+      real(8),allocatable                     :: Bath(:)
+      ! Non-interacting Bethe lattice Green's function (naming
+      ! convention will be clear in the following section)
+      complex(8),allocatable,dimension(:,:,:) :: Weiss
 
       !> READ THE input using EDIpack procedure: 
       call ed_read_input('inputED.conf')
@@ -40,18 +42,12 @@ some local variables and proceed with reading the input file
 :code:`"inputED.conf"` using the `EDIpack2.0` function
 :f:func:`ed_read_input`.
 
-Next we construct the Bethe lattice DOS and non-interacting Green's
+Next we construct the non-interacting Green's
 function, using procedures available in :f:var:`SciFortran`:
 
 
 .. code-block:: fortran
 		
-   !> Bethe Lattice linear disperion
-   Ebands = linspace(-D,D,Le,mesh=de)
-   !> Bethe Lattice DOS (rescaled to mesh)
-   Dbands = dens_bethe(Ebands,D)
-
-
    !> Get the Bethe lattice non-interacting Matsubara GF as a guess for the bath 
    allocate(Weiss(Nso,Nso,Lmats))
    call bethe_guess_g0(Weiss(1,1,:),D,beta,hloc=0d0)
@@ -93,9 +89,44 @@ of parameters specified in the input file (see below)
    call ed_solve(bath)
 
 
+.. raw:: html
+
+   <hr>
+
+Here is a snapshot of the results obtained for :math:`U=1.0, 10.0`.
+
+   
+.. image:: 01_anderson_fig.pdf
+   :class: with-border
+	   
+In the top panel we report the impurity spectral functions :math:`-\Im
+G^{im}(\omega)/\pi` compared to the  Bethe density of states (filled
+curve). In the bottom panel we show the real part of the
+impurity real-axis self-energy functions :math:`\Sigma(\omega)`
+near the Fermi level :math:`\omega=0`. The linear fit :math:`y =
+A\omega` gives a direct estimate of the derivatives :math:`A\simeq
+\tfrac{\partial\Re\Sigma}{\partial\omega}_{|_{\omega\rightarrow 0}}` and thus of the quasi-particle
+renormalization constants :math:`Z=\left( 1 - A \right)^{-1}` as
+reported in the legend.
+
+As a direct comparison we report also the values of :math:`Z` 
+estimated from the Matsubara axis using the relation 
+:math:`\frac{\Im\Sigma(i\omega_n}{\omega_n}_{|_{\omega_n\rightarrow
+0}}= \frac{1}{\pi}\int_{\mathbb R}d\epsilon
+\frac{\Re\Sigma(\epsilon)}{\epsilon^2}=
+\frac{\partial\Re\Sigma}{\partial\omega}_{|_{\omega\rightarrow
+0}}`.
+
+We obtained:  :math:`Z=0.74` and :math:`Z=0.002`, respectively, for :math:`U=1.0`
+and  :math:`U=10.0`.
 
 
 
+
+
+   
+
+   
 .. raw:: html
 
    <hr>
