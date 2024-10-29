@@ -19,12 +19,13 @@ module ED_MAIN
 
   !>INIT ED SOLVER
   interface ed_init_solver
-     !
-     ! Initialize the Exact Diagonalization solver of `EDIpack2.0`. This procedure reserves and allocates all the  memory required by the solver, performs all the consistency check and initializes the bath instance guessing or reading from a file.      
-     !
-     ! Input:
-     !  * :f:var:`bath` : a double precision array of rank-1 [ :f:var:`nb` ] for a single impurity or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the R-DMFT case.   
-     !
+!
+!Initialize the Exact Diagonalization solver of `EDIpack2.0`. This procedure reserves and allocates all the  
+!memory required by the solver, performs all the consistency check and initializes the bath instance guessing or reading from a file.      
+!It requires as an input a double precision array of rank-1 [ :f:var:`nb` ] for the single-impurity case or
+!or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the Real space DMFT case. :f:var:`nlat` is the number of inequivalent impurity sites,
+!while :f:var:`nb` depends on the bath size and geometry and can be obtained from :f:func:`get_bath_dimension` .
+!
      module procedure :: ed_init_solver_single
      module procedure :: ed_init_solver_lattice
   end interface ed_init_solver
@@ -32,25 +33,23 @@ module ED_MAIN
 
   !> ED SOLVER
   interface ed_solve
-     !
-     ! Launch the Exact Diagonalizaton solver for the single-site and multiple-site (R-DMFT) quantum impurity problem.
-     !
-     ! Input:
-     !  * :f:var:`bath` : a double precision array of rank-1 [ :f:var:`nb` ] for a single impurity or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the R-DMFT case.
-     !
-     ! The solution is achieved in this sequence:
-     !
-     !  #. setup the MPI environment, if any 
-     !  #. Set the internal bath instance :f:var:`dmft_bath` copying from the user provided input :f:var:`bath`
-     !  #. Get the low energy spectrum: call :f:func:`diagonalize_impurity`
-     !  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = T)
-     !  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = T)
-     !  #. Get the impurity observables: call :f:func:`observables_impurity`
-     !  #. Get the impurity local energy: call :f:func:`local_energy_impurity`
-     !  #. Delete MPI environment and deallocate used structures :f:var:`state_list` and :f:var:`dmft_bath`
-     !
-     ! For many inequivalent sites and :f:var:`mpi_lanc` = F then this cycle is performed for any site attributed to a given thread. 
-     !
+!
+!Launch the Exact Diagonalizaton solver for the single-site and multiple-site (R-DMFT) quantum impurity problem.
+!It requires as an input a double precision array of rank-1 [ :f:var:`nb` ] for the single-impurity case or
+!or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the Real space DMFT case. :f:var:`nlat` is the number of inequivalent impurity sites,
+!while :f:var:`nb` depends on the bath size and geometry and can be obtained from :f:func:`get_bath_dimension` .
+!
+! The solution is achieved in this sequence:
+!
+!  #. setup the MPI environment, if any 
+!  #. Set the internal bath instance :f:var:`dmft_bath` copying from the user provided input :f:var:`bath`
+!  #. Get the low energy spectrum: call :f:func:`diagonalize_impurity`
+!  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = T)
+!  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = T)
+!  #. Get the impurity observables: call :f:func:`observables_impurity`
+!  #. Get the impurity local energy: call :f:func:`local_energy_impurity`
+!  #. Delete MPI environment and deallocate used structures :f:var:`state_list` and :f:var:`dmft_bath`
+!
      module procedure :: ed_solve_single
      module procedure :: ed_solve_lattice
   end interface ed_solve
@@ -58,18 +57,28 @@ module ED_MAIN
 
   !> ED REBUILD GF
   interface ed_rebuild_gf
-     !
-     ! Re-build the impurity Green's functions using the stored weights and poles from :f:var:`impgmatrix` data structure
-     !
+!
+! Re-build the impurity Green's functions and self-energies using the stored weights and poles from :f:var:`impgmatrix` data structure,
+! instead of calculating them from the ED routine. Store them in the global variables
+!
+!  * :f:var:`impsmats` / :f:var:`impgmats` : normal, Matsubara axis
+!  * :f:var:`impsreal` / :f:var:`impgreal` : normal, real frequency axis
+!  * :f:var:`impsamats` / :f:var:`impfmats` : anomalous, Matsubara axis
+!  * :f:var:`impsareal` / :f:var:`impfreal` : anomalous, real-frequency axis
+!  * :f:var:`smats_ineq` / :f:var:`gmats_ineq` : normal, Matsubara axis, real-space DMFT
+!  * :f:var:`sreal_ineq` / :f:var:`greal_ineq` : normal, real frequency axis, real-space DMFT
+!  * :f:var:`samats_ineq` / :f:var:`fmats_ineq` : anomalous, Matsubara axis, real-space DMFT
+!  * :f:var:`sareal_ineq` / :f:var:`freal_ineq` : anomalous, real frequency axis, real-space DMFT
+!
      module procedure :: ed_rebuild_gf_single
      module procedure :: ed_rebuild_gf_lattice
   end interface ed_rebuild_gf
 
   !> FINALIZE SOLVER AND CLEANUP ENVIRONMENT
   interface ed_finalize_solver
-     ! 
-     ! Finalize the Exact Diagonalization solver, clean up all the allocated memory. 
-     !
+! 
+! Finalize the Exact Diagonalization solver, clean up all the allocated memory. 
+!
      module procedure :: ed_finalize_solver_single
      module procedure :: ed_finalize_solver_lattice
   end interface ed_finalize_solver
@@ -81,8 +90,8 @@ module ED_MAIN
   public :: ed_rebuild_gf
 
 
-  !Boolean to redo setup. Reset by ed_finalize_solver
-  logical,save :: isetup=.true.
+  
+  logical,save :: isetup=.true. !Allow :f:func:`init_ed_structure` and :f:func:`setup_global` to be called. Set to :f:code:`.false.` by :f:func:`ed_init_solver`, reset by :f:func:`ed_finalize_solver` . Default :code:`.true.`
 
 
 
@@ -227,8 +236,8 @@ contains
   !+-----------------------------------------------------------------------------+!
   subroutine ed_solve_single(bath,sflag,fmpi)
     real(8),dimension(:),intent(in)     :: bath  !user bath input array
-    logical,optional                    :: sflag !get observables only flag
-    logical,optional                    :: fmpi  !serial execution flag
+    logical,optional                    :: sflag !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) Green's functions and susceptibilities. Default :code:`.true.` . 
+    logical,optional                    :: fmpi  !flag to solve the impurity problem parallely ( :code:`.true.` ) or not ( :code:`.false.` ). Default :code:`.true.` . 
     logical                             :: fmpi_
     logical                             :: check,iflag
     !
@@ -276,14 +285,14 @@ contains
 
 
   subroutine ed_solve_lattice(bath,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,iflag)
-    real(8)                             :: bath(:,:) !user bath input array
-    logical,optional                    :: mpi_lanc  !MPI structure flag: F = mpi over sites, T= mpi for the diagonalization
-    real(8),optional                    :: Uloc_ii(size(bath,1),Norb) !local interaction :f:var:`uloc`
-    real(8),optional                    :: Ust_ii(size(bath,1)) !local interaction :f:var:`ust`
-    real(8),optional                    :: Jh_ii(size(bath,1))  !local Hund's coupling :f:var:`jh`
-    real(8),optional                    :: Jp_ii(size(bath,1))  !local pair hopping :f:var:`jp`
-    real(8),optional                    :: Jx_ii(size(bath,1))  !local spin flip :f:var:`jx`
-    logical,optional                    :: iflag                !get  observables only flag
+    real(8)                                         :: bath(:,:) !user bath input array
+    logical,optional                                :: mpi_lanc  !parallelization strategy flag: if :code:`.false.` each core serially solves an inequivalent site, if :code:`.true.` all cores parallely solve each site in sequence. Default :code:`.false.` .
+    real(8),optional,dimension(size(bath,1),Norb)   :: Uloc_ii !site-dependent values for :f:var:`uloc` , overriding the ones in the input file. It has dimension [ :f:var:`nlat` , :f:var:`norb` ].
+    real(8),optional,dimension(size(bath,1))        :: Ust_ii  !site-dependent values for :f:var:`ust` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
+    real(8),optional,dimension(size(bath,1))        :: Jh_ii   !site-dependent values for :f:var:`jh` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
+    real(8),optional,dimension(size(bath,1))        :: Jp_ii   !site-dependent values for :f:var:`jx` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
+    real(8),optional,dimension(size(bath,1))        :: Jx_ii   !site-dependent values for :f:var:`jp` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
+    logical,optional                                :: iflag   !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) Green's functions and susceptibilities. Default :code:`.true.` . 
     !
     !MPI  auxiliary vars
     complex(8)                          :: Smats_tmp(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
@@ -581,7 +590,8 @@ contains
   !+-----------------------------------------------------------------------------+!
 
   subroutine ed_finalize_solver_lattice(Nineq)
-    integer                              :: ilat,Nineq
+    integer                              :: ilat
+    integer                              :: Nineq !number of inequivalent impurity sites for real-space DMFT
     !
     if(allocated(dens_ineq))deallocate(dens_ineq)
     if(allocated(docc_ineq))deallocate(docc_ineq)
@@ -646,7 +656,7 @@ contains
   end subroutine ed_rebuild_gf_single
 
   subroutine ed_rebuild_gf_lattice(Nlat)
-    integer                                       :: Nlat
+    integer                                       :: Nlat !number of inequivalent impurity sites for real-space DMFT
     !MPI  auxiliary vars
     complex(8),dimension(:,:,:,:,:,:),allocatable :: Smats_tmp,Sreal_tmp
     complex(8),dimension(:,:,:,:,:,:),allocatable :: SAmats_tmp,SAreal_tmp
