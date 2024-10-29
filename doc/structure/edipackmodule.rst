@@ -1,4 +1,4 @@
-EDIpack2
+EDIpack2 Fortran Module
 ==========================
 
 

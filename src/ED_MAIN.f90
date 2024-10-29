@@ -44,8 +44,8 @@ module ED_MAIN
 !  #. setup the MPI environment, if any 
 !  #. Set the internal bath instance :f:var:`dmft_bath` copying from the user provided input :f:var:`bath`
 !  #. Get the low energy spectrum: call :f:func:`diagonalize_impurity`
-!  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = T)
-!  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = T)
+!  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = :code:`.true.` )
+!  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = :code:`.true.` )
 !  #. Get the impurity observables: call :f:func:`observables_impurity`
 !  #. Get the impurity local energy: call :f:func:`local_energy_impurity`
 !  #. Delete MPI environment and deallocate used structures :f:var:`state_list` and :f:var:`dmft_bath`
