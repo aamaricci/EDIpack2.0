@@ -290,8 +290,8 @@ contains
     real(8),optional,dimension(size(bath,1),Norb)   :: Uloc_ii !site-dependent values for :f:var:`uloc` , overriding the ones in the input file. It has dimension [ :f:var:`nlat` , :f:var:`norb` ].
     real(8),optional,dimension(size(bath,1))        :: Ust_ii  !site-dependent values for :f:var:`ust` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
     real(8),optional,dimension(size(bath,1))        :: Jh_ii   !site-dependent values for :f:var:`jh` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
-    real(8),optional,dimension(size(bath,1))        :: Jp_ii   !site-dependent values for :f:var:`jx` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
-    real(8),optional,dimension(size(bath,1))        :: Jx_ii   !site-dependent values for :f:var:`jp` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
+    real(8),optional,dimension(size(bath,1))        :: Jp_ii   !site-dependent values for :f:var:`jp` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
+    real(8),optional,dimension(size(bath,1))        :: Jx_ii   !site-dependent values for :f:var:`jx` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
     logical,optional                                :: iflag   !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) Green's functions and susceptibilities. Default :code:`.true.` . 
     !
     !MPI  auxiliary vars
