@@ -1,4 +1,7 @@
 MODULE ED_OBSERVABLES_NORMAL
+!This module calculates, starting from the impurity problem eigenvectors, a series of observables, and stores 
+!them in aptly named plain-text files. Unless explicitly specified, the dimensions of the observables are scalar
+!or array-like with each component of length :f:var:`norb` .
   USE SF_CONSTANTS, only:zero,pi,xi
   USE SF_IOTOOLS, only:free_unit,reg,txtfy
   USE SF_ARRAYS, only: arange
@@ -18,23 +21,28 @@ MODULE ED_OBSERVABLES_NORMAL
   public :: local_energy_normal
 
   logical,save                       :: iolegend=.true.
-  real(8),dimension(:),allocatable   :: dens,dens_up,dens_dw
-  real(8),dimension(:),allocatable   :: docc
-  real(8),dimension(:),allocatable   :: magz
-  real(8),dimension(:,:),allocatable :: sz2,n2
-  real(8),dimension(:,:),allocatable :: exct_s0
-  real(8),dimension(:,:),allocatable :: exct_tz
-  real(8),dimension(:,:),allocatable :: zimp,simp
-  real(8)                            :: dens_ph
-  real(8)                            :: X_ph, X2_ph
-  real(8)                            :: s2tot
-  real(8)                            :: Egs
+  real(8),dimension(:),allocatable   :: dens ! orbital-resolved charge density
+  real(8),dimension(:),allocatable   :: dens_up ! orbital-resolved spin-:math:`uparrow` electron density
+  real(8),dimension(:),allocatable   :: dens_dw ! orbital-resolved spin-:math:`downarrow` electron density
+  real(8),dimension(:),allocatable   :: docc ! orbital-resolved double occupation
+  real(8),dimension(:),allocatable   :: magz ! orbital-resolved magnetization ( :code:`z` component )
+  real(8),dimension(:,:),allocatable :: n2 ! :math:`\langle n_{i} n_{j} \rangle` for i,j orbitals
+  real(8),dimension(:,:),allocatable :: sz2! :math:`\langle S^{z}_{i} S^{z}_{j} \rangle` for i,j orbitals
+  real(8),dimension(:,:),allocatable :: exct_s0 !excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{0}c_{js^{'}} \rangle`
+  real(8),dimension(:,:),allocatable :: exct_tz !excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{z}c_{js^{'}} \rangle`
+  real(8),dimension(:,:),allocatable :: zimp !quasiparticle weight
+  real(8),dimension(:,:),allocatable :: simp !scattering rate
+  real(8)                            :: dens_ph !phonon density
+  real(8)                            :: X_ph ! :math:`\langle X \rangle` with :math:`X = \frac{b + b^{dagger}}{2}`
+  real(8)                            :: X2_ph ! :math:`\langle X^{2} \rangle` with :math:`X = \frac{b + b^{dagger}}{2}`
+  real(8)                            :: s2tot ! :math:`\langle S_{z}^{2} \rangle`
+  real(8)                            :: Egs ! Ground-state energy
   real(8)                            :: Ei
-  real(8),dimension(:),allocatable   :: Prob
-  real(8),dimension(:),allocatable   :: prob_ph
-  real(8),dimension(:),allocatable   :: pdf_ph
-  real(8),dimension(:,:),allocatable :: pdf_part
-  real(8)                            :: w_ph
+  real(8),dimension(:),allocatable   :: Prob ! Probability distribution
+  real(8),dimension(:),allocatable   :: prob_ph ! Phonon probability
+  real(8),dimension(:),allocatable   :: pdf_ph ! Phonon probability distribution :f:func:`prob_distr_ph`
+  real(8),dimension(:,:),allocatable :: pdf_part ! Lattice probability distribution as obtained by :f:func:`prob_distr_ph`
+  real(8)                            :: w_ph ! Renormalized phonon frequency
   !
   integer                            :: iorb,jorb,iorb1,jorb1
   integer                            :: ispin,jspin
@@ -67,6 +75,7 @@ contains
   !PURPOSE  : Lanc method
   !+-------------------------------------------------------------------+
   subroutine observables_normal()
+    !Calculate the values of the local observalbes
     integer                         :: iprob,istate,Nud(2,Ns),iud(2),jud(2),val
     integer,dimension(2*Ns_Ud)      :: Indices,Jndices
     integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
@@ -446,6 +455,7 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_normal()
+    !Calculate the value of the local energy components
     integer                             :: istate,iud(2),jud(2)
     integer,dimension(2*Ns_Ud)          :: Indices,Jndices
     integer,dimension(Ns_Ud,Ns_Orb)     :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
@@ -701,6 +711,7 @@ contains
   !PURPOSE  : get scattering rate and renormalization constant Z
   !+-------------------------------------------------------------------+
   subroutine get_szr()
+    !Calculate the values of the scattering rate and quasiparticle weight
     integer                  :: ispin,iorb
     real(8)                  :: wm1,wm2
     wm1 = pi/beta ; wm2=3d0*pi/beta
@@ -719,6 +730,7 @@ contains
   !PURPOSE  : write legend, i.e. info about columns 
   !+-------------------------------------------------------------------+
   subroutine write_legend()
+!Write a plain-text file called :code:`observables_info.ed` detailing the names and contents of the observable output files
     integer :: unit,iorb,jorb,ispin,stride
     
     unit = free_unit()
@@ -775,6 +787,7 @@ contains
   end subroutine write_legend
 
   subroutine write_energy_info()
+!Write a plain-text file called :code:`energy_info.ed` containing a legend for the energy output file
     integer :: unit
     unit = free_unit()
     open(unit,file="energy_info.ed")
@@ -793,6 +806,7 @@ contains
   !PURPOSE  : write observables to file
   !+-------------------------------------------------------------------+
   subroutine write_observables()
+!Write the observable output files
     integer :: unit
     integer :: iorb,jorb,ispin
     !
@@ -936,6 +950,7 @@ contains
   end subroutine write_observables
 
   subroutine write_energy()
+!Write the latest iteration values of energy observables
     integer :: unit
     unit = free_unit()
     open(unit,file="energy_last"//reg(ed_file_suffix)//".ed")
@@ -944,6 +959,7 @@ contains
   end subroutine write_energy
 
   subroutine write_pdf()
+!Write the lattice probability distribution function
     integer :: unit,i
     real(8) :: x,dx
     unit = free_unit()
@@ -963,9 +979,9 @@ contains
   !PURPOSE  : subroutines useful for the phonons
   !+-------------------------------------------------------------------+
 
-  !Compute the local lattice probability distribution function (PDF), i.e. the local probability of displacement
-  !as a function of the displacement itself
   subroutine prob_distr_ph(vec,val)
+!Compute the local lattice probability distribution function (PDF), i.e. the local probability of displacement
+!as a function of the displacement itself
     real(8),dimension(:) :: vec
     real(8)              :: psi(0:DimPh-1)
     real(8)              :: x,dx
@@ -995,9 +1011,10 @@ contains
     enddo
   end subroutine prob_distr_ph
 
-  !Compute the Hermite functions (i.e. harmonic oscillator eigenfunctions)
-  !the output is a vector with the functions up to order Dimph-1 evaluated at position x
+
   subroutine Hermite(x,psi)
+!Compute the Hermite functions (i.e. harmonic oscillator eigenfunctions)
+!the output is a vector with the functions up to order Dimph-1 evaluated at position x
     real(8),intent(in)  ::  x
     real(8),intent(out) ::  psi(0:DimPh-1)
     integer             ::  i
