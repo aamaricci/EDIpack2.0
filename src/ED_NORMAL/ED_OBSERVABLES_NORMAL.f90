@@ -22,8 +22,8 @@ MODULE ED_OBSERVABLES_NORMAL
 
   logical,save                       :: iolegend=.true.
   real(8),dimension(:),allocatable   :: dens ! orbital-resolved charge density
-  real(8),dimension(:),allocatable   :: dens_up ! orbital-resolved spin-:math:`uparrow` electron density
-  real(8),dimension(:),allocatable   :: dens_dw ! orbital-resolved spin-:math:`downarrow` electron density
+  real(8),dimension(:),allocatable   :: dens_up ! orbital-resolved spin-:math:`\uparrow` electron density
+  real(8),dimension(:),allocatable   :: dens_dw ! orbital-resolved spin-:math:`\downarrow` electron density
   real(8),dimension(:),allocatable   :: docc ! orbital-resolved double occupation
   real(8),dimension(:),allocatable   :: magz ! orbital-resolved magnetization ( :code:`z` component )
   real(8),dimension(:,:),allocatable :: n2 ! :math:`\langle n_{i} n_{j} \rangle` for i,j orbitals
