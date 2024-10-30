@@ -37,7 +37,7 @@ The initialization of the code is:
 
       
 where we load both the `EDIpack2.0` and `SciFortran` libraries through
-their main module :f:mod:`edipac2` and :f:mod:`scifor`. We also define
+their main module :f:mod:`edipack2` and :f:mod:`scifor`. We also define
 some local variables and proceed with reading the input file
 :code:`"inputED.conf"` using the `EDIpack2.0` function
 :f:func:`ed_read_input`.
