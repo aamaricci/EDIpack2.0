@@ -1,3 +1,17 @@
+Impurity Diagonalization 
+###########################
+
+The :f:mod:`ed_diag`  provides a single interface  to all the different
+diagonalization procedures available in the code.
+This is used in the :f:mod:`ed_main` Fortran API. 
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   diag
+   
+   
 Normal mode
 ###########################
 
@@ -58,17 +72,3 @@ conservation, as for instance in presence of Spin-Orbit coupling.
 
    nonsu2/01_diag
 
-
-
-Impurity Diagonalization 
-###########################
-
-The :f:mod:`ed_diag`  provides a single interface  to all the different
-diagonalization procedures available in the code.
-This is used in the :f:mod:`ed_main` Fortran API. 
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   diag

@@ -1,3 +1,19 @@
+Impurity Green's functions
+###########################
+
+The :f:mod:`ed_greens_functions` and :f:mod:`ed_chi_functions` (only
+for :f:var:`ed_mode` = :code:`normal`) provide
+two simple interfaces to all the different dynamical response functions
+calculation procedures available in the code. 
+This is used  in the :f:mod:`ed_main` Fortran API. 
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   greensfunctions
+   
+
 Normal mode
 ###########################
 
@@ -62,20 +78,3 @@ conservation, as for instance in presence of Spin-Orbit coupling.
 
    nonsu2/03_greensfunctions
 
-
-
-
-Impurity Green's functions
-###########################
-
-The :f:mod:`ed_greens_functions` and :f:mod:`ed_chi_functions` (only
-for :f:var:`ed_mode` = :code:`normal`) provide
-two simple interfaces to all the different dynamical response functions
-calculation procedures available in the code. 
-This is used  in the :f:mod:`ed_main` Fortran API. 
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   greensfunctions
