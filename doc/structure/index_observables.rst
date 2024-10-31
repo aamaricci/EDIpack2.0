@@ -1,4 +1,16 @@
+Impurity observbales
+###########################
 
+The :f:mod:`ed_observables`  provides a single interface  to all the different
+observables and static correlation calculation procedures available in the code.
+This is used in the :f:mod:`ed_main` Fortran API. 
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   observables
+   
 
 Normal mode
 ###########################
@@ -59,18 +71,3 @@ conservation, as for instance in presence of Spin-Orbit coupling.
 
    nonsu2/05_observables
 
-
-
-
-Impurity observbales
-###########################
-
-The :f:mod:`ed_observables`  provides a single interface  to all the different
-observables and static correlation calculation procedures available in the code.
-This is used in the :f:mod:`ed_main` Fortran API. 
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   observables
