@@ -1,3 +1,3 @@
-A dive into superconductivity: attractive Hubbard model 
+Attractive Hubbard model: a dive into superconductivity
 #######################################################
 

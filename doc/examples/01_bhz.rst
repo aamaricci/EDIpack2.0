@@ -1,3 +1,3 @@
-A simple topological model: interacting Bernevig-Hughes-Zhang model
+Interacting Bernevig-Hughes-Zhang model	
 ###################################################################
 

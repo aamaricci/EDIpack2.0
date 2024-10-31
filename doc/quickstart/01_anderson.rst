@@ -1,4 +1,4 @@
-Single Impurity Anderson problem
+Solving a Single Impurity Anderson model
 #########################################
 
 In this section we use the methods in `EDIpack2.0`  to solve a simple

@@ -1,5 +1,5 @@
-ED solver for Dynamical Mean-Field Theory
-#########################################
+Solving Dynamical Mean-Field Theory with `EDIpack2.0`
+############################################################
 
 In this section we take a step further to show how to integrate the
 `EDIpack2.0` as a solver for Dynamical Mean-Field Theory calculations. 
