@@ -33,9 +33,9 @@ contains
     ! Build the quantum impurity electrons Green's functions :math:`\hat{G}` , the self-energy :math:`\hat{\Sigma}` and the phonons Green's function :math:`\hat{D}` , calling the correct procedure according to the value of :f:var:`ed_mode` .
     ! Write the results on file according to the values of input variables :f:var:`ed_print_g` , :f:var:`ed_print_sigma` and :f:var:`ed_print_g0` .
     !
-    ! * :f:var:`normal` : :f:var:`build_gf_normal` and :f:var:`build_sigma_normal`
-    ! * :f:var:`superc` : :f:var:`build_gf_superc` and :f:var:`build_sigma_superc`
-    ! * :f:var:`nonsu2` : :f:var:`build_gf_nonsu2` and :f:var:`build_sigma_nonsu2`
+    ! * :code:`normal` : :f:func:`build_gf_normal` and :f:func:`build_sigma_normal`
+    ! * :code:`superc` : :f:func:`build_gf_superc` and :f:func:`build_sigma_superc`
+    ! * :code:`nonsu2` : :f:func:`build_gf_nonsu2` and :f:func:`build_sigma_nonsu2`
     !
     !
 #ifdef _DEBUG
@@ -96,11 +96,11 @@ contains
 
   subroutine rebuildGF_impurity()
     ! Re-build the quantum impurity electrons Green's functions :math:`\hat{G}` , the self-energy :math:`\hat{\Sigma}` and the phonons Green's function :math:`\hat{D}` , calling the correct procedure according to the value of :f:var:`ed_mode` using the :f:var:`impgmatrix` .
-    ! Write the results on file according to the values of input variables :f:var:`ed_print_g` , :f:var:`ed_print_sigma` and :f:var:`ed_print_g0` .
+    ! Write the results on file according to the values of input variables :f:func:`ed_print_g` , :f:func:`ed_print_sigma` and :f:func:`ed_print_g0` .
     !
-    ! * :f:var:`normal` : :f:var:`rebuild_gf_normal` and :f:var:`build_sigma_normal`
-    ! * :f:var:`superc` : :f:var:`rebuild_gf_superc` and :f:var:`build_sigma_superc`
-    ! * :f:var:`nonsu2` : :f:var:`rebuild_gf_nonsu2` and :f:var:`build_sigma_nonsu2`
+    ! * :code:`normal` : :f:func:`rebuild_gf_normal` and :f:func:`build_sigma_normal`
+    ! * :code:`superc` : :f:func:`rebuild_gf_superc` and :f:func:`build_sigma_superc`
+    ! * :code:`nonsu2` : :f:func:`rebuild_gf_nonsu2` and :f:func:`build_sigma_nonsu2`
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG rebuild_GF: re-building GF"
 #endif
