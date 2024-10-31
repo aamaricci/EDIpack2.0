@@ -149,12 +149,73 @@ The cycle close with a simple error check on the Weiss field itself.
    <hr>
 
 
-In the following we present some results obtained with this simple
-method.
+In the following we present some results obtained by executing this
+simple program varying the interaction strenght :f:var:`uloc`.
+Differently from the previous case of a quantum impurity embedded in a
+given bath describing the progressive formation of a
+strongly renormalized Fermi liquid state, here the DMFT
+self-consistency allows to describe the transition from a correlated
+metal to a Mott insulating state.
 
 
+To illustrate this point, in panel **A** we report the evolution of
+the spectral function :math:`-{\rm Im}G(\omega)/\pi` as a function of
+:math:`U`. Despite the *spiky* nature of the spectrum, due to the
+finite size (i.e. number of poles) of the discretized effective bath,
+one can clearly distinguish the renormalization of the central
+quasi-particle peak at low-energy and the concomitant formation of
+rather incoherent  high-energy features which will develop into
+Hubbard bands for :math:`U>U_c`, with :math:`U_c\simeq 2.8D`. 
 
 
 .. image:: 02_dmft_fig.svg
    :class: with-border
    :width: 800px
+
+
+In the panels (B) and (C) we further discuss the metal-insulator
+transition by showing the evolution of the self-energy functions.
+In panel (B) we report the self-energy :math:`{\rm Im}\Sigma(i\omega)`
+on the Matsubara axis in the low energy regime. Increasing :math:`U`
+we observe the progressive growth of this function until it takes a
+diverging behavior crossing the critical interaction strenght. We
+recall that this behavior can be observed on the Matsubara axis
+because of the particle-hole symmetry of the problem.
+
+Using the relation:
+
+.. math::
+
+   \frac{\Im\Sigma(i\omega_n)}{\omega_n}_{|_{\omega_n\rightarrow 0}}=
+   \frac{1}{\pi}\int_{\mathbb R}d\epsilon \frac{\Re\Sigma(\epsilon)}{\epsilon^2}=
+   \frac{\partial\Re\Sigma}{\partial\omega}_{|_{\omega\rightarrow 0}}.
+
+we can extract the quasi-particle renormalization constant :math:`Z`
+from the linear behavior of  :math:`{\rm Im}\Sigma(i\omega)` near
+:math:`\omega=0` in the metallic regime. The results are highlighted
+in the figure and the values of :math:`Z` are reported in the legend.
+
+Using the right hand side of the previous relation, we show in
+panel (C) the behavior of :math:`{\rm Re}\Sigma(\omega)`
+on the real axis around the Fermi level. Again, increasing :math:`U`
+we observe the slope of the linear behavior to increase until the
+critical point is crossed and an insulating state is reached. On the
+real-axis this is signaled by the divergence of the imaginary part of
+the self-energy   :math:`{\rm Im}\Sigma(\omega) \rightarrow -\infty`
+near the chemical potential, which here is set to zero by
+particle-hole symmetry. The corresponding real part shows a
+discontinuity visibile in the panel (C). 
+
+
+In panel (D)  we show the results of the :math:`\chi^2` fit procedure
+projecting the Weiss field :math:`{\cal G}_0` onto the space of
+Anderson non-interacting Green's functions with a finite number of
+parameters. The quality of the fit is very good, notwithstanding some
+small oscillations at low frequency related to the nature of the
+rational functions in :math:`G^{\rm And}`.
+
+Finally, in panel (E) we show the critical slowing down of the
+solution upon approaching the Mott transition at :math:`U=U_c`. The
+data report the behavior of the convergence error check in terms of
+relative difference of the Weiss fields between two successive steps.  
+
