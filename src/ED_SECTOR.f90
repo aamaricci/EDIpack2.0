@@ -1,4 +1,7 @@
 MODULE ED_SECTOR
+  !
+  !Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones. 
+!
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_AUX_FUNX

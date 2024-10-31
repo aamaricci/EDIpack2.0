@@ -1,14 +1,6 @@
 Bath Dimension routines
 ============================
 
-..
- .. raw:: html
-    :file:  ../graphs/bath_aux/02_ed_bath_dim.html
-
- |
-
-
-Check / operate on bath dimensions
 
 .. f:automodule::   ed_bath_dim
 

@@ -1,4 +1,6 @@
 MODULE ED_BATH_USER
+  !Implements functions the user can use to enforce specific symmetry operations on the bath array.
+  !
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,str
   USE SF_LINALG, only: eye,inv

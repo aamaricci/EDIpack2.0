@@ -1,4 +1,6 @@
 MODULE ED_BATH_AUX
+  !Implements a number of auxiliary procedures used to construct replica/general bath
+  !
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,str
   USE SF_LINALG, only: eye,inv
@@ -22,7 +24,6 @@ MODULE ED_BATH_AUX
 
 
   interface get_Whyb_matrix
-     !
      ! This subroutine build up the hybridization matrix :math:`W_{\sigma\sigma^{'}}` used in the :f:var:`ed_mode` = nonsu2 with :f:var:`bath_type` = hybrid. The input can have different shape and type:
      !
      !   * :f:var:`u` , :f:var:`v` with dimensions [ |Nspin| , |Norb| ]  

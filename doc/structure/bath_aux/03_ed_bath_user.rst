@@ -1,16 +1,7 @@
 User Bath symmetry operations
 =================================
 
-..
- .. raw:: html
-    :file:  ../graphs/bath_dmft/02_ed_bath_user.html
 
- |
-
-
-In this module we implement few functions to let the user implement
-common symmetry operation on the bath array. In some cases using such
-operations can help the convergence of DMFT calculations.
 
 
 .. f:automodule::   ed_bath_user

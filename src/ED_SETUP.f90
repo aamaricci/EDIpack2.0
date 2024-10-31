@@ -1,4 +1,7 @@
 MODULE ED_SETUP
+  !
+  !Contains procedures to set up the Exact Diagonalization calculation, executing all internal consistency checks and allocation of the global memory.
+  !
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_AUX_FUNX
@@ -20,7 +23,7 @@ MODULE ED_SETUP
   public :: get_normal_sector_dimension
   public :: get_superc_sector_dimension
   public :: get_nonsu2_sector_dimension
-  
+
 contains
 
   subroutine ed_checks_global
@@ -165,7 +168,7 @@ contains
 
 
 
-  
+
 
   !+------------------------------------------------------------------+
   !PURPOSE  : Init ED structure and calculation
@@ -472,7 +475,7 @@ contains
 
 
 
- 
+
 
 
 
@@ -637,7 +640,7 @@ contains
 
   !SUPERCONDUCTING
   subroutine setup_global_superc
-        !Setup the local Fock space maps used in the ED calculation for the **superc** operative mode. All sectors dimensions, quantum numbers, twin sectors and list of requested eigensolutions for each sectors are defined here. Identify Bath positions stride for a given value of :code:`bath_type`. Determines the sector indices for :math:`\pm` -particle with :math:`\sigma=\uparrow,\downarrow`.
+    !Setup the local Fock space maps used in the ED calculation for the **superc** operative mode. All sectors dimensions, quantum numbers, twin sectors and list of requested eigensolutions for each sectors are defined here. Identify Bath positions stride for a given value of :code:`bath_type`. Determines the sector indices for :math:`\pm` -particle with :math:`\sigma=\uparrow,\downarrow`.
     integer                                           :: i,isz,in,dim,isector,jsector
     integer                                           :: sz,iorb,jsz
     integer                                           :: unit,status,istate
@@ -756,7 +759,7 @@ contains
 
   !NON SU(2)
   subroutine setup_global_nonsu2
-        !Setup the local Fock space maps used in the ED calculation for the **nonsu2** operative mode. All sectors dimensions, quantum numbers, twin sectors and list of requested eigensolutions for each sectors are defined here. Identify Bath positions stride for a given value of :code:`bath_type`. Determines the sector indices for :math:`\pm` -particle with :math:`\sigma=\uparrow,\downarrow`.
+    !Setup the local Fock space maps used in the ED calculation for the **nonsu2** operative mode. All sectors dimensions, quantum numbers, twin sectors and list of requested eigensolutions for each sectors are defined here. Identify Bath positions stride for a given value of :code:`bath_type`. Determines the sector indices for :math:`\pm` -particle with :math:`\sigma=\uparrow,\downarrow`.
     integer                                           :: i,dim,isector,jsector
     integer                                           :: in,jn,iorb,ispin
     integer                                           :: unit,status,istate
@@ -987,7 +990,7 @@ contains
     dim=binomial(2*Ns,n)
   end function get_nonsu2_sector_dimension
 
-  
+
   function get_nonsu2_sector_dimension_Jz(n,twoJz) result(dim)
     integer :: n
     integer :: twoJz

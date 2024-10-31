@@ -1,4 +1,6 @@
 MODULE ED_BATH_DIM
+  !Returns or check the dimensions to which the user should allocate the bath array.
+  !
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,str
   USE SF_LINALG, only: eye,inv

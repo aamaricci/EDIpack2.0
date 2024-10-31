@@ -1,4 +1,6 @@
 MODULE ED_BATH_REPLICA
+  !In these module we implement the functions to set the matrix basis :math:`\{ \hat{O}_i \}_{i=1,\dots,N_{sym}}` and the initial variational parameters :math:`\vec{\lambda}` used to decompose each local bath hamiltonian for the  :f:var:`replica` and :f:var:`general` bath types.  
+  !
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,str
   USE SF_LINALG, only: eye,inv

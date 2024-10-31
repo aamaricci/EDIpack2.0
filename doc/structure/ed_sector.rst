@@ -2,9 +2,7 @@ Quantum Numbers Sectors
 ============================
 
 The :mod:`ed_sector` represents a key part of the ED code. Here the
-symmetry sectors corresponding to a given set of quantum numbers
-:math:`\vec{Q}` are
-built. This step essentially consist in the construction of the
+symmetry sectors construction  essentially consist in the determination of the
 injective map :math:`{\cal M}:{\cal S}(\vec{Q})\rightarrow{\cal F}`
 relating the states of the sectors :math:`|i\rangle\in{\cal
 S}(\vec{Q})` to the corresponding ones :math:`|I\rangle\in{\cal F}` in

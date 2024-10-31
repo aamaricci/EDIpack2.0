@@ -1,18 +1,7 @@
 Sparse Matrices 
 =======================
 
-..
- .. raw:: html
-    :file:  ../graphs/classes/01_ed_sparse_matrix.html
-
- |
-
-
-This class defines a data structure to efficiently store sparse
-matrices into dedicated CSR matrices. The class features support to
-MPI parallel storage, so that each matrix is spread across the
-threads.
-
+Implements sparse matrices data structures as dedicated CSR matrices. 
 Each instance of :f:var:`sparse_matrix_csr` corresponds to a rank-1
 array of dynamically reallocated rows, :f:var:`sparse_row_csr`,
 including one array for columns indices and one array for non-zero

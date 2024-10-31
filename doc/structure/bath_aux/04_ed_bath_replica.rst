@@ -1,17 +1,7 @@
 Bath Replica routines
 ============================
 
-..
- .. raw:: html
-    :file:  ../graphs/bath_dmft/03_ed_bath_replica.html
 
- |
-
-In these module we implement the functions to set the matrix basis
-:math:`\{ \hat{O}_i \}_{i=1,\dots,N_{sym}}` and the initial
-variational parameters :math:`\vec{\lambda}` used to decompose each
-local bath hamiltonian for the  :f:var:`replica` and :f:var:`general`
-bath types.  
 
 .. f:automodule::   ed_bath_replica
 

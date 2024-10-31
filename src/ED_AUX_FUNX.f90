@@ -1,4 +1,8 @@
 MODULE ED_AUX_FUNX
+  !
+  !Hosts a number of auxiliary procedures required in different parts of the code.
+  !Specifically, it implements: creation/annihilation fermionic operators, binary decomposition of integer representation of Fock states and setup the local impurity Hamiltonian
+  !
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE SF_TIMER

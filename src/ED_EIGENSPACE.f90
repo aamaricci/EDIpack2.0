@@ -1,4 +1,7 @@
 module ED_EIGENSPACE
+  !
+  !A class implementing a data structure to efficiently store the low part of the Fock space spectrum, automatically spreading and retrieving the eigenstates among/from MPI threads. 
+  !
   USE ED_VARS_GLOBAL
   USE ED_AUX_FUNX
   USE ED_SECTOR

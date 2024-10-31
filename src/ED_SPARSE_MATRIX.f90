@@ -1,4 +1,7 @@
 MODULE ED_SPARSE_MATRIX
+  !This class defines a data structure to efficiently store sparse matrices into dedicated CSR matrices, featuring support to MPI parallel storage, so that each matrix is spread across the threads.
+  !
+  !
   USE ED_INPUT_VARS
 #ifdef _MPI
   USE SF_MPI

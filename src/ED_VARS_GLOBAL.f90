@@ -1,4 +1,8 @@
 MODULE ED_VARS_GLOBAL
+  !
+  !Contains all variables, arrays and derived types instances shared throughout the code.
+  !Specifically, it contains definitions of the :f:var:`effective_bath`, the :f:var:`gfmatrix` and the :f:var:`sector` data structures. 
+  !
   USE SF_CONSTANTS
   USE SF_IOTOOLS, only:free_unit,reg,str
   USE ED_SPARSE_MATRIX
