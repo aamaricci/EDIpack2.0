@@ -1,7 +1,5 @@
 MODULE ED_OBSERVABLES_NORMAL
-!This module calculates, starting from the impurity problem eigenvectors, a series of observables, and stores 
-!them in aptly named plain-text files. Unless explicitly specified, the dimensions of the observables are scalar
-!or array-like with each component of length :f:var:`norb` .
+!This module calculates a series of observables, and stores them in aptly named plain-text files. :f:var:`ed_mode` = :code:`normal`
   USE SF_CONSTANTS, only:zero,pi,xi
   USE SF_IOTOOLS, only:free_unit,reg,txtfy
   USE SF_ARRAYS, only: arange
@@ -75,7 +73,7 @@ contains
   !PURPOSE  : Lanc method
   !+-------------------------------------------------------------------+
   subroutine observables_normal()
-    !Calculate the values of the local observalbes
+    !Calculate the values of the local observables
     integer                         :: iprob,istate,Nud(2,Ns),iud(2),jud(2),val
     integer,dimension(2*Ns_Ud)      :: Indices,Jndices
     integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
@@ -711,7 +709,7 @@ contains
   !PURPOSE  : get scattering rate and renormalization constant Z
   !+-------------------------------------------------------------------+
   subroutine get_szr()
-    !Calculate the values of the scattering rate and quasiparticle weight
+!Calculate the values of the scattering rate and quasiparticle weight
     integer                  :: ispin,iorb
     real(8)                  :: wm1,wm2
     wm1 = pi/beta ; wm2=3d0*pi/beta
@@ -806,7 +804,8 @@ contains
   !PURPOSE  : write observables to file
   !+-------------------------------------------------------------------+
   subroutine write_observables()
-!Write the observable output files
+!Write the observable output files. Filenames with suffix :code:`_all` contain values for all DMFT interations, those with suffix :code:`_last` 
+!only values for the last iteration
     integer :: unit
     integer :: iorb,jorb,ispin
     !

@@ -26,6 +26,14 @@ contains
 
 
   subroutine observables_impurity()
+! 
+! Calculate the local observables calling the correct procedure according to the value of :f:var:`ed_mode` .
+! Write the results on plain-text files.
+!
+! * :code:`normal` : :f:func:`observables_normal`
+! * :code:`superc` : :f:func:`observables_superc`
+! * :code:`nonsu2` : :f:func:`observables_nonsu2`
+!
     write(LOGfile,"(A)")"Get observables:"
     select case(ed_mode)
     case default  ;call observables_normal()
@@ -36,6 +44,14 @@ contains
 
 
   subroutine local_energy_impurity()
+! 
+! Calculate the local energy calling the correct procedure according to the value of :f:var:`ed_mode` .
+! Write the results on plain-text files.
+!
+! * :code:`normal` : :f:func:`local_energy_normal`
+! * :code:`superc` : :f:func:`local_energy_superc`
+! * :code:`nonsu2` : :f:func:`local_energy_nonsu2`
+!
     write(LOGfile,"(A)")"Get local energy:"
     select case(ed_mode)
     case default  ;call local_energy_normal()

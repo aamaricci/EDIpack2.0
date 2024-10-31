@@ -1,4 +1,5 @@
 MODULE ED_OBSERVABLES_NONSU2
+!This module calculates a series of observables, and stores them in aptly named plain-text files. :f:var:`ed_mode` = :code:`nonsu2`
   USE SF_CONSTANTS, only:zero,pi,xi
   USE SF_IOTOOLS, only:free_unit,reg,txtfy
   USE SF_ARRAYS, only: arange
@@ -20,18 +21,24 @@ MODULE ED_OBSERVABLES_NONSU2
 
 
   logical,save                          :: iolegend=.true.
-  real(8),dimension(:),allocatable      :: dens,dens_up,dens_dw
-  real(8),dimension(:),allocatable      :: docc
-  real(8),dimension(:),allocatable      :: magZ,magX,magY
-  real(8),dimension(:),allocatable      :: phisc
-  real(8),dimension(:,:),allocatable    :: sz2,n2
-  real(8),dimension(:,:),allocatable    :: exct_s0
-  real(8),dimension(:,:),allocatable    :: exct_tz
-  real(8),dimension(:,:),allocatable    :: exct_tx
-  real(8),dimension(:,:),allocatable    :: exct_ty
-  real(8),dimensioN(:,:),allocatable    :: zimp,simp
-  real(8)                               :: s2tot
-  real(8)                               :: Egs
+  real(8),dimension(:),allocatable      :: dens ! orbital-resolved charge density
+  real(8),dimension(:),allocatable      :: dens_up ! orbital-resolved spin-:math:`\uparrow` electron density
+  real(8),dimension(:),allocatable      :: dens_dw ! orbital-resolved spin-:math:`\downarrow` electron density
+  real(8),dimension(:),allocatable      :: docc ! orbital-resolved double occupation
+  real(8),dimension(:),allocatable      :: magx ! orbital-resolved magnetization ( :code:`x` component )
+  real(8),dimension(:),allocatable      :: magy ! orbital-resolved magnetization ( :code:`y` component )
+  real(8),dimension(:),allocatable      :: magz ! orbital-resolved magnetization ( :code:`z` component )
+  real(8),dimension(:),allocatable      :: phisc ! superconductive order parameter
+  real(8),dimension(:,:),allocatable    :: n2 ! :math:`\langle n_{i} n_{j} \rangle` for i,j orbitals
+  real(8),dimension(:,:),allocatable    :: sz2! :math:`\langle S^{z}_{i} S^{z}_{j} \rangle` for i,j orbitals
+  real(8),dimension(:,:),allocatable    :: exct_s0 ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{0}c_{js^{'}} \rangle`
+  real(8),dimension(:,:),allocatable    :: exct_tx ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{x}c_{js^{'}} \rangle`
+  real(8),dimension(:,:),allocatable    :: exct_ty ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{y}c_{js^{'}} \rangle`
+  real(8),dimension(:,:),allocatable    :: exct_tz ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{z}c_{js^{'}} \rangle`
+  real(8),dimension(:,:),allocatable    :: zimp ! quasiparticle weight
+  real(8),dimension(:,:),allocatable    :: simp ! scattering rate
+  real(8)                               :: s2tot ! :math:`\langle S_{z}^{2} \rangle`
+  real(8)                               :: Egs ! Ground-state energy
   real(8)                               :: Ei
   !
   integer                               :: iorb,jorb,istate
@@ -68,6 +75,7 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_nonsu2()
+    !Calculate the values of the local observables
     integer,dimension(2*Ns)      :: ib
     integer,dimension(2,Ns)      :: Nud
     integer,dimension(Ns)        :: IbUp,IbDw
@@ -655,6 +663,7 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_nonsu2()
+    !Calculate the value of the local energy components
     integer,dimension(2*Ns) :: ib
     integer,dimension(2,Ns) :: Nud
     integer,dimension(Ns)   :: IbUp,IbDw
@@ -911,6 +920,7 @@ contains
   !PURPOSE  : get scattering rate and renormalization constant Z
   !+-------------------------------------------------------------------+
   subroutine get_szr()
+!Calculate the values of the scattering rate and quasiparticle weight
     integer                  :: ispin,iorb
     real(8)                  :: wm1,wm2
     wm1 = pi/beta ; wm2=3d0*pi/beta
@@ -929,6 +939,7 @@ contains
   !PURPOSE  : write legend, i.e. info about columns 
   !+-------------------------------------------------------------------+
   subroutine write_legend()
+!Write a plain-text file called :code:`observables_info.ed` detailing the names and contents of the observable output files
     integer :: unit,iorb,jorb,ispin
     !
     unit = free_unit()
@@ -1008,6 +1019,8 @@ contains
   !PURPOSE  : write observables to file
   !+-------------------------------------------------------------------+
   subroutine write_observables()
+!Write the observable output files. Filenames with suffix :code:`_all` contain values for all DMFT interations, those with suffix :code:`_last` 
+!only values for the last iteration
     integer :: unit
     integer :: iorb,jorb,ispin
     !
@@ -1171,6 +1184,7 @@ contains
   end subroutine write_observables
 
   subroutine write_energy()
+!Write the latest iteration values of energy observables
     integer :: unit
     unit = free_unit()
     open(unit,file="energy_last"//reg(ed_file_suffix)//".ed")
