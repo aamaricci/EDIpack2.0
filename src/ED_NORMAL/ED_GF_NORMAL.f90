@@ -1,4 +1,5 @@
 MODULE ED_GF_NORMAL
+  !Constructs the interacting impurity electronic Green's functions. On request it evaluated the phononic Green's functions and and different susceptibilities.  
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER  
   USE SF_IOTOOLS, only: str,reg,txtfy

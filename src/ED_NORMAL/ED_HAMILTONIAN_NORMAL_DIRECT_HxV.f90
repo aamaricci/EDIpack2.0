@@ -1,5 +1,6 @@
-! > SPARSE MAT-VEC DIRECT ON-THE-FLY PRODUCT 
 MODULE ED_HAMILTONIAN_NORMAL_DIRECT_HxV
+  !Constructs and applies on-the-fly each term of the sector Hamiltonian to the input
+  !vector :math:`\vec{w} = H\times \vec{v}` in a Arpack/Lanczos framework.
   USE ED_HAMILTONIAN_NORMAL_COMMON
   implicit none
   private

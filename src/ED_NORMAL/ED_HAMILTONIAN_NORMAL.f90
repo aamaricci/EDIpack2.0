@@ -1,4 +1,6 @@
 MODULE ED_HAMILTONIAN_NORMAL
+  !Setup and build the sector Hamiltonian, returns the correct dimension of the vectors in the Arpack/Lanczos procedure in each thread and provides an interface to Tri-Diagonalize the Hamiltonian on a Krylov basis given a starting vector.
+  !
   USE ED_HAMILTONIAN_NORMAL_COMMON
   USE ED_HAMILTONIAN_NORMAL_STORED_HxV
   USE ED_HAMILTONIAN_NORMAL_DIRECT_HxV

@@ -1,4 +1,6 @@
 MODULE ED_HAMILTONIAN_NORMAL_COMMON
+  !Global variables related to sector Hamiltonian construction. It  contains the :f:func:`vector_transpose_mpi` implementing the  MPI :code:`Allv-2-Allv` parallel matrix transposition.
+  !
   USE SF_MISC,    only: assert_shape
   USE SF_LINALG,  only: kronecker_product,eye
   USE SF_SP_LINALG, only: sp_lanc_tridiag

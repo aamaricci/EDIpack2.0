@@ -1,5 +1,6 @@
-! > BUILD SPARSE HAMILTONIAN of the SECTOR
 MODULE ED_HAMILTONIAN_NORMAL_STORED_HxV
+  !Constructs each terms of the sector Hamiltonian storing them into different :f:var:`sparse_matrix` instances, implement the corresponding matrix-vector products using stored sparse matrices. 
+  !
   USE ED_HAMILTONIAN_NORMAL_COMMON
   implicit none
   private

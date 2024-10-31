@@ -1,4 +1,5 @@
 MODULE ED_BATH_DMFT
+  !A class for the the :f:var:`effective_bath` data structure describing the effective bath in the code. 
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,str
   USE SF_LINALG, only: eye,inv

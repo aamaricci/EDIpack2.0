@@ -1,4 +1,6 @@
 MODULE ED_BATH_FUNCTIONS
+  !A comprehensive set of procedures to evaluate the non-interacting impurity Green's functions :math:`\hat{G}^{\rm And}` and hybridizations :math:`\hat{F}^{\rm And}` in the complex frequency domain given the :f:var:`effective_bath` instance.
+  !
   USE SF_CONSTANTS, only: zero
   USE SF_IOTOOLS, only:free_unit,reg,file_length,txtfy,str
   USE SF_LINALG, only: eye,inv,diag,zeye,inv_her,kron

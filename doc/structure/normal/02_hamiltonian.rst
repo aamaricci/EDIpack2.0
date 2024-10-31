@@ -2,10 +2,9 @@ Hamiltonian Setup
 ============================
 
 
-In :f:var:`ed_hamiltonian_normal` we implement procedures to setup and
-build the sector Hamiltonian which are then used elsewhere to obtain
-the low part of the energy spectrum or construct the dynamical response
-functions. 
+In :f:var:`ed_hamiltonian_normal` we  setup and build the sector
+Hamiltonian, which are then used elsewhere to obtain the low part of
+the energy spectrum or construct the dynamical response functions. 
 
 The sector electron Hamiltonian is:
 

@@ -1,4 +1,6 @@
 MODULE ED_CHI_PAIR
+  !Evaluates the impurity pair susceptibility.
+  !
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER  
   USE SF_IOTOOLS, only: str,reg,txtfy
