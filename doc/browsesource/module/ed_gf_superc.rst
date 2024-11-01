@@ -6,5 +6,5 @@ ED_GF_SUPERC
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SUPERC/ED_GF_SUPERC.f90>`_ on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SUPERC/ED_GF_SUPERC.f90>`_ for :f:mod:`ed_gf_superc` on GitHub
  

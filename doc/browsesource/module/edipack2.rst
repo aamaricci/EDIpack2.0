@@ -6,5 +6,5 @@ EDIPACK2
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/EDIPACK2.f90>`_ on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/EDIPACK2.f90>`_ for :f:mod:`edipack2` on GitHub
  

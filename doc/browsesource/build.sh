@@ -74,6 +74,9 @@ sed -e "s/html/rst/g" list2 > list
 rm list2
 
 
+
+
+
 #generate .rst
 for file in $(cat list); do
   name=$(echo $file | sed -e "s/\.rst//g")
@@ -93,7 +96,7 @@ for file in $(cat list); do
     echo "Not found graph for $name"
   fi
   echo " " >> module/$file
-  echo "\`Open source file <${githubpath}>\`_ on GitHub" >> module/$file
+  echo "\`Open source file <${githubpath}>\`_ for :f:mod:\`${name}\` on GitHub" >> module/$file
   echo " " >> module/$file
 done
 

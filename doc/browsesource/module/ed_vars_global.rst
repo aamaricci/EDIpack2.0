@@ -6,5 +6,5 @@ ED_VARS_GLOBAL
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_VARS_GLOBAL.f90>`_ on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_VARS_GLOBAL.f90>`_ for :f:mod:`ed_vars_global` on GitHub
  
