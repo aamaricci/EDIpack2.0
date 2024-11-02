@@ -1,8 +1,11 @@
+Impurity Model Bath
+########################
+
 .. f:automodule::   ed_bath
    :hide-output: True
 
 Bath Auxiliary
-###########################
+++++++++++++++++
 
 In this set of modules we implement a number of auxiliary procedures
 which are required to enumerate the bath levels, performs all the
@@ -20,7 +23,7 @@ on the user side.
    bath_aux/04_ed_bath_replica
 	      
 Bath DMFT
-###########################
++++++++++++++
 
 In :f:mod:`ed_bath_dmft` we implement operations on the  :f:type:`effective_bath` data
 structure: a suitable representation of the effective bath used
@@ -36,7 +39,7 @@ construction of symmetry sectors Hamiltonian.
 
 
 Bath Functions
-###########################
+++++++++++++++++
 
 In :f:mod:`ed_bath_functions` we implement on-the-fly construction of
 the hybridization functions :math:`\Delta(z) = \sum_p
