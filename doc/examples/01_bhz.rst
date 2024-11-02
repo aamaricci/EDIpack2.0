@@ -58,7 +58,7 @@ In presence of interaction we can solve the model using DMFT. We
 review here the setup of the program using `EDIpack2.0`. 
 
 
-.. code-block::
+.. code-block:: fortran
    :linenos:
    
    program ed_bhz
@@ -191,7 +191,7 @@ which in the code setup the impurity Hamiltonian, initialize the bath.
    call ed_init_solver(bath)
 
 
-Then we implement the DMFT loop, using the same structure we have
+Then we implement the DMFT loop, using the same structure we 
 discussed in the previous section:
 
   #. Solve the quantum impurity problem for a given user bath :math:`\vec{b}`.
