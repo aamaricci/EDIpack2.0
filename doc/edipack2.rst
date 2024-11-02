@@ -201,7 +201,7 @@ variational parameters.
    structure/bath
    
 
-Hamiltonian Setup
+Hamiltonian
 ###########################
 
 This part of the `EDIpack2.0` code implements the setup of the

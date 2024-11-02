@@ -13,7 +13,7 @@ This is used in the :f:mod:`ed_main` Fortran API.
    
 
 Normal mode
-###########################
++++++++++++++++
 
 This set of modules implements the  evaluation of impurity observables
 and other static correlations  assuming :math:`\vec{Q}=\left[\vec{N}_\uparrow,\vec{N}_\downarrow \right]`.
@@ -36,7 +36,7 @@ operator.
 
 
 Superconductive mode
-###############################
+++++++++++++++++++++++++
 
 This set of modules implements the  evaluation of impurity observables
 and other static correlations  assuming 
@@ -55,7 +55,7 @@ wave pairing.
 
 
 Non-SU(2) mode
-###############################
++++++++++++++++++++
 
 This set of modules implements the  evaluation of impurity observables
 and other static correlations   assuming 

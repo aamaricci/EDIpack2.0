@@ -1,19 +1,15 @@
-..
-   Global
-   ###########################
+Hamiltonian Setup
+###########################
 
-   This module provide a single interface to the different
-   Hamiltonian setup procedures for each operational modes described below.
+.. f:automodule::   ed_hamiltonian
+   :hide-output: True
 
-   .. toctree::
-      :maxdepth: 2
-      :glob:
-
-      hamiltonian
+This module provide a single interface to the different
+Hamiltonian setup procedures for each operational modes described below.
 
 
 Normal mode
-###########################
++++++++++++++++
 
 This set of modules implements the Hamiltonian setup for each symmetry
 sector assuming :math:`\vec{Q}=\left[\vec{N}_\uparrow,\vec{N}_\downarrow \right]`.
@@ -39,7 +35,7 @@ operator.
 
 
 Superconductive mode
-###############################
+++++++++++++++++++++++++
 
 This set of modules implements the Hamiltonian setup for each symmetry
 sector  assuming 
@@ -61,7 +57,7 @@ wave pairing.
 
    
 Non-SU(2) mode
-###############################
++++++++++++++++++
 
 This set of modules implements the Hamiltonian setup for each symmetry
 sector  assuming 

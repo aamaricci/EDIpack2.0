@@ -15,7 +15,7 @@ This is used  in the :f:mod:`ed_main` Fortran API.
    
 
 Normal mode
-###########################
+++++++++++++++++
 
 This set of modules implements the calculations of impurity dynamical
 response functions, e.g. the Green's functions and different
@@ -43,7 +43,7 @@ operator.
    
 
 Superconductive mode
-###############################
++++++++++++++++++++++++
 
 This set of modules implements the calculations of impurity dynamical
 response functions, e.g. the Green's functions,  assuming 
@@ -62,7 +62,7 @@ wave pairing.
 
 
 Non-SU(2) mode
-###############################
++++++++++++++++++++++++
 
 This set of modules implements the calculations of impurity dynamical
 response functions, e.g. the Green's functions,  assuming 

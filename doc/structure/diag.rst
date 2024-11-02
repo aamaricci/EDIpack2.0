@@ -1,5 +1,5 @@
-Impurity diagonalization 
-============================
+Impurity diagonalization interface
+=====================================
 
 The global unique interface to the all the available exact diagonalization
 procedures. The correct diagonalization is called according to the

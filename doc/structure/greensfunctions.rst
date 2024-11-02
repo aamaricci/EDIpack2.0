@@ -1,5 +1,5 @@
-Impurity dynamical response functions 
-============================================
+Impurity response functions interface
+=========================================
 
 The global unique interface to the all the available procedures
 evaluating dynamical response functions of the quantum impurity

@@ -1,5 +1,5 @@
-Impurity observables
-============================================
+Impurity observables interface
+==================================
 
 The global unique interface to the all the available procedures
 evaluating impurity observables and static correlations.

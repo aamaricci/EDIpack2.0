@@ -13,7 +13,7 @@ This is used in the :f:mod:`ed_main` Fortran API.
    
    
 Normal mode
-###########################
++++++++++++++
 
 This set of modules implements the exact diagonalization of the single
 impurity problems assuming :math:`\vec{Q}=\left[\vec{N}_\uparrow,\vec{N}_\downarrow \right]`.
@@ -36,7 +36,7 @@ operator.
 
 
 Superconductive mode
-###############################
+++++++++++++++++++++++++
 
 This set of modules implements the exact diagonalization of the single
 impurity problems assuming 
@@ -56,7 +56,7 @@ wave pairing.
 
    
 Non-SU(2) mode
-###############################
++++++++++++++++++
 
 This set of modules implements the exact diagonalization of the single
 impurity problems assuming 
