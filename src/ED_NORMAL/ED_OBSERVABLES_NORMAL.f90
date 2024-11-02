@@ -73,7 +73,7 @@ contains
   !PURPOSE  : Lanc method
   !+-------------------------------------------------------------------+
   subroutine observables_normal()
-    !Calculate the values of the local observables
+!Calculate the values of the local observables
     integer                         :: iprob,istate,Nud(2,Ns),iud(2),jud(2),val
     integer,dimension(2*Ns_Ud)      :: Indices,Jndices
     integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]

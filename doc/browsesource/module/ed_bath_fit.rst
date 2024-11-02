@@ -6,5 +6,5 @@ ED_BATH_FIT
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src>`_ on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src>`_ for :f:mod:`ed_bath_fit` on GitHub
  

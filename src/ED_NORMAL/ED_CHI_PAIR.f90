@@ -42,7 +42,7 @@ contains
   !+------------------------------------------------------------------+
   subroutine build_chi_pair_normal()
     !
-    ! Evaluates the impurity Pair susceptibility :math:`\\chi^{\Delta}=\langle T_\tau \Delta_a(\tau) \Delta_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
+    ! Evaluates the impurity Pair susceptibility :math:`\chi^{\Delta}=\langle T_\tau \Delta_a(\tau) \Delta_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
     !
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
     !

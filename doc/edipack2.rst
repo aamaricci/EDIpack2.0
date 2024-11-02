@@ -245,9 +245,10 @@ internal energy or double occupation. Calculations are performed in
 each operational mode,  corresponding to the choice of the specific
 symmetry implemented in the code, i.e. which quantum numbers are to be
 conserved. The operational modes are selected by the variable
-:f:var:`ed_mode` =  :code:`normal, superc, nosu2`. See
-:f:mod:`ed_sector` for more info about the symmetries implemented
-in the code.
+:f:var:`ed_mode` =  :code:`normal, superc, nosu2`. The observables
+are printed in plain text files and are accessible to the user
+through the routines lited in :f:mod:`ed_io`. See :f:mod:`ed_sector` 
+for more info about the symmetries implemented in the code.
 
 
 .. toctree::

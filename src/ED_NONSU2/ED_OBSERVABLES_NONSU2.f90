@@ -75,7 +75,7 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_nonsu2()
-    !Calculate the values of the local observables
+!Calculate the values of the local observables
     integer,dimension(2*Ns)      :: ib
     integer,dimension(2,Ns)      :: Nud
     integer,dimension(Ns)        :: IbUp,IbDw
