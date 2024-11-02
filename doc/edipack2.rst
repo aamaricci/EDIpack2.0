@@ -1,8 +1,39 @@
+EDIpack2.0 Fortran Library
+===========================
+
 Here we give an overview of the structure of the EDIpack2.0 library,
 with a detailed description of the relevant modules and procedures.
 
 
-General 
+Library Frontend
+###########################
+
+The :f:mod:`edipack2` represents the user interface or Fortran API 
+of the library, giving access to all therequried procedures and 
+variables needed to solve a quantum impurity problem.  
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/edipackmodule
+      
+
+Core Solver Routines
+###########################
+
+The module of the `EDIpack2.0` library which wraps up the
+solver into three functions according to three steps: initialization,
+solution and finalization. 
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/main
+
+
+General Environment
 ###########################
 
 This include a set of modules which contains input variables
@@ -170,7 +201,7 @@ variational parameters.
    structure/bath
    
 
-Hamiltonian setup
+Hamiltonian Setup
 ###########################
 
 This part of the `EDIpack2.0` code implements the setup of the
@@ -217,7 +248,7 @@ distinct class of modules.
 
 
 
-Green's functions 
+Green's Functions 
 ###########################
 This part of the `EDIpack2.0` code implements the calculation of the
 impurity interacting Green's functions, self-energy functions and
@@ -292,29 +323,6 @@ Anderson Green's function with the aim of updating the user bath parameters.
    :maxdepth: 1
 
    structure/fit
-
-
-EDIpack2.0
-###########################
-
-The two topmost modules of the `EDIpack2.0` library which wrap up the
-solver into three functions according to three steps: initialization,
-solution and finalization. The :f:mod:`edipack2` represents the user
-interface or Fortran API of the library, giving access to all the
-requried procedures and variables needed to solve a quantum impurity
-problem.  
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   structure/main
-   structure/edipackmodule
-   
-
-
-
-      
 
 
 
