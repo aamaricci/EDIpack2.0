@@ -1,3 +1,6 @@
+.. f:automodule::   ed_bath
+   :hide-output: True
+
 Bath Auxiliary
 ###########################
 
