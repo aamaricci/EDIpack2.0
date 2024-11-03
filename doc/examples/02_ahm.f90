@@ -52,6 +52,7 @@ program ed_ahm_2d
   allocate(Sreal(2,Nso,Nso,Lreal))
 
 
+  
   !> Allocate the 2d DOS and dispersion for the Nambu structure in DMFT_TOOLS
   !  we ask for separate dispersions (or two H(k)) for the two elements on the diagonal
   allocate(Edos(2,1,Le))  
@@ -59,8 +60,11 @@ program ed_ahm_2d
   Edos(2,1,:) =-linspace(-D,D,Le,mesh=de)
   allocate(Ddos(1,Le))
   do i=1,Le
-     Ddos(1,i) = dens_2dsquare(Edos(1,1,i),D)*de
+     Ddos(1,i) = dens_2dsquare(Edos(1,1,i),D)
   enddo
+  Ddos= Ddos/simps(Ddos(1,:),-D,D)*de
+
+  
   !> Get local Hamiltonian (used in DMFT_TOOLS)
   allocate(H0(2,1))
   H0=0d0

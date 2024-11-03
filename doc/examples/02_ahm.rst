@@ -1,6 +1,17 @@
 Attractive Hubbard model: a superconductive example
 #######################################################
 
+In this second example we focus on the use of `EDIpack2.0` ED method
+as a solver for DMFT in presence of superconductivity, i.e. :f:var:`ed_mode` = **superc**. 
+
+We consider the simple, but non-trivial, case of the attractive
+single-band Fermi-Hubbard model on a square lattice:
+
+
+.. math::
+
+   H  = \sum_{k\sigma} \epsilon(k) c^\dagger_{k\sigma}c_{k\sigma} -
+   |U| \sum_i n_{i\uparrow}n_{i\downarrow}
 
 
 
@@ -36,9 +47,8 @@ serial execution.
 
 
 
-In presence of superconductivity we have to deal with Nambu structure
-of the local functions and Hamiltonians, for instance the Green's
-function has the matrix form:
+We deal with superconducting case using Nambu structure of the local
+functions and Hamiltonians, for instance the Green's function has the matrix form:
 
 .. math::
 
@@ -110,10 +120,11 @@ user side. Finally we initialize the ED solver.
 Then we implement the DMFT loop, using a similar structure as we
 discussed in the previous sections:
 
-  #. Solve the quantum impurity problem for a given user bath :math:`\vec{b}`.
+  #. Solve the quantum impurity problem for a given user bath
+     :math:`\vec{b}`, which with :f:var:`ed_mode` = **superc** includes the bath pair amplitudes.
   #. Retrieve Matsubara self-energies :math:`\Sigma` and :math:`S`,
      get the local Nambu Green's function
-     :math:`\hat{G}_{loc}=\sum_k [i\omega_n + \mu - \hat{H}(k) - \hat{\Sigma}]^{-1}` where the :math:`\hat{A}` indicates the multi-orbital and the Nambu structure. 
+     :math:`\hat{G}_{loc}=\int d\epsilon [i\omega_n + \mu - \hat{\epsilon} - \hat{\Sigma}(i\omega_n)]^{-1}` where the :math:`\hat{A}` indicates the multi-orbital and the Nambu structure. 
   #. Implement DMFT self-consistency to update Nambu Weiss fields:
      :math:`\hat{{\cal G}}_0 = [\hat{G}^{-1}_{loc} + \hat{\Sigma}]^{-1}`
   #. Update the user bath :math:`\vec{b}` using :math:`\chi^2`
@@ -172,7 +183,45 @@ real-axis Green's functions using the retrieved normal and anomalous self-energi
 
 
 
-   
+
+.. raw:: html
+
+   <hr>
+
+
+
+We present some results obtained using this `EDIpack2.0` based
+program. To begin with, we show in panel A a snapshot of the evolution
+of the spectral functions :math:`-\Im G(\omega)/\pi` upon increasing
+the attraction strength :math:`U`. The tiny gap visible for small
+attractions (BCS regime) evolves into a large one, separating two high
+energy features in the BEC regime.
+
+
+.. image:: 02_ahm_fig1.svg
+   :class: with-border
+   :width: 800px
+
+
+In panel B we report the evolution of the pair amplitude :math:`\phi=
+\langle c_{\uparrow}c_{\downarrow}\rangle` as a function
+:math:`U`. For comparison, we also show the mean-field results (red solid line). 
+In both cases the exponential activation of the order parameter is
+numerically harder to reproduce. The local quantum fluctuations in
+DMFT slightly reduce the value of :math:`\phi` compared to
+mean-field solution.
+
+In the remaining two panels C and D we analyze the temperature
+behavior of superconducting solution at the edge of the BCS regime,
+:math:`U=0.5`. This  also illustrates the
+capability of  `EDIpack2.0`  to obtain finite temperature results.
+In C we report the fall off of the pair amplitude as a function of
+temperature, while in panel D we show the corresponding potential
+energy behavior.  
+
+  
+
+
 
 .. raw:: html
 
@@ -184,13 +233,10 @@ The program to solve the main model is available here:
 
 Here is a list of bath files:
 
-  * Bath  :math:`U=-1`:   :download:`hamiltonian.restart <U1_2d_hamiltonian.restart>`
-  * Bath  :math:`U=-2`:   :download:`hamiltonian.restart <U2_2d_hamiltonian.restart>`
-  * Bath  :math:`U=-3`:   :download:`hamiltonian.restart <U3_2d_hamiltonian.restart>`
-  * Bath  :math:`U=-4`:   :download:`hamiltonian.restart <U4_2d_hamiltonian.restart>`  
-  * Bath  :math:`U=-5`:   :download:`hamiltonian.restart <U5_2d_hamiltonian.restart>`
-  * Bath  :math:`U=-6`:   :download:`hamiltonian.restart <U6_2d_hamiltonian.restart>`
-  * Bath  :math:`U=-8`:   :download:`hamiltonian.restart <U8_2d_hamiltonian.restart>`
+  * Bath  :math:`U=-0.5`:   :download:`hamiltonian.restart <U0.5_hamiltonian.restart>`
+  * Bath  :math:`U=-1.0`:   :download:`hamiltonian.restart <U1.0_hamiltonian.restart>`
+  * Bath  :math:`U=-2.0`:   :download:`hamiltonian.restart <U2.0_hamiltonian.restart>`
+  * Bath  :math:`U=-5.0`:   :download:`hamiltonian.restart <U5.0_hamiltonian.restart>`  
 
 
 An example of the input file used in the calculations can be find here:  :download:`InputFile <inputAHM.conf>`

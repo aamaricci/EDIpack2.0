@@ -1,15 +1,15 @@
 Interacting Bernevig-Hughes-Zhang model	
 ###################################################################
 
-In this section we discuss a more thorough example, using the
-`EDIpack2.0` ED algorithm as a solver for DMFT in a paradigmatic
-multi-orbital model of interacting electrons.
+In this section we discuss a thorough example , using the
+`EDIpack2.0` ED algorithm as a solver for DMFT for  :f:var:`ed_mode` =
+**normal**.  We focus on a paradigmatic multi-orbital model of interacting electrons.
 
 This is a Fermi-Hubbard model describing two-orbital electrons on a
-square lattice. Under suitable conditions the system describes an
-interacting quantum spin Hall insulator (QSHI). The model is an extension of
-the Bernevig-Hughes-Zhang model supplemented with Hubbard-Kanamori
-interaction.
+square lattice describing  an interacting quantum spin Hall insulator
+(QSHI).
+The model is an extension of the Bernevig-Hughes-Zhang model
+supplemented with Hubbard-Kanamori interaction. 
 
 We first introduce a suitable basis of Dirac matrices
 :math:`\Gamma_{a\alpha}=\sigma_a\otimes \tau_\alpha`, where :math:`\sigma_a` and
