@@ -1,4 +1,5 @@
 MODULE ED_BATH_FIT
+!Contains routines that fit the Impurity model bath
   USE SF_CONSTANTS
   USE SF_OPTIMIZE, only:fmin_cg,fmin_cgplus,fmin_cgminimize
   USE SF_LINALG,   only:eye,zeye,inv,inv_her,operator(.x.)

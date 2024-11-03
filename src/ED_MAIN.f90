@@ -1,4 +1,5 @@
 module ED_MAIN
+!Contains routine that initialize, run and finalize the Impurity model solver
   USE SF_IOTOOLS, only: str,reg
   USE SF_TIMER,only: start_timer,stop_timer
   USE SF_MISC,only: assert_shape

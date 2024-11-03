@@ -109,7 +109,7 @@ Usage
      Some examples illustrating the use of `EDIpack2.0` for simple test problems
      
 
-EDIpack2.0
+EDIpack2
 ======================
 
 :doc:`edipack2`
@@ -152,7 +152,7 @@ Browse Source Code
    examples
    
 .. toctree::
-   :caption: EDIpack2.0
+   :caption: EDIpack2
    :maxdepth: 2
    :hidden:
       
