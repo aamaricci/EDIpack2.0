@@ -133,9 +133,7 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-html_css_files = [
-    'css/custom.css',
-]
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -144,6 +142,16 @@ html_theme_options = {
   'collapse_navigation': False,
   'navigation_depth': 4,
 }
+
+# html_theme = "sphinxawesome_theme"
+# # Select theme for both light and dark mode
+# # https://dt.iki.fi/pygments-gallery
+# pygments_style = "emacs"
+
+
+html_css_files = [
+    'css/custom.css',
+]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
