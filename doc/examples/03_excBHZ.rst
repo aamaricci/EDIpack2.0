@@ -67,14 +67,67 @@ printing flags.
    <hr>
 
 
-We can now discuss some results obtained with this code for the
-exciton condensation. More results can be found in `PhysRevB.107.115117`_. 
+We can now discuss some results obtained with this `EDIpack2.0` code concerning the
+exciton condensation in QSHI. More results can be found in `PhysRevB.107.115117`_. 
 
 .. _PhysRevB.107.115117: https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.115117
 
 
 
+To make a connection with the disordered case,  we consider here :math:`M=1` and fix the Hund's
+exchange to :math:`J/U=0.25`. Then we illustrate the effect of raising
+the interaction strength :math:`U`.
+In the top panels of the following figure we report the evolution
+(from left to right) of the spectral functions :math:`-\Im
+G_{a=1,2}(\omega)` for increasing :math:`U` in the three different
+phases of the system, respectively: QSHI (:math:`U=2`),  Excitonic
+insulator (:math:`U=4`)   and Mott insulator  (:math:`U=6`).
+Quite interestingly the spectral functions in the first two cases
+reveal an almost identical gap size at low energy.
 
+Yet, a closer look at the topological Hamiltonian :math:`H_{top}` show
+the completely different the low-energy effective band structure.
+In panel D we show the expected behavior for a QSHI, featuring a band inversion
+around the topological gap and full spin symmetry. In panel E however,
+we observe a much larger energy separation and the breaking of spin
+degeneracy.  
+
+
+.. image:: 03_excBHZ_fig1.svg
+   :class: with-border
+   :width: 800px
+
+
+
+
+In order to better assess the nature of the state interposing between
+the QSHI and the Mott insulator, we report in the next figure the
+behavior of the in-plane triplet excitonic order parameter
+:math:`\langle E_x \rangle`. As the critical strength at about
+:math:`U\simeq 4` is reached we observe a sharp discontinuous
+formation of a broken symmetry state with a finite order parameter.
+Further increasing the interaction strength the value of
+:math:`\langle E_x \rangle` decreases slowly towards zero signalling
+the continuous transition to a Mott state (which can be possibly
+unstable towards magnetic ordering, neglected in this calculation).
+
+For comparison we report in the same figure also the evolution of the
+orbital polarization :math:`\langle T_z\rangle` and of the correlation
+strength :math:`\theta` defined as the deviation from a constant,
+mean-field, behavior of the sele-energy function.
+The first quantity has a decreasing behavior with a small
+discontinuity at the QSHI to EI transition, while it continuously
+vanishes at the Mott transition. Interestingly, the correlation
+strength which is smoothly increasing in the QSHI, shows a sudden
+increase in the EI reaching large values to finally settle down to a
+linearly increasing  behavior in the Mott state.  
+
+
+
+
+.. image:: 03_excBHZ_fig2.svg
+   :class: with-border
+   :width: 800px
 
 
 
@@ -85,3 +138,15 @@ exciton condensation. More results can be found in `PhysRevB.107.115117`_.
 
 The program to solve the main model can be found here:
 :download:`Exciton BHZ Code <03_excBHZ.f90>`
+
+A li of replica bath parameters used in the calculations reported in
+fig.1 are here:
+
+  * Bath :math:`M=1`, :math:`J/U=0.25` and :math:`U=2`
+    :download:`hamiltonian.restart <exct_M1_U2_J0.25_hamiltonian.restart>`
+  * Bath :math:`M=1`, :math:`J/U=0.25` and :math:`U=4`
+    :download:`hamiltonian.restart <exct_M1_U4_J0.25_hamiltonian.restart>`
+  * Bath :math:`M=1`, :math:`J/U=0.25` and :math:`U=6`
+    :download:`hamiltonian.restart <exct_M1_U6_J0.25_hamiltonian.restart>`
+
+Here is an example of input file used in the calculations above:  :download:`InputFile <inputED_exctBHZ.conf>`
