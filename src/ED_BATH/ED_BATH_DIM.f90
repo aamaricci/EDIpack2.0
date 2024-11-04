@@ -155,7 +155,8 @@ contains
   end function get_bath_dimension_direct
 
   function get_bath_dimension_symmetries(Nsym) result(bath_size)
-    integer :: bath_size,ndx,isym,Nsym
+    integer :: Nsym !Number of symmetries (for :f:var:`ed_mode` = :code:`replica, general` )
+    integer :: bath_size,ndx,isym
     !
     select case(bath_type)
     case("replica")
@@ -198,7 +199,7 @@ contains
     !
     ! Checks the  user bath :f:var:`bath_` on input has the correct dimensions according to the choice of input parameters for the calculations. 
     !
-    real(8),dimension(:)           :: bath_
+    real(8),dimension(:)           :: bath_ !user-accessible bath array
     integer                        :: Ntrue,i
     logical                        :: bool
     select case (bath_type)
