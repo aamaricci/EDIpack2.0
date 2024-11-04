@@ -219,3 +219,24 @@ solution upon approaching the Mott transition at :math:`U=U_c`. The
 data report the behavior of the convergence error check in terms of
 relative difference of the Weiss fields between two successive steps.  
 
+
+
+
+.. raw:: html
+
+   <hr>
+
+
+The program used in this quickstart is available here:
+:download:`Hubbard Bethe Code <02_dmft.f90>`
+
+together with  a list of bath files corresponding the solutions
+presented above:
+
+  * Bath :math:`U=1.00`  :download:`hamiltonian.restart <U1.00_hamiltonian.restart>`
+  * Bath :math:`U=2.00`  :download:`hamiltonian.restart <U2.00_hamiltonian.restart>`
+  * Bath :math:`U=2.50`  :download:`hamiltonian.restart <U2.50_hamiltonian.restart>`
+  * Bath :math:`U=3.00`  :download:`hamiltonian.restart <U3.00_hamiltonian.restart>`
+  * Bath :math:`U=4.00`  :download:`hamiltonian.restart <U4.00_hamiltonian.restart>`
+
+and one of the input files used above:  :download:`InputFile <inputED.conf>`
