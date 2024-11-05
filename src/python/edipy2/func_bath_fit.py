@@ -16,13 +16,13 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
       **or** [np.array(dtype=complex,np.array(dtype=float)]
       :param args: The positional arguments are the function(s) to fit and the bath array. 
        
-       If the system is not superconductive (:code:`ED_MODE=NORMAL` or\
-       :code:`ED_MODE=NONSU2`) the argumens are
+       If the system is not superconductive ( :f:var:`ed_mode` = :code:`NORMAL` or\
+        :f:var:`ed_mode` = :code:`NONSU2`) the argumens are
       
        * :code:`g`: the function to fit
        * :code:`bath`: the bath
       
-       If the system is superconductive (:code:`ED_MODE=SUPERC`) the arguments are
+       If the system is superconductive ( :f:var:`ed_mode` = :code:`SUPERC`) the arguments are
 
        * :code:`g`: the normal function to fit
        * :code:`f`: the anomalous function to fit

@@ -52,7 +52,7 @@ def add_global_variable(obj, dynamic_name, target_object, target_attribute):
 def get_bath_type(self):
     """
     
-     This function returns an integer number related to the value of :code:`BATH_TYPE` in the input file
+     This function returns an integer number related to the value of  :f:var:`bath_type` in the input file
     
       - :code:`1` for **normal** bath
       - :code:`2` for **hybrid** bath
@@ -73,7 +73,7 @@ def get_bath_type(self):
 def get_ed_mode(self):
     """
     
-     This function returns an integer number related to the value of :code:`ED_MODE` in the input file
+     This function returns an integer number related to the value of  :f:var:`ed_mode` in the input file
      
       - :code:`1` for **normal** mode
       - :code:`2` for **superc** mode
