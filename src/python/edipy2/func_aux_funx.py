@@ -146,7 +146,12 @@ def check_convergence(self,func,threshold,N1,N2):
     :rtype: float, bool
     
     """
-    
+    try:
+        import mpi4py
+        from mpi4py import MPI
+    except:
+        pass
+        
     check_convergence_wrap = self.library.check_convergence
     check_convergence_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
                                        c_int,
@@ -160,9 +165,26 @@ def check_convergence(self,func,threshold,N1,N2):
     converged=np.asarray([0])
     func=np.asarray(func,order="F")
     dim_func=np.shape(func)
-    check_convergence_wrap(func,dim_func[0],threshold,N1,N2,err,converged)
-    if converged[0]==0:
-        conv_bool=False
-    else:
-        conv_bool=True
+    
+    rank = 0
+    err = np.asarray([1.0],order="F")
+    conv_bool = False
+    
+    try:
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+    except:
+        pass
+    
+    if rank == 0:
+        check_convergence_wrap(func,dim_func[0],threshold,N1,N2,err,converged)   
+        if converged[0]==0:
+            conv_bool=False
+        else:
+            conv_bool=True
+    try:
+        conv_bool = comm.bcast(conv_bool, root=0)
+        err = comm.bcast(err, root=0)
+    except:
+        pass
     return err[0],conv_bool
