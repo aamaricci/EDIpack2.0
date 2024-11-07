@@ -212,13 +212,14 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
         if self.whichiter <= N2:
             if np.prod(np.shape(errvec)) > 1:
                 print(colorprefix + "max error=" + self.COLOREND + f"{errmax:.6e}")
-            print(colorprefix + "    error=" + self.COLOREND + f"{err:.6e}")
+            print(colorprefix + "    "*(np.prod(np.shape(errvec)) > 1)+"error=" + self.COLOREND + f"{err:.6e}")
             if np.prod(np.shape(errvec)) > 1:
                 print(colorprefix + "min error=" + self.COLOREND + f"{errmin:.6e}\n")
         else:
             print("Not converged after "+str(N2)+" iterations.")
             with open("ERROR.ERR", "w") as file:
                 file.write("Not converged after "+str(N2)+" iterations.")
+        print("\n")
         
         #delete methods after convergence or Nmax exceeded
         if conv_bool:
