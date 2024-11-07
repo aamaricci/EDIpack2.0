@@ -168,14 +168,14 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
     #if first loop, allocate old function as method
     if not hasattr(self,"oldfunc"):
         self.oldfunc = np.zeros_like(func,dtype=complex)
-        self.whichiter = 1
+        self.whichiter = 0
         self.gooditer = 0
     
     #only the master does the calculation      
     if rank == 0:
         errvec = np.real(np.sum(abs(func - self.oldfunc),axis = -1) / np.sum(abs(func),axis = -1))
         #first iteration
-        if self.whichiter == 1:
+        if self.whichiter == 0:
             errvec = np.ones_like(errvec)        
         #remove nan compoments, if some component is divided by zero
         if np.prod(np.shape(errvec)) > 1:
@@ -222,10 +222,13 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
         print("\n")
         
         #delete methods after convergence or Nmax exceeded
-        if conv_bool:
-            del self.oldfunc
-            del self.gooditer
-            del self.whichiter
+        #Disabled: I think these need to remain defined in case of fixed-density calculations where
+        #the truth value of the convergence flag is modified afterwards.
+        #Moving this to finalize_environment
+        #if conv_bool:
+        #    del self.oldfunc
+        #    del self.gooditer
+        #    del self.whichiter
     
     #pass to other cores:   
     try:

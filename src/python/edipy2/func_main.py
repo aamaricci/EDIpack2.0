@@ -159,5 +159,11 @@ def finalize_solver(self):
         self.Nineq = None
         self.dim_hloc = 0
         self.Nsym = None
+        
+        if hasattr(self,"oldfunc"): del self.oldfunc
+        if hasattr(self,"gooditer"): del self.gooditer
+        if hasattr(self,"whichiter"): del self.whichiter
+        
         print("ED environment finalized")
+
         return ;
