@@ -135,10 +135,10 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
     :param threshold: the error threshold
    
     :type N1: int
-    :param N1: minimum number of loops (default = :data:`edipy2.global_env.Nsuccess`)
+    :param N1: minimum number of loops (default = :data:`Nsuccess`)
 
     :type N2: int
-    :param N2: maximum number of loops (default = :data:`edipy2.global_env.Nloop`)
+    :param N2: maximum number of loops (default = :data:`Nloop`)
    
     :return: 
      - the error
