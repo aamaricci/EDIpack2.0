@@ -123,7 +123,7 @@ def search_variable(self,var,ntmp,converged):
     return var[0],conv_bool
 
 #check_convergence
-def check_convergence(self,func,threshold,N1,N2):
+def check_convergence(self,func,threshold,N1=None,N2=None):
     """
     
     This function checks the variation of a given quantity (Weiss field, Delta, ...) against the one for the previous step. It is used to determined whether the DMFT loop has converged. If a maximum number of loops is exceeded, returns True with a warning.
@@ -135,10 +135,10 @@ def check_convergence(self,func,threshold,N1,N2):
     :param threshold: the error threshold
    
     :type N1: int
-    :param N1: minimum number of loops
+    :param N1: minimum number of loops (default = :data:`edipy2.global_env.Nsuccess`)
 
     :type N2: int
-    :param N2: maximum number of loops
+    :param N2: maximum number of loops (default = :data:`edipy2.global_env.Nloop`)
    
     :return: 
      - the error
@@ -149,42 +149,87 @@ def check_convergence(self,func,threshold,N1,N2):
     try:
         import mpi4py
         from mpi4py import MPI
-    except:
-        pass
-        
-    check_convergence_wrap = self.library.check_convergence
-    check_convergence_wrap.argtypes = [np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
-                                       c_int,
-                                       c_double,
-                                       c_int,
-                                       c_int,
-                                       np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
-                                       np.ctypeslib.ndpointer(dtype=int,ndim=1, flags='F_CONTIGUOUS')]
-    check_convergence_wrap.restype = None
-    err=np.asarray([1.0])
-    converged=np.asarray([0])
-    func=np.asarray(func,order="F")
-    dim_func=np.shape(func)
-    
-    rank = 0
-    err = np.asarray([1.0],order="F")
-    conv_bool = False
-    
-    try:
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
     except:
-        pass
+        rank = 0
+        
+    func = np.asarray(func)
+    err = 1.0
+    conv_bool = False
+    outfile = "error.err"
     
+    #if N1 and/or N2 are None, set them to the input variables
+    if N1 is None:
+        N1 = c_int.in_dll(self.library, "Nsuccess").value
+    if N2 is None:
+        N2 = c_int.in_dll(self.library, "Nloop").value
+    
+    #if first loop, allocate old function as method
+    if not hasattr(self,"oldfunc"):
+        self.oldfunc = np.zeros_like(func,dtype=complex)
+        self.whichiter = 1
+        self.gooditer = 0
+    
+    #only the master does the calculation      
     if rank == 0:
-        check_convergence_wrap(func,dim_func[0],threshold,N1,N2,err,converged)   
-        if converged[0]==0:
-            conv_bool=False
+        errvec = np.real(np.sum(abs(func - self.oldfunc),axis = -1) / np.sum(abs(func),axis = -1))
+        #first iteration
+        if self.whichiter == 1:
+            errvec = np.ones_like(errvec)        
+        #remove nan compoments, if some component is divided by zero
+        if np.prod(np.shape(errvec)) > 1:
+            errvec = errvec[~np.isnan(errvec)]       
+        errmax = np.max(errvec)
+        errmin = np.min(errvec)
+        err = np.average(errvec)
+        self.oldfunc = np.copy(func)
+        conv_bool = ((err < threshold) and (self.gooditer >= N1) and (self.whichiter <= N2)) or (self.whichiter > N2)
+        if err < threshold:
+            self.gooditer += 1
+        self.whichiter += 1
+        
+        #write out
+        with open(outfile, "a") as file:
+            file.write(f"{self.whichiter} {err:.6e}\n")
+        if np.prod(np.shape(errvec)) > 1:
+            with open(outfile+".max", "a") as file:
+                file.write(f"{self.whichiter} {errmax:.6e}\n")
+            with open(outfile+".min", "a") as file:
+                file.write(f"{self.whichiter} {errmin:.6e}\n")
+            with open(outfile+".distribution", "a") as file:
+                file.write(f"{self.whichiter}" + " ".join([f"{x:.6e}" for x in errvec.flatten()]) + "\n")
+        
+        #print convergence message:
+        if conv_bool:
+            colorprefix= self.BOLD + self.GREEN
+        elif (err < threshold) and (self.gooditer <= N1):
+            colorprefix= self.BOLD + self.YELLOW
         else:
-            conv_bool=True
+            colorprefix= self.BOLD + self.RED
+        
+        print("\n")
+        if self.whichiter <= N2:
+            if np.prod(np.shape(errvec)) > 1:
+                print(colorprefix + "max error=" + self.COLOREND + f"{errmax:.6e}")
+            print(colorprefix + "    error=" + self.COLOREND + f"{err:.6e}")
+            if np.prod(np.shape(errvec)) > 1:
+                print(colorprefix + "min error=" + self.COLOREND + f"{errmin:.6e}\n")
+        else:
+            print("Not converged after "+str(N2)+" iterations.")
+            with open("ERROR.ERR", "w") as file:
+                file.write("Not converged after "+str(N2)+" iterations.")
+        
+        #delete methods after convergence or Nmax exceeded
+        if conv_bool:
+            del self.oldfunc
+            del self.gooditer
+            del self.whichiter
+    
+    #pass to other cores:   
     try:
         conv_bool = comm.bcast(conv_bool, root=0)
         err = comm.bcast(err, root=0)
     except:
         pass
-    return err[0],conv_bool
+    return err,conv_bool
