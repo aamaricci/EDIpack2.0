@@ -207,28 +207,18 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
             colorprefix= self.BOLD + self.YELLOW
         else:
             colorprefix= self.BOLD + self.RED
-        
-        print("\n")
+
         if self.whichiter <= N2:
             if np.prod(np.shape(errvec)) > 1:
                 print(colorprefix + "max error=" + self.COLOREND + f"{errmax:.6e}")
             print(colorprefix + "    "*(np.prod(np.shape(errvec)) > 1)+"error=" + self.COLOREND + f"{err:.6e}")
             if np.prod(np.shape(errvec)) > 1:
-                print(colorprefix + "min error=" + self.COLOREND + f"{errmin:.6e}\n")
+                print(colorprefix + "min error=" + self.COLOREND + f"{errmin:.6e}")
         else:
             print("Not converged after "+str(N2)+" iterations.")
             with open("ERROR.ERR", "w") as file:
                 file.write("Not converged after "+str(N2)+" iterations.")
         print("\n")
-        
-        #delete methods after convergence or Nmax exceeded
-        #Disabled: I think these need to remain defined in case of fixed-density calculations where
-        #the truth value of the convergence flag is modified afterwards.
-        #Moving this to finalize_environment
-        #if conv_bool:
-        #    del self.oldfunc
-        #    del self.gooditer
-        #    del self.whichiter
     
     #pass to other cores:   
     try:

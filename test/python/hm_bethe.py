@@ -47,10 +47,6 @@ Hloc =np.zeros((ed.Nspin,ed.Nspin,ed.Norb,ed.Norb),dtype='complex')
 ed.set_hloc(Hloc)
 Nb=ed.get_bath_dimension()
 bath = ed.init_solver()
-ed.finalize_solver()
-print("AAAAA")
-ed.init_solver(Nb)
-ed.set_hloc(hloc=Hloc)
 bath_prev = np.copy(bath)
 
 #DMFT CYCLE
@@ -71,14 +67,12 @@ while (not converged and iloop<ed.Nloop ):
     Gmats = np.zeros_like(Smats)
     Greal = np.zeros_like(Sreal)
 
-    #Compute the local gf:
-    for i in range(ed.Lmats):
-        zeta             = wm[i]*1j - Smats[0,0,0,0,i]
-        Gmats[0,0,0,0,i] = sum(Dband/(zeta - Eband))*de
 
-    for i in range(ed.Lreal):
-        zeta             = wr[i]+ed.eps*1j - Sreal[0,0,0,0,i]
-        Greal[0,0,0,0,i] = sum(Dband/(zeta - Eband))*de
+    zeta             = wm*1j - Smats[0,0,0,0,:]
+    Gmats[0,0,0,0,:] = np.sum(Dband / (zeta[:, np.newaxis] - Eband), axis=1)*de
+    
+    zeta             = wr+ed.eps*1j - Sreal[0,0,0,0,:]
+    Greal[0,0,0,0,:] = np.sum(Dband / (zeta[:, np.newaxis] - Eband), axis=1)*de
         
     if(rank==0):
         np.savetxt('Gloc_iw.dat', np.transpose([wm,Gmats[0,0,0,0,:].imag,Gmats[0,0,0,0,:].real]))
@@ -95,7 +89,8 @@ while (not converged and iloop<ed.Nloop ):
         bath = wmixing*bath + (1.0-wmixing)*bath_prev
     bath_prev=np.copy(bath)
  
-    err,converged=ed.check_convergence(Delta[0,0,0,0,:],ed.dmft_error,1,ed.Nloop)
+    err,converged=ed.check_convergence(Delta,ed.dmft_error)
 
+ed.finalize_solver()
 print("Done...")
 
