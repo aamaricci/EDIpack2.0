@@ -196,9 +196,11 @@ def check_convergence(self,func,threshold=None,N1=None,N2=None):
         err = np.average(errvec)
         self.oldfunc = np.copy(func)
         if err < threshold:
-            self.gooditer += 1
+            self.gooditer += 1 #increase good iterations count
+        else:
+            self.gooditer = 0 #reset good iterations count
         self.whichiter += 1
-        conv_bool = ((err < threshold) and (self.gooditer >= N1) and (self.whichiter <= N2)) or (self.whichiter >= N2)
+        conv_bool = ((err < threshold) and (self.gooditer > N1) and (self.whichiter < N2)) or (self.whichiter >= N2)
         
         #write out
         with open(outfile, "a") as file:
