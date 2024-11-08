@@ -123,16 +123,25 @@ def search_variable(self,var,ntmp,converged):
     return var[0],conv_bool
 
 #check_convergence
-def check_convergence(self,func,threshold,N1=None,N2=None):
+def check_convergence(self,func,threshold=None,N1=None,N2=None):
     """
     
-    This function checks the variation of a given quantity (Weiss field, Delta, ...) against the one for the previous step. It is used to determined whether the DMFT loop has converged. If a maximum number of loops is exceeded, returns True with a warning.
+    This function checks the relative variation of a given quantity (Weiss field, Delta, ...) \
+    against the one for the previous step. It is used to determined whether the DMFT loop has converged. 
+    If a maximum number of loops is exceeded, returns :code:`True` with a warning and appends 
+    it to the plain text file :code:`ERROR.README`.
 
     :type func: np.array(dtype=complex) 
-    :param func: the quantity to be checked. It is one-dimensional, with its length being a number of frequencies
+    :param func: the quantity to be checked. It can have any rank and shape, but the last dimension is 
+      summed over to get the relative error. All the components in the other dimensions are evalutated
+      in the same way. The overall error is the average of the component-resolved error.
+      It is appended to the plain text file :code:`error.err`.
+      The maximum and minimum component-resolve errors,  as well as all the finite component-resolved 
+      error values are appended to the plain text files :code:`error.err.max` , :code:`error.err.min` 
+      :code:`error.err.distribution` respectively.
    
     :type threshold: float 
-    :param threshold: the error threshold
+    :param threshold: the error threshold (default = :data:`dmft_error`)
    
     :type N1: int
     :param N1: minimum number of loops (default = :data:`Nsuccess`)
@@ -159,7 +168,9 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
     conv_bool = False
     outfile = "error.err"
     
-    #if N1 and/or N2 are None, set them to the input variables
+    #if threshold, N1 and/or N2 are None, set them to the input variables
+    if threshold is None:
+        threshold = c_double.in_dll(self.library, "dmft_error").value
     if N1 is None:
         N1 = c_int.in_dll(self.library, "Nsuccess").value
     if N2 is None:
@@ -184,10 +195,10 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
         errmin = np.min(errvec)
         err = np.average(errvec)
         self.oldfunc = np.copy(func)
-        conv_bool = ((err < threshold) and (self.gooditer >= N1) and (self.whichiter <= N2)) or (self.whichiter > N2)
         if err < threshold:
             self.gooditer += 1
         self.whichiter += 1
+        conv_bool = ((err < threshold) and (self.gooditer >= N1) and (self.whichiter <= N2)) or (self.whichiter >= N2)
         
         #write out
         with open(outfile, "a") as file:
@@ -208,15 +219,20 @@ def check_convergence(self,func,threshold,N1=None,N2=None):
         else:
             colorprefix= self.BOLD + self.RED
 
-        if self.whichiter <= N2:
+        if self.whichiter < N2:
             if np.prod(np.shape(errvec)) > 1:
                 print(colorprefix + "max error=" + self.COLOREND + f"{errmax:.6e}")
             print(colorprefix + "    "*(np.prod(np.shape(errvec)) > 1)+"error=" + self.COLOREND + f"{err:.6e}")
             if np.prod(np.shape(errvec)) > 1:
                 print(colorprefix + "min error=" + self.COLOREND + f"{errmin:.6e}")
         else:
+            if np.prod(np.shape(errvec)) > 1:
+                print(colorprefix + "max error=" + self.COLOREND + f"{errmax:.6e}")
+            print(colorprefix + "    "*(np.prod(np.shape(errvec)) > 1)+"error=" + self.COLOREND + f"{err:.6e}")
+            if np.prod(np.shape(errvec)) > 1:
+                print(colorprefix + "min error=" + self.COLOREND + f"{errmin:.6e}")
             print("Not converged after "+str(N2)+" iterations.")
-            with open("ERROR.ERR", "w") as file:
+            with open("ERROR.README", "a") as file:
                 file.write("Not converged after "+str(N2)+" iterations.")
         print("\n")
     
