@@ -252,15 +252,15 @@ contains
        !
        !BATH V INITIALIZATION
        do ibath=1,Nbath
-          dmft_bath%item(ibath)%v=max(0.1d0,1d0/sqrt(dble(Nbath)))
+          dmft_bath_%item(ibath)%v=max(0.1d0,1d0/sqrt(dble(Nbath)))
        enddo
        !
        !BATH LAMBDAS INITIALIZATION
        !Do not need to check for Hreplica_basis: this is done at allocation time of the dmft_bath.
-       Nsym = dmft_bath%Nbasis
+       Nsym = dmft_bath_%Nbasis
        do isym=1,Nsym
           do ibath=1,Nbath
-             dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym)
+             dmft_bath_%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym)
           enddo
           diagonal_hsym = is_diagonal(Hreplica_basis(isym)%O)
           one_lambdaval = Hreplica_lambda(Nbath,isym)
@@ -272,7 +272,7 @@ contains
                 offset(Nbath/2 + 1) = min(1.d-1,offset(Nbath/2 + 1))
              endif
              do ibath=1,Nbath
-                dmft_bath%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym) + offset(ibath)
+                dmft_bath_%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym) + offset(ibath)
              enddo
              write(*,*) "                                                                    "
              write(*,*) "WARNING: some of your lambdasym values have been internally changed "
@@ -296,19 +296,21 @@ contains
        !
        !BATH V INITIALIZATION
        do ibath=1,Nbath
-          dmft_bath%item(ibath)%vg(:)=max(0.1d0,1d0/sqrt(dble(Nbath)))
+          dmft_bath_%item(ibath)%vg(:)=max(0.1d0,1d0/sqrt(dble(Nbath)))
        enddo
        !
        !BATH LAMBDAS INITIALIZATION
        !Do not need to check for Hgeneral_basis: this is done at allocation time of the dmft_bath.
-       Nsym = dmft_bath%Nbasis
+       Nsym = dmft_bath_%Nbasis
        do isym=1,Nsym
           do ibath=1,Nbath
-             dmft_bath%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym)
+             dmft_bath_%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym)
           enddo
+          !
           diagonal_hsym = is_diagonal(Hgeneral_basis(isym)%O)
           one_lambdaval = Hgeneral_lambda(Nbath,isym)
           all_lambdas_are_equal = all(Hgeneral_lambda(:,isym)==one_lambdaval)
+          !
           if(diagonal_hsym.AND.all_lambdas_are_equal.AND.Nbath>1)then
              offset=linspace(-ed_offset_bath,ed_offset_bath,Nbath)
              if(is_identity(Hgeneral_basis(isym)%O).AND.mod(Nbath,2)==0)then
@@ -316,7 +318,7 @@ contains
                 offset(Nbath/2 + 1) = min(1.d-1,offset(Nbath/2 + 1))
              endif
              do ibath=1,Nbath
-                dmft_bath%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym) + offset(ibath)
+                dmft_bath_%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym) + offset(ibath)
              enddo
              write(*,*) "                                                                    "
              write(*,*) "WARNING: some of your lambdasym values have been internally changed "
@@ -415,7 +417,7 @@ contains
        case ('replica')
           read(unit,*)
           !
-          read(unit,*)dmft_bath%Nbasis
+          read(unit,*)dmft_bath_%Nbasis
           do i=1,Nbath
              read(unit,*)dmft_bath_%item(i)%v,&
                   (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
@@ -425,7 +427,7 @@ contains
        case ('general')
           read(unit,*)
           !
-          read(unit,*)dmft_bath%Nbasis
+          read(unit,*)dmft_bath_%Nbasis
           do i=1,Nbath
              read(unit,*)dmft_bath_%item(i)%vg(:),&
                   (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
@@ -643,6 +645,7 @@ contains
     if(ed_verbose>1)write(Logfile,"(A)")"DEBUG set_dmft_bath: dmft_bath <- user_bath"
 #endif
     if(.not.dmft_bath_%status)stop "set_dmft_bath error: bath not allocated"
+    !
     check = check_bath_dimension(bath_)
     if(.not.check)stop "set_dmft_bath error: wrong bath dimensions"
     !
@@ -849,6 +852,7 @@ contains
     if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_dmft_bath: dmft_bath -> user_bath"
 #endif
     if(.not.dmft_bath_%status)stop "get_dmft_bath error: bath not allocated"
+    !
     check=check_bath_dimension(bath_)
     if(.not.check)stop "get_dmft_bath error: wrong bath dimensions"
     !

@@ -40,7 +40,7 @@ MODULE ED_VARS_GLOBAL
 
 
 
-  
+
   !-------------------- CUSTOM OBSERVABLE STRUCTURE ----------------------!
   type observable
      complex(8),dimension(:,:,:),allocatable   :: sij ![Nlso][Nlso][Nk]
@@ -184,8 +184,6 @@ MODULE ED_VARS_GLOBAL
   integer,allocatable,dimension(:)                   :: getDim             ! [Nsectors]
   integer,allocatable,dimension(:,:,:)               :: getCsector         ! [1/Norb,2,NSectors]
   integer,allocatable,dimension(:,:,:)               :: getCDGsector       ! [1/Norb,2,NSectors]
-  integer,allocatable,dimension(:,:,:)               :: getCsector_Jz
-  integer,allocatable,dimension(:,:,:)               :: getCDGsector_Jz
   integer,allocatable,dimension(:,:)                 :: getBathStride
   integer,allocatable,dimension(:,:)                 :: impIndex
   logical,allocatable,dimension(:)                   :: twin_mask
@@ -193,6 +191,9 @@ MODULE ED_VARS_GLOBAL
   integer,allocatable,dimension(:,:)                 :: getSector
   integer,allocatable,dimension(:)                   :: getSz
   integer,allocatable,dimension(:)                   :: getN
+  !
+  integer,allocatable,dimension(:,:,:)               :: getCsector_Jz
+  integer,allocatable,dimension(:,:,:)               :: getCDGsector_Jz
   integer,allocatable,dimension(:)                   :: gettwoJz
   integer,allocatable,dimension(:)                   :: getmaxtwoJz
 
@@ -366,7 +367,7 @@ MODULE ED_VARS_GLOBAL
   real(8),dimension(:,:,:),allocatable               :: Hgeneral_lambda_ineq ![Nineq,Nbath,Nsym]
 
 
-  
+
   !File suffixes for printing fine tuning.
   !=========================================================
   character(len=32)                                  :: ed_file_suffix=""       !suffix string attached to the output files.

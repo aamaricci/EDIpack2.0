@@ -39,7 +39,9 @@ MODULE ED_BATH_FUNCTIONS
      !
      module procedure Fdelta_bath_array
   end interface Fdelta_bath_function
-  !
+
+
+  
   !NON-INTERACTING GREEN'S FUNCTION 
   interface g0and_bath_function
      !
@@ -58,10 +60,11 @@ MODULE ED_BATH_FUNCTIONS
      ! Output:
      !   * :f:var:`f0and` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]
      !
-
      module procedure f0and_bath_array
   end interface f0and_bath_function
-  !
+
+
+  
   !INVERSE NON-INTERACTING GREEN'S FUNCTION 
   interface invg0_bath_function
      !

@@ -541,8 +541,8 @@ contains
        do while(status>=0)
           read(unit,*,iostat=status)istate,isector,indices
           list_sector(istate)=isector
-          call get_Nup(isector,Nups)
-          call get_Ndw(isector,Ndws)
+          call get_Nup(isector,Nups) 
+          call get_Ndw(isector,Ndws) 
           if(any(Indices /= [Nups,Ndws]))&
                stop "setup_global error: nups!=nups(isector).OR.ndws!=ndws(isector)"
        enddo

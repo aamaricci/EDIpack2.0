@@ -148,7 +148,7 @@ contains
           bool = check_nambu(nn2so_reshape(Hvec(:,:,:,:,isym),Nnambu*Nspin,Norb),Nspin*Norb)
        end select
        if(.not.bool)then
-          write(LOGfile,"(A)")"init_Hreplica_symmetries_site ERROR: not Hermitian/Nambu of replica basis O_"//str(isym)
+          write(LOGfile,"(A)")"init_Hreplica_symmetries_d5 ERROR: not Hermitian/Nambu of replica basis O_"//str(isym)
           stop
        endif
     enddo
@@ -177,7 +177,7 @@ contains
     logical                     :: bool
     !
 #ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries_site: from {[Hs,Lam]}_b"
+    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG init_Hreplica_symmetries_d3: from {[Hs,Lam]}_b"
 #endif
     if(ed_mode=="superc")Nnambu=2
     Nsym=size(lambdavec,2)

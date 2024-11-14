@@ -97,6 +97,7 @@ contains
     enddo
   end function Hreplica_build
 
+  
   function Hreplica_mask(wdiag,uplo) result(Hmask)
     logical,optional                                          :: wdiag,uplo
     logical                                                   :: wdiag_,uplo_
@@ -163,8 +164,8 @@ contains
        lambda = lambdavec
     endif
     H=zero
-    do isym=1,size(lambdavec)
-       H=H+lambdavec(isym)*Hgeneral_basis(isym)%O
+    do isym=1,size(lambda)
+       H=H+lambda(isym)*Hgeneral_basis(isym)%O
     enddo
   end function Hgeneral_build
 

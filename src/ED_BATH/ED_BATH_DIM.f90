@@ -81,7 +81,8 @@ contains
        bath_size=Nspin*bath_size
        !
     case('replica')
-       allocate(H(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
+       if(ed_mode=='superc')stop "get_bath_dimension_direct ERROR: called with ed_mode=superc"
+       allocate(H(Nspin,Nspin,Norb,Norb))
        if(present(H_nn))then    !User defined H_nn
           H=H_nn
        elseif(Hreplica_status)then !User defined Hreplica_basis
@@ -92,14 +93,12 @@ contains
        endif
        !
        !Check Hermiticity:
-       ! if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
-      
-       if( .not. check_herm( nn2so_reshape(H,Nnambu*Nspin,Norb),Nnambu*Nspin*Norb) )stop "H is not Hermitian"
+       if( .not. check_herm( nn2so_reshape(H,Nspin,Norb),Nspin*Norb) )stop "H is not Hermitian"
        !
        !Re/Im off-diagonal non-vanishing elements
        ndx=0
-       do ispin=1,Nnambu*Nspin
-          do jspin=1,Nnambu*Nspin
+       do ispin=1,Nspin
+          do jspin=1,Nspin
              do iorb=1,Norb
                 do jorb=1,Norb
                    io = iorb + (ispin-1)*Norb
@@ -117,24 +116,24 @@ contains
        ndx = ndx + 1     !we also print Nbasis
        bath_size = ndx
     case('general')
-       allocate(H(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
+       if(ed_mode=='superc')stop "get_bath_dimension_direct ERROR: called with ed_mode=superc"
+       allocate(H(Nspin,Nspin,Norb,Norb))
        if(present(H_nn))then    !User defined H_nn
           H=H_nn
        elseif(Hgeneral_status)then !User defined Hgeneral_basis
-          H=Hgeneral_build()!Hgeneral_lambda(Nbath,:))!see above
+          H=Hgeneral_build()
        else                        !Error:
           deallocate(H)
           stop "ERROR get_bath_dimension_direct: ed_mode=general neither H_nn present nor Hgeneral_basis defined"
        endif
        !
        !Check Hermiticity:
-       ! if( all(abs(nn2so_reshape(H,Nnambu*Nspin,Norb) - conjg(transpose(nn2so_reshape(H,Nnambu*Nspin,Norb))))<1d-6)  )stop "H is not Hermitian"
-       if( .not. check_herm( nn2so_reshape(H,Nnambu*Nspin,Norb),Nnambu*Nspin*Norb) )stop "H is not Hermitian"
+       if( .not. check_herm( nn2so_reshape(H,Nspin,Norb),Nspin*Norb) )stop "H is not Hermitian"
        !
        !Re/Im off-diagonal non-vanishing elements
        ndx=0
-       do ispin=1,Nnambu*Nspin
-          do jspin=1,Nnambu*Nspin
+       do ispin=1,Nspin
+          do jspin=1,Nspin
              do iorb=1,Norb
                 do jorb=1,Norb
                    io = iorb + (ispin-1)*Norb
@@ -154,6 +153,7 @@ contains
     end select
   end function get_bath_dimension_direct
 
+  
   function get_bath_dimension_symmetries(Nsym) result(bath_size)
     integer :: Nsym !Number of symmetries (for :f:var:`ed_mode` = :code:`replica, general` )
     integer :: bath_size,ndx,isym
