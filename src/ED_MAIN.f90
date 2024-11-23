@@ -286,6 +286,9 @@ contains
 
 
   subroutine ed_solve_lattice(bath,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,iflag)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb
+#endif
     real(8)                                         :: bath(:,:) !user bath input array
     logical,optional                                :: mpi_lanc  !parallelization strategy flag: if :code:`.false.` each core serially solves an inequivalent site, if :code:`.true.` all cores parallely solve each site in sequence. Default :code:`.false.` .
     real(8),optional,dimension(size(bath,1),Norb)   :: Uloc_ii !site-dependent values for :f:var:`uloc` , overriding the ones in the input file. It has dimension [ :f:var:`nlat` , :f:var:`norb` ].

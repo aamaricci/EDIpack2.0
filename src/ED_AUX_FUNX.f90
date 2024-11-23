@@ -1540,6 +1540,9 @@ contains
   !PURPOSE  : Print Hloc
   !+------------------------------------------------------------------+
   subroutine print_Hloc_nn_c(hloc,file)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb
+#endif
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: hloc
     character(len=*),optional                                 :: file
     integer                                                   :: iorb,jorb,ispin,jspin,Nso,unit
@@ -1568,6 +1571,9 @@ contains
   end subroutine print_Hloc_nn_c
 
   subroutine print_Hloc_so_c(hloc,file)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb
+#endif
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: hloc
     character(len=*),optional                   :: file
     integer                                     :: is,js,Nso,unit

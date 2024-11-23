@@ -180,6 +180,9 @@ contains
 
 
   subroutine init_dmft_bath(dmft_bath_,used)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     !
     ! Initialize the :f:var:`effective_bath` input :f:var:`dmft_bath_`.
     ! The energy parameters :f:var:`e` are constructed using a centered :f:var:`nbath` discretization of the flat band of width 2 :f:var:`ed_hw_bath`.
@@ -440,6 +443,9 @@ contains
 
 
   subroutine write_dmft_bath(dmft_bath_,unit)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     !
     ! Write the :f:var:`effective_bath` on input to std.output or to a file associated to the [optional] unit.
     !
@@ -836,6 +842,9 @@ contains
 
 
   subroutine get_dmft_bath(dmft_bath_,bath_)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     !
     ! Set the user input bath :f:var:`bath_` from the components of the :f:var:`effective_bath` :f:var:`dmft_bath_` , i.e. it dumps the internal data structure to the user bath. 
     !

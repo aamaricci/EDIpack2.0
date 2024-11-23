@@ -80,7 +80,7 @@ contains
     integer          :: Nsym
     integer          :: isym
     !
-#ifdef _DEBUG,iorb,ispin
+#ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")"DEBUG allocate_Hreplica"
 #endif
     if(allocated(Hreplica_basis))deallocate(Hreplica_basis)
