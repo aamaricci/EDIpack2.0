@@ -242,6 +242,7 @@ def check_convergence(self,func,threshold=None,N1=None,N2=None):
     try:
         conv_bool = comm.bcast(conv_bool, root=0)
         err = comm.bcast(err, root=0)
+        sys.stdout.flush()
     except:
         pass
     return err,conv_bool
