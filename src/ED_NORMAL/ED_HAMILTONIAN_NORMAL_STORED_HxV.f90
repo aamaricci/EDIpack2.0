@@ -484,11 +484,11 @@ contains
     ! Serial version of the matrix-vector product :math:`\vec{w}=H\times\vec{v}` used in Arpack/Lanczos algorithm for :f:var:`ed_total_ud` = :code:`True` 
     ! This procedures applies one by one each term of the global Hamiltonian to an input vector using the stored sparse matrices.  
     !
-    integer                         :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
-    real(8),dimension(Nloc)         :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
-    real(8),dimension(Nloc)         :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
-    real(8)                         :: val
-    integer                         :: i,iup,idw,j,jup,jdw,jj,i_el,j_el
+    integer                 :: Nloc !Global dimension of the problem. :code:`size(v)=Nloc=size(Hv)`
+    real(8),dimension(Nloc) :: v    !input vector (passed by Arpack/Lanczos) :math:`\vec{v}`
+    real(8),dimension(Nloc) :: Hv   !output vector (required by Arpack/Lanczos) :math:`\vec{w}`
+    real(8)                 :: val
+    integer                 :: i,iup,idw,j,jup,jdw,jj,i_el,j_el
     !
     !
     Hv=0d0

@@ -71,7 +71,7 @@ contains
   !PURPOSE  : Evaluate and print out many interesting physical qties
   !+-------------------------------------------------------------------+
   subroutine observables_superc()
-!Calculate the values of the local observables
+    !Calculate the values of the local observables
     integer                 :: val
     integer,dimension(2*Ns) :: ib
     integer,dimension(2,Ns) :: Nud
@@ -308,7 +308,7 @@ contains
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
   subroutine local_energy_superc()
-!Calculate the values of the local observables
+    !Calculate the values of the local observables
     integer,dimension(2*Ns) :: ib
     integer,dimension(2,Ns) :: Nud
     integer,dimension(Ns)   :: IbUp,IbDw

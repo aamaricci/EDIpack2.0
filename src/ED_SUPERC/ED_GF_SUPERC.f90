@@ -85,9 +85,9 @@ contains
 #ifdef _DEBUG
        write(Logfile,"(A)")""
 #endif
-       impGmats(ispin,ispin,iorb,iorb,:) = auxGmats(1,:) !this is G_{up,up;iorb,iorb}
+       impGmats(ispin,ispin,iorb,iorb,:) = auxGmats(1,:) !this is G_{up,up;iorb,iorb} <CCdg>
        impGreal(ispin,ispin,iorb,iorb,:) = auxGreal(1,:)  
-       barGmats(                 iorb,:) = auxGmats(2,:) !this is G_{dw,dw;iorb,iorb}
+       barGmats(                 iorb,:) = auxGmats(2,:) !this is \bar{G}_{dw,dw;iorb,iorb} <CdgC>
        barGreal(                 iorb,:) = auxGreal(2,:)
     enddo
     !
@@ -255,13 +255,13 @@ contains
 
 
 
-
   !################################################################
   !################################################################
   !################################################################
   !################################################################
 
 
+  
 
 
   subroutine lanc_build_gf_superc_Gdiag(iorb)

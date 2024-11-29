@@ -247,9 +247,8 @@ contains
     complex(8),dimension(:)             :: vvinit
     real(8),dimension(:),allocatable    :: alanc,blanc
     real(8)                             :: norm2
-    complex(8),dimension(:),allocatable :: vvloc,      dellete,indel
-    integer                             :: vecDim,     Lvvinit,iii
-    logical                             ::             existo
+    complex(8),dimension(:),allocatable :: vvloc
+    integer                             :: vecDim
     !
 #ifdef _DEBUG
     if(ed_verbose>4)write(Logfile,"(A)")&

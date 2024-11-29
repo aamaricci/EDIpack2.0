@@ -236,7 +236,6 @@ contains
        if(ed_verbose>2)write(LOGfile,*)""
        if(ed_verbose>2)write(LOGfile,*)""
        !
-
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")"DEBUG ed_diag_d SUPERC: building states list"
 #endif
