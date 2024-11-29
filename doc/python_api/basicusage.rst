@@ -28,7 +28,7 @@ Set the local Hamiltonian
 
     ed.set_hloc(hloc=Hloc)
     
-If :code:`BATH_TYPE` is :code:`REPLICA` or :code:`GENERAL`, the replica matrix has to be initialized via
+If  :f:var:`bath_type`  is :code:`REPLICA` or :code:`GENERAL`, the replica matrix has to be initialized via
 
 .. code-block:: python
 

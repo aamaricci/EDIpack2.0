@@ -32,7 +32,7 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES GNU) # this is gfortran
   # -fdebug-aux-vars
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
   SET(CMAKE_Fortran_MODDIR_FLAG    "-module ") #remember the ending white space here 
-  SET(CMAKE_Fortran_FLAGS          "-fpp")
+  SET(CMAKE_Fortran_FLAGS          "-fpp -fPIC")
   SET(CMAKE_Fortran_FLAGS_RELEASE  "-O3 -ftz")
   SET(CMAKE_Fortran_FLAGS_TESTING  "-O1 ")
   SET(CMAKE_Fortran_FLAGS_DEBUG    "-p -O0 -g -fpe1 -warn -debug extended -traceback -check all,noarg_temp_created")

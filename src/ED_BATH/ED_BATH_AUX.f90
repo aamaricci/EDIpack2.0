@@ -68,6 +68,9 @@ contains
 
 
   subroutine Hreplica_site(site)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     integer :: site
     if(site<1.OR.site>size(Hreplica_lambda_ineq,1))stop "ERROR Hreplica_site: site not in [1,Nlat]"
     if(.not.allocated(Hreplica_lambda_ineq))stop "ERROR Hreplica_site: Hreplica_lambda_ineq not allocated"
@@ -77,6 +80,9 @@ contains
 
 
   function Hreplica_build(lambdavec) result(H)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     !
     !This function is used to reconstruct the local bath Hamiltonian from basis expansion given the vector of :math:`\vec{\lambda}` parameters :math:`h^p=\sum_i \lambda^p_i O_i`. The resulting Hamiltonian has dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| ]
     !
@@ -99,6 +105,9 @@ contains
 
   
   function Hreplica_mask(wdiag,uplo) result(Hmask)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     logical,optional                                          :: wdiag,uplo
     logical                                                   :: wdiag_,uplo_
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
@@ -142,6 +151,9 @@ contains
 
 
   subroutine Hgeneral_site(site)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     integer :: site
     if(site<1.OR.site>size(Hgeneral_lambda_ineq,1))stop "ERROR Hgeneral_site: site not in [1,Nlat]"
     if(.not.allocated(Hgeneral_lambda_ineq))stop "ERROR Hgeneral_site: Hgeneral_lambda_ineq not allocated"
@@ -149,6 +161,9 @@ contains
   end subroutine Hgeneral_site
 
   function Hgeneral_build(lambdavec) result(H)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     !
     !This function is used to reconstruct the local bath Hamiltonian from basis expansion given the vector of :math:`\vec{\lambda}` parameters :math:`h^p=\sum_i \lambda^p_i O_i`. The resulting Hamiltonian has dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| ]
     !
@@ -170,6 +185,9 @@ contains
   end function Hgeneral_build
 
   function Hgeneral_mask(wdiag,uplo) result(Hmask)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     logical,optional                                          :: wdiag,uplo
     logical                                                   :: wdiag_,uplo_
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
@@ -219,6 +237,9 @@ contains
 
 
   function get_Whyb_matrix_1orb(v,u) result(w)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     real(8),dimension(Nspin,Nbath)       :: v,u
     real(8),dimension(Nspin,Nspin,Nbath) :: w
     integer                              :: ispin
@@ -230,6 +251,9 @@ contains
   end function get_Whyb_matrix_1orb
 
   function get_Whyb_matrix_Aorb(v,u) result(w)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     real(8),dimension(Nspin,Norb,Nbath)       :: v,u
     real(8),dimension(Nspin,Nspin,Norb,Nbath) :: w
     integer                                   :: ispin
@@ -241,6 +265,9 @@ contains
   end function get_Whyb_matrix_Aorb
 
   function get_Whyb_matrix_dmft_bath(dmft_bath_) result(w)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     type(effective_bath)                      :: dmft_bath_
     real(8),dimension(Nspin,Nspin,Norb,Nbath) :: w
     integer                                   :: ispin
@@ -259,6 +286,9 @@ contains
   !PURPOSE  : Check if a matrix is the identity
   !+-------------------------------------------------------------------+
   function is_identity_nn(mnnn) result(flag)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: mnnn
     real(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                  :: i,j
@@ -281,6 +311,9 @@ contains
   end function is_identity_nn
 
   function is_identity_so(mlso) result(flag)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mlso
     real(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                  :: i,j
@@ -308,6 +341,9 @@ contains
   !PURPOSE  : Check if a matrix is diagonal
   !+-------------------------------------------------------------------+
   function is_diagonal_nn(mnnn) result(flag)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: mnnn
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                     :: i,j
@@ -326,6 +362,9 @@ contains
   end function is_diagonal_nn
 
   function is_diagonal_so(mlso) result(flag)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mlso
     complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: mtmp
     integer                                     :: i,j
@@ -349,6 +388,9 @@ contains
 
 
   function check_herm(A,N,error) result(bool)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     integer,intent(in)                   :: N
     complex(8),dimension(N,N),intent(in) :: A
     logical                              :: bool
@@ -360,6 +402,9 @@ contains
 
 
   function check_nambu(A,N,error) result(bool)
+#if __INTEL_COMPILER
+  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
     integer,intent(in)                       :: N
     complex(8),dimension(2*N,2*N),intent(in) :: A
     complex(8),dimension(N,N)                :: h11,h22

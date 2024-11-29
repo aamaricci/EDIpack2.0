@@ -187,91 +187,91 @@ end subroutine ed_get_eimp_n2_c
 !rebuild sigma
 subroutine rebuild_sigma_single_n3_c(zeta,dz,sigma_normal,sigma_anomalous) bind(c,name="build_sigma_single_n3")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: sigma_normal(Nspin*Norb,Nspin*Norb,dz)
   complex(c_double_complex)                     :: sigma_anomalous(Nspin*Norb,Nspin*Norb,dz)
-  integer(c_int),value                          :: dz
   call ed_build_sigma(zeta,sigma_normal,sigma_anomalous)
 end subroutine rebuild_sigma_single_n3_c
 
 subroutine rebuild_sigma_single_n5_c(zeta,dz,sigma_normal,sigma_anomalous) bind(c,name="build_sigma_single_n5")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: sigma_normal(Nspin,Nspin,Norb,Norb,dz)
   complex(c_double_complex)                     :: sigma_anomalous(Nspin,Nspin,Norb,Norb,dz)
-  integer(c_int),value                          :: dz
   call ed_build_sigma(zeta,sigma_normal,sigma_anomalous)
 end subroutine rebuild_sigma_single_n5_c
 
 subroutine rebuild_sigma_ineq_n3_c(zeta,dz,Nineq,sigma_normal,sigma_anomalous) bind(c,name="build_sigma_ineq_n3")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz,Nineq
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: sigma_normal(Nineq*Nspin*Norb,Nineq*Nspin*Norb,dz)
   complex(c_double_complex)                     :: sigma_anomalous(Nineq*Nspin*Norb,Nineq*Nspin*Norb,dz)
-  integer(c_int),value                          :: dz,Nineq
   call ed_build_sigma(zeta,Nineq,sigma_normal,sigma_anomalous)
 end subroutine rebuild_sigma_ineq_n3_c
 
 subroutine rebuild_sigma_ineq_n4_c(zeta,dz,Nineq,sigma_normal,sigma_anomalous) bind(c,name="build_sigma_ineq_n4")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz,Nineq
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: sigma_normal(Nineq,Nspin*Norb,Nspin*Norb,dz)
   complex(c_double_complex)                     :: sigma_anomalous(Nineq,Nspin*Norb,Nspin*Norb,dz)
-  integer(c_int),value                          :: dz,Nineq
   call ed_build_sigma(zeta,Nineq,sigma_normal,sigma_anomalous)
 end subroutine rebuild_sigma_ineq_n4_c
 
 subroutine rebuild_sigma_ineq_n6_c(zeta,dz,Nineq,sigma_normal,sigma_anomalous) bind(c,name="build_sigma_ineq_n6")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz,Nineq
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: sigma_normal(Nineq,Nspin,Nspin,Norb,Norb,dz)
   complex(c_double_complex)                     :: sigma_anomalous(Nineq,Nspin,Nspin,Norb,Norb,dz)
-  integer(c_int),value                          :: dz,Nineq
   call ed_build_sigma(zeta,Nineq,sigma_normal,sigma_anomalous)
 end subroutine rebuild_sigma_ineq_n6_c
 
 !rebuild gimp
 subroutine rebuild_gimp_single_n3_c(zeta,dz,gimp_normal,gimp_anomalous) bind(c,name="build_gimp_single_n3")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: gimp_normal(Nspin*Norb,Nspin*Norb,dz)
   complex(c_double_complex)                     :: gimp_anomalous(Nspin*Norb,Nspin*Norb,dz)
-  integer(c_int),value                          :: dz
   call ed_build_gimp(zeta,gimp_normal,gimp_anomalous)
 end subroutine rebuild_gimp_single_n3_c
 
 subroutine rebuild_gimp_single_n5_c(zeta,dz,gimp_normal,gimp_anomalous) bind(c,name="build_gimp_single_n5")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: gimp_normal(Nspin,Nspin,Norb,Norb,dz)
   complex(c_double_complex)                     :: gimp_anomalous(Nspin,Nspin,Norb,Norb,dz)
-  integer(c_int),value                          :: dz
   call ed_build_gimp(zeta,gimp_normal,gimp_anomalous)
 end subroutine rebuild_gimp_single_n5_c
 
 subroutine rebuild_gimp_ineq_n3_c(zeta,dz,Nineq,gimp_normal,gimp_anomalous) bind(c,name="build_gimp_ineq_n3")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz,Nineq
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: gimp_normal(Nineq*Nspin*Norb,Nineq*Nspin*Norb,dz)
   complex(c_double_complex)                     :: gimp_anomalous(Nineq*Nspin*Norb,Nineq*Nspin*Norb,dz)
-  integer(c_int),value                          :: dz,Nineq
   call ed_build_gimp(zeta,Nineq,gimp_normal,gimp_anomalous)
 end subroutine rebuild_gimp_ineq_n3_c
 
 subroutine rebuild_gimp_ineq_n4_c(zeta,dz,Nineq,gimp_normal,gimp_anomalous) bind(c,name="build_gimp_ineq_n4")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz,Nineq
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: gimp_normal(Nineq,Nspin*Norb,Nspin*Norb,dz)
   complex(c_double_complex)                     :: gimp_anomalous(Nineq,Nspin*Norb,Nspin*Norb,dz)
-  integer(c_int),value                          :: dz,Nineq
   call ed_build_gimp(zeta,Nineq,gimp_normal,gimp_anomalous)
 end subroutine rebuild_gimp_ineq_n4_c
 
 subroutine rebuild_gimp_ineq_n6_c(zeta,dz,Nineq,gimp_normal,gimp_anomalous) bind(c,name="build_gimp_ineq_n6")
   use, intrinsic :: iso_c_binding
+  integer(c_int),value                          :: dz,Nineq
   complex(c_double_complex)                     :: zeta(dz)
   complex(c_double_complex)                     :: gimp_normal(Nineq,Nspin,Nspin,Norb,Norb,dz)
   complex(c_double_complex)                     :: gimp_anomalous(Nineq,Nspin,Nspin,Norb,Norb,dz)
-  integer(c_int),value                          :: dz,Nineq
   call ed_build_gimp(zeta,Nineq,gimp_normal,gimp_anomalous)
 end subroutine rebuild_gimp_ineq_n6_c
