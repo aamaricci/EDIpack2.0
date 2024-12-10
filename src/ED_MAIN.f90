@@ -83,11 +83,12 @@ module ED_MAIN
      module procedure :: ed_finalize_solver_single
      module procedure :: ed_finalize_solver_lattice
   end interface ed_finalize_solver
-  public :: ed_finalize_solver
+
 
 
   public :: ed_init_solver
   public :: ed_solve
+  public :: ed_finalize_solver
   public :: ed_rebuild_gf
 
 
