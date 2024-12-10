@@ -30,7 +30,7 @@ bin:
 	echo GENERAL/NORMAL >> $(TSTBIN)/list_dir
 	echo GENERAL/SUPERC >> $(TSTBIN)/list_dir
 
-test:
+test: all
 	./test.sh
 
 clean:

@@ -37,16 +37,19 @@ all:
 	@echo ""
 	@echo "compiling $(EXE).f90 "
 	@echo ""
+	@echo "$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}"
 	$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}
 	@cp *.check $(TSTBIN)/
 	@cp *.restart $(TSTBIN)/
 	@cp *.in    $(TSTBIN)/
+	@echo "Done"
 
 debug: FLAG:=${DFLAG} ${FPPFLAG}
 debug:
 	@echo ""
 	@echo "compiling $(EXE).f90 "
 	@echo ""
+	@echo "$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}"
 	$(FC) $(FLAG) $(OBJS) $(EXE).f90 -o $(TSTBIN)/$(EXE).x -I../../ ${GLOB_INC} ${GLOB_LIB}
 	@cp *.check $(TSTBIN)/
 	@cp *.restart $(TSTBIN)/

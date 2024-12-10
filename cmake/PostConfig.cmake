@@ -57,14 +57,20 @@ MESSAGE( STATUS "${Red}Library version:${ColourReset} ${VERSION}")
 MESSAGE( STATUS "${Red}Library will be installed in:${ColourReset} ${CMAKE_INSTALL_PREFIX}")
 MESSAGE( STATUS "
 >> ${Red}TO CONCLUDE INSTALLATION${ColourReset} <<
-Compile with:
+${Yellow}Compile with${ColourReset}:
 $ ${BARE_MAKE_PROGRAM}
 
-Install with:
+${Yellow}Install with${ColourReset}:
 $ ${BARE_MAKE_PROGRAM} install
 
-Uninstall with:
+${Yellow}Uninstall with${ColourReset}:
 $ ${BARE_MAKE_PROGRAM} uninstall
+
+${Yellow}Make documenation${ColourReset}:
+$ ${BARE_MAKE_PROGRAM} doc
+
+${Yellow}Make test${ColourReset}:
+$ ${BARE_MAKE_PROGRAM} test
 ")
 
 INSTALL(CODE "MESSAGE(
@@ -111,7 +117,27 @@ ENDIF()
 
 
 
-# Add a distclean target to the Makefile
-ADD_CUSTOM_TARGET(doc 
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_MODULE_PATH}/DistClean.cmake
-)
+#SPHINX DOCUMENTATION TARGET
+if(NOT TARGET doc)
+  FIND_PACKAGE(Sphinx QUIET)
+
+  IF(${SPHINX_FOUND})
+    ADD_CUSTOM_TARGET(doc
+      COMMAND ${SPHINX_EXECUTABLE} -T -b html
+      ${CMAKE_SOURCE_DIR}/doc
+      ${CMAKE_SOURCE_DIR}/_build
+    )
+  ENDIF()
+endif()
+
+
+
+
+IF(NOT TARGET test)
+  PKG_SEARCH_MODULE(EDIPACK2 REQUIRED edipack2)
+
+  ADD_CUSTOM_TARGET(test
+    COMMAND ${BARE_MAKE_PROGRAM} -C ${LIB_TEST} test
+  )
+ENDIF()
+

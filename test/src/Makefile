@@ -14,11 +14,8 @@ all: $(OBJS) NORMAL REPLICA GENERAL # HYBRID
 	@echo "all done"
 
 
-NORMAL REPLICA GENERAL:
+NORMAL REPLICA GENERAL: #HYBRID
 	make -C ./ED_$@
-
-#HYBRID:
-#	make -C ./ED_$@
 
 .f90.o:
 	$(FC) $(FFLAGS) -c $< ${GLOB_INC}
