@@ -54,18 +54,6 @@ ELSE()
 Can not find SciFortran in this system. Check SciFor installation. Try adding the provided PKG-CONFIG file to the environment:
 $ export PKG_CONFIG_PATH=<path_to_scifor_dir>/etc:$PKG_CONFIG_PATH")
 ENDIF()
-# #THIS MAY BE REMOVED I GUESS. IT IS A WAY TOO MUCH JUDICIOUS CROSSCHECK OF SCIFOR CONFIGURATION
-# IF("${SCIFOR_LDFLAGS}" MATCHES "blas" OR "lapack")
-#   FIND_PACKAGE(BLAS REQUIRED)
-#   FIND_PACKAGE(LAPACK REQUIRED)
-# ELSEIF("${SCIFOR_LDFLAGS}" MATCHES "mkl")
-#   FIND_PACKAGE(MKL QUIET)
-#   IF( ${MKL_FOUND} )
-#     MESSAGE(STATUS "MKL detected in SciFortan. Found.")
-#   ELSE()
-#     MESSAGE(WARNING "MKL detected in SciFortran. Not found. Check installation/loading") 
-#   ENDIF()
-# ENDIF()
 INCLUDE_DIRECTORIES(BEFORE ${SCIFOR_INCLUDE_DIRS})
 
 

@@ -59,6 +59,7 @@ MESSAGE( STATUS "
 >> ${Red}TO CONCLUDE INSTALLATION${ColourReset} <<
 Compile with:
 $ ${BARE_MAKE_PROGRAM}
+
 Install with:
 $ ${BARE_MAKE_PROGRAM} install
 
@@ -106,3 +107,11 @@ if(NOT TARGET uninstall)
     "${PROJECT_NAME}/${TMP_MODULE_NAME}" "${PROJECT_NAME}.pc" )
   
 ENDIF()
+
+
+
+
+# Add a distclean target to the Makefile
+ADD_CUSTOM_TARGET(doc 
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_MODULE_PATH}/DistClean.cmake
+)
