@@ -88,6 +88,7 @@ INCLUDE(${CMAKE_MODULE_PATH}/MainConfig.cmake)
 # Define some directories
 SET(LIB_SRC ${CMAKE_SOURCE_DIR}/src)
 SET(LIB_ETC ${CMAKE_SOURCE_DIR}/etc)
+SET(LIB_TEST ${CMAKE_SOURCE_DIR}/test)
 SET(LIB_ENV ${CMAKE_SOURCE_DIR}/etc/environment_modules)
 SET(LIB_TMP_INC ${CMAKE_BINARY_DIR}/include)
 SET(LIB_TMP_ETC ${CMAKE_BINARY_DIR}/etc)
@@ -196,4 +197,11 @@ CONFIGURE_FILE( ${LIB_ETC}/${PROJECT_NAME}.pc.in ${TMP_PKCONFIG_FILE} @ONLY)
 ############################################################
 
 
+
+#Final messages + additional custom targets:
+# - distclean: cleans the generated cmake files
+# - uninstall: provides uninstall of (almost) all the installed files
+# - doc: creates documentation using sphinx (if found)
+# - test: compiles and launches the test in ${LIB_TEST} directory 
 INCLUDE(${CMAKE_MODULE_PATH}/PostConfig.cmake)
+
