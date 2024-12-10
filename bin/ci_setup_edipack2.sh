@@ -2,7 +2,7 @@
 #Errors
 set -e
 
-cd EDIpack2
+cd edipack2
 mkdir build
 cd build
 
@@ -15,6 +15,6 @@ make
 echo "make install"
 make install
 
-echo "source ~/opt/EDIpack2/gnu/*/bin/edipack2_config_user.sh" >> ~/.edipack2_config_user
+echo "source ~/opt/edipack2/gnu/*/bin/edipack2_config_user.sh" >> ~/.edipack2_config_user
 echo -e "\e[32m EDIpack2 installed and sourced \e[0m"
 

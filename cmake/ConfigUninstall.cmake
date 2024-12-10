@@ -8,7 +8,7 @@ STRING(REGEX REPLACE "\n" ";" files "${files}")
 FOREACH(file ${files})
   MESSAGE(STATUS "Uninstalling $ENV{DESTDIR}${file}")
   IF(IS_SYMLINK "$ENV{DESTDIR}${file}" OR EXISTS "$ENV{DESTDIR}${file}")
-    EXEC_PROGRAM(
+    EXECUTE_PROCESS(
       "@CMAKE_COMMAND@" ARGS "-E rm -rf \"$ENV{DESTDIR}${file}\""
       OUTPUT_VARIABLE rm_out
       RETURN_VALUE rm_retval

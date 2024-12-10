@@ -135,7 +135,7 @@ endif()
 
 IF(NOT TARGET test)
   ADD_CUSTOM_TARGET(test
-    COMMAND ${BARE_MAKE_PROGRAM} -C ${LIB_TEST} test
+    COMMAND ${BARE_MAKE_PROGRAM} -C ${LIB_TEST} all test
   )
 ENDIF()
 

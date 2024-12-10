@@ -38,14 +38,14 @@ jobs:
 
 # Build EDIpack2
       - name: Cloning EDIpack2
-        run: git clone https://github.com/aamaricci/EDIpack2.0.git EDIpack2
+        run: git clone https://github.com/aamaricci/EDIpack2.0.git edipack2
       - name: Install EDIpack2
         run: |
           source ~/.scifor_config_user
           export PKG_CONFIG_PATH=~/.pkgconfig.d
           export GLOB_INC=$( pkg-config --cflags scifor )
           export GLOB_LIB=$( pkg-config --libs   scifor  | sed  "s/;/ /g"  | sed 's/\\/  /g' )
-          EDIpack2/bin/ci_setup_edipack2.sh
+          edipack2/bin/ci_setup_edipack2.sh
 
 
 
@@ -59,13 +59,13 @@ jobs:
           export PKG_CONFIG_PATH=~/.pkgconfig.d
           export GLOB_INC=$( pkg-config --cflags scifor edipack2)
           export GLOB_LIB=$( pkg-config --libs   scifor edipack2 | sed  "s/;/ /g"  | sed 's/\\/  /g' )
-          cd EDIpack2/test
+          cd edipack2/test
           export TERM=xterm
           make all
 
       - name: Testing...
         run: |
-          cd EDIpack2/test
+          cd edipack2/test
           make test
 
       # - name: Install LCOV
