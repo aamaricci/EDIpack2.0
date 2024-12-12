@@ -273,18 +273,18 @@ contains
   !  
   !+-------------------------------------------------------------+
   subroutine chi2_fitgf_replica_superc(fg,bath_)
-    complex(8),dimension(:,:,:,:,:,:)                      :: fg ![2][Nspin][Nspin][Norb][Norb][Lmats]
-    logical,dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: Hmask
-    real(8),dimension(:),intent(inout)                     :: bath_
-    real(8),dimension(:),allocatable                       :: array_bath
-    integer                                                :: i,j,iorb,jorb,ispin,jspin,io,jo,ibath,inambu
-    integer                                                :: iter,stride,counter,Asize
-    real(8)                                                :: chi
-    logical                                                :: check
-    type(effective_bath)                                   :: dmft_bath
-    character(len=256)                                     :: suffix
-    integer                                                :: unit
-    complex(8),dimension(:,:,:,:,:,:),allocatable          :: fgand ![2][Nspin][][Norb][][Ldelta]  
+    complex(8),dimension(:,:,:,:,:,:)             :: fg ![2][Nspin][Nspin][Norb][Norb][Lmats]
+    logical,dimension(:,:,:,:),allocatable        :: Hmask
+    real(8),dimension(:),intent(inout)            :: bath_
+    real(8),dimension(:),allocatable              :: array_bath
+    integer                                       :: i,j,iorb,jorb,ispin,jspin,io,jo,ibath,inambu
+    integer                                       :: iter,stride,counter,Asize
+    real(8)                                       :: chi
+    logical                                       :: check
+    type(effective_bath)                          :: dmft_bath
+    character(len=256)                            :: suffix
+    integer                                       :: unit
+    complex(8),dimension(:,:,:,:,:,:),allocatable :: fgand ![2][Nspin][][Norb][][Ldelta]  
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_replica_superc: Fit"
@@ -302,6 +302,7 @@ contains
     array_bath=bath_(2:)
     !
     if(ed_all_g)then
+       allocate(Hmask(Nspin,Nspin,Norb,Norb))
        Hmask=.true.
        ! write(*,*) "!! WARNING !!"
        ! write(*,*) "USING ED_ALL_G=.true."
@@ -313,30 +314,27 @@ contains
        !AA: we fit the 11 and 12 components (G0,F0) explicitly.
        !All the multi-orbital part of the chi^2 function remains identical to the normal case.
     else
+       allocate(Hmask(NNambu*Nspin,NNambu*Nspin,Norb,Norb))
        Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
     endif
     !
     ! Taking only upper-diagonal
-    do ispin=1,Nspin
-       do jspin=1,Nspin
-          do iorb=1,Norb
-             do jorb=1,Norb
-                if(ispin>jspin .OR. iorb>jorb)Hmask(ispin,jspin,iorb,jorb)=.false.
-             enddo
-          enddo
+    do iorb=1,Norb
+       do jorb=1,Norb
+          if(iorb>jorb)Hmask(1,1,iorb,jorb)=.false.
        enddo
     enddo
     !
     totNso=count(Hmask)
     !
-    allocate(getInambu(totNso))
+    !
     allocate(getIspin(totNso),getJspin(totNso))
     allocate(getIorb(totNso) ,getJorb(totNso))
     !
+    getIspin=1
+    getJspin=1
     counter=0
     !HERE NSPIN=1
-    getIspin = 1
-    getJspin = 1
     do iorb=1,Norb
        do jorb=1,Norb
           if (Hmask(1,1,iorb,jorb))then
@@ -457,7 +455,6 @@ contains
     deallocate(FGmatrix,FFmatrix,Gdelta,Fdelta,Xdelta,Wdelta)
     deallocate(getIspin,getJspin)
     deallocate(getIorb,getJorb)
-    deallocate(getInambu)
     deallocate(array_bath)
     !
   contains

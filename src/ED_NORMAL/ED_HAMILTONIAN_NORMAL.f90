@@ -70,7 +70,7 @@ contains
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
          "DEBUG build_Hv_sector_NORMAL: build H*v info. present(Hmat):"//str(present(Hmat))//&
-         ", total Nup,Ndw:"//str(ed_total_ud)//", using sparse H:"//str(ed_sparse_H)
+         ", using sparse H:"//str(ed_sparse_H)
 #endif
     !
     call build_sector(isector,Hsector)

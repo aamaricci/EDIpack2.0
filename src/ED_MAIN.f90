@@ -14,7 +14,7 @@ module ED_MAIN
   USE ED_CHI_FUNCTIONS
   USE ED_OBSERVABLES
   USE ED_DIAG
-
+  USE ED_IO
   implicit none
   private
 

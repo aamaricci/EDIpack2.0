@@ -347,6 +347,15 @@ contains
     impF0mats=zero
     impF0real=zero
     !
+    allocate(impD0mats(Nspin,Nspin,Norb,Norb,Lmats))
+    allocate(impD0real(Nspin,Nspin,Norb,Norb,Lreal))
+    allocate(impT0mats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
+    allocate(impT0real(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
+    impD0mats=zero
+    impD0real=zero
+    impT0mats=zero
+    impT0real=zero
+    !
     allocate(impDmats_ph(0:Lmats))
     allocate(impDreal_ph(Lreal))
     impDmats_ph=zero
@@ -444,6 +453,10 @@ contains
     if(allocated(impG0real))deallocate(impG0real)
     if(allocated(impF0mats))deallocate(impF0mats)
     if(allocated(impF0real))deallocate(impF0real)
+    if(allocated(impD0mats))deallocate(impD0mats)
+    if(allocated(impD0real))deallocate(impD0real)
+    if(allocated(impT0mats))deallocate(impT0mats)
+    if(allocated(impT0real))deallocate(impT0real)
     if(allocated(impDmats_ph))deallocate(impDmats_ph)
     if(allocated(impDreal_ph))deallocate(impDreal_ph)
     if(allocated(impGmatrix))deallocate(impGmatrix)

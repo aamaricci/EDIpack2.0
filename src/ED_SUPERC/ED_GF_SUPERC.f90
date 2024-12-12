@@ -1145,7 +1145,7 @@ contains
           invGimp=zero
           invGimp(1     :Norb  ,     1:Norb  ) = impGmats(ispin,ispin,:,:,i)
           invGimp(1     :Norb  ,Norb+1:2*Norb) = impFmats(ispin,ispin,:,:,i)
-          invGimp(Norb+1:2*Norb,     1:Norb  ) = conjg(impFmats(ispin,ispin,:,:,i))
+          invGimp(Norb+1:2*Norb,     1:Norb  ) = conjg(impFmats(ispin,ispin,:,:,i)) !this is real so conjg does none, but it shouldn't be there
           invGimp(Norb+1:2*Norb,Norb+1:2*Norb) =-conjg(impGmats(ispin,ispin,:,:,i))
           call inv(invGimp)
           invGmats(ispin,ispin,:,:,i) = invGimp(1:Norb,     1:Norb  )
@@ -1155,7 +1155,7 @@ contains
           invGimp=zero
           invGimp(1:Norb       ,     1:Norb)   = impGreal(ispin,ispin,:,:,i)
           invGimp(1:Norb       ,Norb+1:2*Norb) = impFreal(ispin,ispin,:,:,i)
-          invGimp(Norb+1:2*Norb,     1:Norb)   = conjg(impFreal(ispin,ispin,:,:,i))
+          invGimp(Norb+1:2*Norb,     1:Norb)   = impFreal(ispin,ispin,:,:,i)
           invGimp(Norb+1:2*Norb,Norb+1:2*Norb) =-conjg(impGreal(ispin,ispin,:,:,Lreal-i+1))
           call inv(invGimp)
           invGreal(ispin,ispin,:,:,i) =  invGimp(1:Norb,     1:Norb  )

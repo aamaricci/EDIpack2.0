@@ -1,4 +1,4 @@
-subroutine print_impG0_normal
+subroutine print_impDelta_normal
   integer                                           :: i,ispin,isign,unit(2),iorb,jorb
   character(len=20)                                 :: suffix
   integer,dimension(:),allocatable                  :: getIorb,getJorb
@@ -35,19 +35,19 @@ subroutine print_impG0_normal
         iorb=getIorb(l)
         jorb=getJorb(l)
         suffix="_l"//str(iorb)//str(jorb)//"_s"//str(ispin)
-        call splot("impG0"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"   ,wm,impG0mats(ispin,ispin,iorb,jorb,:))
-        call splot("impG0"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impG0real(ispin,ispin,iorb,jorb,:))
+        call splot("impDelta"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"   ,wm,impD0mats(ispin,ispin,iorb,jorb,:))
+        call splot("impDelta"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impD0real(ispin,ispin,iorb,jorb,:))
      enddo
   enddo
   !
-end subroutine print_impG0_normal
+end subroutine print_impDelta_normal
 
 
 
 
 
 
-subroutine print_impG0_superc
+subroutine print_impDelta_superc
   integer                                               :: i,ispin,unit(4),iorb,jorb,isign
   character(len=20)                                     :: suffix
   integer,dimension(:),allocatable                      :: getIorb,getJorb
@@ -85,15 +85,15 @@ subroutine print_impG0_superc
         iorb=getIorb(l)
         jorb=getJorb(l)
         suffix="_l"//str(iorb)//str(jorb)//"_s"//str(ispin)
-        call splot("impG0"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"  ,wm,impG0mats(ispin,ispin,iorb,jorb,:))
-        call splot("impF0"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"  ,wm,impF0mats(ispin,ispin,iorb,jorb,:))
+        call splot("impDelta"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"  ,wm,impD0mats(ispin,ispin,iorb,jorb,:))
+        call splot("impFDelta"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed" ,wm,impT0mats(ispin,ispin,iorb,jorb,:))
         !
-        call splot("impG0"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impG0real(ispin,ispin,iorb,jorb,:))
-        call splot("impF0"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impF0real(ispin,ispin,iorb,jorb,:))
+        call splot("impDelta"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed" ,wr,impD0real(ispin,ispin,iorb,jorb,:))
+        call splot("impFDelta"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impT0real(ispin,ispin,iorb,jorb,:))
      enddo
   enddo
   !
-end subroutine print_impG0_superc
+end subroutine print_impDelta_superc
 
 
 
@@ -107,7 +107,7 @@ end subroutine print_impG0_superc
 
 
 
-subroutine print_impG0_nonsu2
+subroutine print_impDelta_nonsu2
   integer                          :: i,isign,unit(2),iorb,jorb,ispin,jspin
   integer,dimension(:),allocatable :: getIorb,getJorb,getIspin,getJspin
   integer                          :: totNso,totNorb,totNspin,l,io,jo
@@ -159,11 +159,11 @@ subroutine print_impG0_nonsu2
      jspin=getJspin(l)
      !
      suffix="_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
-     call splot("impG0"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"   ,wm,impG0mats(ispin,jspin,iorb,jorb,:))
-     call splot("impG0"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impG0real(ispin,jspin,iorb,jorb,:))
+     call splot("impDelta"//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"   ,wm,impD0mats(ispin,jspin,iorb,jorb,:))
+     call splot("impDelta"//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,impD0real(ispin,jspin,iorb,jorb,:))
   enddo
   !
-end subroutine print_impG0_nonsu2
+end subroutine print_impDelta_nonsu2
 
 
 

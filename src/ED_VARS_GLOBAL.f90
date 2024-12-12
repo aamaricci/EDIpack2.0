@@ -262,6 +262,8 @@ MODULE ED_VARS_GLOBAL
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impGreal
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0mats
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0real
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impD0mats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impD0real
   !
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAmats
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAreal
@@ -269,6 +271,8 @@ MODULE ED_VARS_GLOBAL
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impFreal
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0mats
   complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0real
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impT0mats
+  complex(8),allocatable,dimension(:,:,:,:,:)        :: impT0real
   !
   complex(8),allocatable,dimension(:)                :: impDmats_ph
   complex(8),allocatable,dimension(:)                :: impDreal_ph
