@@ -45,7 +45,7 @@ function delta_bath_array_general(x,dmft_bath_,axis) result(Delta)
      !
      do ibath=1,Nbath
         v  = dmft_bath_%item(ibath)%vg
-        Hk = nn2so_reshape(Hreplica_build(dmft_bath_%item(ibath)%lambda),Nnambu*Nspin,Norb)
+        Hk = nn2so_reshape(Hgeneral_build(dmft_bath_%item(ibath)%lambda),Nnambu*Nspin,Norb)
         Vk = kron( pauli_sigma_z, one*diag(v) )
         do i=1,L
            invH_k   = diag(Z(:,i)) - Hk
