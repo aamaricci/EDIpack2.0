@@ -9,21 +9,13 @@ function delta_bath_array_general(x,dmft_bath_,axis) result(Delta)
   integer                                                           :: i,ih,L
   integer                                                           :: iorb,jorb,ispin,jspin,ibath
   integer                                                           :: io,jo
-  real(8),dimension(Nbath)                                          :: eps,dps,vps
-  real(8),dimension(Norb,Nbath)                                     :: vops
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: Vk
-  !
-  real(8),dimension(Nspin,Nbath)                                    :: ehel
-  real(8),dimension(Nspin,Nspin,Nbath)                              :: whel
-  real(8),dimension(Nspin,Nspin,Norb,Nbath)                         :: wohel
-  !
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb,size(x)) :: zeta
   complex(8),dimension(Nnambu*Nspin*Norb,size(x))                   :: z
   real(8),dimension(Nspin*Norb)                                     :: v
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: Hk
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
   complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
-  complex(8),dimension(Nnambu*Norb,Nnambu*Norb)                     :: JJ
   character(len=4)                                                  :: axis_
   !
   axis_="mats";if(present(axis))axis_=str(axis)
@@ -36,12 +28,11 @@ function delta_bath_array_general(x,dmft_bath_,axis) result(Delta)
   case default;stop "delta_bath_array_general error: ed_mode not supported"
   case ("normal","nonsu2")             !normal OR nonsu2
      invH_k=zero
-     do i=1,L
-        do ibath=1,Nbath
-           Vk       = one*diag(dmft_bath_%item(ibath)%vg(:))
-           invH_knn = Hgeneral_build(dmft_bath_%item(ibath)%lambda)
-           invH_k   = nn2so_reshape(invH_knn,Nspin,Norb)
-           invH_k   = zeye(Nspin*Norb)*x(i) - invH_k
+     do ibath=1,Nbath
+        Vk = one*diag(dmft_bath_%item(ibath)%vg(:))
+        Hk = nn2so_reshape(Hgeneral_build(dmft_bath_%item(ibath)%lambda),Nspin,Norb)
+        do i=1,L
+           invH_k   = zeye(Nspin*Norb)*x(i) - Hk
            call inv(invH_k)
            invH_k   = matmul(matmul(Vk,invH_k),Vk)
            invH_knn = so2nn_reshape(invH_k,Nspin,Norb)
@@ -50,14 +41,14 @@ function delta_bath_array_general(x,dmft_bath_,axis) result(Delta)
      enddo
   case ("superc")
      !
-     z = zeta_superc(x,0d0,axis_)
+     Z = zeta_superc(x,0d0,axis_)
      !
      do ibath=1,Nbath
         v  = dmft_bath_%item(ibath)%vg
         Hk = nn2so_reshape(Hreplica_build(dmft_bath_%item(ibath)%lambda),Nnambu*Nspin,Norb)
         Vk = kron( pauli_sigma_z, one*diag(v) )
         do i=1,L
-           invH_k   = one*diag(z(:,i)) - Hk
+           invH_k   = diag(Z(:,i)) - Hk
            call inv(invH_k)
            invH_k   = matmul(matmul(Vk,invH_k),Vk)
            invH_knn = so2nn_reshape(invH_k,Nnambu*Nspin,Norb)

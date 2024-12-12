@@ -29,7 +29,7 @@ function fdelta_bath_array_general(x,dmft_bath_,axis) result(Fdelta)
      Hk = nn2so_reshape(Hreplica_build(dmft_bath_%item(ibath)%lambda),Nnambu*Nspin,Norb)
      Vk = kron( pauli_sigma_z, one*diag(V) )
      do i=1,L
-        invH_k   = one*diag(Z(:,i)) - Hk
+        invH_k   = diag(Z(:,i)) - Hk
         call inv(invH_k)
         invH_k   = matmul(matmul(Vk,invH_k),Vk)
         invH_knn = so2nn_reshape(invH_k,Nnambu*Nspin,Norb)
