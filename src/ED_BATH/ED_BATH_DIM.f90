@@ -191,7 +191,6 @@ contains
   end function get_bath_dimension_symmetries
 
 
-
   !+-------------------------------------------------------------------+
   !PURPOSE  : Check if the dimension of the bath array are consistent
   !+-------------------------------------------------------------------+

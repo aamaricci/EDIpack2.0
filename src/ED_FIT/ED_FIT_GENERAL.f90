@@ -70,11 +70,13 @@ contains
     call allocate_dmft_bath(dmft_bath)
     call set_dmft_bath(bath_,dmft_bath)
     allocate(array_bath(size(bath_)-1))
-    Nlambdas  =bath_(1)
+    Nsym  =bath_(1)
     array_bath=bath_(2:)
     !
     if(ed_all_g)then
        Hmask=.true.
+       ! Aren't we sure about hermiticity?
+       ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
     else
        Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
     endif
@@ -263,11 +265,8 @@ contains
 
 
 
-  !+-------------------------------------------------------------+
-  !
-  !  UNTESTED
-  !  
-  !+-------------------------------------------------------------+
+
+
   subroutine chi2_fitgf_general_superc(fg,bath_)
     complex(8),dimension(:,:,:,:,:,:)                      :: fg ![2][Nspin][Nspin][Norb][Norb][Lmats]
     logical,dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: Hmask
@@ -294,40 +293,25 @@ contains
     call allocate_dmft_bath(dmft_bath)
     call set_dmft_bath(bath_,dmft_bath)
     allocate(array_bath(size(bath_)-1))
-    Nlambdas  =bath_(1)
+    Nsym  =bath_(1)
     array_bath=bath_(2:)
     !
     if(ed_all_g)then
        Hmask=.true.
-       ! write(*,*) "!! WARNING !!"
-       ! write(*,*) "USING ED_ALL_G=.true."
-       ! write(*,*) "superc-general is able to choose which components should be fitted"
-       ! write(*,*) "the use of ED_ALL_G=.false. is strongly suggested to avoid fit problems"
-       !HERE WE ARE ON GENERAL SUPERC
-       !WE ONLY WANT TO FIT (1,1) and (1,2) SPIN
-       !SECTORS CORRESPONDING TO G0 AND F0
-       !THEREFORE THE SECOND SPIN INDEX IS EQUIVALENT
-       !TO THE INDEX SELECTING G0/F0
-       !AA: we fit the 11 and 12 components (G0,F0) explicitly.
-       !All the multi-orbital part of the chi^2 function remains identical to the normal case.
     else
        Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
     endif
     !
-    ! Taking only upper-diagonal
-    do ispin=1,Nspin
-       do jspin=1,Nspin
-          do iorb=1,Norb
-             do jorb=1,Norb
-                if(ispin>jspin .OR. iorb>jorb)Hmask(ispin,jspin,iorb,jorb)=.false.
-             enddo
-          enddo
+    ! Taking only upper-diagonal: superc => Nspin=1
+    do iorb=1,Norb
+       do jorb=1,Norb
+          if(iorb>jorb)Hmask(1,1,iorb,jorb)=.false.
        enddo
     enddo
     !
-    totNso=count(Hmask)
+    !Counting only the normal part as we get anomalous independently.
+    totNso=count(Hmask(1,1,:,:))
     !
-    allocate(getInambu(totNso))
     allocate(getIspin(totNso),getJspin(totNso))
     allocate(getIorb(totNso) ,getJorb(totNso))
     !
@@ -458,7 +442,6 @@ contains
     deallocate(FGmatrix,FFmatrix,Gdelta,Fdelta,Xdelta,Wdelta)
     deallocate(getIspin,getJspin)
     deallocate(getIorb,getJorb)
-    deallocate(getInambu)
     deallocate(array_bath)
     !
   contains
@@ -511,7 +494,6 @@ contains
   !
   !##################################################################
   !##################################################################
-
 
 
 
@@ -610,7 +592,6 @@ contains
     end select
   end function chi2_delta_general_superc
 
-
   function chi2_delta_general_superc_elemental(a) result(chi2)
     real(8),dimension(:)                                 :: a
     real(8)                                              :: chi2
@@ -686,7 +667,6 @@ contains
     end select
     !
   end function grad_chi2_delta_general
-
 
   !+---------------------------------------------------------------------+
   !PURPOSE: Evaluate the gradient \Grad\chi^2 of \Delta_Anderson function.
@@ -785,7 +765,6 @@ contains
 
 
 
-
   !######################################################################
   ! DELTA + GRAD DELTA: NORMAL
   !######################################################################
@@ -794,36 +773,34 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta) :: Delta
     integer                                            :: ispin,jspin,iorb,jorb,ibath
     integer                                            :: i,stride
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)        :: Haux,Htmp,Vaux
-    real(8),dimension(Nbath,Nspin*Norb)                :: dummy_Vbath
-    type(nsymm_vector),dimension(Nbath)                :: dummy_lambda
-    complex(8)                                         :: iw
+    complex(8),dimension(Nspin*Norb,Nspin*Norb)        :: Haux,Htmp,V
+    real(8),dimension(Nbath,Nspin*Norb)                :: Vk
+    type(nsymm_vector),dimension(Nbath)                :: Lk
     !
     !Get Hs
     stride = 0
     do ibath=1,Nbath
-       allocate(dummy_lambda(ibath)%element(Nlambdas))
+       allocate(Lk(ibath)%element(Nsym))
        !
        !Get Vs
-       dummy_vbath(ibath,:) = a(stride+1:stride+Norb*Nspin)
-       stride = stride + Norb*Nspin
+       Vk(ibath,:) = a(stride+1:stride+Norb*Nspin)
+       stride      = stride + Norb*Nspin
        !Get Lambdas
-       dummy_lambda(ibath)%element=a(stride+1:stride+Nlambdas)
-       stride=stride+Nlambdas
+       Lk(ibath)%element=a(stride+1:stride+Nsym)
+       stride      = stride + Nsym
     enddo
     !
     Delta=zero
     do ibath=1,Nbath
-       Vaux     = one*diag(dummy_Vbath(ibath,:))
-       Htmp     = nn2so_reshape( Hgeneral_build(dummy_lambda(ibath)%element) ,Nspin,Norb)
+       V    = one*diag(Vk(ibath,:))!real
+       Htmp = nn2so_reshape( Hgeneral_build(Lk(ibath)%element) ,Nspin,Norb)
        do i=1,Ldelta
-          iw   = xi*Xdelta(i)
-          Haux = zeye(Nspin*Norb)*iw - Htmp
+          Haux = zeye(Nspin*Norb)*xi*Xdelta(i) - Htmp
           call inv(Haux)
-          Haux = matmul(Vaux,matmul(Haux,Vaux))
+          Haux = matmul(V,matmul(Haux,V))
           Delta(:,:,:,:,i)=Delta(:,:,:,:,i) + so2nn_reshape(Haux,Nspin,Norb)
        enddo
-       deallocate(dummy_lambda(ibath)%element)
+       deallocate(Lk(ibath)%element)
     enddo
     !
   end function delta_general
@@ -832,51 +809,53 @@ contains
     real(8),dimension(:)                                      :: a
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta,size(a)) :: dDelta
     integer                                                   :: ispin,iorb,jorb,ibath
-    integer                                                   :: i,k,ik,l,io,ig,counter
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)               :: H_reconstructed,Hbasis_so,Htmp,Vk
+    integer                                                   :: i,k,ik,l,io,ig,stride
+    complex(8),dimension(Nspin*Norb,Nspin*Norb)               :: H_reconstructed,Hbasis_so,Htmp,V
     complex(8),dimension(Nspin*Norb,Nspin*Norb,Ldelta)        :: Haux
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Ldelta)        :: invH_knn
-    real(8),dimension(Nbath,Norb*Nspin)                       :: dummy_Vbath
-    type(nsymm_vector),dimension(Nbath)                       :: dummy_lambda
+    real(8),dimension(Nbath,Norb*Nspin)                       :: Vk
+    type(nsymm_vector),dimension(Nbath)                       :: Lk
     !
     !
     !Get Hs
-    counter = 0
+    stride = 0
     do ibath=1,Nbath
-       allocate(dummy_lambda(ibath)%element(Nlambdas))
+       allocate(Lk(ibath)%element(Nsym))
        !
-       dummy_vbath(ibath,:) = a(counter+1:counter+Nspin*Norb)
-       counter = counter + Nspin*Norb
-       dummy_lambda(ibath)%element=a(counter+1:counter+Nlambdas)
-       counter = counter + Nlambdas
+       !Get Vs
+       Vk(ibath,:) = a(stride+1:stride+Norb*Nspin)
+       stride      = stride + Norb*Nspin
+       !Get Lambdas
+       Lk(ibath)%element=a(stride+1:stride+Nsym)
+       stride      = stride + Nsym
     enddo
     !
     dDelta=zero
-    counter=0
+    stride=0
     do ibath=1,Nbath
-       Vk = one*diag(dummy_vbath(ibath,:))
-       H_reconstructed= nn2so_reshape( Hgeneral_build(dummy_lambda(ibath)%element) ,Nspin,Norb)
+       V               = diag(Vk(ibath,:))
+       H_reconstructed = nn2so_reshape( Hgeneral_build(Lk(ibath)%element) ,Nspin,Norb)
        do i=1,Ldelta
-          Haux(:,:,i) = zeye(Nspin*Norb)*xi*Xdelta(i) - H_reconstructed
+          Haux(:,:,i)  = zeye(Nspin*Norb)*xi*Xdelta(i) - H_reconstructed
           call inv(Haux(:,:,i))
           !Derivate_V^ibath_g Haux(a,b) = Haux*V(a,b)*delta(a,g)+V*Haux(a,b)*delta(b,g)
           do ig=1,Nspin*Norb
-             Htmp(:,:)  = 0.d0
-             Htmp(:,ig) = Htmp(:,ig) + VH_prod(Vk,Haux(:,:,i),ig)
-             Htmp(ig,:) = Htmp(ig,:) + HV_prod(Vk,Haux(:,:,i),ig)
-             dDelta(:,:,:,:,i,counter+ig)=so2nn_reshape(Htmp,Nspin,Norb)
+             Htmp(:,:)  = zero
+             Htmp(:,ig) = Htmp(:,ig) + VH_prod(V,Haux(:,:,i),ig)
+             Htmp(ig,:) = Htmp(ig,:) + HV_prod(V,Haux(:,:,i),ig)
+             dDelta(:,:,:,:,i,stride+ig)=so2nn_reshape(Htmp,Nspin,Norb)
           enddo
        enddo
-       counter = counter + Nspin*Norb
+       stride = stride + Nspin*Norb
        !
        !Derivate_lambda_p
-       do k=1,Nlambdas
-          counter = counter + 1
+       do k=1,Nsym
+          stride = stride + 1
           Hbasis_so=nn2so_reshape(Hgeneral_basis(k)%O,Nspin,Norb)
           do l=1,Ldelta
              Htmp = (Haux(:,:,l) .x. Hbasis_so) .x. Haux(:,:,l)
-             Htmp = (Vk .x. Htmp) .x. Vk
-             dDelta(:,:,:,:,l,counter)=so2nn_reshape(Htmp,Nspin,Norb)
+             Htmp = (V .x. Htmp) .x. V
+             dDelta(:,:,:,:,l,stride)=so2nn_reshape(Htmp,Nspin,Norb)
           enddo
        enddo
        !
@@ -921,36 +900,37 @@ contains
     complex(8),dimension(2,Nspin,Nspin,Norb,Norb,Ldelta)      :: Delta
     integer                                                   :: ispin,jspin,iorb,jorb,ibath
     integer                                                   :: i,stride,Nso
-    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: Haux,Htmp,Vk
+    complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb) :: Haux,Htmp,V
     complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: invH_knn
-    real(8),dimension(Nbath,Nspin*Norb)                       :: dummy_Vbath
-    type(nsymm_vector),dimension(Nbath)                       :: dummy_lambda
+    real(8),dimension(Nbath,Nspin*Norb)                       :: Vk
+    type(nsymm_vector),dimension(Nbath)                       :: Lk
     !
-    ! JJ=kron(pauli_sigma_z,zeye(Norb))
     !Get Hs
     stride = 0
     do ibath=1,Nbath
-       allocate(dummy_lambda(ibath)%element(Nlambdas))
+       allocate(Lk(ibath)%element(Nsym))
        !
-       dummy_vbath(ibath,:)  = a(stride+1:stride+Nspin*Norb)
-       stride = stride + Nspin*Norb
-       dummy_lambda(ibath)%element= a(stride+1:stride+Nlambdas)
-       stride = stride+Nlambdas
+       !Get Vs
+       Vk(ibath,:) = a(stride+1:stride+Norb*Nspin)
+       stride      = stride + Norb*Nspin
+       !Get Lambdas
+       Lk(ibath)%element=a(stride+1:stride+Nsym)
+       stride      = stride + Nsym
     enddo
     !
     Delta=zero
     do ibath=1,Nbath
-       Vk   = kron(pauli_sigma_z,one*diag(dummy_vbath(ibath,:)))
-       Htmp = nn2so_reshape( Hgeneral_build(dummy_lambda(ibath)%element) ,Nnambu*Nspin,Norb)
+       V    = kron(pauli_sigma_z,diag(Vk(ibath,:)))
+       Htmp = nn2so_reshape( Hgeneral_build(Lk(ibath)%element) , Nnambu*Nspin,Norb)
        do i=1,Ldelta
           Haux     = zeye(Nnambu*Nspin*Norb)*xi*Xdelta(i) - Htmp
           call inv(Haux)
-          invH_knn = so2nn_reshape( matmul(matmul(Vk,Haux),Vk) ,Nnambu*Nspin,Norb)
+          invH_knn = so2nn_reshape( matmul(matmul(V,Haux),V) ,Nnambu*Nspin,Norb)
           !
           Delta(1,1,1,:,:,i)=Delta(1,1,1,:,:,i) + invH_knn(1,1,:,:) !normal
           Delta(2,1,1,:,:,i)=Delta(2,1,1,:,:,i) + invH_knn(1,2,:,:) !anomalous
        enddo
-       deallocate(dummy_lambda(ibath)%element)
+       deallocate(Lk(ibath)%element)
     enddo
     !
   end function delta_general_superc
@@ -1325,7 +1305,7 @@ contains
        Z = (iw+xmu)*zeye(Nso) - zHloc
        FGorb(      :Norb,      :Norb) = Z -       nn2so_reshape(Delta(1,:,:,:,:,i), Nspin,Norb)
        FGorb(      :Norb,Norb+1:    ) =   -       nn2so_reshape(Delta(2,:,:,:,:,i), Nspin,Norb)
-       FGorb(Norb+1:    ,      :Norb) =   - conjg(nn2so_reshape(Delta(2,:,:,:,:,i), Nspin,Norb))
+       FGorb(Norb+1:    ,      :Norb) =   - conjg(nn2so_reshape(Delta(2,:,:,:,:,i), Nspin,Norb))!technically this is not conjg but being real who cares
        FGorb(Norb+1:    ,Norb+1:    ) = Z + conjg(nn2so_reshape(Delta(1,:,:,:,:,i), Nspin,Norb))
        call inv(FGorb)
        G0and(1,:,:,:,:,i) = so2nn_reshape(FGorb(1:Norb,     1:Norb  ),Nspin,Norb)

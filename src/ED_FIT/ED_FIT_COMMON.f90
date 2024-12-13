@@ -36,7 +36,7 @@ MODULE ED_FIT_COMMON
 
   !This contains the number of the lambda expansion
   !for each replica of the impurity
-  integer                              :: Nlambdas
+  integer                              :: Nsym
   !
   !This is a dummy object which is used here to point
   !to the replica bath lambdas, i.e. the coefficients
