@@ -164,7 +164,7 @@ contains
     if(ed_verbose>2)then
        do ibath=1,Nbath
           write(*,*) "Hreplica #"//str(ibath)//":"
-          call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
+          call print_Hbuild(Hreplica_build(Hreplica_lambda(ibath,:)))
        enddo
     endif
     !
@@ -218,7 +218,7 @@ contains
     if(ed_verbose>2)then
        do ibath=1,Nbath
           write(LOGfile,"(A)") "Hreplica #"//str(ibath)//":"
-          call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
+          call print_Hbuild(Hreplica_build(Hreplica_lambda(ibath,:)))
        enddo
     endif
     !
@@ -270,7 +270,7 @@ contains
           write(LOGfile,"(A)")"Inequivalent #"//str(ilat)//":"
           do ibath=1,Nbath
              write(LOGfile,"(A)")"> Hreplica #"//str(ibath)//":"
-             call print_hloc(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
+             call print_Hbuild(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
           enddo
        enddo
     endif
@@ -321,7 +321,7 @@ contains
           write(LOGfile,"(A)")"Inequivalent #"//str(ilat)//":"
           do ibath=1,Nbath
              write(LOGfile,"(A)")"> Hreplica #"//str(ibath)//":"
-             call print_hloc(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
+             call print_Hbuild(Hreplica_build(Hreplica_lambda_ineq(ilat,ibath,:)))
           enddo
        enddo
     endif
@@ -379,7 +379,7 @@ contains
     if(ed_verbose>2)then
        do ibath=1,Nbath
           write(*,*) "Hreplica #"//str(ibath)//":"
-          call print_hloc(Hreplica_build(Hreplica_lambda(ibath,:)))
+          call print_Hbuild(Hreplica_build(Hreplica_lambda(ibath,:)))
        enddo
     endif
     !
@@ -499,7 +499,7 @@ contains
     if(ed_verbose>2)then
        do ibath=1,Nbath
           write(LOGfile,"(A)") "Hgeneral #"//str(ibath)//":"
-          call print_hloc(Hgeneral_build(Hgeneral_lambda(ibath,:)))
+          call print_Hbuild(Hgeneral_build(Hgeneral_lambda(ibath,:)))
        enddo
     endif
     !
@@ -555,7 +555,7 @@ contains
     if(ed_verbose>2)then
        do ibath=1,Nbath
           write(LOGfile,"(A)") "Hgeneral #"//str(ibath)//":"
-          call print_hloc(Hgeneral_build(Hgeneral_lambda(ibath,:)))
+          call print_Hbuild(Hgeneral_build(Hgeneral_lambda(ibath,:)))
        enddo
     endif
     !
@@ -605,7 +605,7 @@ contains
           write(LOGfile,"(A)")"Inequivalent #"//str(ilat)//":"
           do ibath=1,Nbath
              write(LOGfile,"(A)")"> Hgeneral #"//str(ibath)//":"
-             call print_hloc(Hgeneral_build(Hgeneral_lambda_ineq(ilat,ibath,:)))
+             call print_Hbuild(Hgeneral_build(Hgeneral_lambda_ineq(ilat,ibath,:)))
           enddo
        enddo
     endif
@@ -655,7 +655,7 @@ contains
           write(LOGfile,"(A)")"Inequivalent #"//str(ilat)//":"
           do ibath=1,Nbath
              write(LOGfile,"(A)")"> Hgeneral #"//str(ibath)//":"
-             call print_hloc(Hgeneral_build(Hgeneral_lambda_ineq(ilat,ibath,:)))
+             call print_Hbuild(Hgeneral_build(Hgeneral_lambda_ineq(ilat,ibath,:)))
           enddo
        enddo
     endif
@@ -713,13 +713,54 @@ contains
     if(ed_verbose>2)then
        do ibath=1,Nbath
           write(*,*) "Hgeneral #"//str(ibath)//":"
-          call print_hloc(Hgeneral_build(Hgeneral_lambda(ibath,:)))
+          call print_Hbuild(Hgeneral_build(Hgeneral_lambda(ibath,:)))
        enddo
     endif
     !
   end subroutine init_Hgeneral_symmetries_legacy
 
 
+
+
+
+
+
+
+
+
+
+
+
+  
+  subroutine print_Hbuild(H,file)
+#if __INTEL_COMPILER
+    use ED_INPUT_VARS, only: Nnambu,Nspin,Norb
+#endif
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb) :: H
+    character(len=*),optional                                 :: file
+    integer                                                   :: iorb,jorb,ispin,jspin,Nso,unit
+    !
+    unit=LOGfile
+    !
+    if(present(file))then
+       open(free_unit(unit),file=reg(file))
+       write(LOGfile,"(A)")"print_Hbuild on file :"//reg(file)
+    endif
+    !
+    do ispin=1,Nnambu*Nspin
+       do iorb=1,Norb
+          write(unit,"(100(A1,F8.4,A1,F8.4,A1,2x))")&
+               (&
+               (&
+               '(',dreal(H(ispin,jspin,iorb,jorb)),',',dimag(H(ispin,jspin,iorb,jorb)),')',&
+               jorb =1,Norb),&
+               jspin=1,Nnambu*Nspin)
+       enddo
+    enddo
+    write(unit,*)""
+    !
+    if(present(file))close(unit)
+  end subroutine print_Hbuild
 
 
 END MODULE ED_BATH_REPLICA
