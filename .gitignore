@@ -1,12 +1,14 @@
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
-revision.inc
-test
-Makefile
+*.inc
 *.mod
 *.o
+*.gcda
+*.gcno
+test/bin
 build*
 .archive/
 src/ED_VERSION.f90
 .DS_Store
+*~

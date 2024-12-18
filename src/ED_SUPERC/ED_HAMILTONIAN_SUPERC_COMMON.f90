@@ -1,6 +1,7 @@
 MODULE ED_HAMILTONIAN_SUPERC_COMMON
-  USE SF_MISC,    only: assert_shape
-  USE SF_CONSTANTS,only:zero
+  USE SF_MISC,      only: assert_shape
+  USE SF_CONSTANTS, only: zero
+  USE SF_LINALG,    only: kronecker_product,zeye
   USE SF_SP_LINALG, only: sp_lanc_tridiag
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
@@ -17,7 +18,7 @@ MODULE ED_HAMILTONIAN_SUPERC_COMMON
 
   type(sector)       :: Hsector
 
-  integer                              :: Dim
+  integer                              :: Dim, DimEl
   integer                              :: i,iup,idw
   integer                              :: m,mup,mdw
   integer                              :: ishift,ishift_up,ishift_dw

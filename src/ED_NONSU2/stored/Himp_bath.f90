@@ -67,8 +67,8 @@
      enddo
 
 
-     !Off-diagonal, spin-flipping: (only nonsu2 & !replica bath)
-     if(bath_type/="replica")then
+     !Off-diagonal, spin-flipping: (only nonsu2 & !replica/general bath)
+     if(bath_type/="replica".and.bath_type/="general")then
         do iorb=1,Norb
            do kp=1,Nbath
               ms=getBathStride(iorb,kp)

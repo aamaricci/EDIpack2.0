@@ -5,11 +5,7 @@ FILE(REMOVE_RECURSE ${LIB_TMP_ETC}/modules)
 #1. master branch
 #2. no debug
 #3. default prefix
-# IF( (GIT_BRANCH MATCHES "master")
-#     AND (NOT "${CMAKE_BUILD_TYPE}" MATCHES "DEBUG")
-#     AND (PREFIX STREQUAL "${DEFAULT_PREFIX}")
-#     )
-IF( USE_DEFAULT_MODULE_NAME AND (NOT "${CMAKE_BUILD_TYPE}" MATCHES "DEBUG") AND (GIT_BRANCH MATCHES "master"))
+IF( USE_DEFAULT_MODULE_NAME AND (NOT "${BUILD_TYPE}" MATCHES "debug") AND (GIT_BRANCH MATCHES "master"))
   SET(TMP_VER_MODULE_FILE ${LIB_TMP_ETC}/modules/${VERSION_PATH}/.version)
   CONFIGURE_FILE(${LIB_ENV}/version.in ${TMP_VER_MODULE_FILE}  @ONLY)
   MESSAGE(STATUS "${Red}Version file${ColourReset}: ${TMP_VER_MODULE_FILE}")
@@ -56,18 +52,18 @@ INSTALL(FILES ${LIB_TARGET_ETC}/${PROJECT_NAME}.pc DESTINATION $ENV{HOME}/.pkgco
 
 INSTALL(DIRECTORY ${LIB_TARGET_ETC}/modules/ DESTINATION $ENV{HOME}/.modules.d)
 
-
+get_filename_component(BARE_MAKE_PROGRAM ${CMAKE_MAKE_PROGRAM} NAME)
 MESSAGE( STATUS "${Red}Library version:${ColourReset} ${VERSION}")
 MESSAGE( STATUS "${Red}Library will be installed in:${ColourReset} ${CMAKE_INSTALL_PREFIX}")
 MESSAGE( STATUS "
 >> ${Red}TO CONCLUDE INSTALLATION${ColourReset} <<
 Compile with:
-$ make
+$ ${BARE_MAKE_PROGRAM}
 Install with:
-$ make install
+$ ${BARE_MAKE_PROGRAM} install
 
 Uninstall with:
-$ make uninstall
+$ ${BARE_MAKE_PROGRAM} uninstall
 ")
 
 INSTALL(CODE "MESSAGE(
@@ -76,17 +72,17 @@ ADD LIBRARY TO YOUR SYSTEM:
 Pick ONE method below [or add it in your bash profile, e.g. ~/.bashrc]:
 ${Yellow}Method 1: use the provided ${PROJECT_NAME} environment module${ColourReset}:
    $ module use $HOME/.modules.d
-   $ module load ${PROJECT_NAME}/${FC_PLAT}
+   $ module load ${TMP_MODULE_NAME}
 
 ${Yellow}Method 2: source the config script${ColourReset}:
-   $ source ${LIB_TARGET_BIN}/${USER_CONFIG_FILE}
+   $ source ${LIB_TARGET_BIN}/${PROJECT_NAME}_config_user.sh
 
 ${Yellow}Method 3: use pkg-config with the provided ${PROJECT_NAME}.pc${ColourReset}:
    $ export PKG_CONFIG_PATH=${LIB_TARGET_ETC}/:$PKG_CONFIG_PATH
    $ pkg-config --cflags --libs ${PROJECT_NAME}
 
 ${Yellow}Method ADMIN: Add this line to the system shell configuration file, e.g. /etc/bash.bashrc${ColourReset}
-   $ source ${LIB_TARGET_BIN}/${GLOBAL_CONFIG_FILE}
+   $ source ${LIB_TARGET_BIN}/${PROJECT_NAME}_config_global.sh
 \")
 ")
 

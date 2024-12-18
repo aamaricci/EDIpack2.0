@@ -14,15 +14,8 @@ MODULE ED_SETUP
   private
 
 
-  interface set_Himpurity
-     module procedure :: set_Himpurity_so_c
-     module procedure :: set_Himpurity_nn_c
-  end interface set_Himpurity
-
-
   public :: init_ed_structure
   public :: setup_global
-  public :: set_Himpurity
 
 contains
 
@@ -38,13 +31,13 @@ contains
     !
     if(.not.ed_total_ud)then
        if(bath_type=="hybrid")stop "ED ERROR: ed_total_ud=F can not be used with bath_type=hybrid"
-       if(bath_type=="replica")print*,"ED WARNING: ed_total_ud=F with bath_type=replica requires some care with H_bath"
+       if(bath_type=="replica".or.bath_type=="general")print*,"ED WARNING: ed_total_ud=F with bath_type=replica/general requires some care with H_bath"
        if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))stop "ED ERROR: ed_total_ud=F can not be used with Jx!=0 OR Jp!=0"
     endif
     !
     if(ed_mode=="superc")then
-       if(Nspin>1)stop "ED ERROR: SC + Magnetism is currently not supported."
-       if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
+       if(Nspin>1)stop "ED ERROR: SC + Magnetism can not be solved in DMFT (ask CDMFT boys)"
+       ! if(bath_type=="replica")stop "ED ERROR: ed_mode=SUPERC + bath_type=replica is not supported"
     endif
     if(ed_mode=="nonsu2")then
        if(Nspin/=2)then
@@ -113,7 +106,7 @@ contains
     case ('hybrid')
        Ns = Nbath+Norb
        if(.not.ed_total_ud)stop "ed_setup_dimension: bath_type==hybrid AND .NOT.ed_total_ud"
-    case ('replica')
+    case ('replica','general')
        Ns = Norb*(Nbath+1)
     end select
     !
@@ -128,15 +121,15 @@ contains
     !
     DimPh    = Nph+1
     Nlevels  = 2*Ns
+    Nhel     = 1
     !
     select case(ed_mode)
     case default
        Nsectors = ((Ns_Orb+1)*(Ns_Orb+1))**Ns_Ud
-       Nhel     = 1
     case ("superc")
        Nsectors = Nlevels+1     !sz=-Ns:Ns=2*Ns+1=Nlevels+1
-       Nhel     = 1
     case("nonsu2")
+       Nhel     = 2
        if(Jz_basis)then
           isector=0
           do in=0,Nlevels
@@ -157,16 +150,18 @@ contains
              enddo
           enddo
           Nsectors=isector
-          Nhel     = 2
        else
           Nsectors = Nlevels+1     !n=0:2*Ns=2*Ns+1=Nlevels+1
-          Nhel     = 2
        endif
     end select
 
   end subroutine ed_setup_dimensions
 
 
+
+
+
+  
 
   !+------------------------------------------------------------------+
   !PURPOSE  : Init ED structure and calculation
@@ -348,7 +343,7 @@ contains
     impDmats_ph=zero
     impDreal_ph=zero
     !
-    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    allocate(impGmatrix(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
     !
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_phisc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
@@ -397,33 +392,10 @@ contains
 
 
 
-  !+------------------------------------------------------------------+
-  !PURPOSE  : Setup Himpurity, the local part of the non-interacting Hamiltonian
-  !+------------------------------------------------------------------+
-  subroutine set_Himpurity_nn_c(hloc)
-    complex(8),dimension(Nspin,Nspin,Norb,Norb) :: hloc
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
-#endif
-    if(allocated(impHloc))deallocate(impHloc)
-    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
-    impHloc = Hloc
-    if(ed_verbose>2)call print_hloc(impHloc)
-  end subroutine set_Himpurity_nn_c
-
-  subroutine set_Himpurity_so_c(hloc)
-    complex(8),dimension(Nspin*Norb,Nspin*Norb) :: hloc
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG set_Himpurity: set impHloc"
-#endif
-    if(allocated(impHloc))deallocate(impHloc)
-    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
-    impHloc = so2nn_reshape(Hloc,Nspin,Norb)
-    if(ed_verbose>2)call print_hloc(impHloc)
-  end subroutine set_Himpurity_so_c
 
 
 
+ 
 
 
 
@@ -504,7 +476,10 @@ contains
        do isector=1,Nsectors
           call get_Nup(isector,Nups)
           call get_Ndw(isector,Ndws)
-          if(any(Nups < Ndws))twin_mask(isector)=.false.
+          if(any(Nups .ne. Ndws))then
+             call get_Sector([Ndws,Nups],Ns_Orb,jsector)
+             if (twin_mask(jsector))twin_mask(isector)=.false.
+          endif
        enddo
        write(LOGfile,"(A,I6,A,I9)")"Looking into ",count(twin_mask)," sectors out of ",Nsectors
     endif
@@ -520,7 +495,7 @@ contains
        do i=1,Nbath
           getBathStride(:,i)       = Norb + i
        enddo
-    case ('replica')
+    case ('replica','general')
        do i=1,Nbath
           do iorb=1,Norb
              getBathStride(iorb,i) = iorb + i*Norb 
@@ -596,7 +571,7 @@ contains
        getSector(isz,1)=isector
        getSz(isector)=isz
        dim = get_superc_sector_dimension(isz)
-       getDim(isector)=dim
+       getDim(isector)=dim*DimPh
     enddo
     !
     !
@@ -651,10 +626,10 @@ contains
        do i=1,Nbath
           getBathStride(:,i)      = Norb + i
        enddo
-    case ('replica')
+    case ('replica','general')
        do i=1,Nbath
           do iorb=1,Norb
-             getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb
+             getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb !iorb + i*Norb see above normal case
           enddo
        enddo
     end select
@@ -808,7 +783,7 @@ contains
        do i=1,Nbath
           getBathStride(:,i)      = Norb + i
        enddo
-    case ('replica')
+    case ('replica','general')
        do i=1,Nbath
           do iorb=1,Norb
              getBathStride(iorb,i) = Norb + (i-1)*Norb + iorb

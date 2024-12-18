@@ -6,19 +6,19 @@ module ED_EIGENSPACE
   private
 
   type full_espace
-     real(8),dimension(:),pointer   :: e
-     real(8),dimension(:,:),pointer :: M
+     real(8),dimension(:),allocatable   :: e
+     real(8),dimension(:,:),allocatable :: M
   end type full_espace
 
 
   type sparse_estate
-     integer                         :: sector        !index of the sector
-     real(8)                         :: e             !energy of the eigen-state
-     real(8),dimension(:),pointer    :: dvec=>null()  !double precision eigen-vector
-     complex(8),dimension(:),pointer :: cvec=>null()  !double complex eigen-vector
-     logical                         :: itwin=.false. !twin sector label
-     type(sparse_estate),pointer     :: twin=>null()  !link to twin box 
-     type(sparse_estate),pointer     :: next=>null()  !link to next box (chain)
+     integer                             :: sector        !index of the sector
+     real(8)                             :: e             !energy of the eigen-state
+     real(8),dimension(:),allocatable    :: dvec          !double precision eigen-vector
+     complex(8),dimension(:),allocatable :: cvec          !double complex eigen-vector
+     logical                             :: itwin=.false. !twin sector label
+     type(sparse_estate),pointer         :: twin=>null()  !link to twin box 
+     type(sparse_estate),pointer         :: next=>null()  !link to next box (chain)
   end type sparse_estate
 
   type sparse_espace
@@ -61,7 +61,6 @@ module ED_EIGENSPACE
   public :: es_init_espace      !init the espace                 !checked
   public :: es_delete_espace    !del the espace                  !checked
   public :: es_free_espace      !free the espace                 !checked
-  public :: es_print_espace     !print the espace                !checked
   !
   public :: es_insert_state     !insert a state                  !checked
   public :: es_add_state        !add a state w/ costraint        !checked
@@ -168,8 +167,8 @@ contains        !some routine to perform simple operation on the lists
        if(.not.associated(c))exit  !empty list
        p%next => c%next !
        c%next=>null()
-       if(associated(c%dvec))deallocate(c%dvec)
-       if(associated(c%cvec))deallocate(c%cvec)
+       if(allocated(c%dvec))deallocate(c%dvec)
+       if(allocated(c%cvec))deallocate(c%cvec)
        if(associated(c%twin))c%twin=>null()
        deallocate(c)
     end do
@@ -197,8 +196,8 @@ contains        !some routine to perform simple operation on the lists
        if(.not.associated(c))exit  !empty list
        p%next => c%next            !
        c%next=>null()
-       if(associated(c%dvec))deallocate(c%dvec)
-       if(associated(c%cvec))deallocate(c%cvec)
+       if(allocated(c%dvec))deallocate(c%dvec)
+       if(allocated(c%cvec))deallocate(c%cvec)
        if(associated(c%twin))c%twin=>null()
        deallocate(c)
     end do
@@ -422,13 +421,13 @@ contains        !some routine to perform simple operation on the lists
     if(c%itwin)then             
        pp%next => c%next
        !delete C
-       if(associated(c%dvec))deallocate(c%dvec)
-       if(associated(c%cvec))deallocate(c%cvec)
+       if(allocated(c%dvec))deallocate(c%dvec)
+       if(allocated(c%cvec))deallocate(c%cvec)
        if(associated(c%twin))c%twin=>null()
        deallocate(c)
        !delete P
-       if(associated(p%dvec))deallocate(p%dvec)
-       if(associated(p%cvec))deallocate(p%cvec)
+       if(allocated(p%dvec))deallocate(p%dvec)
+       if(allocated(p%cvec))deallocate(p%cvec)
        if(associated(p%twin))p%twin=>null()
        deallocate(p)
        p => pp
@@ -443,28 +442,28 @@ contains        !some routine to perform simple operation on the lists
           if(c%next%itwin)then
              p%next => c%next%next 
              !delete C
-             if(associated(c%dvec))deallocate(c%dvec)
-             if(associated(c%cvec))deallocate(c%cvec)
+             if(allocated(c%dvec))deallocate(c%dvec)
+             if(allocated(c%cvec))deallocate(c%cvec)
              if(associated(c%twin))c%twin=>null()
              deallocate(c)
              !delete C%NEXT
-             if(associated(c%next%dvec))deallocate(c%next%dvec)
-             if(associated(c%next%cvec))deallocate(c%next%cvec)
+             if(allocated(c%next%dvec))deallocate(c%next%dvec)
+             if(allocated(c%next%cvec))deallocate(c%next%cvec)
              if(associated(c%next%twin))c%next%twin=>null()
              deallocate(c%next)
              space%size=space%size-2
           else
              p%next => c%next
-             if(associated(c%dvec))deallocate(c%dvec)
-             if(associated(c%cvec))deallocate(c%cvec)
+             if(allocated(c%dvec))deallocate(c%dvec)
+             if(allocated(c%cvec))deallocate(c%cvec)
              if(associated(c%twin))c%twin=>null()
              deallocate(c)
              space%size=space%size-1
           endif
        else
           p%next => c%next
-          if(associated(c%dvec))deallocate(c%dvec)
-          if(associated(c%cvec))deallocate(c%cvec)
+          if(allocated(c%dvec))deallocate(c%dvec)
+          if(allocated(c%cvec))deallocate(c%cvec)
           if(associated(c%twin))c%twin=>null()
           deallocate(c)
           space%size=space%size-1
@@ -590,10 +589,10 @@ contains        !some routine to perform simple operation on the lists
   !+------------------------------------------------------------------+
   !PURPOSE  : 
   !+------------------------------------------------------------------+
-  function es_return_dvector_default(space,n) result(vector)
+  subroutine es_return_dvector_default(space,n,vector)
     type(sparse_espace),intent(in)   :: space
     integer,optional,intent(in)      :: n
-    real(8),dimension(:),pointer     :: vector
+    real(8),dimension(:),allocatable :: vector
     type(sparse_estate),pointer      :: c
     integer                          :: i,pos
     integer                          :: dim
@@ -609,10 +608,12 @@ contains        !some routine to perform simple operation on the lists
        c => c%next
        if(.not.associated(c))exit
     end do
+    !
+    Dim = getdim(c%sector)
+    allocate(vector(Dim)) ; vector = 0d0
     if(.not.c%itwin)then
-       vector => c%dvec
+       vector = c%dvec
     else
-       dim = getdim(c%sector)
        allocate(Order(dim))
        call twin_sector_order(c%twin%sector,Order)
        allocate(vector(dim))
@@ -622,16 +623,16 @@ contains        !some routine to perform simple operation on the lists
        deallocate(order)
     endif
     if(associated(c))nullify(c)
-  end function es_return_dvector_default
+  end subroutine es_return_dvector_default
 
-  function es_return_cvector_default(space,n) result(vector)
-    type(sparse_espace),intent(in)   :: space
-    integer,optional,intent(in)      :: n
-    complex(8),dimension(:),pointer  :: vector
-    type(sparse_estate),pointer      :: c
-    integer                          :: i,pos
-    integer                          :: dim
-    integer,dimension(:),allocatable :: order
+  subroutine es_return_cvector_default(space,n,vector)
+    type(sparse_espace),intent(in)      :: space
+    integer,optional,intent(in)         :: n
+    complex(8),dimension(:),allocatable :: vector
+    type(sparse_estate),pointer         :: c
+    integer                             :: i,pos
+    integer                             :: dim
+    integer,dimension(:),allocatable    :: order
     !
     if(.not.space%status) stop "es_return_cvector ERRROR: espace not allocated"
     pos= space%size ; if(present(n))pos=n
@@ -643,10 +644,12 @@ contains        !some routine to perform simple operation on the lists
        c => c%next
        if(.not.associated(c))exit
     end do
+    !
+    Dim = getdim(c%sector)
+    allocate(vector(Dim)) ; vector = zero
     if(.not.c%itwin)then
-       vector => c%cvec
+       vector = c%cvec
     else
-       dim = getdim(c%sector)
        allocate(Order(dim))
        call twin_sector_order(c%twin%sector,Order)
        allocate(vector(dim))
@@ -656,15 +659,15 @@ contains        !some routine to perform simple operation on the lists
        deallocate(order)
     endif
     if(associated(c))nullify(c)
-  end function es_return_cvector_default
+  end subroutine  es_return_cvector_default
 
 #ifdef _MPI
-  function es_return_dvector_mpi(MpiComm,space,n) result(vector)
+  subroutine es_return_dvector_mpi(MpiComm,space,n,vector)
     integer                          :: MpiComm
     type(sparse_espace),intent(in)   :: space
     integer,optional,intent(in)      :: n
-    real(8),dimension(:),pointer     :: vtmp
-    real(8),dimension(:),pointer     :: vector
+    real(8),dimension(:),allocatable :: vtmp
+    real(8),dimension(:),allocatable :: vector
     type(sparse_estate),pointer      :: c
     integer                          :: i,pos,Nloc,Ndim
     integer                          :: dim,ierr
@@ -729,19 +732,19 @@ contains        !some routine to perform simple operation on the lists
        deallocate(Vtmp)
     endif
     if(associated(c))nullify(c)
-  end function es_return_dvector_mpi
+  end subroutine  es_return_dvector_mpi
 
-  function es_return_cvector_mpi(MpiComm,space,n) result(vector)
-    integer                          :: MpiComm
-    type(sparse_espace),intent(in)   :: space
-    integer,optional,intent(in)      :: n
-    complex(8),dimension(:),pointer  :: vtmp
-    complex(8),dimension(:),pointer  :: vector
-    type(sparse_estate),pointer      :: c
-    integer                          :: i,pos,Nloc,Ndim
-    integer                          :: dim,ierr
-    logical                          :: MpiMaster
-    integer,dimension(:),allocatable :: order
+  subroutine es_return_cvector_mpi(MpiComm,space,n,vector)
+    integer                             :: MpiComm
+    type(sparse_espace),intent(in)      :: space
+    integer,optional,intent(in)         :: n
+    complex(8),dimension(:),allocatable :: vtmp
+    complex(8),dimension(:),allocatable :: vector
+    type(sparse_estate),pointer         :: c
+    integer                             :: i,pos,Nloc,Ndim
+    integer                             :: dim,ierr
+    logical                             :: MpiMaster
+    integer,dimension(:),allocatable    :: order
     !
     if(MpiComm==MPI_UNDEFINED)stop "es_return_cvector ERRROR: MpiComm = MPI_UNDEFINED"
     !
@@ -776,7 +779,7 @@ contains        !some routine to perform simple operation on the lists
        else
           allocate(Vector(1))
        endif
-       Vector = 0d0
+       Vector = zero
        call gather_vector_MPI(MpiComm,c%cvec,Vector)
     else
        !
@@ -787,7 +790,7 @@ contains        !some routine to perform simple operation on the lists
        else
           allocate(Vtmp(1))
        endif
-       Vtmp = 0d0
+       Vtmp = zero
        call gather_vector_MPI(MpiComm,c%twin%cvec,Vtmp)
        if(MpiMaster)then
           allocate(Vector(Ndim))
@@ -795,58 +798,17 @@ contains        !some routine to perform simple operation on the lists
           deallocate(Order)
        else
           allocate(Vector(1))
-          Vector = 0d0
+          Vector = zero
        endif
        deallocate(Vtmp)
     endif
     if(associated(c))nullify(c)
-  end function es_return_cvector_mpi
+  end subroutine   es_return_cvector_mpi
 #endif
 
 
 
 
-
-  !+------------------------------------------------------------------+
-  !PURPOSE  : pretty print the list of states
-  !+------------------------------------------------------------------+
-  subroutine es_print_espace(space,unit,wvec)
-    type(sparse_espace),intent(in) :: space
-    type(sparse_estate),pointer    :: c
-    integer                        :: counter,i
-    integer,optional               :: unit
-    integer                        :: unit_
-    logical,optional               :: wvec
-    logical                        :: wvec_
-    wvec_=.false.;if(present(wvec))wvec_=wvec
-    unit_=6;if(present(unit))unit_=unit
-    write(*,"(A,I3)")"Print sparse espace unit ->",unit_
-    c => space%root%next   !assume is associated,ie list exists
-    counter = 0
-    if(space%size>0)then
-       do
-          if(.not.associated(c))exit
-          counter=counter+1
-          write(unit_,"(A10,I5)")   "Index   : ",counter
-          write(unit_,"(A10,I5)")   "Sector  : ",c%sector
-          write(unit_,"(A10,3L3)")  "Twin    : ",c%itwin,associated(c%cvec)
-          write(unit_,"(A10,I5)")   "Size    : ",getdim(c%sector)!size(c%vec)
-          write(unit_,"(A10,f18.9)")"Energy  : ",c%e
-          if(wvec_)then
-             write(unit_,"(A10)")"Vec     : "
-             do i=1,size(c%cvec)
-                write(unit_,*)c%cvec(i)
-             enddo
-          endif
-          c => c%next  !traverse list
-          write(unit_,*)""
-       end do
-    else
-       write(unit_,*)"Empty space"
-       return
-    endif
-    if(associated(c))nullify(c)
-  end subroutine es_print_espace
 
 
 

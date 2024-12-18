@@ -24,7 +24,7 @@
      !
      !
      !> H_Bath: inter-orbital bath hopping contribution.
-     if(bath_type=="replica") then
+     if(bath_type=="replica".or.bath_type=="general") then
         do kp=1,Nbath
            do iorb=1,Norb
               do jorb=1,Norb
@@ -85,14 +85,14 @@
      !F_z. T^z_ab :=   F_z . (- C^+_{a,dw}C_{b,dw})
      if(any(exc_field/=0d0))then
         do iorb=1,Norb
-           do jorb=iorb+1,Norb
+           do jorb=1,Norb
               Jcondition = (Ndw(jorb)==1) .AND. (Ndw(iorb)==0)
               if (Jcondition) then
                  call c(jorb,mdw,k1,sg1)
                  call cdg(iorb,k1,k2,sg2)
-                 iup = binary_search(Hsector%H(2)%map,k2)
+                 idw = binary_search(Hsector%H(2)%map,k2)
                  !
-                 htmp = exc_field(1)*sg1*sg2                 
+                 htmp = exc_field(1)*sg1*sg2
                  call sp_insert_element(spH0dws(1),htmp,idw,jdw)
                  !
                  htmp = -exc_field(4)*sg1*sg2

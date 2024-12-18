@@ -28,4 +28,16 @@
            enddo
         enddo
      enddo
+  case ("general")
+     allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
+     allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+     do ibath=1,Nbath
+        Hbath_reconstructed = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+        do ispin=1,Nspin
+           do iorb=1,Norb
+              diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v(iorb+Norb*(spin-1))
+              bath_diag(ispin,iorb,ibath)=Hbath_reconstructed(ispin,ispin,iorb,iorb)
+           enddo
+        enddo
+     enddo
   end select

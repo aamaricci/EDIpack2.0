@@ -8,7 +8,6 @@ MODULE ED_GF_NONSU2
   USE ED_AUX_FUNX
   USE ED_EIGENSPACE
   USE ED_BATH
-  USE ED_BATH_FUNCTIONS
   USE ED_SETUP
   USE ED_SECTOR
   USE ED_HAMILTONIAN_NONSU2
@@ -38,7 +37,7 @@ MODULE ED_GF_NONSU2
 
   !Lanczos shared variables
   !=========================================================
-  complex(8),dimension(:),pointer       :: state_cvec
+  complex(8),dimension(:),allocatable   :: state_cvec
   real(8)                               :: state_e
 
   !AUX GF
@@ -69,8 +68,20 @@ contains
     !
     write(LOGfile,"(A)")""
     write(LOGfile,"(A)")"Get mask(G):"
-    Hmask= .true.
-    if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+    if(ed_all_g)then
+       Hmask=.true.
+       ! Aren't we sure about hermiticity?
+       ! -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
+    else
+       select case(bath_type)
+       case("replica")
+          Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       case("general")
+          Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       case default
+          stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+       end select
+    endif
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -99,7 +110,7 @@ contains
           if(ispin==jspin)cycle
           do iorb=1,Norb
              MaskBool=.true.   
-             if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,iorb)
+             if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,iorb)
              if(.not.MaskBool)cycle
              !
              write(LOGfile,"(A)")""
@@ -135,14 +146,14 @@ contains
     !
     select case(bath_type)
     case default;
-    case("hybrid","replica")
+    case("hybrid","replica","general")
        !different orbital, same spin GF: G_{ab}^{ss}(z)
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")""
@@ -183,7 +194,7 @@ contains
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
                    MaskBool=.true.   
-                   if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,jorb)
+                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,jorb)
                    if(.not.MaskBool)cycle
                    !
                    write(LOGfile,"(A)")""
@@ -242,7 +253,16 @@ contains
 #endif
     !
     Hmask= .true.
-    if(.not.ed_all_g)Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+    if(.not.ed_all_g)then
+       select case(bath_type)
+          case("replica")
+             Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+          case("general")
+             Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+          case default
+             stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+          end select
+       endif
     do ispin=1,Nspin
        do iorb=1,Norb
           write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -264,7 +284,7 @@ contains
           if(ispin==jspin)cycle
           do iorb=1,Norb
              MaskBool=.true.   
-             if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,iorb)
+             if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,iorb)
              if(.not.MaskBool)cycle
              !
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(iorb)//"_s"//str(ispin)//str(jspin)
@@ -292,14 +312,14 @@ contains
     !
     select case(bath_type)
     case default;
-    case("hybrid","replica")
+    case("hybrid","replica","general")
        !different orbital, same spin GF: G_{ab}^{ss}(z)
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
                 MaskBool=.true.   
-                if(bath_type=="replica")MaskBool=Hmask(ispin,ispin,iorb,jorb)
+                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
                 !
                 write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(ispin)
@@ -333,7 +353,7 @@ contains
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
                    MaskBool=.true.   
-                   if(bath_type=="replica")MaskBool=Hmask(ispin,jspin,iorb,jorb)
+                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,jorb)
                    if(.not.MaskBool)cycle
                    !
                    write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
@@ -397,12 +417,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate) 
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        if(MpiMaster)then
@@ -487,15 +507,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
     return
@@ -523,12 +535,12 @@ contains
        state_e    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          state_cvec => es_return_cvector(MpiComm,state_list,istate) 
+          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
        else
-          state_cvec => es_return_cvector(state_list,istate)
+          call es_return_cvector(state_list,istate,state_cvec) 
        endif
 #else
-       state_cvec => es_return_cvector(state_list,istate)
+       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        if(MpiMaster)then
@@ -710,15 +722,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-#ifdef _MPI
-       if(MpiStatus)then
-          if(associated(state_cvec))deallocate(state_cvec)
-       else
-          if(associated(state_cvec))nullify(state_cvec)
-       endif
-#else
-       if(associated(state_cvec))nullify(state_cvec)
-#endif
+       if(allocated(state_cvec))deallocate(state_cvec)
        !
     enddo
     return
@@ -946,7 +950,7 @@ contains
        enddo
        !
        !
-    case ("hybrid","replica")
+    case ("hybrid","replica","general")
        do i=1,Lmats
           invGimp  = nn2so_reshape(impGmats(:,:,:,:,i),Nspin,Norb)
           call inv(invGimp)

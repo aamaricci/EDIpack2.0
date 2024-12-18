@@ -23,7 +23,7 @@ contains
 
   subroutine ed_buildh_normal_main(Hmat)
     real(8),dimension(:,:),optional                :: Hmat
-    integer                                        :: isector   
+    integer                                        :: isector
     real(8),dimension(:,:),allocatable             :: Htmp_up,Htmp_dw,Hrdx,Hmat_tmp
     real(8),dimension(:,:),allocatable             :: Htmp_ph,Htmp_eph_e,Htmp_eph_ph
     integer,dimension(2*Ns_Ud)                     :: Indices    ![2-2*Norb]
@@ -71,6 +71,18 @@ contains
           do ispin=1,Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v!(ispin)
+                bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
+             enddo
+          enddo
+       enddo
+    case ("general")
+       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       do ibath=1,Nbath
+          Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+          do ispin=1,Nspin
+             do iorb=1,Norb
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))!(ispin)
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -276,6 +288,18 @@ contains
           do ispin=1,Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v!(ispin)
+                bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
+             enddo
+          enddo
+       enddo
+    case ("general")
+       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       do ibath=1,Nbath
+          Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+          do ispin=1,Nspin
+             do iorb=1,Norb
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+(ispin-1)*Nspin)!(ispin)
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -536,6 +560,7 @@ contains
     !
     Hv=0d0
     !
+
     do i = 1,Nloc
        i_el = mod(i-1,DimUp*DimDw) + 1
        !
@@ -699,7 +724,7 @@ contains
                    val = spH0e_eph%row(i_el)%dvals(j_el)*&
                         spH0ph_eph%row(iph)%dvals(jj)
                    !interaction is diag from the electron point of view (coupling to the density)
-                   j = i_el + (spH0ph_eph%row(iph)%cols(jj)-1)*DimUp*MpiQdw
+                   j = spH0e_eph%row(i_el)%cols(j_el) + (spH0ph_eph%row(iph)%cols(jj)-1)*DimUp*MpiQdw
                    Hv(i) = Hv(i) + val*v(j)
                 enddo
              enddo

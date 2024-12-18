@@ -1,5 +1,11 @@
 #   Exact Diagonalization for Quantum Impurity problems
 
+[![TestSuite](https://img.shields.io/github/actions/workflow/status/QcmPlab/LIB_DMFT_ED/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/QcmPlab/LIB_DMFT_ED/actions/workflows/PushWorkflow.yml) 
+
+<!-- TO BE SETUP ASAP
+[![Coverage]()]()
+[![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://qcmplab.github.io/DMFT_ED)
+-->
 A serial/parallel Lanczos based method for the solution of single-site Quantum Impurity problems, with a special application as Dynamical Mean-Field Theory solver. 
 
 This library provides a simple, yet generic, interface to the solution of single-site, multi-orbital quantum impurity models with a finite, discrete electronic bath. The solution is obtained in either for *normal*, *superconducting* (s-wave) or *Sz-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases. The code works at zero and  low temperatures.   
@@ -59,7 +65,7 @@ adriano DOT amaricci @ gmail DOT com
 --
 
 ***LICENSE***  
-Copyright 2020- (C) Adriano Amaricci, Lorenzo Crippa, Alberto Scazzola, Giacomo Mazza, Francesco Petocchi, Luca de Medici and Massimo Capone. 
+Copyright 2020- (C) Adriano Amaricci, Lorenzo Crippa, Alberto Scazzola, Gabriele Bellomia, Samuele Giuli, Giacomo Mazza, Francesco Petocchi, Luca de Medici and Massimo Capone. 
 
 The software is provided with no license, as such it is protected by copyright.
 The software is provided as it is and can be read and copied, in agreement with 

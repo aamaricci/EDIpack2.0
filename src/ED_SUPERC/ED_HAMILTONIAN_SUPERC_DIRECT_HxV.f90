@@ -19,22 +19,23 @@ contains
 
 
   subroutine directMatVec_superc_main(Nloc,vin,Hv)
-    integer                                           :: Nloc
-    complex(8),dimension(Nloc)                        :: vin
-    complex(8),dimension(Nloc)                        :: Hv
-    integer                                           :: isector
-    integer,dimension(Nlevels)                        :: ib
-    integer,dimension(Ns)                             :: ibup,ibdw  
-    real(8),dimension(Norb)                           :: nup,ndw
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
-    integer                                           :: first_state,last_state
-    integer                                           :: first_state_up,last_state_up
-    integer                                           :: first_state_dw,last_state_dw
+    integer                                                         :: Nloc, i_el, j_el, iph, jj
+    complex(8),dimension(Nloc)                                      :: vin
+    complex(8),dimension(Nloc)                                      :: Hv
+    integer                                                         :: isector
+    integer,dimension(Nlevels)                                      :: ib
+    integer,dimension(Ns)                                           :: ibup,ibdw  
+    real(8),dimension(Norb)                                         :: nup,ndw
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nbath) :: Hbath_tmp
+    integer                                                         :: first_state,last_state
+    integer                                                         :: first_state_up,last_state_up
+    integer                                                         :: first_state_dw,last_state_dw
     !
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    Dim = getdim(isector)
+    Dim   = Hsector%Dim
+    DimEl = Hsector%DimEl
     !
     if(Nloc/=dim)stop "directMatVec_cc ERROR: Nloc != dim(isector)"
     !
@@ -57,13 +58,25 @@ contains
           enddo
        enddo
     case ("replica")
-       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
-       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
        do ibath=1,Nbath
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
-          do ispin=1,Nspin
+          do ispin=1,Nnambu*Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
+                bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
+             enddo
+          enddo
+       enddo
+    case ("general")
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
+       do ibath=1,Nbath
+          Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+          do ispin=1,Nnambu*Nspin
+             do iorb=1,Norb
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -72,8 +85,10 @@ contains
     !
     Hv=zero
     !-----------------------------------------------!
-    states: do j=MpiIstart,MpiIend
-       m    = Hsector%H(1)%map(j)
+    states: do i=1,Dim
+       i_el = mod(i-1,DimEl) +1
+       iph  = (i-1)/DimEl +1
+       m    = Hsector%H(1)%map(i_el)
        ib   = bdecomp(m,2*Ns)
        !
        do iorb=1,Norb
@@ -93,6 +108,14 @@ contains
        !
        !IMPURITY- BATH HYBRIDIZATION
        include "direct/HxVimp_bath.f90"
+       !
+       if(DimPh>1)then
+          !PHONON TERMS
+          include "direct/HxV_ph.f90"
+          !
+          !ELECTRON-PHONON INTERACTION
+          include "direct/HxV_eph.f90"
+       endif
     enddo states
     !-----------------------------------------------!
     !
@@ -102,21 +125,21 @@ contains
 
 #ifdef _MPI
   subroutine directMatVec_MPI_superc_main(Nloc,v,Hv)
-    integer                                        :: Nloc
-    complex(8),dimension(Nloc)                     :: v
-    complex(8),dimension(Nloc)                     :: Hv
-    integer                                        :: N
-    complex(8),dimension(:),allocatable            :: vin
-    integer,allocatable,dimension(:)               :: Counts,Offset
-    integer                                        :: isector
-    integer,dimension(Nlevels)                     :: ib
-    integer,dimension(Ns)                          :: ibup,ibdw  
-    real(8),dimension(Norb)                        :: nup,ndw
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Nbath) :: Hbath_tmp
-    integer                                        :: first_state,last_state
-    integer                                        :: first_state_up,last_state_up
-    integer                                        :: first_state_dw,last_state_dw
-    integer                                        :: mpiIerr
+    integer                                                         :: Nloc, i_el, j_el, iph, jj
+    complex(8),dimension(Nloc)                                      :: v
+    complex(8),dimension(Nloc)                                      :: Hv
+    integer                                                         :: N
+    complex(8),dimension(:),allocatable                             :: vin
+    integer,allocatable,dimension(:)                                :: Counts,Offset
+    integer                                                         :: isector
+    integer,dimension(Nlevels)                                      :: ib
+    integer,dimension(Ns)                                           :: ibup,ibdw  
+    real(8),dimension(Norb)                                         :: nup,ndw
+    complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb,Nbath) :: Hbath_tmp
+    integer                                                         :: first_state,last_state
+    integer                                                         :: first_state_up,last_state_up
+    integer                                                         :: first_state_dw,last_state_dw
+    integer                                                         :: mpiIerr
     !
     if(MpiComm==MPI_UNDEFINED)stop "directMatVec_MPI_cc ERRROR: MpiComm = MPI_UNDEFINED"
     if(.not.MpiStatus)stop "directMatVec_MPI_cc ERROR: MpiStatus = F"
@@ -124,7 +147,8 @@ contains
     if(.not.Hsector%status)stop "directMatVec_cc ERROR: Hsector NOT allocated"
     isector=Hsector%index
     !
-    Dim = getdim(isector)
+    Dim   = Hsector%Dim
+    DimEl = Hsector%DimEl
     !
     !
     !Get diagonal hybridization, bath energy
@@ -146,13 +170,25 @@ contains
           enddo
        enddo
     case ("replica")
-       allocate(diag_hybr(Nspin,Norb,Nbath));diag_hybr=0d0
-       allocate(bath_diag(Nspin,Norb,Nbath));bath_diag=0d0
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
        do ibath=1,Nbath
           Hbath_tmp(:,:,:,:,ibath) = Hreplica_build(dmft_bath%item(ibath)%lambda)
-          do ispin=1,Nspin
+          do ispin=1,Nnambu*Nspin
              do iorb=1,Norb
                 diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%v
+                bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
+             enddo
+          enddo
+       enddo
+    case ("general")
+       allocate(diag_hybr(Nnambu*Nspin,Norb,Nbath));diag_hybr=0d0
+       allocate(bath_diag(Nnambu*Nspin,Norb,Nbath));bath_diag=0d0
+       do ibath=1,Nbath
+          Hbath_tmp(:,:,:,:,ibath) = Hgeneral_build(dmft_bath%item(ibath)%lambda)
+          do ispin=1,Nnambu*Nspin
+             do iorb=1,Norb
+                diag_hybr(ispin,iorb,ibath)=dmft_bath%item(ibath)%vg(iorb+Norb*(ispin-1))
                 bath_diag(ispin,iorb,ibath)=Hbath_tmp(ispin,ispin,iorb,iorb,ibath)
              enddo
           enddo
@@ -182,8 +218,10 @@ contains
     Hv=zero
     !
     !-----------------------------------------------!
-    states: do j=MpiIstart,MpiIend
-       m  = Hsector%H(1)%map(j)
+    states: do i=MpiIstart,MpiIend
+       i_el = mod(i-1,DimEl) +1
+       iph  = (i-1)/DimEl +1
+       m  = Hsector%H(1)%map(i_el)
        ib = bdecomp(m,2*Ns)
        !
        do iorb=1,Norb
@@ -203,15 +241,19 @@ contains
        !
        !IMPURITY- BATH HYBRIDIZATION
        include "direct/HxVimp_bath.f90"
+       !
+       if(DimPh>1)then
+          !PHONON TERMS
+          include "direct/HxV_ph.f90"
+          !
+          !ELECTRON-PHONON INTERACTION
+          include "direct/HxV_eph.f90"
+       endif
     enddo states
     !-----------------------------------------------!
     !
   end subroutine directMatVec_MPI_superc_main
 #endif
-
-
-
-
 
 end MODULE ED_HAMILTONIAN_SUPERC_DIRECT_HXV
 

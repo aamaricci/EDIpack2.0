@@ -104,7 +104,7 @@
      !Evaluate: F.dot.T = sum_a={0,x,y,z} F_a.T^a
      if(any(exc_field/=0d0))then
         do iorb=1,Norb
-           do jorb=iorb+1,Norb
+           do jorb=1,Norb
               !
               !F_0. T^0_ab :=   F_0 . (C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw})
               !F_z. T^z_ab :=   F_z . (C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw})
@@ -140,7 +140,7 @@
                  call cdg(iorb,k1,k2,sg2)
                  j = binary_search(Hsector%H(1)%map,k2)
                  !
-                 htmp = one*exc_field(1)*sg1*sg2
+                 htmp = exc_field(1)*sg1*sg2
                  select case(MpiStatus)
                  case (.true.)
                     call sp_insert_element(MpiComm,spH0,htmp,i,j)

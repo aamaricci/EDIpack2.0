@@ -13,7 +13,7 @@
      i = j
      hv(i-MpiIshift) = hv(i-MpiIshift) + htmp*vin(i)
      !
-  case("replica")
+  case("replica","general")
      htmp=zero
      do kp=1,Nbath
         do iorb=1,Norb

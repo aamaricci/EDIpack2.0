@@ -64,7 +64,7 @@ contains
     logical             :: lanc_solve,Tflag,lanc_verbose,bool
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: digonalization"
+    write(Logfile,"(A)")"DEBUG ed_diag_d NORMAL: diagonalization"
 #endif
     if(state_list%status)call es_delete_espace(state_list)
     state_list=es_init_espace()
@@ -190,6 +190,9 @@ contains
           end select
           if(MpiMaster.AND.ed_verbose>3)write(LOGfile,*)""
           call delete_Hv_sector_normal()
+#ifdef _MPI
+          if(MpiStatus)call Bcast_MPI(MpiComm,eig_values)
+#endif
           !
           !
        else                     !else LAPACK_SOLVE

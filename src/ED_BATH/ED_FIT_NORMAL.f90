@@ -133,6 +133,12 @@ contains
           !
           !
        case (1)
+          if(cg_grad==0)then
+             write(*,*) "                                                                                "
+             write(*,*) "WARNING: analytic gradient not available with cg-method=1 (minimize f77 routine)"
+             write(*,*) "         > we will force cg_grad=1 (so let the routine estimate the gradient)   "
+             write(*,*) "                                                                                "
+          endif
           select case (cg_scheme)
           case ("weiss")
              call fmin_cgminimize(array_bath,chi2_weiss_normal_normal,&
@@ -1008,7 +1014,7 @@ contains
   function chi2_weiss_normal_superc(a) result(chi2)
     real(8),dimension(:)           ::  a
     complex(8),dimension(2,Ldelta) ::  g0and
-    real(8),dimension(Ldelta)    ::  Gtmp,Ftmp
+    real(8),dimension(Ldelta)      ::  Gtmp,Ftmp
     real(8)                        ::  chi2
     !
 #ifdef _DEBUG
