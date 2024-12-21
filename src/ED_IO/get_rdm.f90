@@ -1,18 +1,13 @@
 subroutine ed_get_rdm_single(dm,doprint)
-  complex(8),allocatable,intent(inout)        :: dm(:,:)
-  logical               ,intent(in) ,optional :: doprint
-  logical                                     :: doprint_
-  !
+  complex(8),dimension(:,:),allocatable,intent(inout) :: dm
+  logical               ,intent(in) ,optional         :: doprint
+  logical                                             :: doprint_
   doprint_=.false.; if(present(doprint)) doprint_=doprint
-  !
-  if(.not.allocated(impurity_density_matrix))then
-     stop "ERROR: impurity_density_matrix is not allocated"
-  endif
+  if(.not.allocated(impurity_density_matrix))stop "ERROR: impurity_density_matrix is not allocated"
   !
   if(allocated(dm))deallocate(dm)
   allocate(dm, source=impurity_density_matrix)
   !
-  !Print to file (if requested)
   if(doprint_)call ed_print_dm(dm,4**Norb)
   !
 end subroutine ed_get_rdm_single
@@ -20,8 +15,6 @@ end subroutine ed_get_rdm_single
 
 
 
-!****************************************************************************************!
-!****************************************************************************************!
 subroutine ed_get_reduced_rdm_global(rdm,orbital_mask,doprint)
   complex(8),dimension(:,:),allocatable,intent(inout) :: rdm
   logical,dimension(Norb),intent(in)                  :: orbital_mask
@@ -31,16 +24,13 @@ subroutine ed_get_reduced_rdm_global(rdm,orbital_mask,doprint)
   !
   select case(ed_mode)
   case default  ;call ed_get_reduced_rdm_normal(rdm,orbital_mask,doprint)
-  case("superc");stop "it is not implemented"!call ed_get_reduced_rdm_superc(rdm,orbital_mask,doprint)
-  case("nonsu2");stop "it is not implemented"!call ed_get_reduced_rdm_nonsu2(rdm,orbital_mask,doprint)
+  case("superc");stop "it is not implemented"
+  case("nonsu2");stop "it is not implemented"
   end select
-  !
 end subroutine ed_get_reduced_rdm_global
 
 
-
 subroutine ed_get_reduced_rdm_normal(rdm,orbital_mask,doprint)
-  !! further reduce the cdm by tracing out selected orbitals (via mask)
   complex(8),dimension(:,:),allocatable,intent(inout) :: rdm
   logical,dimension(Norb),intent(in)                  :: orbital_mask
   logical,intent(in),optional                         :: doprint
@@ -62,8 +52,7 @@ subroutine ed_get_reduced_rdm_normal(rdm,orbital_mask,doprint)
   real(8)                                             :: IsignUP,IsignDW
   real(8)                                             :: JsignUP,JsignDW
   integer                                             :: i,j,io,jo
-  
-  ! Input handling and checks
+  !
   Nred = count(orbital_mask)
   if(Nred<1)stop "ERROR: invalid orbital mask, the reduced system must consist of at least one orbital"  
   if(Nred==Norb)then
@@ -76,13 +65,11 @@ subroutine ed_get_reduced_rdm_normal(rdm,orbital_mask,doprint)
   !
   if(allocated(rdm))deallocate(rdm)
   !
-  ! Retrieve cdm from the global scope
   if(.not.allocated(impurity_density_matrix))stop "ERROR: impurity_density_matrix is not allocated"
   !  
   associate(cdm => impurity_density_matrix)
     if(.not.dotrace_)then
-       ! Pour the whole cdm into the rdm
-       allocate(rdm, source=cdm) ! and that's all we do…
+       allocate(rdm, source=cdm) 
     else
        ! Retrieve the requested bit-indices for the reduced/traced system
        red_count   = 0
@@ -136,13 +123,12 @@ subroutine ed_get_reduced_rdm_normal(rdm,orbital_mask,doprint)
     end if
   end associate
   !
-  !Print to file (if requested)
   if(doprint_)call ed_print_dm(rdm,orbital_mask)
   !
 contains
   !
+  ! Compute the Fermionic sign associated to the required swipes
   subroutine get_sign(sign,state,indices)
-    !! Compute the Fermionic sign associated to the required swipes
     real(8), intent(out)                              :: sign
     integer, intent(in)                               :: state(Norb)
     integer, intent(in)                               :: indices(:)
@@ -158,14 +144,14 @@ contains
     enddo
     ! ASSIGN THE SIGN: (-1)^N
     if(mod(N,2)==0)then
-       sign = +1
+       sign = 1
     else
        sign = -1
     endif
   end subroutine get_sign
   !
+  ! Extract the reduced and tracing subsystems, given the appropriate bit-indices
   subroutine split_state(state,reduced_indices,tracing_indices,reduced_state,tracing_state)
-    !! Extract the reduced and tracing subsystems, given the appropriate bit-indices
     integer,intent(in),allocatable                    :: state(:)
     integer,intent(in),allocatable                    :: reduced_indices(:)
     integer,intent(in),allocatable                    :: tracing_indices(:)

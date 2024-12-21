@@ -823,7 +823,7 @@ contains
           suffix = trim(suffix)//"_l"//reg(str(iorb))
        endif
     enddo
-    fname = "reduced_density_matrix"//trim(suffix)//".dat"
+    fname = "reduced_density_matrix"//str(ed_file_suffix)//"_"//str(suffix)//".ed"
     !
     unit = free_unit()
     open(unit,file=fname,action="write",position="rewind",status='unknown')
@@ -845,7 +845,7 @@ contains
   subroutine ed_print_dm_LEGACY(dm,Nrdm)
     integer                  ,intent(in)            :: Nrdm
     complex(8),dimension(:,:),intent(in)            :: dm
-    integer                                         :: unit,Nsites
+    integer                                         :: unit
     character(len=64)                               :: fname
     integer                                         :: io,jo
     !
@@ -853,9 +853,8 @@ contains
        stop "ERROR: actual dm argument has incogruent size wrt explicitly passed Nrdm"
     endif
     !
-    Nsites = nint( 1/Norb * log(real(Nrdm,kind=8)) / log(4d0) ) !Nrdm = 4**(Nsites*Norb)
     !
-    fname = "reduced_density_matrix_"//reg(str(Nsites))//".dat"
+    fname = "reduced_density_matrix"//str(ed_file_suffix)//".ed"
     !
     unit = free_unit()
     open(unit,file=fname,action="write",position="rewind",status='unknown')
