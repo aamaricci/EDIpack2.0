@@ -2,6 +2,7 @@ MODULE ED_RDM
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_EIGENSPACE
+  USE ED_IO
   USE ED_BATH
   USE ED_SETUP
   USE ED_HAMILTONIAN
@@ -21,8 +22,8 @@ contains
 
   subroutine rdm_impurity()
     ! 
-    ! Calculate the impurity reduced density matrix calling the correct procedure according to the value of :f:var:`ed_mode` .
-    ! Write the results on plain-text files.
+    ! Calculate the impurity RDM calling the correct procedure according to the value of :f:var:`ed_mode` .
+    ! Write the resulting matrix to a plain-text file.
     !
     ! * :code:`normal` : :f:func:`imp_rdm_normal`
     ! * :code:`superc` : :f:func:`imp_rdm_superc`
@@ -34,6 +35,8 @@ contains
     case("superc");call imp_rdm_superc()
     case("nonsu2");call imp_rdm_nonsu2()
     end select
+    !
+    call ed_print_dm(impurity_density_matrix,size(impurity_density_matrix,1))
   end subroutine rdm_impurity
 
 

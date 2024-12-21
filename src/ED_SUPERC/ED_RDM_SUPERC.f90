@@ -53,6 +53,21 @@ contains
   !PURPOSE  : Lanc method
   !+-------------------------------------------------------------------+
   subroutine imp_rdm_superc()
+    !Evaluates the RDM using the saved eigen-states in the :f:var:`state_list` and an efficient sparse algorithm.
+    !For any given eigen-state :math:`|N\rangle` we proceed as follows.
+    !Such state is a linear combination of the basis state in a given sector: 
+    !
+    !:math:`|N\rangle = \sum_I c_I |I\rangle = \sum_{I}C_I |I_\uparrow\rangle|B_\uparrow\rangle|I_\downarrow\rangle|B_\downarrow\rangle`
+    !
+    !the goal is to build:
+    !
+    !:math:`\rho_{IJ} = \sum_{B_\sigma}|I_\uparrow\rangle|B_\uparrow\rangle|I_\downarrow\rangle|B_\downarrow\rangle \langle B_\downarrow|\langle J_\downarrow| \langle B_\uparrow| \langle J_\uparrow|`
+    !
+    !However, not all the bath configurations are admissibile in this sum. In fact if we store in a sparse map which bath configuration :math:`B_\sigma` (as integer)
+    !corresponds to a given value of the impurity configuration :math:`I_\sigma`, then we can look for those value of :math:`B_\sigma` which *couples* to both
+    !:math:`I_\sigma` and :math:`J_\sigma`. This reduces the sum to all and only the terms contributing to the RDM.
+    !
+    !In the  :code:`superc` mode we need to enforce the link between different spin orientation imposed by the symmetry of the sectors.
     integer                         :: istate,val
     real(8),dimension(Norb)         :: nup,ndw
 
@@ -72,6 +87,8 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")&
          "DEBUG observables_superc: eval impurity density matrix \rho_IMP = Tr_BATH(\rho)"
 #endif
+    if(allocated(impurity_density_matrix))deallocate(impurity_density_matrix)
+    allocate(impurity_density_matrix(4**Norb,4**Norb))
     impurity_density_matrix=zero
     do istate=1,state_list%size
 #ifdef _DEBUG
@@ -145,9 +162,8 @@ contains
     if(MPIMASTER)then
        if(Norb<=3)then
           write(LOGfile,*)"RDM:"
-          write(fmt,"(A1,I0,A2,I0,A1,I0,A5)")"(",4**Norb,"(F5.2,1x))"
           do i=1,4**Norb
-             write(LOGfile,fmt)(dreal(impurity_density_matrix(i,j)),j=1,4**Norb)
+             write(LOGfile,"(*(F5.2,1x))")(dreal(impurity_density_matrix(i,j)),j=1,4**Norb)
           enddo
 #ifdef _DEBUG
           if(Norb==1)then

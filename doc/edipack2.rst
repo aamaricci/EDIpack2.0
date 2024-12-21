@@ -289,7 +289,30 @@ for more info about the symmetries implemented in the code.
    structure/index_observables
 
 
+   
+Reduced Density Matrix
+####################################
 
+This part of the `EDIpack2.0` code implements the calculation of the
+impurity Reduced Density Matrix (RDM). Calculations are performed in
+each operational mode,  corresponding to the choice of the specific
+symmetry implemented in the code, i.e. which quantum numbers are to be
+conserved. The operational modes are selected by the variable
+:f:var:`ed_mode` =  :code:`normal, superc, nosu2`.
+The evaluation of the RDM exploit an efficient sparse algorithm to
+avoid tracing over the exponentially many bath configuration.
+The RDM is saved to file and made available to the user 
+through the routines listed in :f:mod:`ed_io`. 
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   structure/index_rdm
+
+
+   
 
 Input/Output
 ###########################
