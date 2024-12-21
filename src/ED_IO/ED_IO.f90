@@ -359,9 +359,17 @@ MODULE ED_IO
 
 
 
+  interface ed_get_impurity_rdm
+     module procedure :: ed_get_rdm_single
+  end interface ed_get_impurity_rdm
+
+  !>>DA RIVEDERE<<
+  interface ed_get_reduced_rdm
+     module procedure :: ed_get_reduced_rdm_global
+  end interface ed_get_reduced_rdm
 
 
-  interface ed_get_density_matrix
+  interface ed_get_sp_dm
      !This subroutine returns to the user the impurity density matrix.
      !The density matrix is an array having the following possible dimensions:
      ! 
@@ -370,7 +378,9 @@ MODULE ED_IO
      !
      module procedure :: ed_get_density_matrix_single
      module procedure :: ed_get_density_matrix_lattice
-  end interface ed_get_density_matrix
+  end interface ed_get_sp_dm
+
+
 
   interface ed_read_impSigma
      !This subroutine reads the impurity Sigmas from files in the execution folder and stores them in the global variables 
@@ -399,6 +409,14 @@ MODULE ED_IO
   end interface ed_read_impSigma
 
 
+  interface ed_print_dm
+     module procedure :: ed_print_dm_orb
+     module procedure :: ed_print_dm_LEGACY
+  end interface ed_print_dm
+
+
+
+
   public :: ed_get_sigma
   public :: ed_get_gimp
   public :: ed_get_g0imp
@@ -423,8 +441,15 @@ MODULE ED_IO
   public :: ed_get_dse
   public :: ed_get_dph
   public :: ed_get_neigen_total
-  !  
-  public :: ed_get_density_matrix
+  !
+
+
+  public :: ed_get_impurity_rdm
+  public :: ed_get_reduced_rdm
+  public :: ed_get_sp_dm
+  public :: ed_print_dm
+
+
   public :: ed_get_quantum_SOC_operators
 
   !****************************************************************************************!
@@ -486,9 +511,8 @@ contains
 
 
   !+--------------------------------------------------------------------------+!
-  ! PURPOSE: Retrieve impurity density matrices and SOC operators
+  ! PURPOSE: Retrieve SOC operators
   !+--------------------------------------------------------------------------+!
-  include "get_imp_dm.f90"
   include "get_imp_SOC_op.f90"
 
   !+--------------------------------------------------------------------------+!
@@ -502,6 +526,11 @@ contains
   include "get_doubles.f90"
 
 
+  !+--------------------------------------------------------------------------+!
+  ! PURPOSE: RDMs
+  !+--------------------------------------------------------------------------+!
+  include "get_rdm.f90"
+  include "get_sp_dm.f90"
 
 
 
@@ -743,7 +772,7 @@ contains
     !impurity site for real-space DMFT (if that is the case). The ordering of the results in the output files is described by comments
     !in the files themselves
     !
-    if (allocated(imp_density_matrix_ineq)) then
+    if (allocated(single_particle_density_matrix)) then
        call ed_get_quantum_soc_operators_lattice()
     else
        call ed_get_quantum_SOC_operators_single()
@@ -766,6 +795,83 @@ contains
        nlii=neigen_total_ineq
     endif
   end subroutine ed_get_neigen_total
+
+
+
+
+
+  !+------------------------------------------------------------------+
+  !                      PRINT DENSITY MATRICES
+  !+------------------------------------------------------------------+
+  subroutine ed_print_dm_orb(dm,orbital_mask)
+    complex(8),dimension(:,:),intent(in) :: dm
+    logical,dimension(Norb),intent(in)   :: orbital_mask
+    integer                              :: unit,Nsites
+    character(len=64)                    :: fname,suffix
+    integer                              :: ilat,iorb,Nrdm,io,i,jo
+    integer,allocatable,dimension(:)     :: s1,s2,s3,s4
+    !
+    Nrdm = 4**count(orbital_mask)
+    !
+    if(size(dm,1)/=Nrdm.OR.size(dm,2)/=Nrdm)then
+       stop "ERROR: reduced density matrix and orbital mask have incompatible sizes"
+    endif
+    !
+    suffix = ""
+    do iorb = 1,Norb
+       if(orbital_mask(i))then
+          suffix = trim(suffix)//"_l"//reg(str(iorb))
+       endif
+    enddo
+    fname = "reduced_density_matrix"//trim(suffix)//".dat"
+    !
+    unit = free_unit()
+    open(unit,file=fname,action="write",position="rewind",status='unknown')
+    do io=1,Nrdm
+       write(unit,"(*(F20.16,1X))") (dreal(dm(io,jo)),jo=1,Nrdm)
+    enddo
+    if(any(dimag(dm)/=0d0))then
+       write(unit,*)
+       do io=1,Nrdm
+          write(unit,"(*(F20.16,1X))") (dimag(dm(io,jo)),jo=1,Nrdm)
+       enddo
+    endif
+    close(unit)
+    !
+  end subroutine ed_print_dm_orb
+  !
+
+  !
+  subroutine ed_print_dm_LEGACY(dm,Nrdm)
+    integer                  ,intent(in)            :: Nrdm
+    complex(8),dimension(:,:),intent(in)            :: dm
+    integer                                         :: unit,Nsites
+    character(len=64)                               :: fname
+    integer                                         :: io,jo
+    !
+    if(size(dm,1)/=Nrdm.OR.size(dm,2)/=Nrdm)then
+       stop "ERROR: actual dm argument has incogruent size wrt explicitly passed Nrdm"
+    endif
+    !
+    Nsites = nint( 1/Norb * log(real(Nrdm,kind=8)) / log(4d0) ) !Nrdm = 4**(Nsites*Norb)
+    !
+    fname = "reduced_density_matrix_"//reg(str(Nsites))//".dat"
+    !
+    unit = free_unit()
+    open(unit,file=fname,action="write",position="rewind",status='unknown')
+    do io=1,Nrdm
+       write(unit,"(*(F20.16,1X))") (dreal(dm(io,jo)),jo=1,Nrdm)
+    enddo
+    if(any(dimag(dm)/=0d0))then
+       write(unit,*)
+       do io=1,Nrdm
+          write(unit,"(*(F20.16,1X))") (dimag(dm(io,jo)),jo=1,Nrdm)
+       enddo
+    endif
+    close(unit)
+    !
+  end subroutine ed_print_dm_LEGACY
+
 
 
 END MODULE ED_IO

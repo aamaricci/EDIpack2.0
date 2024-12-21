@@ -73,7 +73,7 @@ contains
   !PURPOSE  : Lanc method
   !+-------------------------------------------------------------------+
   subroutine observables_normal()
-!Calculate the values of the local observables
+    !Calculate the values of the local observables
     integer                         :: iprob,istate,Nud(2,Ns),iud(2),jud(2),val
     integer,dimension(2*Ns_Ud)      :: Indices,Jndices
     integer,dimension(Ns_Ud,Ns_Orb) :: Nups,Ndws  ![1,Ns]-[Norb,1+Nbath]
@@ -311,13 +311,13 @@ contains
 #endif
 
     !
-    !IMPURITY DENSITY MATRIX
+    !SINGLE PARTICLE IMPURITY DENSITY MATRIX
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG observables_normal: eval impurity density matrix <C^+_a C_b>"
+         "DEBUG observables_normal: eval single particle density matrix <C^+_a C_b>"
 #endif
-    if(allocated(imp_density_matrix)) deallocate(imp_density_matrix)
-    allocate(imp_density_matrix(Nspin,Nspin,Norb,Norb));imp_density_matrix=zero
+    if(allocated(single_particle_density_matrix)) deallocate(single_particle_density_matrix)
+    allocate(single_particle_density_matrix(Nspin,Nspin,Norb,Norb));single_particle_density_matrix=zero
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
@@ -334,7 +334,6 @@ contains
 #else
        call es_return_dvector(state_list,istate,state_dvec) 
 #endif
-
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
        peso = peso/zeta_function
@@ -353,8 +352,8 @@ contains
              !Diagonal densities
              do ispin=1,Nspin
                 do iorb=1,Norb
-                   imp_density_matrix(ispin,ispin,iorb,iorb) = &
-                        imp_density_matrix(ispin,ispin,iorb,iorb) + &
+                   single_particle_density_matrix(ispin,ispin,iorb,iorb) = &
+                        single_particle_density_matrix(ispin,ispin,iorb,iorb) + &
                         peso*nud(ispin,iorb)*(state_dvec(i))*state_dvec(i)
                 enddo
              enddo
@@ -377,8 +376,8 @@ contains
                             !
                             j = j + (iph-1)*sectorI%DimEl
                             !
-                            imp_density_matrix(ispin,ispin,iorb,jorb) = &
-                                 imp_density_matrix(ispin,ispin,iorb,jorb) + &
+                            single_particle_density_matrix(ispin,ispin,iorb,jorb) = &
+                                 single_particle_density_matrix(ispin,ispin,iorb,jorb) + &
                                  peso*sgn1*state_dvec(i)*sgn2*(state_dvec(j))
                          endif
                       enddo
@@ -398,7 +397,7 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
     !
-    !
+    
     !
     !
     if(MPIMASTER)then
@@ -434,6 +433,7 @@ contains
        call Bcast_MPI(MpiComm,ed_dens_dw)
        call Bcast_MPI(MpiComm,ed_dens)
        call Bcast_MPI(MpiComm,ed_docc)
+       if(allocated(single_particle_density_matrix))call Bcast_MPI(MpiComm,single_particle_density_matrix)
     endif
 #endif
     !

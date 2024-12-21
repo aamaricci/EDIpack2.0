@@ -247,6 +247,98 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
     !
+
+
+
+    !STATUS: IMPORTED FROM NORMAL, TO BE UPDATE TO NAMBU BASIS <\psi^+_a Psi_a>
+    !     !
+    !     !SINGLE PARTICLE IMPURITY DENSITY MATRIX
+    ! #ifdef _DEBUG
+    !     if(ed_verbose>2)write(Logfile,"(A)")&
+    !          "DEBUG observables_superc: eval single particle density matrix <C^+_a C_b>"
+    ! #endif
+    !     if(allocated(single_particle_density_matrix)) deallocate(single_particle_density_matrix)
+    !     allocate(single_particle_density_matrix(Nspin,Nspin,Norb,Norb));single_particle_density_matrix=zero
+    !     do istate=1,state_list%size
+    !        isector = es_return_sector(state_list,istate)
+    !        Ei      = es_return_energy(state_list,istate)
+    ! #ifdef _DEBUG
+    !        if(ed_verbose>3)write(Logfile,"(A)")&
+    !             "DEBUG observables_normal: get contribution from state:"//str(istate)
+    ! #endif
+    ! #ifdef _MPI
+    !        if(MpiStatus)then
+    !           call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
+    !        else
+    !           call es_return_dvector(state_list,istate,state_dvec) 
+    !        endif
+    ! #else
+    !        call es_return_dvector(state_list,istate,state_dvec) 
+    ! #endif
+    !        !
+    !        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
+    !        peso = peso/zeta_function
+    !        !
+    !        if(MpiMaster)then
+    !           call build_sector(isector,sectorI)
+    !           do i=1,sectorI%Dim
+    !              iph = (i-1)/(sectorI%DimEl) + 1
+    !              i_el = mod(i-1,sectorI%DimEl) + 1
+    !              call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+    !              !
+    !              call build_op_Ns(i,IbUp,IbDw,sectorI)
+    !              Nud(1,:)=IbUp
+    !              Nud(2,:)=IbDw
+    !              !
+    !              !Diagonal densities
+    !              do ispin=1,Nspin
+    !                 do iorb=1,Norb
+    !                    single_particle_density_matrix(ispin,ispin,iorb,iorb) = &
+    !                         single_particle_density_matrix(ispin,ispin,iorb,iorb) + &
+    !                         peso*nud(ispin,iorb)*(state_dvec(i))*state_dvec(i)
+    !                 enddo
+    !              enddo
+    !              !
+    !              !Off-diagonal
+    !              if(ed_total_ud)then
+    !                 do ispin=1,Nspin
+    !                    do iorb=1,Norb
+    !                       do jorb=1,Norb
+    !                          !
+    !                          if((Nud(ispin,jorb)==1).and.(Nud(ispin,iorb)==0))then
+    !                             iud(1) = sectorI%H(1)%map(Indices(1))
+    !                             iud(2) = sectorI%H(2)%map(Indices(2))
+    !                             call c(jorb,iud(ispin),r,sgn1)
+    !                             call cdg(iorb,r,k,sgn2)
+    !                             Jndices = Indices
+    !                             Jndices(1+(ispin-1)*Ns_Ud) = &
+    !                                  binary_search(sectorI%H(1+(ispin-1)*Ns_Ud)%map,k)
+    !                             call indices2state(Jndices,[sectorI%DimUps,sectorI%DimDws],j)
+    !                             !
+    !                             j = j + (iph-1)*sectorI%DimEl
+    !                             !
+    !                             single_particle_density_matrix(ispin,ispin,iorb,jorb) = &
+    !                                  single_particle_density_matrix(ispin,ispin,iorb,jorb) + &
+    !                                  peso*sgn1*state_dvec(i)*sgn2*(state_dvec(j))
+    !                          endif
+    !                       enddo
+    !                    enddo
+    !                 enddo
+    !              endif
+    !              !
+    !              !
+    !           enddo
+    !           call delete_sector(sectorI)         
+    !        endif
+    !        !
+    !        if(allocated(state_dvec))deallocate(state_dvec)
+    !        !
+    !     enddo
+    ! #ifdef _DEBUG
+    !     if(ed_verbose>2)write(Logfile,"(A)")""
+    ! #endif
+    !     !
+
     do iorb=1,Norb
        do jorb=1,Norb
           phiscAB(iorb,jorb) = 0.5d0*(phiscAB(iorb,jorb) - dens_dw(iorb) - (1.d0-dens_up(jorb)))
@@ -287,7 +379,6 @@ contains
        call Bcast_MPI(MpiComm,ed_docc)
        call Bcast_MPI(MpiComm,ed_phisc)
        call Bcast_MPI(MpiComm,ed_mag)
-       if(allocated(imp_density_matrix))call Bcast_MPI(MpiComm,imp_density_matrix)
     endif
 #endif
     !

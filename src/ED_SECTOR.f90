@@ -94,19 +94,24 @@ contains
   !BUILD SECTORS
   !##################################################################
   !##################################################################
-  subroutine build_sector(isector,self)
+  subroutine build_sector(isector,self,iTrace)
     !
     ! This procedure build the sector :f:type:`sector` :math:`{\cal S}(\vec{Q})` given the index :f:var:`isector` which univocally determines the quantum numbers :math:`\vec{Q}`. All the components of the data structure :f:type:`sector` are determined here. Moreover the map connecting the states of the sector to thos in the Fock space is constructed.
     ! To avoid integer overflow the loop over Fock space states is decomposed in spin up and down integer so that :math:`I = I_\uparrow + 2^{N}I_\downarrow`.  
     !
     integer,intent(in) :: isector
     type(sector)       :: self
+    logical,optional   :: itrace
+    logical            :: itrace_
     integer            :: iup,idw
     integer            :: nup_,ndw_,sz_,nt_
     integer            :: twoSz_,twoLz_,twoJz
-    integer            :: dim,iud,i,ibath,iorb
+    integer            :: dim,iud,i,iorb,impDIM
     integer            :: ivec(Ns),jvec(Ns)
+    integer            :: iImp,iImpUp,iImpDw
+    integer            :: iBath,iBathUp,iBathDw
     !
+    itrace_=.false. ; if(present(itrace))itrace_=itrace
     !
     if(self%status)call delete_sector(self)
     !
@@ -114,6 +119,9 @@ contains
     !
     select case(ed_mode)
     case default
+       !
+       impDIM = 2**(Norb/Ns_ud)
+       !
        allocate(self%H(2*Ns_Ud))
        allocate(self%DimUps(Ns_Ud))
        allocate(self%DimDws(Ns_Ud))
@@ -132,7 +140,12 @@ contains
        self%DimPh=Nph+1
        self%Dim=self%DimEl*self%DimPh
        !
-       call map_allocate(self%H,[self%DimUps,self%DimDws])
+       if(itrace_)then
+          call map_allocate(self%H,[self%DimUps,self%DimDws],impDIM)
+       else
+          call map_allocate(self%H,[self%DimUps,self%DimDws])
+       endif
+       !
        do iud=1,Ns_Ud
           !UP    
           dim=0
@@ -141,6 +154,10 @@ contains
              if(nup_ /= self%Nups(iud))cycle
              dim  = dim+1
              self%H(iud)%map(dim) = iup
+             if(.not.itrace_)cycle
+             iImp  = ibits(iup,0,Norb)
+             iBath = ibits(iup,Norb,Norb*Nbath)
+             call sp_insert_state(self%H(iud)%sp,iImp,iBath,dim)
           enddo
           !DW
           dim=0
@@ -149,10 +166,17 @@ contains
              if(ndw_ /= self%Ndws(iud))cycle
              dim = dim+1
              self%H(iud+Ns_Ud)%map(dim) = idw
+             if(.not.itrace_)cycle
+             iIMP  = ibits(idw,0,Norb)
+             iBATH = ibits(idw,Norb,Norb*Nbath)
+             call sp_insert_state(self%H(iud+Ns_Ud)%sp,iImp,iBath,dim)
           enddo
        enddo
        !
     case ("superc")
+       !
+       impDIM = 4**Norb
+       !
        allocate(self%H(1))
        self%Sz    = getSz(isector)
 #ifdef _DEBUG
@@ -162,7 +186,11 @@ contains
        self%DimPh = Nph+1
        self%DimEl = getDim(isector)/(Nph+1)
        self%Dim   = self%DimEl*self%DimPh
-       call map_allocate(self%H,[self%DimEl])
+       if(itrace_)then
+          call map_allocate(self%H,[self%DimEl],impDIM)
+       else
+          call map_allocate(self%H,[self%DimEl])
+       endif
        dim=0
        do idw=0,2**Ns-1
           ndw_= popcnt(idw)
@@ -172,11 +200,32 @@ contains
              if(sz_ == self%Sz)then
                 dim=dim+1
                 self%H(1)%map(dim) = iup + idw*2**Ns
+                if(.not.itrace_)cycle
+                iImpUp  = ibits(iup,0,Norb)
+                iImpDw  = ibits(idw,0,Norb)
+                iBathUp = ibits(iup,Norb,Norb*Nbath)
+                iBathDw = ibits(idw,Norb,Norb*Nbath)
+                ! The correct reconstruction is:
+                ! iImp = Iup + Bup*2**Norb + (Idw + Bdw*2**Norb)*2**Ns
+                ! iImp = Iup + Idw*2**Ns + (Bup + Bdw*2**Ns)*2**Norb
+                ! so that iImp should be (as iBath): 
+                ! iImp = ImpUp + ImpDw*2^Ns (1)
+                ! and not
+                ! iImp = ImpUp + ImpDw*2^Nimp (2)
+                ! However (2) is used to have Imp states in 1:4**Norb, the size of RDM.
+                ! This ensures that, when needed, we could decompose the iImp from (2) into Iup .+. Idw
+                ! correctly and reconstruct the exact iImp index as in (1). 
+                iImp    = iImpUp  + iImpDw*(2**Norb)
+                iBath   = iBathUp + iBathDw*(2**Ns)
+                call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
              endif
           enddo
        enddo
 
     case ("nonsu2")
+       !
+       impDIM = 4**Norb
+       !
        allocate(self%H(1))
        if(Jz_basis)then
           self%Ntot  = getN(isector)
@@ -188,7 +237,11 @@ contains
           self%DimPh = Nph+1
           self%Dim   = self%DimEl*self%DimPh
           self%twoJz = gettwoJz(isector)
-          call map_allocate(self%H,[self%Dim])
+          if(itrace_)then
+             call map_allocate(self%H,[self%DimEl],impDIM)
+          else
+             call map_allocate(self%H,[self%DimEl])
+          endif
           dim=0
           do idw=0,2**Ns-1
              ndw_= popcnt(idw)
@@ -208,6 +261,23 @@ contains
                 if(self%Ntot == nt_  .AND. self%twoJz==(twoSz_+twoLz_) )then
                    dim=dim+1
                    self%H(1)%map(dim) = iup + idw*2**Ns
+                   if(.not.itrace_)cycle
+                   iImpUp  = ibits(iup,0,Norb)
+                   iImpDw  = ibits(idw,0,Norb)
+                   iBathUp = ibits(iup,Norb,Norb*Nbath)
+                   iBathDw = ibits(idw,Norb,Norb*Nbath)
+                   ! iImp = Iup + Bup*2**Norb + (Idw + Bdw*2**Norb)*2**Ns
+                   ! iImp = Iup + Idw*2**Ns + (Bup + Bdw*2**Ns)*2**Norb
+                   ! so that iImp should be (as iBath): 
+                   ! iImp = ImpUp + ImpDw*2^Ns (1)
+                   ! and not
+                   ! iImp = ImpUp + ImpDw*2^Nimp (2)
+                   ! However (2) is used to have Imp states in 1:4**Norb, the size of RDM.
+                   ! This ensures that, when needed, we could decompose the iImp from (2) into Iup .+. Idw
+                   ! correctly and reconstruct the exact iImp index as in (1). 
+                   iImp    = iImpUp  + iImpDw*(2**Norb)
+                   iBath   = iBathUp + iBathDw*(2**Ns)
+                   call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
                 endif
              enddo
           enddo
@@ -220,23 +290,43 @@ contains
           self%DimEl = getDim(isector)
           self%DimPh = Nph+1
           self%Dim   = self%DimEl*self%DimPh
-          call map_allocate(self%H,[self%Dim])
+          if(itrace_)then
+             call map_allocate(self%H,[self%DimEl],impDIM)
+          else
+             call map_allocate(self%H,[self%DimEl])
+          endif
           dim=0
           do idw=0,2**Ns-1
              ndw_= popcnt(idw)
              do iup=0,2**Ns-1
                 nup_ = popcnt(iup)
                 nt_  = nup_ + ndw_
-                if(nt_ == self%Ntot)then
-                   dim=dim+1
-                   self%H(1)%map(dim) = iup + idw*2**Ns
-                endif
+                if(nt_ /= self%Ntot)cycle
+                dim=dim+1
+                self%H(1)%map(dim) = iup + idw*2**Ns
+                if(.not.itrace_)cycle
+                iImpUp  = ibits(iup,0,Norb)
+                iImpDw  = ibits(idw,0,Norb)
+                iBathUp = ibits(iup,Norb,Norb*Nbath)
+                iBathDw = ibits(idw,Norb,Norb*Nbath)
+                ! iImp = Iup + Bup*2**Norb + (Idw + Bdw*2**Norb)*2**Ns
+                ! iImp = Iup + Idw*2**Ns + (Bup + Bdw*2**Ns)*2**Norb
+                ! so that iImp should be (as iBath): 
+                ! iImp = ImpUp + ImpDw*2^Ns (1)
+                ! and not
+                ! iImp = ImpUp + ImpDw*2^Nimp (2)
+                ! However (2) is used to have Imp states in 1:4**Norb, the size of RDM.
+                ! This ensures that, when needed, we could decompose the iImp from (2) into Iup .+. Idw
+                ! correctly and reconstruct the exact iImp index as in (1). 
+                iImp    = iImpUp  + iImpDw*(2**Norb)
+                iBath   = iBathUp + iBathDw*(2**Ns)
+                call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
              enddo
           enddo
        endif
     end select
-    self%Nlanc = min(self%Dim,lanc_nGFiter)
-    self%status=.true.
+    self%Nlanc  = min(self%Dim,lanc_nGFiter)
+    self%status = .true.
   end subroutine build_sector
 
 
@@ -270,42 +360,49 @@ contains
 
 
 
-  subroutine map_allocate_scalar(H,N)
-    type(sector_map) :: H
-    integer          :: N
-    if(H%status) call map_deallocate_scalar(H)
-    allocate(H%map(N))
-    H%status=.true.
-  end subroutine map_allocate_scalar
-  !
-  subroutine map_allocate_vector(H,N)
-    type(sector_map),dimension(:)       :: H
-    integer,dimension(size(H))          :: N
-    integer                             :: i
-    do i=1,size(H)
-       call map_allocate_scalar(H(i),N(i))
-    enddo
-  end subroutine map_allocate_vector
+   subroutine map_allocate_scalar(H,N,Nsp)
+      type(sector_map) :: H
+      integer          :: N
+      integer,optional :: Nsp
+      if(H%status) call map_deallocate_scalar(H)
+      allocate(H%map(N))
+      if(present(Nsp))call sp_init_map(H%sp,Nsp)
+      H%status=.true.
+   end subroutine map_allocate_scalar
+   !
+   subroutine map_allocate_vector(H,N,Nsp)
+      type(sector_map),dimension(:)       :: H
+      integer,dimension(size(H))          :: N
+      integer,optional                    :: Nsp
+      integer                             :: i
+      do i=1,size(H)
+         if(present(Nsp))then
+            call map_allocate_scalar(H(i),N(i),Nsp)
+         else
+            call map_allocate_scalar(H(i),N(i))
+         endif
+      enddo
+   end subroutine map_allocate_vector
 
 
 
-  subroutine map_deallocate_scalar(H)
-    type(sector_map) :: H
-    if(.not.H%status)then
-       write(*,*) "WARNING map_deallocate_scalar: H is not allocated"
-       return
-    endif
-    if(allocated(H%map))deallocate(H%map)
-    H%status=.false.
-  end subroutine map_deallocate_scalar
-  !
-  subroutine map_deallocate_vector(H)
-    type(sector_map),dimension(:) :: H
-    integer                       :: i
-    do i=1,size(H)
-       call map_deallocate_scalar(H(i))
-    enddo
-  end subroutine map_deallocate_vector
+   subroutine map_deallocate_scalar(H)
+      type(sector_map) :: H
+      if(.not.H%status)then
+         write(*,*) "WARNING map_deallocate_scalar: H is not allocated"
+         return
+      endif
+      if(allocated(H%map))deallocate(H%map)
+      H%status=.false.
+   end subroutine map_deallocate_scalar
+   !
+   subroutine map_deallocate_vector(H)
+      type(sector_map),dimension(:) :: H
+      integer                       :: i
+      do i=1,size(H)
+         call map_deallocate_scalar(H(i))
+      enddo
+   end subroutine map_deallocate_vector
 
 
 

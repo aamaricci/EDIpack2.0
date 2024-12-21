@@ -1,5 +1,5 @@
 module ED_MAIN
-!Contains routine that initialize, run and finalize the Impurity model solver
+  !Contains routine that initialize, run and finalize the Impurity model solver
   USE SF_IOTOOLS, only: str,reg
   USE SF_TIMER,only: start_timer,stop_timer
   USE SF_MISC,only: assert_shape
@@ -13,6 +13,7 @@ module ED_MAIN
   USE ED_GREENS_FUNCTIONS
   USE ED_CHI_FUNCTIONS
   USE ED_OBSERVABLES
+  USE ED_RDM
   USE ED_DIAG
   USE ED_IO
   implicit none
@@ -20,13 +21,13 @@ module ED_MAIN
 
   !>INIT ED SOLVER
   interface ed_init_solver
-!
-!Initialize the Exact Diagonalization solver of `EDIpack2.0`. This procedure reserves and allocates all the  
-!memory required by the solver, performs all the consistency check and initializes the bath instance guessing or reading from a file.      
-!It requires as an input a double precision array of rank-1 [ :f:var:`nb` ] for the single-impurity case or
-!or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the Real space DMFT case. :f:var:`nlat` is the number of inequivalent impurity sites,
-!while :f:var:`nb` depends on the bath size and geometry and can be obtained from :f:func:`get_bath_dimension` .
-!
+     !
+     !Initialize the Exact Diagonalization solver of `EDIpack2.0`. This procedure reserves and allocates all the  
+     !memory required by the solver, performs all the consistency check and initializes the bath instance guessing or reading from a file.      
+     !It requires as an input a double precision array of rank-1 [ :f:var:`nb` ] for the single-impurity case or
+     !or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the Real space DMFT case. :f:var:`nlat` is the number of inequivalent impurity sites,
+     !while :f:var:`nb` depends on the bath size and geometry and can be obtained from :f:func:`get_bath_dimension` .
+     !
      module procedure :: ed_init_solver_single
      module procedure :: ed_init_solver_lattice
   end interface ed_init_solver
@@ -34,23 +35,24 @@ module ED_MAIN
 
   !> ED SOLVER
   interface ed_solve
-!
-!Launch the Exact Diagonalizaton solver for the single-site and multiple-site (R-DMFT) quantum impurity problem.
-!It requires as an input a double precision array of rank-1 [ :f:var:`nb` ] for the single-impurity case or
-!or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the Real space DMFT case. :f:var:`nlat` is the number of inequivalent impurity sites,
-!while :f:var:`nb` depends on the bath size and geometry and can be obtained from :f:func:`get_bath_dimension` .
-!
-! The solution is achieved in this sequence:
-!
-!  #. setup the MPI environment, if any 
-!  #. Set the internal bath instance :f:var:`dmft_bath` copying from the user provided input :f:var:`bath`
-!  #. Get the low energy spectrum: call :f:func:`diagonalize_impurity`
-!  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = :code:`.true.` )
-!  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = :code:`.true.` )
-!  #. Get the impurity observables: call :f:func:`observables_impurity`
-!  #. Get the impurity local energy: call :f:func:`local_energy_impurity`
-!  #. Delete MPI environment and deallocate used structures :f:var:`state_list` and :f:var:`dmft_bath`
-!
+     !
+     !Launch the Exact Diagonalizaton solver for the single-site and multiple-site (R-DMFT) quantum impurity problem.
+     !It requires as an input a double precision array of rank-1 [ :f:var:`nb` ] for the single-impurity case or
+     !or rank-2 [ :f:var:`nb` , :f:var:`nlat` ] for the Real space DMFT case. :f:var:`nlat` is the number of inequivalent impurity sites,
+     !while :f:var:`nb` depends on the bath size and geometry and can be obtained from :f:func:`get_bath_dimension` .
+     !
+     ! The solution is achieved in this sequence:
+     !
+     !  #. setup the MPI environment, if any 
+     !  #. Set the internal bath instance :f:var:`dmft_bath` copying from the user provided input :f:var:`bath`
+     !  #. Get the low energy spectrum: call :f:func:`diagonalize_impurity`
+     !  #. Get the impurity Green's functions: call :f:func:`buildgf_impurity` (if :f:var:`sflag` = :code:`.true.` )
+     !  #. Get the impurity susceptibilities, if any: call :f:func:`buildchi_impurity` (if :f:var:`sflag` = :code:`.true.` )
+     !  #. Get the impurity observables: call :f:func:`observables_impurity`
+     !  #. Get the impurity local energy: call :f:func:`local_energy_impurity`
+     !  #. Get the impurity reduced density matric: call :f:func:`rdm_impurity`
+     !  #. Delete MPI environment and deallocate used structures :f:var:`state_list` and :f:var:`dmft_bath`
+     !
      module procedure :: ed_solve_single
      module procedure :: ed_solve_lattice
   end interface ed_solve
@@ -58,28 +60,28 @@ module ED_MAIN
 
   !> ED REBUILD GF
   interface ed_rebuild_gf
-!
-! Re-build the impurity Green's functions and self-energies using the stored weights and poles from :f:var:`impgmatrix` data structure,
-! instead of calculating them from the ED routine. Store them in the global variables
-!
-!  * :f:var:`impsmats` / :f:var:`impgmats` : normal, Matsubara axis
-!  * :f:var:`impsreal` / :f:var:`impgreal` : normal, real frequency axis
-!  * :f:var:`impsamats` / :f:var:`impfmats` : anomalous, Matsubara axis
-!  * :f:var:`impsareal` / :f:var:`impfreal` : anomalous, real-frequency axis
-!  * :f:var:`smats_ineq` / :f:var:`gmats_ineq` : normal, Matsubara axis, real-space DMFT
-!  * :f:var:`sreal_ineq` / :f:var:`greal_ineq` : normal, real frequency axis, real-space DMFT
-!  * :f:var:`samats_ineq` / :f:var:`fmats_ineq` : anomalous, Matsubara axis, real-space DMFT
-!  * :f:var:`sareal_ineq` / :f:var:`freal_ineq` : anomalous, real frequency axis, real-space DMFT
-!
+     !
+     ! Re-build the impurity Green's functions and self-energies using the stored weights and poles from :f:var:`impgmatrix` data structure,
+     ! instead of calculating them from the ED routine. Store them in the global variables
+     !
+     !  * :f:var:`impsmats` / :f:var:`impgmats` : normal, Matsubara axis
+     !  * :f:var:`impsreal` / :f:var:`impgreal` : normal, real frequency axis
+     !  * :f:var:`impsamats` / :f:var:`impfmats` : anomalous, Matsubara axis
+     !  * :f:var:`impsareal` / :f:var:`impfreal` : anomalous, real-frequency axis
+     !  * :f:var:`smats_ineq` / :f:var:`gmats_ineq` : normal, Matsubara axis, real-space DMFT
+     !  * :f:var:`sreal_ineq` / :f:var:`greal_ineq` : normal, real frequency axis, real-space DMFT
+     !  * :f:var:`samats_ineq` / :f:var:`fmats_ineq` : anomalous, Matsubara axis, real-space DMFT
+     !  * :f:var:`sareal_ineq` / :f:var:`freal_ineq` : anomalous, real frequency axis, real-space DMFT
+     !
      module procedure :: ed_rebuild_gf_single
      module procedure :: ed_rebuild_gf_lattice
   end interface ed_rebuild_gf
 
   !> FINALIZE SOLVER AND CLEANUP ENVIRONMENT
   interface ed_finalize_solver
-! 
-! Finalize the Exact Diagonalization solver, clean up all the allocated memory. 
-!
+     ! 
+     ! Finalize the Exact Diagonalization solver, clean up all the allocated memory. 
+     !
      module procedure :: ed_finalize_solver_single
      module procedure :: ed_finalize_solver_lattice
   end interface ed_finalize_solver
@@ -92,7 +94,7 @@ module ED_MAIN
   public :: ed_rebuild_gf
 
 
-  
+
   logical,save :: isetup=.true. !Allow :f:func:`init_ed_structure` and :f:func:`setup_global` to be called. Set to :f:code:`.false.` by :f:func:`ed_init_solver`, reset by :f:func:`ed_finalize_solver` . Default :code:`.true.`
 
 
@@ -160,7 +162,8 @@ contains
     if(allocated(Freal_ineq))deallocate(Freal_ineq)
     if(allocated(Dmats_ph_ineq))deallocate(Dmats_ph_ineq)
     if(allocated(Dreal_ph_ineq))deallocate(Dreal_ph_ineq)
-    if(allocated(imp_density_matrix_ineq))deallocate(imp_density_matrix_ineq)
+    if(allocated(single_particle_density_matrix_ineq))deallocate(single_particle_density_matrix_ineq)
+    if(allocated(impurity_density_matrix_ineq))deallocate(impurity_density_matrix_ineq)
     if(allocated(neigen_sector_ineq))deallocate(neigen_sector_ineq)
     if(allocated(neigen_total_ineq))deallocate(neigen_total_ineq)
     !
@@ -190,7 +193,8 @@ contains
     allocate(Dmats_ph_ineq(Nineq,Lmats))
     allocate(Dreal_ph_ineq(Nineq,Lreal))
     !
-    allocate(imp_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
+    allocate(single_particle_density_matrix_ineq(Nineq,Nspin,Nspin,Norb,Norb))
+    allocate(impurity_density_matrix_ineq(Nineq,4**Norb,4**Norb))
     !
     do ilat=1,Nineq
        call ed_set_suffix(ilat)
@@ -270,6 +274,7 @@ contains
     endif
     call observables_impurity()
     call local_energy_impurity()
+    call rdm_impurity()
     !
     call deallocate_dmft_bath(dmft_bath)
     call es_delete_espace(state_list)
@@ -288,7 +293,7 @@ contains
 
   subroutine ed_solve_lattice(bath,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,iflag)
 #if __INTEL_COMPILER
-  use ED_INPUT_VARS, only: Nspin,Norb
+    use ED_INPUT_VARS, only: Nspin,Norb
 #endif
     real(8)                                         :: bath(:,:) !user bath input array
     logical,optional                                :: mpi_lanc  !parallelization strategy flag: if :code:`.false.` each core serially solves an inequivalent site, if :code:`.true.` all cores parallely solve each site in sequence. Default :code:`.false.` .
@@ -317,7 +322,8 @@ contains
     real(8)                             :: e_tmp(size(bath,1),4)
     real(8)                             :: dd_tmp(size(bath,1),4)
     !    
-    complex(8)                          :: imp_density_matrix_tmp(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8)       :: single_particle_density_matrix_tmp(size(bath,1),Nspin,Nspin,Norb,Norb)
+    complex(8)       :: impurity_density_matrix_tmp(size(bath,1),4**Norb,4**Norb)
     !
     integer                             :: neigen_sectortmp(size(bath,1),Nsectors)
     integer                             :: neigen_totaltmp(size(bath,1))
@@ -366,7 +372,8 @@ contains
     dens_ineq     = 0d0  ; docc_ineq     = 0d0
     mag_ineq      = 0d0  ; phisc_ineq    = 0d0  
     e_ineq        = 0d0  ; dd_ineq       = 0d0 
-    imp_density_matrix_ineq = zero
+    single_particle_density_matrix_ineq = zero
+    impurity_density_matrix_ineq = zero
     !
     Smats_tmp  = zero ; Sreal_tmp  = zero ; SAmats_tmp = zero ; SAreal_tmp = zero
     Gmats_tmp  = zero ; Greal_tmp  = zero ; Fmats_tmp  = zero ; Freal_tmp  = zero
@@ -376,7 +383,8 @@ contains
     e_tmp      = 0d0  ; dd_tmp     = 0d0
     neigen_sectortmp = 0
     neigen_totaltmp  = 0
-    imp_density_matrix_tmp = zero
+    single_particle_density_matrix_tmp = zero
+    impurity_density_matrix_tmp = zero
     !
     !
     select case(mpi_lanc_)
@@ -422,7 +430,8 @@ contains
           phisc_tmp(ilat,1:Norb)     = ed_phisc(1:Norb)
           e_tmp(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
           dd_tmp(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-          imp_density_matrix_tmp(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+          single_particle_density_matrix_tmp(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)
+          impurity_density_matrix_tmp(ilat,:,:) = impurity_density_matrix(:,:)
        enddo
 #ifdef _MPI
        call Barrier_MPI()
@@ -448,7 +457,7 @@ contains
           call AllReduce_MPI(MPI_COMM_WORLD,phisc_tmp,phisc_ineq)
           call AllReduce_MPI(MPI_COMM_WORLD,e_tmp,e_ineq)
           call AllReduce_MPI(MPI_COMM_WORLD,dd_tmp,dd_ineq)
-          call AllReduce_MPI(MPI_COMM_WORLD,imp_density_matrix_tmp,imp_density_matrix_ineq)
+          call AllReduce_MPI(MPI_COMM_WORLD,impurity_density_matrix_tmp,impurity_density_matrix_ineq)
           neigen_sector_ineq=0
           neigen_total_ineq=0
           call AllReduce_MPI(MPI_COMM_WORLD,neigen_sectortmp,neigen_sector_ineq)
@@ -472,7 +481,7 @@ contains
           dd_ineq                 = dd_tmp
           neigen_sector_ineq      = neigen_sectortmp
           neigen_total_ineq       = neigen_totaltmp
-          imp_density_matrix_ineq = imp_density_matrix_tmp
+          impurity_density_matrix_ineq = impurity_density_matrix_tmp
        endif
 #else
        Smats_ineq              = Smats_tmp
@@ -493,7 +502,7 @@ contains
        dd_ineq                 = dd_tmp
        neigen_sector_ineq      = neigen_sector_tmp
        neigen_total_ineq       = neigen_total_tmp
-       imp_density_matrix_ineq = imp_density_matrix_tmp
+       impurity_density_matrix_ineq = impurity_density_matrix_tmp
 #endif
        !
        !
@@ -536,7 +545,8 @@ contains
           phisc_ineq(ilat,1:Norb)     = ed_phisc(1:Norb)
           e_ineq(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
           dd_ineq(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
-          imp_density_matrix_ineq(ilat,:,:,:,:) = imp_density_matrix(:,:,:,:)
+          single_particle_density_matrix_ineq(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)
+          impurity_density_matrix_ineq(ilat,:,:) = impurity_density_matrix(:,:)
        enddo
        if(MPI_MASTER)call stop_timer
        call ed_reset_suffix
@@ -614,7 +624,8 @@ contains
     if(allocated(Freal_ineq))deallocate(Freal_ineq)
     if(allocated(Dmats_ph_ineq))deallocate(Dmats_ph_ineq)
     if(allocated(Dreal_ph_ineq))deallocate(Dreal_ph_ineq)
-    if(allocated(imp_density_matrix_ineq))deallocate(imp_density_matrix_ineq)
+    if(allocated(single_particle_density_matrix_ineq))deallocate(single_particle_density_matrix_ineq)
+    if(allocated(impurity_density_matrix_ineq))deallocate(impurity_density_matrix_ineq)
     if(allocated(neigen_sector_ineq))deallocate(neigen_sector_ineq)
     if(allocated(neigen_total_ineq))deallocate(neigen_total_ineq)
     !

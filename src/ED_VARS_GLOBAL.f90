@@ -6,6 +6,7 @@ MODULE ED_VARS_GLOBAL
   USE SF_CONSTANTS
   USE SF_IOTOOLS, only:free_unit,reg,str
   USE ED_SPARSE_MATRIX
+  USE ED_SPARSE_MAP
   USE ED_INPUT_VARS, only:ed_verbose,logfile
 #ifdef _MPI
   USE MPI
@@ -62,6 +63,7 @@ MODULE ED_VARS_GLOBAL
   !---------------- SECTOR-TO-FOCK SPACE STRUCTURE -------------------!
   type sector_map
      integer,dimension(:),allocatable          :: map
+     type(sparse_map)                          :: sp
      logical                                   :: status=.false.
   end type sector_map
 
@@ -344,9 +346,10 @@ MODULE ED_VARS_GLOBAL
   !Impurity operators
   !PRIVATE (now public but accessible thru routine)
   !=========================================================
-  complex(8),allocatable,dimension(:,:,:,:)          :: imp_density_matrix
-  integer,dimension(3)                     :: Lzdiag = [-1,+1,0]
-  integer,dimension(2)                     :: Szdiag = [1,-1]
+  complex(8),allocatable,dimension(:,:,:,:)          :: single_particle_density_matrix ![Nspin,Nspin,Norb,Norb]
+  complex(8),allocatable,dimension(:,:)              :: impurity_density_matrix        ![2**2Norb,2**2Norb]
+  integer,dimension(3)                               :: Lzdiag = [-1,+1,0]
+  integer,dimension(2)                               :: Szdiag = [1,-1]
   real(8),dimension(:,:),allocatable                 :: spin_field ![Norb,3=x,y,z]
 
 
@@ -359,7 +362,8 @@ MODULE ED_VARS_GLOBAL
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: G0mats_ineq,G0real_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: F0mats_ineq,F0real_ineq
   complex(8),dimension(:,:),allocatable,save         :: Dmats_ph_ineq,Dreal_ph_ineq
-  complex(8),dimension(:,:,:,:,:),allocatable,save   :: imp_density_matrix_ineq
+  complex(8),dimension(:,:,:,:,:),allocatable,save   :: single_particle_density_matrix_ineq
+  complex(8),dimension(:,:,:),allocatable,save       :: impurity_density_matrix_ineq
   real(8),dimension(:,:),allocatable,save            :: dens_ineq 
   real(8),dimension(:,:),allocatable,save            :: docc_ineq
   real(8),dimension(:,:,:),allocatable,save          :: mag_ineq
