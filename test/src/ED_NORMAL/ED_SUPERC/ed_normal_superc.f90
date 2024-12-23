@@ -21,7 +21,7 @@ program ed_normal_normal
   real(8)                                     :: Delta
   character(len=16)                           :: finput
   !NORMAL variables:
-  real(8),allocatable                         :: dens(:), docc(:), energy(:), phisc(:), imp(:), Smats11mom(:), ASmats11mom(:)
+  real(8),allocatable                         :: dens(:), docc(:), energy(:), phisc(:,:), imp(:), Smats11mom(:), ASmats11mom(:)
   !CHECK variables:
   real(8),allocatable                         :: dens_(:),docc_(:),energy_(:),phisc_(:),imp_(:), Smats11mom_(:),ASmats11mom_(:)
   !
@@ -86,7 +86,7 @@ program ed_normal_normal
   allocate(dens(Norb),dens_(Norb))
   allocate(docc(Norb),docc_(Norb))
   allocate(energy(8),energy_(8))
-  allocate(phisc(4),phisc_(4))
+  allocate(phisc(2,2),phisc_(4))
   allocate(imp(2),imp_(2))
   allocate(Wlist(size(Smats,6)))
   allocate(Smats11mom(Nmomenta) , Smats11mom_(Nmomenta))
@@ -125,13 +125,14 @@ program ed_normal_normal
   close(unit_)
   call assert(imp,imp_,"imp(:)")
   !Superc Order Parameters
-  open(unit,file="phi_last.ed")
-  read(unit,*) phisc(:)
-  close(unit)
+  call ed_get_phi(phisc)
+  ! open(unit,file="phi_last.ed")
+  ! read(unit,*) phisc(:)
+  ! close(unit)
   open(unit_,file="phisc_last.check")
   read(unit_,*) phisc_(:)
   close(unit_)
-  call assert(phisc,phisc_,"phisc(:)")
+  call assert(reshape(transpose(phisc),[4]),phisc_,"phisc(:)")
   !Self-Energies
   open(unit,file="impSigma_l11_s1_iw.ed")
   do iw=1,size(Smats,6)

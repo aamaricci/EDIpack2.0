@@ -8,7 +8,7 @@ subroutine ed_get_phisc_n0(self,iorb,jorb)
   self = ed_phisc(iorb_,jorb_)
 end subroutine ed_get_phisc_n0
 
-!phi_aa or phi_i(iorb,iorb)
+!phi(a,a) or phi_i(a_,a_)
 subroutine ed_get_phisc_n1(self,iorb,Nlat)
   real(8),dimension(:) :: self
   integer,optional     :: iorb

@@ -68,6 +68,7 @@ MODULE EDIPACK2
        ed_get_g0and           , &
        ed_get_delta           , &
        ed_get_dens            , &
+       ed_get_phi             , &
        ed_get_mag             , &
        ed_get_docc            , &
        ed_get_eimp            , &
