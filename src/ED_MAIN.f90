@@ -176,7 +176,7 @@ contains
     allocate(dens_ineq(Nineq,Norb))
     allocate(docc_ineq(Nineq,Norb))
     allocate(mag_ineq(Nineq,3,Norb))
-    allocate(phisc_ineq(Nineq,Norb))
+    allocate(phisc_ineq(Nineq,Norb,Norb))
     allocate(e_ineq(Nineq,4))
     allocate(dd_ineq(Nineq,4))
     !
@@ -318,7 +318,7 @@ contains
     real(8)                             :: dens_tmp(size(bath,1),Norb)
     real(8)                             :: docc_tmp(size(bath,1),Norb)
     real(8)                             :: mag_tmp(size(bath,1),3,Norb)
-    real(8)                             :: phisc_tmp(size(bath,1),Norb)
+    real(8)                             :: phisc_tmp(size(bath,1),Norb,Norb)
     real(8)                             :: e_tmp(size(bath,1),4)
     real(8)                             :: dd_tmp(size(bath,1),4)
     !    
@@ -427,7 +427,7 @@ contains
           dens_tmp(ilat,1:Norb)      = ed_dens(1:Norb)
           docc_tmp(ilat,1:Norb)      = ed_docc(1:Norb)
           mag_tmp(ilat,:,1:Norb)     = ed_mag(:,1:Norb)
-          phisc_tmp(ilat,1:Norb)     = ed_phisc(1:Norb)
+          phisc_tmp(ilat,1:Norb,1:Norb)     = ed_phisc(1:Norb,1:Norb)
           e_tmp(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
           dd_tmp(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
           single_particle_density_matrix_tmp(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)
@@ -542,7 +542,7 @@ contains
           dens_ineq(ilat,1:Norb)      = ed_dens(1:Norb)
           docc_ineq(ilat,1:Norb)      = ed_docc(1:Norb)
           mag_ineq(ilat,:,1:Norb)     = ed_mag(:,1:Norb)
-          phisc_ineq(ilat,1:Norb)     = ed_phisc(1:Norb)
+          phisc_ineq(ilat,1:Norb,1:Norb)     = ed_phisc(1:Norb,1:Norb)
           e_ineq(ilat,:)              = [ed_Epot,ed_Eint,ed_Ehartree,ed_Eknot]
           dd_ineq(ilat,:)             = [ed_Dust,ed_Dund,ed_Dse,ed_Dph]
           single_particle_density_matrix_ineq(ilat,:,:,:,:) = single_particle_density_matrix(:,:,:,:)

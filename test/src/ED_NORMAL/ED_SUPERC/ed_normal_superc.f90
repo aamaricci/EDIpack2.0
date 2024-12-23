@@ -87,27 +87,25 @@ program ed_normal_normal
   allocate(docc(Norb),docc_(Norb))
   allocate(energy(8),energy_(8))
   allocate(phisc(4),phisc_(4))
-  allocate(imp(4),imp_(4))
+  allocate(imp(2),imp_(2))
   allocate(Wlist(size(Smats,6)))
   allocate(Smats11mom(Nmomenta) , Smats11mom_(Nmomenta))
   allocate(ASmats11mom(Nmomenta),ASmats11mom_(Nmomenta))
   write(*,*) ""
   write(*,*) "ED_MODE = SUPERC   |   BATH_TYPE = NORMAL"
   write(*,*) "Checking..."
-  ! density
+  !
   unit =free_unit()
   unit_=free_unit()
-  open(unit,file="dens_last.ed")
-  read(unit,*) dens(:)
-  close(unit)
+  !
+  ! density
+  call ed_get_dens(dens)
   open(unit_,file="dens_last.check")
   read(unit_,*) dens_(:)
   close(unit_)
   call assert(dens,dens_,"dens(:)")
   !Double Occupancy
-  open(unit,file="docc_last.ed")
-  read(unit,*) docc(:)
-  close(unit)
+  call ed_get_docc(docc)
   open(unit_,file="docc_last.check")
   read(unit_,*) docc_(:)
   close(unit_)
@@ -121,15 +119,13 @@ program ed_normal_normal
   close(unit_)
   call assert(energy,energy_,"energy(:)")
   !impurity
-  open(unit,file="imp_last.ed")
-  read(unit,*) imp(:)
-  close(unit)
+  call ed_get_imp_info(imp)
   open(unit_,file="imp_last.check")
   read(unit_,*) imp_(:)
   close(unit_)
   call assert(imp,imp_,"imp(:)")
   !Superc Order Parameters
-  open(unit,file="phisc_last.ed")
+  open(unit,file="phi_last.ed")
   read(unit,*) phisc(:)
   close(unit)
   open(unit_,file="phisc_last.check")
@@ -169,8 +165,8 @@ program ed_normal_normal
   close(unit_)
   call assert(Smats11mom/Smats11mom_, dble(ones(Nmomenta)),  "Sigma_matsubara_l11(:)",tol=1.0d-8)
   call assert(ASmats11mom/ASmats11mom_,dble(ones(Nmomenta)), "Self_matsubara_l11(:)",tol=1.0d-8)
-  
-  
+
+
   call finalize_MPI()
 
 
@@ -220,7 +216,7 @@ contains
        enddo
     enddo
   end function j2so
-  
+
   ! Subroutine to compute momenta
   ! 
   ! ( sum_w abs(F(w))*w**n ) / ( sum_w abs(F(w)) )
@@ -239,8 +235,8 @@ contains
     enddo
     momentum=num/den
   end subroutine compute_momentum
-    
-    
+
+
 
 end program ed_normal_normal
 

@@ -328,8 +328,9 @@ MODULE ED_VARS_GLOBAL
   real(8),dimension(:),allocatable                   :: ed_dens
   real(8),dimension(:),allocatable                   :: ed_dens_up,ed_dens_dw
   real(8),dimension(:),allocatable                   :: ed_docc
-  real(8),dimension(:),allocatable                   :: ed_phisc
+  real(8),dimension(:,:),allocatable                 :: ed_phisc
   real(8),dimension(:,:),allocatable                 :: ed_mag
+  real(8),dimension(:),allocatable                   :: ed_imp_info
   real(8)                                            :: ed_Ekin
   real(8)                                            :: ed_Epot
   real(8)                                            :: ed_Eint
@@ -367,7 +368,7 @@ MODULE ED_VARS_GLOBAL
   real(8),dimension(:,:),allocatable,save            :: dens_ineq 
   real(8),dimension(:,:),allocatable,save            :: docc_ineq
   real(8),dimension(:,:,:),allocatable,save          :: mag_ineq
-  real(8),dimension(:,:),allocatable,save            :: phisc_ineq
+  real(8),dimension(:,:,:),allocatable,save          :: phisc_ineq
   real(8),dimension(:,:),allocatable,save            :: dd_ineq,e_ineq
   integer,allocatable,dimension(:,:)                 :: neigen_sector_ineq
   integer,allocatable,dimension(:)                   :: neigen_total_ineq

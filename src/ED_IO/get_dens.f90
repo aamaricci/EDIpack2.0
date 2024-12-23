@@ -37,3 +37,12 @@ subroutine ed_get_dens_n2(self,Nlat)
   call assert_shape(self,[Nlat,Norb],'ed_get_dens','dens')
   self = dens_ineq
 end subroutine ed_get_dens_n2
+
+
+
+
+
+subroutine ed_get_imp_info(self)
+  real(8),dimension(2) :: self
+  self = ed_imp_info
+end subroutine ed_get_imp_info

@@ -1,5 +1,5 @@
 MODULE ED_OBSERVABLES_NONSU2
-!This module calculates a series of observables, and stores them in aptly named plain-text files. :f:var:`ed_mode` = :code:`nonsu2`
+  !This module calculates a series of observables, and stores them in aptly named plain-text files. :f:var:`ed_mode` = :code:`nonsu2`
   USE SF_CONSTANTS, only:zero,pi,xi
   USE SF_IOTOOLS, only:free_unit,reg,txtfy
   USE SF_ARRAYS, only: arange
@@ -20,7 +20,6 @@ MODULE ED_OBSERVABLES_NONSU2
   public :: local_energy_nonsu2
 
 
-  logical,save                          :: iolegend=.true.
   real(8),dimension(:),allocatable      :: dens ! orbital-resolved charge density
   real(8),dimension(:),allocatable      :: dens_up ! orbital-resolved spin-:math:`\uparrow` electron density
   real(8),dimension(:),allocatable      :: dens_dw ! orbital-resolved spin-:math:`\downarrow` electron density
@@ -591,7 +590,6 @@ contains
     !
     if(MPIMASTER)then
        call get_szr
-       if(iolegend)call write_legend
        call write_observables()
     endif
     write(LOGfile,"(A,10f18.12,f18.12)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
@@ -634,6 +632,10 @@ contains
        ed_mag(2,iorb)  =magY(iorb)
        ed_mag(3,iorb)  =magZ(iorb)
     enddo
+    !
+    ed_imp_info=[s2tot,egs]
+    !
+
 #ifdef _MPI
     if(MpiStatus)then
        call Bcast_MPI(MpiComm,ed_dens_up)
@@ -641,6 +643,7 @@ contains
        call Bcast_MPI(MpiComm,ed_dens)
        call Bcast_MPI(MpiComm,ed_docc)
        call Bcast_MPI(MpiComm,ed_mag)
+       call Bcast_MPI(MpiComm,ed_imp_info)
        if(allocated(single_particle_density_matrix))call Bcast_MPI(MpiComm,single_particle_density_matrix)
     endif
 #endif
@@ -903,7 +906,6 @@ contains
        write(LOGfile,"(A,10f18.12)")"Dph     =",ed_Dph
     endif
     if(MPIMASTER)then
-       call write_energy_info()
        call write_energy()
     endif
     !
@@ -919,7 +921,7 @@ contains
   !PURPOSE  : get scattering rate and renormalization constant Z
   !+-------------------------------------------------------------------+
   subroutine get_szr()
-!Calculate the values of the scattering rate and quasiparticle weight
+    !Calculate the values of the scattering rate and quasiparticle weight
     integer                  :: ispin,iorb
     real(8)                  :: wm1,wm2
     wm1 = pi/beta ; wm2=3d0*pi/beta
@@ -934,59 +936,22 @@ contains
 
 
 
+
+
+
+
+
   !+-------------------------------------------------------------------+
-  !PURPOSE  : write legend, i.e. info about columns 
+  !PURPOSE  : write observables to file
   !+-------------------------------------------------------------------+
-  subroutine write_legend()
-!Write a plain-text file called :code:`observables_info.ed` detailing the names and contents of the observable output files
-    integer :: unit,iorb,jorb,ispin
+  subroutine write_observables()
+    !Write a plain-text file called :code:`observables_info.ed` detailing the names and contents of the observable output files.
+    !Write the observable output files. Filenames with suffix :code:`_all` contain values for all DMFT interations, those with suffix :code:`_last` 
+    !only values for the last iteration
+    integer :: unit
+    integer :: iorb,jorb,ispin
     !
-    unit = free_unit()
-    open(unit,file="observables_info.ed")
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# dens_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"dens_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# docc_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"docc_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# dens_up_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"dens_up_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# dens_dw_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"dens_dw_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# magX_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"magX_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# magY_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"magY_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# magZ_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"magZ_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# Sz2_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(jorb-1)*Norb))//"Sz2_"//reg(txtfy(iorb)),iorb=1,Norb),jorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# n2_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(jorb-1)*Norb))//"n2_"//reg(txtfy(iorb)),iorb=1,Norb),jorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# Z_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",((reg(txtfy(iorb+(ispin-1)*Norb))//"z_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# sig_last.ed"
-    write(unit,"(A1,90(A10,6X))") "#",((reg(txtfy(iorb+(ispin-1)*Norb))//"sig_"//reg(txtfy(iorb))//"s"//reg(txtfy(ispin)),iorb=1,Norb),ispin=1,Nspin)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# phisc_last.ed"
-    write(unit,"(A1,90(A10,6X))") "# ",(reg(txtfy(iorb))//"phisc_"//reg(txtfy(iorb)),iorb=1,Norb)
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# imp_last.ed"
-    write(unit,"(A1,90(A10,6X))") "#", "1s2tot", "2egs"
-    write(unit,"(A)") "# *****"
-    write(unit,"(A)") "# exciton_last.ed"
-    write(unit,"(A1,90(A10,6X))") "#","1S_0" , "2T_z", "3T_x", "4T_y"
-    close(unit)
-    !
+    !Parameters used:
     unit = free_unit()
     open(unit,file="parameters_info.ed")
     write(unit,"(A1,90(A14,1X))")"#","1xmu","2beta",&
@@ -994,54 +959,46 @@ contains
          reg(txtfy(2+Norb+1))//"U'",reg(txtfy(2+Norb+2))//"Jh"
     close(unit)
     !
-    iolegend=.false.
-  end subroutine write_legend
-
-  subroutine write_energy_info()
-    integer :: unit
     unit = free_unit()
-    open(unit,file="energy_info.ed")
-    write(unit,"(A1,90(A14,1X))")"#",&
-         reg(txtfy(1))//"<Hi>",&
-         reg(txtfy(2))//"<V>=<Hi-Ehf>",&
-         reg(txtfy(3))//"<Eloc>",&
-         reg(txtfy(4))//"<Ehf>",&
-         reg(txtfy(5))//"<Dst>",&
-         reg(txtfy(6))//"<Dnd>",&
-         reg(txtfy(7))//"<Dse>",&
-         reg(txtfy(8))//"<Dph>"
+    open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
     close(unit)
-  end subroutine write_energy_info
-
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : write observables to file
-  !+-------------------------------------------------------------------+
-  subroutine write_observables()
-!Write the observable output files. Filenames with suffix :code:`_all` contain values for all DMFT interations, those with suffix :code:`_last` 
-!only values for the last iteration
-    integer :: unit
-    integer :: iorb,jorb,ispin
     !
-    !ALL OBSERVABLES
+    !Generic observables 
     unit = free_unit()
-    open(unit,file="dens_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
+    open(unit,file="observables_info.ed")
+    write(unit,"(A1,*(A10,6X))")"#",&
+         (str(iorb)//"dens_"//str(iorb),iorb=1,Norb),&
+         (str(Norb+iorb)//"docc_"//str(iorb),iorb=1,Norb),&
+         (str(2*Norb+iorb)//"nup_"//str(iorb),iorb=1,Norb),&
+         (str(3*Norb+iorb)//"ndw_"//str(iorb),iorb=1,Norb),&
+         str(4*Norb+1)//"s2tot",str(5*Norb+2)//"egs"
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="docc_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
+    open(unit,file="observables_all_site"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))")&
+         (dens(iorb),iorb=1,Norb),&
+         (docc(iorb),iorb=1,Norb),&
+         (dens_up(iorb),iorb=1,Norb),&
+         (dens_dw(iorb),iorb=1,Norb),&
+         s2tot,egs
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="dens_up_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
+    open(unit,file="observables_last_site"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))")&
+         (dens(iorb),iorb=1,Norb),&
+         (docc(iorb),iorb=1,Norb),&
+         (dens_up(iorb),iorb=1,Norb),&
+         (dens_dw(iorb),iorb=1,Norb),&
+         s2tot,egs
     close(unit)
     !
+    !Magnetization along the 3 axis
     unit = free_unit()
-    open(unit,file="dens_dw_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
+    open(unit,file="magXYZ_info.ed")
+    write(unit,"(A1,*(A10,6X))") "# ",(str(iorb)//"mag_"//str(iorb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
@@ -1060,67 +1017,6 @@ contains
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="Sz2_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="n2_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    ! unit = free_unit()
-    ! open(unit,file="phisc_all"//reg(ed_file_suffix)//".ed",position='append')
-    ! write(unit,"(90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
-    ! close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="imp_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") s2tot, egs
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="exciton_all"//reg(ed_file_suffix)//".ed",position='append')
-    do iorb=1,Norb
-       do jorb=iorb+1,Norb
-          write(unit,"(90(F15.9,1X))")&
-               exct_s0(iorb,jorb),exct_tz(iorb,jorb),exct_tx(iorb,jorb),exct_ty(iorb,jorb)
-       enddo
-    enddo
-    close(unit)
-    !
-    !LAST OBSERVABLES
-    unit = free_unit()
-    open(unit,file="dens_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") (dens(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="docc_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") (docc(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="dens_up_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") (dens_up(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="dens_dw_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") (dens_dw(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
     open(unit,file="magX_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
     close(unit)
@@ -1135,56 +1031,77 @@ contains
     write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
     close(unit)
     !
+    !
+    !Exciton Singlet-Triplets
     unit = free_unit()
-    open(unit,file="Sz2_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((sz2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    open(unit,file="Exct_info.ed")
+    write(unit,"(A1,*(A10,6X))") "# ",(("Exct_"//str(iorb)//str(jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="n2_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((n2(iorb,jorb),jorb=1,Norb),iorb=1,Norb)
+    open(unit,file="ExctS0_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_s0(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    open(unit,file="ExctTx_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_tx(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !unit = free_unit()
-    !open(unit,file="phisc_last"//reg(ed_file_suffix)//".ed")
-    !write(unit,"(90(F15.9,1X))") (phisc(iorb),iorb=1,Norb)
-    !close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="imp_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") s2tot, egs
+    open(unit,file="ExctTy_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_ty(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="exciton_last"//reg(ed_file_suffix)//".ed")
-    do iorb=1,Norb
-       do jorb=iorb+1,Norb
-          write(unit,"(90(F15.9,1X))")&
-               exct_s0(iorb,jorb),exct_tz(iorb,jorb),exct_tx(iorb,jorb),exct_ty(iorb,jorb)
-       enddo
-    enddo
+    open(unit,file="ExctTz_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_tz(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    !
+    unit = free_unit()
+    open(unit,file="ExctS0_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))") ((exct_s0(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
     !
     unit = free_unit()
-    open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
+    open(unit,file="ExctTx_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))") ((exct_tx(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
-
+    !
+    unit = free_unit()
+    open(unit,file="ExctTy_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))") ((exct_ty(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="ExctTz_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))") ((exct_tz(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
   end subroutine write_observables
 
+
+
+
+
   subroutine write_energy()
-!Write the latest iteration values of energy observables
+    !Write the latest iteration values of energy observables
     integer :: unit
+    !
+    unit = free_unit()
+    open(unit,file="energy_info.ed")
+    write(unit,"(A1,90(A14,1X))")"#",&
+         reg(txtfy(1))//"<Hi>",&
+         reg(txtfy(2))//"<V>=<Hi-Ehf>",&
+         reg(txtfy(3))//"<Eloc>",&
+         reg(txtfy(4))//"<Ehf>",&
+         reg(txtfy(5))//"<Dst>",&
+         reg(txtfy(6))//"<Dnd>",&
+         reg(txtfy(7))//"<Dse>",&
+         reg(txtfy(8))//"<Dph>"
+    close(unit)
+    !
     unit = free_unit()
     open(unit,file="energy_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90F15.9)")ed_Epot,ed_Epot-ed_Ehartree,ed_Eknot,ed_Ehartree,ed_Dust,ed_Dund,ed_Dse,ed_Dph

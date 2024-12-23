@@ -364,14 +364,15 @@ contains
     allocate(impGmatrix(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
     !
     !allocate observables
-    allocate(ed_dens(Norb),ed_docc(Norb),ed_phisc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
-    allocate(ed_mag(3,Norb))
+    allocate(ed_dens(Norb),ed_docc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
+    allocate(ed_mag(3,Norb),ed_phisc(Norb,Norb),ed_imp_info(2))
     ed_dens=0d0
     ed_docc=0d0
     ed_phisc=0d0
     ed_dens_up=0d0
     ed_dens_dw=0d0
     ed_mag=0d0
+    ed_imp_info=0d0
     !
     allocate(spinChi_tau(Norb,Norb,0:Ltau))
     allocate(spinChi_w(Norb,Norb,Lreal))

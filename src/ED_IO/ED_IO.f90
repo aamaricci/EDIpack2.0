@@ -218,6 +218,7 @@ MODULE ED_IO
      module procedure :: ed_get_phisc_n0
      module procedure :: ed_get_phisc_n1
      module procedure :: ed_get_phisc_n2
+     module procedure :: ed_get_phisc_n3
   end interface ed_get_phi
 
 
@@ -441,7 +442,7 @@ MODULE ED_IO
   public :: ed_get_dse
   public :: ed_get_dph
   public :: ed_get_neigen_total
-  !
+  public :: ed_get_imp_info
 
 
   public :: ed_get_impurity_rdm

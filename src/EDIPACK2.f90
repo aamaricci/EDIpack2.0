@@ -76,6 +76,7 @@ MODULE EDIPACK2
        ed_get_ehartree        , &
        ed_get_eknot           , &
        ed_get_doubles         , &
+       ed_get_imp_info        , &
        ed_get_impurity_rdm    , &
        ed_get_reduced_rdm     , &
        ed_get_sp_dm           , &
