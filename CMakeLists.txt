@@ -1,7 +1,7 @@
 ##################################################
 # DMFTED PROJECT
 ##################################################
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10.0)
 PROJECT(edipack2 Fortran)
 SET(VERSION 1.4.1)
 
