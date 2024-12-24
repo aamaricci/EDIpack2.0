@@ -79,6 +79,7 @@ MODULE ED_INPUT_VARS
   integer              :: ed_verbose          !verbosity level: 0=almost nothing --> 5:all. Really: all
   real(8)              :: ed_offset_bath      !half-bandwidth for the bath initialization: flat in -hwband:hwband
   real(8)              :: ed_hw_bath          !half-bandwidth for the bath initialization: flat in -hwband:hwband
+  logical              :: ed_obs_all          !flag to print observables for every loop
   !
   character(len=12)    :: lanc_method         !select the lanczos method to be used in the determination of the spectrum. ARPACK (default), LANCZOS (T=0 only) 
   real(8)              :: lanc_tolerance      !Tolerance for the Lanczos iterations as used in Arpack and plain lanczos. 
@@ -222,6 +223,8 @@ contains
     ed_total_ud = ed_total_ud_
     call parse_input_variable(ed_twin_,"ED_TWIN",INPUTunit,default=.false.,comment="flag to reduce (T) or not (F,default) the number of visited sector using twin symmetry.")
     ed_twin = ed_twin_
+    call parse_input_variable(ed_obs_all,"ED_OBS_ALL",INPUTunit,default=.true.,comment="flag to print observables for every loop.")
+
     
     call parse_input_variable(ed_solve_offdiag_gf,"ED_SOLVE_OFFDIAG_GF",INPUTunit,default=.false.,comment="flag to select the calculation of the off-diagonal impurity GF. this is T by default if bath_type/=normal") 
     call parse_input_variable(ed_print_Sigma,"ED_PRINT_SIGMA",INPUTunit,default=.true.,comment="flag to print impurity Self-energies")
