@@ -948,20 +948,22 @@ contains
     !Write a plain-text file called :code:`observables_info.ed` detailing the names and contents of the observable output files.
     !Write the observable output files. Filenames with suffix :code:`_all` contain values for all DMFT interations, those with suffix :code:`_last` 
     !only values for the last iteration
-    integer :: unit
-    integer :: iorb,jorb,ispin
-    !
+    call write_obs_info()
+    call write_obs_last()
+    if(ed_obs_all)call write_obs_all()
+  end subroutine write_observables
+
+
+
+
+  subroutine write_obs_info()
+    integer :: unit,iorb,jorb,ispin
     !Parameters used:
     unit = free_unit()
     open(unit,file="parameters_info.ed")
     write(unit,"(A1,90(A14,1X))")"#","1xmu","2beta",&
          (reg(txtfy(2+iorb))//"U_"//reg(txtfy(iorb)),iorb=1,Norb),&
          reg(txtfy(2+Norb+1))//"U'",reg(txtfy(2+Norb+2))//"Jh"
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="parameters_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
     close(unit)
     !
     !Generic observables 
@@ -975,18 +977,65 @@ contains
          str(4*Norb+1)//"s2tot",str(5*Norb+2)//"egs"
     close(unit)
     !
+    !Magnetization along the 3 axis
     unit = free_unit()
-    open(unit,file="observables_all_site"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))")&
-         (dens(iorb),iorb=1,Norb),&
-         (docc(iorb),iorb=1,Norb),&
-         (dens_up(iorb),iorb=1,Norb),&
-         (dens_dw(iorb),iorb=1,Norb),&
-         s2tot,egs
+    open(unit,file="magXYZ_info.ed")
+    write(unit,"(A1,*(A10,6X))") "# ",(str(iorb)//"mag_"//str(iorb),iorb=1,Norb)
     close(unit)
     !
+    !Z renormalization constant
     unit = free_unit()
-    open(unit,file="observables_last_site"//reg(ed_file_suffix)//".ed")
+    open(unit,file="Z_info.ed")
+    write(unit,"(A1,*(A10,6X))") "# ",&
+         ((str(iorb+(ispin-1)*Norb)//"z_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !\Sigma scattering rate
+    unit = free_unit()
+    open(unit,file="Sig_info.ed")
+    write(unit,"(A1,*(A10,6X))") "#",&
+         ((str(iorb+(ispin-1)*Norb)//"sig_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !Spin-Spin correlation
+    unit = free_unit()
+    open(unit,file="Sz2_info.ed")
+    write(unit,"(A1,2A6,A15)")"#","a","b","Sz.Sz(a,b)"
+    close(unit)
+    !
+    !Density-Density correlation
+    unit = free_unit()
+    open(unit,file="N2_info.ed")
+    write(unit,"(A1,2A6,A15)")"#","a","b","N.N(a,b)"
+    close(unit)
+    !
+    !Exciton Singlet-Triplets
+    unit = free_unit()
+    open(unit,file="Exct_info.ed")
+    write(unit,"(A1,*(A10,6X))") "# ",(("Exct_"//str(iorb)//str(jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+  end subroutine write_obs_info
+
+
+
+
+
+
+
+
+
+  subroutine write_obs_last()
+    integer :: unit,iorb,jorb,ispin
+    !Parameters used:
+    unit = free_unit()
+    open(unit,file="parameters.ed")
+    write(unit,"(90F15.9)")xmu,beta,(uloc(iorb),iorb=1,Norb),Ust,Jh,Jx,Jp
+    close(unit)
+    !
+    !Generic observables 
+    unit = free_unit()
+    open(unit,file="observables_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(*(F15.9,1X))")&
          (dens(iorb),iorb=1,Norb),&
          (docc(iorb),iorb=1,Norb),&
@@ -996,26 +1045,6 @@ contains
     close(unit)
     !
     !Magnetization along the 3 axis
-    unit = free_unit()
-    open(unit,file="magXYZ_info.ed")
-    write(unit,"(A1,*(A10,6X))") "# ",(str(iorb)//"mag_"//str(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="magX_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="magY_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
-    close(unit)
-    !
     unit = free_unit()
     open(unit,file="magX_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
@@ -1031,34 +1060,39 @@ contains
     write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
     close(unit)
     !
+    !Z renormalization constant
+    unit = free_unit()
+    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !\Sigma scattering rate
+    unit = free_unit()
+    open(unit,file="Sig_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !Spin-Spin correlation
+    unit = free_unit()
+    open(unit,file="Sz2_last"//reg(ed_file_suffix)//".ed")
+    do iorb=1,Norb
+       do jorb=1,Norb
+          write(unit,"(1X,2I6,F15.9)")iorb,jorb,sz2(iorb,jorb)
+       enddo
+    enddo
+    close(unit)
+    !
+    !Density-Density correlation
+    unit = free_unit()
+    open(unit,file="N2_last"//reg(ed_file_suffix)//".ed")
+    do iorb=1,Norb
+       do jorb=1,Norb
+          write(unit,"(1X,2I6,F15.9)")iorb,jorb,n2(iorb,jorb)
+       enddo
+    enddo
+    close(unit)
     !
     !Exciton Singlet-Triplets
-    unit = free_unit()
-    open(unit,file="Exct_info.ed")
-    write(unit,"(A1,*(A10,6X))") "# ",(("Exct_"//str(iorb)//str(jorb),jorb=iorb+1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="ExctS0_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((exct_s0(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="ExctTx_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((exct_tx(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="ExctTy_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((exct_ty(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    unit = free_unit()
-    open(unit,file="ExctTz_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((exct_tz(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
-    close(unit)
-    !
-    !
     unit = free_unit()
     open(unit,file="ExctS0_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(*(F15.9,1X))") ((exct_s0(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
@@ -1079,7 +1113,100 @@ contains
     write(unit,"(*(F15.9,1X))") ((exct_tz(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
     close(unit)
     !
-  end subroutine write_observables
+  end subroutine write_obs_last
+
+
+
+
+
+
+
+
+
+  subroutine write_obs_all()
+    integer :: unit,iorb,jorb,ispin
+    !
+    !Generic observables 
+    unit = free_unit()
+    open(unit,file="observables_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))")&
+         (dens(iorb),iorb=1,Norb),&
+         (docc(iorb),iorb=1,Norb),&
+         (dens_up(iorb),iorb=1,Norb),&
+         (dens_dw(iorb),iorb=1,Norb),&
+         s2tot,egs
+    close(unit)
+    !
+    !
+    !Magnetization along the 3 axis
+    unit = free_unit()
+    open(unit,file="magX_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(90(F15.9,1X))") (magx(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magY_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(90(F15.9,1X))") (magy(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
+    close(unit)
+    !
+    !Z renormalization constant
+    unit = free_unit()
+    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !\Sigma scattering rate
+    unit = free_unit()
+    open(unit,file="Sig_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !Spin-Spin correlation
+    unit = free_unit()
+    open(unit,file="Sz2_all"//reg(ed_file_suffix)//".ed",position='append')
+    do iorb=1,Norb
+       do jorb=1,Norb
+          write(unit,"(1X,2I6,F15.9)")iorb,jorb,sz2(iorb,jorb)
+       enddo
+    enddo
+    close(unit)
+    !
+    !Density-Density correlation
+    unit = free_unit()
+    open(unit,file="N2_all"//reg(ed_file_suffix)//".ed",position='append')
+    do iorb=1,Norb
+       do jorb=1,Norb
+          write(unit,"(1X,2I6,F15.9)")iorb,jorb,n2(iorb,jorb)
+       enddo
+    enddo
+    close(unit)
+    !
+    !Exciton Singlet-Triplets
+    unit = free_unit()
+    open(unit,file="ExctS0_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_s0(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="ExctTx_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_tx(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="ExctTy_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_ty(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+    !
+    unit = free_unit()
+    open(unit,file="ExctTz_all"//reg(ed_file_suffix)//".ed",position='append')
+    write(unit,"(*(F15.9,1X))") ((exct_tz(iorb,jorb),jorb=iorb+1,Norb),iorb=1,Norb)
+    close(unit)
+  end subroutine write_obs_all
 
 
 
