@@ -33,8 +33,8 @@ MODULE ED_GF_NORMAL
   !
   real(8),allocatable              :: vvinit(:)
   real(8),allocatable              :: alfa_(:),beta_(:)
-  real(8),dimension(:),allocatable :: state_dvec
-  real(8)                          :: state_e
+  real(8),dimension(:),allocatable :: v_state
+  real(8)                          :: e_state
 
 
 
@@ -256,15 +256,16 @@ contains
        call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,Nchan=2)
        !
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)e)
+       
 #ifdef _MPI
        if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
+          call es_return_dvector(MpiComm,state_list,istate,v_state) 
        else
-          call es_return_dvector(state_list,istate,state_dvec) 
+          call es_return_dvector(state_list,istate,v_state) 
        endif
 #else
-       call es_return_dvector(state_list,istate,state_dvec) 
+       call es_return_dvector(state_list,istate,v_state) 
 #endif
        !
        if(MpiMaster)then
@@ -284,7 +285,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*state_dvec(i)
+                vvinit(j) = sgn*v_state(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -292,7 +293,7 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,iorb,ispin,ichan=1,istate=istate)
+          call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,1,iorb,iorb,ispin,ichan=1,istate=istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
@@ -310,7 +311,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*state_dvec(i)
+                vvinit(j) = sgn*v_state(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -318,7 +319,7 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,iorb,ispin,ichan=2,istate=istate)
+          call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,-1,iorb,iorb,ispin,ichan=2,istate=istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
@@ -326,7 +327,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     return
@@ -359,15 +360,15 @@ contains
        call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,Nchan=2)
        !
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
+          call es_return_dvector(MpiComm,state_list,istate,v_state) 
        else
-          call es_return_dvector(state_list,istate,state_dvec) 
+          call es_return_dvector(state_list,istate,v_state) 
        endif
 #else
-       call es_return_dvector(state_list,istate,state_dvec) 
+       call es_return_dvector(state_list,istate,v_state) 
 #endif
 
        !
@@ -389,13 +390,13 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*state_dvec(i)
+                vvinit(j) = sgn*v_state(i)
              enddo
              !+c^+_jorb|gs>
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,jpos,jalfa,ispin,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + sgn*state_dvec(i)
+                vvinit(j) = vvinit(j) + sgn*v_state(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -403,7 +404,7 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,1,iorb,jorb,ispin,ichan=1,istate=istate)
+          call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,1,iorb,jorb,ispin,ichan=1,istate=istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
@@ -422,13 +423,13 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*state_dvec(i)
+                vvinit(j) = sgn*v_state(i)
              enddo
              !+c_jorb|gs>
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,jpos,jalfa,ispin,sectorI,sectorJ)
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + sgn*state_dvec(i)
+                vvinit(j) = vvinit(j) + sgn*v_state(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -436,7 +437,7 @@ contains
           endif
           !
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_normal(one*norm2,state_e,alfa_,beta_,-1,iorb,jorb,ispin,2,istate)
+          call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,-1,iorb,jorb,ispin,2,istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
@@ -444,7 +445,7 @@ contains
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     return
@@ -554,15 +555,15 @@ contains
        ! call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
        !
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
+          call es_return_dvector(MpiComm,state_list,istate,v_state) 
        else
-          call es_return_dvector(state_list,istate,state_dvec) 
+          call es_return_dvector(state_list,istate,v_state) 
        endif
 #else
-       call es_return_dvector(state_list,istate,state_dvec) 
+       call es_return_dvector(state_list,istate,v_state) 
 #endif
        !
        call get_Nup(isector,Nups)
@@ -588,13 +589,13 @@ contains
              !apply destruction operator
              if(iph>1) then
                 j = i_el + ((iph-1)-1)*iDimUp*iDimDw
-                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*state_dvec(i)
+                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*v_state(i)
              endif
              !
              !apply creation operator
              if(iph<DimPh) then
                 j = i_el + ((iph+1)-1)*iDimUp*iDimDw
-                vvinit(j) = vvinit(j) + sqrt(dble(iph))*state_dvec(i)
+                vvinit(j) = vvinit(j) + sqrt(dble(iph))*v_state(i)
              endif
           enddo
        else
@@ -602,10 +603,10 @@ contains
        endif
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_phonon(norm2,state_e,alfa_,beta_,istate)
+       call add_to_lanczos_phonon(norm2,e_state,alfa_,beta_,istate)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
     enddo
     return
   end subroutine lanc_build_gf_phonon_main

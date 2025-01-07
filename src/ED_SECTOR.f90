@@ -1,7 +1,7 @@
 MODULE ED_SECTOR
   !
   !Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones. 
-!
+  !
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_AUX_FUNX
@@ -53,6 +53,7 @@ MODULE ED_SECTOR
   public :: build_sector
   public :: delete_sector
   !
+  !public :: apply_Cops
   public :: apply_op_C
   public :: apply_op_CDG
   public :: apply_op_Sz
@@ -360,108 +361,144 @@ contains
 
 
 
-   subroutine map_allocate_scalar(H,N,Nsp)
-      type(sector_map) :: H
-      integer          :: N
-      integer,optional :: Nsp
-      if(H%status) call map_deallocate_scalar(H)
-      allocate(H%map(N))
-      if(present(Nsp))call sp_init_map(H%sp,Nsp)
-      H%status=.true.
-   end subroutine map_allocate_scalar
-   !
-   subroutine map_allocate_vector(H,N,Nsp)
-      type(sector_map),dimension(:)       :: H
-      integer,dimension(size(H))          :: N
-      integer,optional                    :: Nsp
-      integer                             :: i
-      do i=1,size(H)
-         if(present(Nsp))then
-            call map_allocate_scalar(H(i),N(i),Nsp)
-         else
-            call map_allocate_scalar(H(i),N(i))
-         endif
-      enddo
-   end subroutine map_allocate_vector
+  subroutine map_allocate_scalar(H,N,Nsp)
+    type(sector_map) :: H
+    integer          :: N
+    integer,optional :: Nsp
+    if(H%status) call map_deallocate_scalar(H)
+    allocate(H%map(N))
+    if(present(Nsp))call sp_init_map(H%sp,Nsp)
+    H%status=.true.
+  end subroutine map_allocate_scalar
+  !
+  subroutine map_allocate_vector(H,N,Nsp)
+    type(sector_map),dimension(:)       :: H
+    integer,dimension(size(H))          :: N
+    integer,optional                    :: Nsp
+    integer                             :: i
+    do i=1,size(H)
+       if(present(Nsp))then
+          call map_allocate_scalar(H(i),N(i),Nsp)
+       else
+          call map_allocate_scalar(H(i),N(i))
+       endif
+    enddo
+  end subroutine map_allocate_vector
 
 
 
-   subroutine map_deallocate_scalar(H)
-      type(sector_map) :: H
-      if(.not.H%status)then
-         write(*,*) "WARNING map_deallocate_scalar: H is not allocated"
-         return
-      endif
-      if(allocated(H%map))deallocate(H%map)
-      H%status=.false.
-   end subroutine map_deallocate_scalar
-   !
-   subroutine map_deallocate_vector(H)
-      type(sector_map),dimension(:) :: H
-      integer                       :: i
-      do i=1,size(H)
-         call map_deallocate_scalar(H(i))
-      enddo
-   end subroutine map_deallocate_vector
-
-
-
-
+  subroutine map_deallocate_scalar(H)
+    type(sector_map) :: H
+    if(.not.H%status)then
+       write(*,*) "WARNING map_deallocate_scalar: H is not allocated"
+       return
+    endif
+    if(allocated(H%map))deallocate(H%map)
+    H%status=.false.
+  end subroutine map_deallocate_scalar
+  !
+  subroutine map_deallocate_vector(H)
+    type(sector_map),dimension(:) :: H
+    integer                       :: i
+    do i=1,size(H)
+       call map_deallocate_scalar(H(i))
+    enddo
+  end subroutine map_deallocate_vector
 
 
 
 
-  !> i=instate , j=outstate, ipos=site+orb index, ialfa=?, ispin, sectorI=sector in,sectorJ=sector out
-  subroutine apply_op_C(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ) 
-    integer, intent(in)         :: i,ipos,ialfa,ispin
-    type(sector),intent(in)     :: sectorI,sectorJ
-    integer,intent(out)         :: j
-    real(8),intent(out)         :: sgn
-    integer                     :: ibeta,isite
-    integer                     :: r
-    integer                     :: iph,i_el,j_el,el_state
-    integer,dimension(2*Ns_Ud)  :: Indices
-    integer,dimension(2*Ns_Ud)  :: Jndices
-    integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
-    integer,dimension(2)        :: Iud
-    integer,dimension(2*Ns)     :: ib
+
+
+
+
+  function apply_op_C(V,ipos,ialfa,ispin,jsector,sectorI) result(OV)
+    complex(8),dimension(:),intent(in)  :: V
+    integer, intent(in)                 :: ipos,ialfa,ispin,jsector
+    type(sector),intent(in)             :: sectorI
+    type(sector)                        :: sectorJ
+    complex(8),dimension(:),allocatable :: OV
+    real(8)                             :: sgn
+    integer                             :: ibeta,isite
+    integer                             :: i,j,r
+    integer                             :: iph,i_el,j_el,el_state
+    integer,dimension(2*Ns_Ud)          :: Indices
+    integer,dimension(2*Ns_Ud)          :: Jndices
+    integer,dimension(2,Ns_Orb)         :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)                :: Iud
+    integer,dimension(2*Ns)             :: ib
     !
-    j=0
-    sgn=0d0
     !
-    select case(ed_mode)
-    case default
-       ibeta  = ialfa + (ispin-1)*Ns_Ud
-       iph = (i-1)/(sectorI%DimEl) + 1
-       i_el = mod(i-1,sectorI%DimEl) + 1
+    if(MpiMaster)then
        !
-       call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-       iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
-       iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
-       nud(1,:) = Bdecomp(iud(1),Ns_Orb)
-       nud(2,:) = Bdecomp(iud(2),Ns_Orb)
-       if(Nud(ispin,ipos)/=1)return
-       call c(ipos,iud(ispin),r,sgn)
-       Jndices        = Indices
-       Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
-       call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j)
+       if(size(V)/=sectorI%Dim)stop "apply_op_C ERROR: size(V) != sectorI.Dim"
        !
-       j = j + (iph-1)*sectorJ%DimEl
+       call build_sector(jsector,sectorJ)
        !
-    case("superc","nonsu2")
-       isite= ipos + (ispin-1)*Ns
-       iph  = (i-1)/(sectorI%DimEl)+1
-       i_el = mod(i-1,sectorI%DimEl)+1
-       el_state = sectorI%H(1)%map(i_el)
-       ib   = bdecomp(el_state,2*Ns)
-       if(ib(isite)/=1)return
-       call c(isite,el_state,r,sgn)
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=zero
        !
-       j_el    = binary_search(sectorJ%H(1)%map,r)
-       j = j_el + (iph-1)*sectorJ%DimEl
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default
+             write(LOGfile,"(A,I6,2I4,A,I6,2I4)")&
+                  'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
+                  ' -> apply C  :',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
+          case ("superc")
+             write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                  'From:',sectorI%index,sectorI%Sz,&
+                  'apply C  :',sectorJ%index,sectorJ%Sz
+          case ("nonsu2")
+             write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                  'From:',sectorI%index,sectorI%Ntot,&
+                  'apply C  :',sectorJ%index,sectorJ%Ntot
+          end select
+       endif
        !
-    end select
-  end subroutine apply_op_C
+       do i=1,sectorI%Dim
+          !
+          select case(ed_mode)
+          case default
+             ibeta = ialfa + (ispin-1)*Ns_Ud
+             iph   = (i-1)/(sectorI%DimEl) + 1
+             i_el  = mod(i-1,sectorI%DimEl) + 1
+             !
+             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+             iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+             iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+             nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+             nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+             if(Nud(ispin,ipos)/=1)return
+             call c(ipos,iud(ispin),r,sgn)
+             Jndices        = Indices
+             Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
+             call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j)
+             !
+             j = j + (iph-1)*sectorJ%DimEl
+             !
+          case("superc","nonsu2")
+             isite= ipos + (ispin-1)*Ns
+             iph  = (i-1)/(sectorI%DimEl)+1
+             i_el = mod(i-1,sectorI%DimEl)+1
+             el_state = sectorI%H(1)%map(i_el)
+             ib   = bdecomp(el_state,2*Ns)
+             if(ib(isite)/=1)return
+             call c(isite,el_state,r,sgn)
+             !
+             j_el    = binary_search(sectorJ%H(1)%map,r)
+             j = j_el + (iph-1)*sectorJ%DimEl
+             !
+          end select
+          !
+          OV(j) = sgn*V(i)
+       enddo
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=zero
+    end if
+    !
+  end function apply_op_C
 
 
   subroutine apply_op_CDG(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ) 
