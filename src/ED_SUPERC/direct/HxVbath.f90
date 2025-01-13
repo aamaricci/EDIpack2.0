@@ -58,7 +58,7 @@
                  j_el = binary_search(Hsector%H(1)%map,k2)
                  j    = j_el + (iph-1)*DimEl
                  !hbat_tmp written in Nambu repr
-                 htmp = -(hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
+                 htmp = (hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
                  !
                  hv(j-MpiIshift) = hv(j-MpiIshift) + htmp*vin(i)
                  !

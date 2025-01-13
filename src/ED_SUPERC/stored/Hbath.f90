@@ -77,7 +77,7 @@
                     call cdg(ibeta,m,k1,sg1)
                     call c(ialfa,k1,k2,sg2)
                     j = binary_search(Hsector%H(1)%map,k2)
-                    htmp = -(hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
+                    htmp = (hbath_tmp(Nnambu*Nspin,Nnambu*Nspin,iorb,jorb,kp))*sg1*sg2
                     select case(MpiStatus)
                     case (.true.)
                        call sp_insert_element(MpiComm,spH0,htmp,i,j)
