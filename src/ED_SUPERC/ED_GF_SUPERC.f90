@@ -106,7 +106,7 @@ contains
 #ifdef _DEBUG
           write(Logfile,"(A)")""
 #endif
-          ! auxG{mats,real}(4,:) !this is <Odg.O> -xi*<Pdg.P>, w O=(a_up+adg_dw), P=(a_up+xi*adg_dw)
+          ! auxG{mats,real}(4,:) !this is <O.Odg> -xi*<P.Pdg>, w O=(a_up+adg_dw), P=(a_up+xi*adg_dw)
           impFmats(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(iorb,:)) )
           impFreal(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(iorb,:)) )
        enddo
@@ -127,7 +127,7 @@ contains
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
-             ! auxG{mats,real}(3,:) !this is <Qdg.Q> -xi*<Rdg.R>, w Q=(a_up+b_up), R=(a_up+xi.b_up)
+             ! auxG{mats,real}(3,:) !this is <Q.Qdg> -xi*<R.Rdg>, w Q=(a_up+b_up), R=(a_up+xi.b_up)
              impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(3,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+impGmats(ispin,ispin,jorb,jorb,:)))
              impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(3,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+impGreal(ispin,ispin,jorb,jorb,:)))
           enddo
@@ -146,7 +146,7 @@ contains
 #ifdef _DEBUG
              write(Logfile,"(A)")""
 #endif
-             ! auxG{mats,real}(4,:) !this is <Odg.O> -xi*<Pdg.P>, w O=(a_up+bdg_dw), P=(a_up+xi*bdg_dw)
+             ! auxG{mats,real}(4,:) !this is <O.Odg> -xi*<P.Pdg>, w O=(a_up+bdg_dw), P=(a_up+xi*bdg_dw)
              impFmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGmats(4,:)-(one-xi)*(impGmats(ispin,ispin,iorb,iorb,:)+barGmats(jorb,:)) )
              impFreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(auxGreal(4,:)-(one-xi)*(impGreal(ispin,ispin,iorb,iorb,:)+barGreal(jorb,:)) )
           enddo
@@ -504,12 +504,12 @@ contains
        !
        !
        !
-       !EVALUATE (cdg_iorb -xi cdg_jorb)|gs>  --> <R. Rdg> => -xi*<Pdg.P>
+       !EVALUATE (cdg_iorb + xi cdg_jorb)|gs>  --> <R. Rdg> => -xi*<Pdg.P>
        jsector = getCDGsector(ialfa,1,isector)
        if(jsector/=0)then 
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_{a,up} - xi.cdg_{b,up}:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_{a,up} + xi.cdg_{b,up}:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !Cdg_{a,up}
@@ -519,7 +519,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !-xi.Cdg_{b,up}
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) -xi*sgn*state_cvec(i)
+                vvinit(j) = vvinit(j) +xi*sgn*state_cvec(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -534,12 +534,12 @@ contains
           call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),istate,3,Nexc=0)
        endif
        !
-       !EVALUATE (c_iorb + xi c_jorb)|gs>  --> <Rdg. R> => -xi*<P.Pdg>
+       !EVALUATE (c_iorb - xi c_jorb)|gs>  --> <Rdg. R> => -xi*<P.Pdg>
        jsector = getCsector(ialfa,1,isector)
        if(jsector/=0)then 
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_{a,up} + xi.c_{b,up}:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_{a,up} - xi.c_{b,up}:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ) !C_{a,up}
@@ -549,7 +549,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !+xi.C_{b,up}
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
+                vvinit(j) = vvinit(j) - xi*sgn*state_cvec(i)
              enddo
              call delete_sector(sectorJ)
           else
