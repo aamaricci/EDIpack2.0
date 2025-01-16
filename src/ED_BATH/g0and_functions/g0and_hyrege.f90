@@ -11,7 +11,7 @@ function g0and_bath_array_hyrege(x,dmft_bath_,axis) result(G0and)
   integer                                             :: iorb,jorb,ispin,jspin,io,jo,Nso,i,L
   real(8),dimension(size(x))                          :: ddet
   complex(8),dimension(size(x))                       :: cdet
-  complex(8),dimension(Nnambu*Nspin*Norb,size(x))     :: z
+  complex(8),dimension(2*Nspin*Norb,size(x))          :: z
   complex(8),dimension(size(x))                       :: fg,ff
   complex(8),dimension(:,:),allocatable               :: fgorb,zeta
   !
