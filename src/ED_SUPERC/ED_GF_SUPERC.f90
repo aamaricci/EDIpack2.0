@@ -672,13 +672,13 @@ contains
        endif
        !
        !
-       !EVALUATE [c^+_{up,iorb} - xi*c_{dw,jorb}]|gs>  += -xi*<P.Pdg>
+       !EVALUATE [c^+_{up,iorb} + xi*c_{dw,jorb}]|gs>  += -xi*<P.Pdg>
        isz = getsz(isector)
        if(isz<Ns)then
           jsector = getsector(isz+1,1)
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_a,up - xi*c_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply cdg_a,up + xi*c_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!Cdg_a,up
@@ -688,7 +688,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,jorb,ialfa,2,sectorI,sectorJ) !-xi*c_b,dw
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) - xi*sgn*state_cvec(i)
+                vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
              enddo
              call delete_sector(sectorJ)
           else
@@ -703,13 +703,13 @@ contains
           call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,3,Nexc=0)
        endif
        !
-       !EVALUATE [c_{up,iorb} + xi*c^+_{dw,jorb}]|gs>  += -xi*<Pdg.P>
+       !EVALUATE [c_{up,iorb} - xi*c^+_{dw,jorb}]|gs>  += -xi*<Pdg.P>
        isz = getsz(isector)
        if(isz>-Ns)then
           jsector = getsector(isz-1,1)
           if(MpiMaster)then
              call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up + xi*cdg_b,dw:',sectorJ%Sz
+             if(ed_verbose>=3)write(LOGfile,"(A23,I3)")'apply c_a,up - xi*cdg_b,dw:',sectorJ%Sz
              allocate(vvinit(sectorJ%Dim)) ; vvinit=zero
              do i=1,sectorI%Dim
                 call apply_op_C(i,j,sgn,iorb,ialfa,1,sectorI,sectorJ)!c_a,up
@@ -719,7 +719,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_CDG(i,j,sgn,jorb,ialfa,2,sectorI,sectorJ) !+xi*c^+_b,dw
                 if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + xi*sgn*state_cvec(i)
+                vvinit(j) = vvinit(j) - xi*sgn*state_cvec(i)
              enddo
              call delete_sector(sectorJ)
           else
