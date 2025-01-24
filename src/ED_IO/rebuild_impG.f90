@@ -473,7 +473,7 @@ subroutine rebuild_gimp_nonsu2(zeta,gf)
         if(ispin==jspin)cycle
         do iorb=1,Norb
            gf(ispin,jspin,iorb,iorb,:) = 0.5d0*(gf(ispin,jspin,iorb,iorb,:) &
-                -(one-xi)*gf(ispin,ispin,iorb,iorb,:) -(one+xi)-gf(jspin,jspin,iorb,iorb,:))
+                -(one-xi)*gf(ispin,ispin,iorb,iorb,:) -(one-xi)*gf(jspin,jspin,iorb,iorb,:))
         enddo
      enddo
   enddo
