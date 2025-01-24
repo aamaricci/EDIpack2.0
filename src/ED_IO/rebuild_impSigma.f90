@@ -349,7 +349,7 @@ subroutine rebuild_sigma_superc(zeta,sigma,self)
      enddo
      !
      !
-  case ("hybrid")
+  case ("hybrid","replica","general")
      do i=1,Lzeta
         if(imZ)then
            Gmat=zero
