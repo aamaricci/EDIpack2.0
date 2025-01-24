@@ -979,7 +979,8 @@ contains
     integer            :: Nstates,istate
     integer            :: Nchannels,ic,ichan
     integer            :: Nexcs,iexc
-    real(8)            :: peso,de
+    complex(8)         :: peso
+    real(8)            :: de
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
@@ -1018,7 +1019,8 @@ contains
     integer            :: Nstates,istate
     integer            :: Nchannels,ic,ichan
     integer            :: Nexcs,iexc
-    real(8)            :: peso,de
+    complex(8)         :: peso
+    real(8)            :: de
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
@@ -1056,7 +1058,8 @@ contains
     integer            :: Nstates,istate
     integer            :: Nchannels,ic,ichan
     integer            :: Nexcs,iexc
-    real(8)            :: peso,de
+    complex(8)         :: peso
+    real(8)            :: de
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&

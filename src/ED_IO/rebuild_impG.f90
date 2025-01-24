@@ -473,7 +473,7 @@ subroutine rebuild_gimp_nonsu2(zeta,gf)
         if(ispin==jspin)cycle
         do iorb=1,Norb
            gf(ispin,jspin,iorb,iorb,:) = 0.5d0*(gf(ispin,jspin,iorb,iorb,:) &
-                -(one+xi)*gf(ispin,ispin,iorb,iorb,:) -(one+xi)*gf(jspin,jspin,iorb,iorb,:))
+                -(one-xi)*gf(ispin,ispin,iorb,iorb,:) -(one+xi)-gf(jspin,jspin,iorb,iorb,:))
         enddo
      enddo
   enddo
@@ -515,7 +515,7 @@ subroutine rebuild_gimp_nonsu2(zeta,gf)
            do jorb=1,Norb
               if(iorb==jorb)cycle
               gf(ispin,ispin,iorb,jorb,:) = 0.5d0*(gf(ispin,ispin,iorb,jorb,:) &
-                   -(one+xi)*gf(ispin,ispin,iorb,iorb,:) -(one+xi)*gf(ispin,ispin,jorb,jorb,:))
+                   -(one-xi)*gf(ispin,ispin,iorb,iorb,:) -(one-xi)*gf(ispin,ispin,jorb,jorb,:))
            enddo
         enddo
      enddo
@@ -556,7 +556,7 @@ subroutine rebuild_gimp_nonsu2(zeta,gf)
               do jorb=1,Norb
                  if(iorb==jorb)cycle
                  gf(ispin,jspin,iorb,jorb,:) = 0.5d0*(gf(ispin,jspin,iorb,jorb,:) &
-                      -(one+xi)*gf(ispin,ispin,iorb,iorb,:) -(one+xi)*gf(jspin,jspin,jorb,jorb,:))
+                      -(one-xi)*gf(ispin,ispin,iorb,iorb,:) -(one-xi)*gf(jspin,jspin,jorb,jorb,:))
               enddo
            enddo
         enddo
