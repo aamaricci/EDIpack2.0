@@ -361,7 +361,11 @@ contains
     impDmats_ph=zero
     impDreal_ph=zero
     !
-    allocate(impGmatrix(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb))
+    if(ed_mode=="superc")then
+      allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
+    else
+      allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    endif
     !
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))

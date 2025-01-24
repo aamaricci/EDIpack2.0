@@ -79,7 +79,14 @@ contains
        auxGreal=zero
        write(LOGfile,"(A)")"Get G&F_l"//str(iorb)//"_s"//str(ispin)
        if(MPIMASTER)call start_timer(unit=LOGfile)
-       call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
+       
+       !(ispin,ispin) to components:
+       !(1,1) -> diag normal (diag e offdiag)
+       !(1,2) -> anomalous (diag e offdiag)
+       !(2,2) -> bar
+       
+       call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),Nstate=state_list%size)
+       call allocate_GFmatrix(impGmatrix(2,2,iorb,iorb),Nstate=state_list%size)
        call lanc_build_gf_superc_Gdiag(iorb)
        if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
@@ -100,7 +107,7 @@ contains
           auxGreal=zero
           write(LOGfile,"(A)")"Get F_l"//str(iorb)
           if(MPIMASTER)call start_timer(unit=LOGfile)
-          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,iorb),Nstate=state_list%size)
+          call allocate_GFmatrix(impGmatrix(1,2,iorb,iorb),Nstate=state_list%size)
           call lanc_build_gf_superc_Fmix(iorb,iorb)
           if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
@@ -121,7 +128,7 @@ contains
              if(iorb==jorb)cycle
              write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)
              if(MPIMASTER)call start_timer(unit=LOGfile)
-             call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
+             call allocate_GFmatrix(impGmatrix(1,1,iorb,jorb),Nstate=state_list%size)
              call lanc_build_gf_superc_Gmix(iorb,jorb)
              if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
@@ -140,7 +147,7 @@ contains
              auxGreal=zero
              write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)
              if(MPIMASTER)call start_timer(unit=LOGfile)
-             call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),Nstate=state_list%size)
+             call allocate_GFmatrix(impGmatrix(1,2,iorb,jorb),Nstate=state_list%size)
              call lanc_build_gf_superc_Fmix(iorb,jorb)
              if(MPIMASTER)call stop_timer
 #ifdef _DEBUG
@@ -277,7 +284,8 @@ contains
     !
     do istate=1,state_list%size
        !
-       call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,Nchan=4) !2*[uu,dd]
+       call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,Nchan=2) ![c+_up,c_up]
+       call allocate_GFmatrix(impGmatrix(2,2,iorb,iorb),istate,Nchan=2) ![c_dw,c+_dw]
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -367,11 +375,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,1,2,iorb,iorb,3,istate)
+          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,1,2,iorb,iorb,1,istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,3,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(2,2,iorb,iorb),istate,1,Nexc=0)
        endif
        !
        !EVALUATE c^+_{dw,iorb}|v> --> Gaux(2) = G^<_{dw,dw;iorb,iorb}
@@ -392,11 +400,11 @@ contains
           endif
           !
           call tridiag_Hv_sector_superc(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,-1,2,iorb,iorb,4,istate)
+          call add_to_lanczos_gf_superc(one*norm2,state_e,alfa_,beta_,-1,2,iorb,iorb,2,istate)
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),istate,4,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(2,2,iorb,iorb),istate,2,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -517,7 +525,7 @@ contains
                 vvinit(j) = sgn*state_cvec(i)
              enddo
              do i=1,sectorI%Dim
-                call apply_op_CDG(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !-xi.Cdg_{b,up}
+                call apply_op_CDG(i,j,sgn,jorb,ialfa,1,sectorI,sectorJ) !xi.Cdg_{b,up}
                 if(sgn==0d0.OR.j==0)cycle
                 vvinit(j) = vvinit(j) +xi*sgn*state_cvec(i)
              enddo
@@ -588,7 +596,7 @@ contains
     !
     !
     do istate=1,state_list%size
-       call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,Nchan=4) !2*[Odg.O,Pdg.P]
+       call allocate_GFmatrix(impGmatrix(1,2,iorb,jorb),istate,Nchan=4) !2*[Odg.O,Pdg.P]
        !
        isector    =  es_return_sector(state_list,istate)
        state_e    =  es_return_energy(state_list,istate)
@@ -637,7 +645,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,1,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(1,2,iorb,jorb),istate,1,Nexc=0)
        endif
        !
        !EVALUATE [c_{up,iorb} + cdg_{dw,jorb}]|gs> --> <Odg.O>
@@ -668,7 +676,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,2,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(1,2,iorb,jorb),istate,2,Nexc=0)
        endif
        !
        !
@@ -700,7 +708,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,3,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(1,2,iorb,jorb),istate,3,Nexc=0)
        endif
        !
        !EVALUATE [c_{up,iorb} - xi*c^+_{dw,jorb}]|gs>  += -xi*<Pdg.P>
@@ -731,7 +739,7 @@ contains
           deallocate(alfa_,beta_)
           if(allocated(vvinit))deallocate(vvinit)
        else
-          call allocate_GFmatrix(impGmatrix(Nnambu,Nnambu,iorb,jorb),istate,4,Nexc=0)
+          call allocate_GFmatrix(impGmatrix(1,2,iorb,jorb),istate,4,Nexc=0)
        endif
        !
        if(MpiMaster)call delete_sector(sectorI)
@@ -756,7 +764,7 @@ contains
     integer                                    :: isign,ichan,iorb,jorb,istate,ic
     real(8),dimension(size(alanc),size(alanc)) :: Z
     real(8),dimension(size(alanc))             :: diag,subdiag
-    integer                                    :: i,j,ierr,myic
+    integer                                    :: i,j,ierr,chanI,chanJ
     complex(8)                                 :: iw
     !
 #ifdef _DEBUG
@@ -794,16 +802,28 @@ contains
 #endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
-    myic=1
-    if(ichan==4)myic=Nnambu
-    call allocate_GFmatrix(impGmatrix(myic,myic,iorb,jorb),istate,ic,Nlanc)
+    select case(ichan)
+      case(1,3)
+        chanI=1
+        chanJ=1
+      case(2)
+        chanI=2
+        chanJ=2
+      case(4)
+        chanI=1
+        chanJ=2
+    case default
+      STOP "add_to_lanczos_gf_superc: wrong ichan"
+    end select
+    !
+    call allocate_GFmatrix(impGmatrix(chanI,chanJ,iorb,jorb),istate,ic,Nlanc)
     !
     do j=1,nlanc
        de = diag(j)-Ei
        peso = pesoBZ*Z(1,j)*Z(1,j)
        !
-       impGmatrix(myic,myic,iorb,jorb)%state(istate)%channel(ic)%weight(j) = peso
-       impGmatrix(myic,myic,iorb,jorb)%state(istate)%channel(ic)%poles(j)  = isign*de
+       impGmatrix(chanI,chanJ,iorb,jorb)%state(istate)%channel(ic)%weight(j) = peso
+       impGmatrix(chanI,chanJ,iorb,jorb)%state(istate)%channel(ic)%poles(j)  = isign*de
        !
        do i=1,Lmats
           iw=xi*wm(i)

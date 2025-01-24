@@ -756,7 +756,11 @@ contains
     !
     if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
     if(allocated(impGmatrix))deallocate(impGmatrix)
-    allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    if(ed_mode=="superc")then
+      allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
+    else
+      allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    endif
     file_="gfmatrix";if(present(file))file_=str(file)
     call read_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
   end subroutine ed_read_impGmatrix

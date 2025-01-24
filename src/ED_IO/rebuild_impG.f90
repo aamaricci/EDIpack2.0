@@ -255,7 +255,7 @@ end subroutine rebuild_gimp_normal
 subroutine rebuild_gimp_superc(zeta,gf,ff)
   complex(8),dimension(:)                                :: zeta
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: gf,ff,bg
-  complex(8),dimension(4,size(zeta))                     :: auxG
+  complex(8),dimension(size(zeta))                       :: auxG
   integer                                                :: ispin,jspin
   integer                                                :: iorb,jorb
   integer                                                :: Nstates,istate
@@ -267,71 +267,130 @@ subroutine rebuild_gimp_superc(zeta,gf,ff)
   !
   ispin = 1
   !
+  !ichan=1
   do iorb=1,Norb
      auxG = zero
      !
-     if(.not.allocated(impGmatrix(ispin,ispin,iorb,iorb)%state)) cycle
-     Nstates = size(impGmatrix(ispin,ispin,iorb,iorb)%state)
+     if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state)) cycle
+     Nstates = size(impGmatrix(1,1,iorb,iorb)%state)
      do istate=1,Nstates
-        if(.not.allocated(impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel))cycle
-        Nchannels = size(impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel)
+        if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state(istate)%channel))cycle
+        Nchannels = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel)
         do ic=1,Nchannels
-           Nexcs  = size(impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel(ic)%poles)
+           Nexcs  = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles)
            if(Nexcs==0)cycle
-           select case(ic)
-           case(1,2);ichan=1
-           case(3,4);ichan=2
-           case(5:8);ichan=3
-           end select
            do iexc=1,Nexcs
-              peso  = impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
-              de    = impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
-              auxG(ichan,:)=auxG(ichan,:) + peso/(zeta-de)
+              peso  = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
+              de    = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
+              auxG  = auxG+ peso/(zeta-de)
            enddo
         enddo
      enddo
      !
-     gf(ispin,ispin,iorb,iorb,:) = auxG(1,:)
-     bg(ispin,ispin,iorb,iorb,:) = auxG(2,:)
-     ff(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxG(3,:)-auxG(1,:)-auxG(2,:))
-     ! >ANOMAL
-     ! ff(ispin,ispin,iorb,iorb,:) = 0.5d0*(auxG(3,:)-(one-xi)*auxG(1,:)-(one-xi)*auxG(2,:))
-     ! <ANOMAL
+     gf(1,1,iorb,iorb,:) = auxG
   enddo
-  !
-  if(bath_type=='hybrid')then
+
+  !ichan=2
+  do iorb=1,Norb
+     auxG = zero
+     !
+     if(.not.allocated(impGmatrix(2,2,iorb,iorb)%state)) cycle
+     Nstates = size(impGmatrix(2,2,iorb,iorb)%state)
+     do istate=1,Nstates
+        if(.not.allocated(impGmatrix(2,2,iorb,iorb)%state(istate)%channel))cycle
+        Nchannels = size(impGmatrix(2,2,iorb,iorb)%state(istate)%channel)
+        do ic=1,Nchannels
+           Nexcs  = size(impGmatrix(2,2,iorb,iorb)%state(istate)%channel(ic)%poles)
+           if(Nexcs==0)cycle
+           do iexc=1,Nexcs
+              peso  = impGmatrix(2,2,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
+              de    = impGmatrix(2,2,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
+              auxG  = auxG+ peso/(zeta-de)
+           enddo
+        enddo
+     enddo
+     !
+     bg(1,1,iorb,iorb,:) = auxG
+  enddo
+
+  
+  !ichan=4
+  do iorb=1,Norb
+     auxG = zero
+     !
+     if(.not.allocated(impGmatrix(1,2,iorb,iorb)%state)) cycle
+     Nstates = size(impGmatrix(1,2,iorb,iorb)%state)
+     do istate=1,Nstates
+        if(.not.allocated(impGmatrix(1,2,iorb,iorb)%state(istate)%channel))cycle
+        Nchannels = size(impGmatrix(1,2,iorb,iorb)%state(istate)%channel)
+        do ic=1,Nchannels
+           Nexcs  = size(impGmatrix(1,2,iorb,iorb)%state(istate)%channel(ic)%poles)
+           if(Nexcs==0)cycle
+           do iexc=1,Nexcs
+              peso  = impGmatrix(1,2,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
+              de    = impGmatrix(1,2,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
+              auxG  = auxG + peso/(zeta-de)
+           enddo
+        enddo
+     enddo
+     !
+     ff(1,1,iorb,iorb,:) = 0.5d0*(auxG - (one-xi)*gf(1,1,iorb,iorb,:) - (one-xi)*bg(1,1,iorb,iorb,:))
+  enddo
+  
+  if(bath_type .ne. 'normal') then
+     !ichan 3
      do iorb=1,Norb
         do jorb=1,Norb
            if(iorb==jorb)cycle
            auxG = zero
            !
-           if(.not.allocated(impGmatrix(ispin,ispin,iorb,iorb)%state)) cycle
-           Nstates = size(impGmatrix(ispin,ispin,iorb,iorb)%state)
+           if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state)) cycle
+           Nstates = size(impGmatrix(1,1,iorb,jorb)%state)
            do istate=1,Nstates
-              if(.not.allocated(impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel))cycle
-              Nchannels = size(impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel)
+              if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state(istate)%channel))cycle
+              Nchannels = size(impGmatrix(1,1,iorb,jorb)%state(istate)%channel)
               do ic=1,Nchannels
-                 Nexcs  = size(impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel(ic)%poles)
+                 Nexcs  = size(impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%poles)
                  if(Nexcs==0)cycle
                  ichan=4
                  do iexc=1,Nexcs
-                    peso  = impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
-                    de    = impGmatrix(ispin,ispin,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
-                    auxG(ichan,:)=auxG(ichan,:) + peso/(zeta-de)
+                    peso  = impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%weight(iexc)
+                    de    = impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%poles(iexc)
+                    auxG = auxG + peso/(zeta-de)
                  enddo
               enddo
            enddo
            !
-           gf(ispin,ispin,iorb,jorb,:) = auxG(4,:) !This is G_oo -xi*G_pp = A_ab -xi*B_ab
+           gf(1,1,iorb,jorb,:) = 0.5d0*(auxG - (one-xi)*gf(1,1,iorb,iorb,:) - (one-xi)*gf(1,1,jorb,jorb,:))
         enddo
      enddo
+     
+     !ichan 4
      do iorb=1,Norb
         do jorb=1,Norb
            if(iorb==jorb)cycle
-           ff(ispin,ispin,iorb,jorb,:) = 0.5d0*( gf(ispin,ispin,iorb,jorb,:) &
-                -(one-xi)*gf(ispin,ispin,iorb,iorb,:) - (one-xi)*bg(ispin,ispin,jorb,jorb,:) )
+           auxG = zero
+           !
+           if(.not.allocated(impGmatrix(2,2,iorb,jorb)%state)) cycle
+           Nstates = size(impGmatrix(2,2,iorb,jorb)%state)
+           do istate=1,Nstates
+              if(.not.allocated(impGmatrix(2,2,iorb,jorb)%state(istate)%channel))cycle
+              Nchannels = size(impGmatrix(2,2,iorb,jorb)%state(istate)%channel)
+              do ic=1,Nchannels
+                 Nexcs  = size(impGmatrix(2,2,iorb,jorb)%state(istate)%channel(ic)%poles)
+                 if(Nexcs==0)cycle
+                 ichan=4
+                 do iexc=1,Nexcs
+                    peso  = impGmatrix(2,2,iorb,jorb)%state(istate)%channel(ic)%weight(iexc)
+                    de    = impGmatrix(2,2,iorb,jorb)%state(istate)%channel(ic)%poles(iexc)
+                    auxG  =auxG + peso/(zeta-de)
+                 enddo
+              enddo
+           enddo
+           !
+           ff(1,1,iorb,jorb,:) = 0.5d0*(auxG - (one-xi)*gf(1,1,iorb,iorb,:) - (one-xi)*bg(1,1,jorb,jorb,:))
         enddo
-     enddo
+     enddo     
   endif
   return
   !
