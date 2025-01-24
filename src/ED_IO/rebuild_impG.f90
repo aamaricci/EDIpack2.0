@@ -205,7 +205,8 @@ subroutine rebuild_gimp_normal(zeta,gf)
   integer                                                :: Nstates,istate
   integer                                                :: Nchannels,ichan
   integer                                                :: Nexcs,iexc
-  real(8)                                                :: peso,de
+  complex(8)                                             :: peso
+  real(8)                                                :: de
   !
   gf = zero
   !
@@ -261,9 +262,12 @@ subroutine rebuild_gimp_superc(zeta,gf,ff)
   integer                                                :: Nstates,istate
   integer                                                :: Nchannels,ichan,ic
   integer                                                :: Nexcs,iexc
-  real(8)                                                :: peso,de
+  complex(8)                                             :: peso
+  real(8)                                                :: de
   !
   gf = zero
+  ff = zero
+  bg = zero
   !
   ispin = 1
   !
@@ -407,7 +411,8 @@ subroutine rebuild_gimp_nonsu2(zeta,gf)
   integer                                                :: Nstates,istate
   integer                                                :: Nchannels,ichan
   integer                                                :: Nexcs,iexc
-  real(8)                                                :: peso,de
+  complex(8)                                             :: peso
+  real(8)                                                :: de
   !
   gf = zero
   !
