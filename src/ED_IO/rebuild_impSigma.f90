@@ -266,7 +266,7 @@ subroutine rebuild_sigma_nonsu2(zeta,sigma)
   invG  = zero
   !  
   !Get Gimp
-  call rebuild_gimp_normal(zeta,G)
+  call rebuild_gimp_nonsu2(zeta,G)
   !
   !Get G0^-1
   invG0 = invg0_bath_function(zeta,dmft_bath)
