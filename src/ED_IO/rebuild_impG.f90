@@ -240,10 +240,10 @@ subroutine rebuild_gimp_normal(zeta,gf)
   if(offdiag_gf_flag)then
      do ispin=1,Nspin
         do iorb=1,Norb
-           do jorb=1,Norb
-              if(iorb==jorb)cycle
+           do jorb=iorb+1,Norb
               gf(ispin,ispin,iorb,jorb,:) = 0.5d0*(gf(ispin,ispin,iorb,jorb,:) &
                    -gf(ispin,ispin,iorb,iorb,:) -gf(ispin,ispin,jorb,jorb,:))
+              gf(ispin,ispin,jorb,iorb,:) = gf(ispin,ispin,iorb,jorb,:) 
            enddo
         enddo
      enddo
