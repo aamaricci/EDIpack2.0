@@ -96,8 +96,8 @@ MODULE ED_VARS_GLOBAL
   !their combination thereof as well as for any state |n> of the spectrum such that
   !GF(z) = sum w/z-e
   type GFspectrum
-     real(8),dimension(:),allocatable       :: weight
-     real(8),dimension(:),allocatable       :: poles
+     complex(8),dimension(:),allocatable       :: weight
+     real(8),dimension(:),allocatable          :: poles
   end type GFspectrum
 
   !N_channel = c,cdag,c \pm cdag, c \pm i*cdag, ...

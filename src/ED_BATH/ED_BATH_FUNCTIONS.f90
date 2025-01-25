@@ -306,7 +306,7 @@ contains
     complex(8),dimension(:)                        :: x
     real(8)                                        :: mu
     character(len=*)                               :: axis
-    complex(8),dimension(Nnambu*Nspin*Norb,size(x)) :: zeta
+    complex(8),dimension(2*Nspin*Norb,size(x))     :: zeta
     integer                                        :: iorb,N,L
     N = Nspin*Norb
     L = size(x)

@@ -10,7 +10,7 @@ function f0and_bath_array_hyrege(x,dmft_bath_,axis) result(F0and)
   !
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: Delta,Fdelta
   integer                                             :: iorb,jorb,ispin,i,L
-  complex(8),dimension(Nnambu*Nspin*Norb,size(x))     :: z
+  complex(8),dimension(2*Nspin*Norb,size(x))          :: z
   complex(8),dimension(:,:),allocatable               :: fgorb,zeta
   !
   axis_="mats";if(present(axis))axis_=str(axis)

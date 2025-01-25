@@ -266,57 +266,27 @@ subroutine rebuild_sigma_nonsu2(zeta,sigma)
   invG  = zero
   !  
   !Get Gimp
-  call rebuild_gimp_normal(zeta,G)
+  call rebuild_gimp_nonsu2(zeta,G)
   !
   !Get G0^-1
   invG0 = invg0_bath_function(zeta,dmft_bath)
   !
   !Get Gimp^-1
-  select case(bath_type)
-  case ("normal")
-     do i=1,size(zeta)
-        do ispin=1,Nspin
-           do jspin=1,Nspin
-              do iorb=1,Norb
-                 jorb= iorb
-                 io  = iorb + (ispin-1)*Norb
-                 jo  = jorb + (jspin-1)*Norb
-                 Gmat(io,jo) = G(ispin,jspin,iorb,jorb,i)
-              enddo
-           enddo
-        enddo
-        call inv(Gmat)
-        do ispin=1,Nspin
-           do jspin=1,Nspin
-              do iorb=1,Norb
-                 jorb= iorb
-                 io  = iorb + (ispin-1)*Norb
-                 jo  = jorb + (jspin-1)*Norb
-                 Sigma(ispin,jspin,iorb,jorb,i) = invG0(ispin,jspin,iorb,jorb,i) - Gmat(io,jo) 
-              enddo
-           enddo
-        enddo
-     enddo
-     !
-  case ("hybrid","replica","general")
-     do i=1,size(zeta)
-        Gmat  = nn2so_reshape(G(:,:,:,:,i),Nspin,Norb)
-        call inv(Gmat)
-        do ispin=1,Nspin
-           do jspin=1,Nspin
-              do iorb=1,Norb
-                 do jorb=1,Norb
-                    io = iorb + (ispin-1)*Norb
-                    jo = jorb + (jspin-1)*Norb
-                    Sigma(ispin,jspin,iorb,jorb,i) = invG0(ispin,jspin,iorb,jorb,i) - Gmat(io,jo)
-                 enddo
-              enddo
-           enddo
-        enddo
-     enddo
-     !
-  end select
-  !
+   do i=1,size(zeta)
+      Gmat  = nn2so_reshape(G(:,:,:,:,i),Nspin,Norb)
+      call inv(Gmat)
+      do ispin=1,Nspin
+         do jspin=1,Nspin
+            do iorb=1,Norb
+               do jorb=1,Norb
+                  io = iorb + (ispin-1)*Norb
+                  jo = jorb + (jspin-1)*Norb
+                  Sigma(ispin,jspin,iorb,jorb,i) = invG0(ispin,jspin,iorb,jorb,i) - Gmat(io,jo)
+               enddo
+            enddo
+         enddo
+      enddo
+   enddo
   return
   !     
 end subroutine rebuild_sigma_nonsu2
@@ -379,7 +349,7 @@ subroutine rebuild_sigma_superc(zeta,sigma,self)
      enddo
      !
      !
-  case ("hybrid")
+  case ("hybrid","replica","general")
      do i=1,Lzeta
         if(imZ)then
            Gmat=zero

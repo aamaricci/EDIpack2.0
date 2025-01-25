@@ -159,7 +159,7 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
     !Useful prints to test:
-    if(MPIMASTER)then
+    if(MPIMASTER .and. ed_verbose>2)then
        if(Norb<=3)then
           write(LOGfile,*)"RDM:"
           do i=1,4**Norb

@@ -833,7 +833,8 @@ contains
     integer            :: Nstates,istate
     integer            :: Nchannels,ichan
     integer            :: Nexcs,iexc
-    real(8)            :: peso,de
+    complex(8)         :: peso
+    real(8)            :: de
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
@@ -912,96 +913,37 @@ contains
     !
     !Get Gimp^-1 - Matsubara freq.
     !Get Gimp^-1 - Real freq.
-    select case(bath_type)
-    case ("normal")
-       do i=1,Lmats
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   ! do jorb=1,Norb
-                   !    if (iorb.eq.jorb) then
-                   jorb= iorb
-                   io  = iorb + (ispin-1)*Norb
-                   jo  = jorb + (jspin-1)*Norb
-                   invGimp(io,jo) = impGmats(ispin,jspin,iorb,jorb,i)
-                   !    endif
-                   ! enddo
-                enddo
-             enddo
-          enddo
-          call inv(invGimp)
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   jorb= iorb
-                   io  = iorb + (ispin-1)*Norb
-                   jo  = jorb + (jspin-1)*Norb
-                   impSmats(ispin,jspin,iorb,jorb,i) = invG0mats(ispin,jspin,iorb,jorb,i) - invGimp(io,jo) 
-                enddo
-             enddo
-          enddo
-       enddo
-       !
-       do i=1,Lreal
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   jorb= iorb
-                   io  = iorb + (ispin-1)*Norb
-                   jo  = jorb + (jspin-1)*Norb
-                   invGimp(io,jo) = impGreal(ispin,jspin,iorb,jorb,i)
-                enddo
-             enddo
-          enddo
-          call inv(invGimp)
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   jorb= iorb
-                   io  = iorb + (ispin-1)*Norb
-                   jo  = jorb + (jspin-1)*Norb
-                   impSreal(ispin,jspin,iorb,jorb,i) = invG0real(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
-                enddo
-             enddo
-          enddo
-       enddo
-       !
-       !
-    case ("hybrid","replica","general")
-       do i=1,Lmats
-          invGimp  = nn2so_reshape(impGmats(:,:,:,:,i),Nspin,Norb)
-          call inv(invGimp)
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      io = iorb + (ispin-1)*Norb
-                      jo = jorb + (jspin-1)*Norb
-                      impSmats(ispin,jspin,iorb,jorb,i) = invG0mats(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
-                   enddo
-                enddo
-             enddo
-          enddo
-       enddo
-       !
-       do i=1,Lreal
-          invGimp  = nn2so_reshape(impGreal(:,:,:,:,i),Nspin,Norb)
-          call inv(invGimp)
-          do ispin=1,Nspin
-             do jspin=1,Nspin
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      io = iorb + (ispin-1)*Norb
-                      jo = jorb + (jspin-1)*Norb
-                      impSreal(ispin,jspin,iorb,jorb,i) = invG0real(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
-                   enddo
-                enddo
-             enddo
-          enddo
-       enddo
-       !
-       !
-    end select
+     do i=1,Lmats
+        invGimp  = nn2so_reshape(impGmats(:,:,:,:,i),Nspin,Norb)
+        call inv(invGimp)
+        do ispin=1,Nspin
+           do jspin=1,Nspin
+              do iorb=1,Norb
+                 do jorb=1,Norb
+                    io = iorb + (ispin-1)*Norb
+                    jo = jorb + (jspin-1)*Norb
+                    impSmats(ispin,jspin,iorb,jorb,i) = invG0mats(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
+                 enddo
+              enddo
+           enddo
+        enddo
+     enddo
+     !
+     do i=1,Lreal
+        invGimp  = nn2so_reshape(impGreal(:,:,:,:,i),Nspin,Norb)
+        call inv(invGimp)
+        do ispin=1,Nspin
+           do jspin=1,Nspin
+              do iorb=1,Norb
+                 do jorb=1,Norb
+                    io = iorb + (ispin-1)*Norb
+                    jo = jorb + (jspin-1)*Norb
+                    impSreal(ispin,jspin,iorb,jorb,i) = invG0real(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
+                 enddo
+              enddo
+           enddo
+        enddo
+     enddo
     !
     !Get G0and:
     impG0mats(:,:,:,:,:) = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
