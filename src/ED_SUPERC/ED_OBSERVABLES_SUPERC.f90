@@ -55,7 +55,7 @@ MODULE ED_OBSERVABLES_SUPERC
   integer                             :: isector,jsector
   !
   complex(8),dimension(:),allocatable :: vvinit
-  complex(8),dimension(:),allocatable :: state_cvec
+  complex(8),dimension(:),allocatable :: v_state
   logical                             :: Jcondition
   !
   type(sector)                        :: sectorI,sectorJ
@@ -117,19 +117,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
-       !
+       v_state    =  es_return_cvec(state_list,istate)       
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_superc: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -138,7 +129,7 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             gs_weight=peso*abs(state_cvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              i_el = mod(i-1,sectorI%DimEl)+1
              m    = sectorI%H(1)%map(i_el)
              ib   = bdecomp(m,2*Ns)
@@ -182,12 +173,12 @@ contains
              !<X> and <X^2> with X=(b+bdg)/sqrt(2)
              if(iph<DimPh)then
                 j= i_el + (iph)*sectorI%DimEl
-                X_ph = X_ph + sqrt(2.d0*dble(iph))*real(state_cvec(i)*conjg(state_cvec(j)))*peso
+                X_ph = X_ph + sqrt(2.d0*dble(iph))*real(v_state(i)*conjg(v_state(j)))*peso
              end if
              X2_ph = X2_ph + 0.5d0*(1+2*(iph-1))*gs_weight
              if(iph<DimPh-1)then
                 j= i_el + (iph+1)*sectorI%DimEl
-                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*real(state_cvec(i)*conjg(state_cvec(j)))*peso
+                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*real(v_state(i)*conjg(v_state(j)))*peso
              end if
              !compute the lattice probability distribution function
              if(Dimph>1 .AND. iph==1) then
@@ -196,7 +187,7 @@ contains
                 do iorb=1,Norb
                    val = val + abs(nint(sign((nt(iorb) - 1.d0),real(g_ph(iorb,iorb)))))
                 enddo
-                call prob_distr_ph(state_cvec,val)
+                call prob_distr_ph(v_state,val)
              end if
           enddo
           !
@@ -206,30 +197,20 @@ contains
           if(ed_verbose>2)write(Logfile,"(A)")"DEBUG observables_superc: get OP"
 #endif
           do ispin=1,Nspin 
-             !GET <(b_up + adg_dw)(bdg_up + a_dw)> = 
-             !<b_up*bdg_up> + <adg_dw*a_dw> + <b_up*a_dw> + <adg_dw*bdg_up> = 
+             !GET <(a_up + bdg_dw)(adg_up + b_dw)> = 
+             !<a_up*adg_up> + <bdg_dw*b_dw> + <a_up*b_dw> + <bdg_dw*adg_up> = 
              !<n_a,dw> + < 1 - n_b,up> + 2*<PHI>_ab
-             do iorb=1,Norb !A
-                do jorb=1,Norb !B
+             !
+             !EVALUATE [adg_up + b_dw]|gs> = [1,1].[C_{+1},C_{-1}].[iorb,jorb].[up,dw]
+             do iorb=1,Norb 
+                do jorb=1,Norb 
                    isz = getsz(isector)
                    if(isz<Ns)then
                       jsector = getsector(isz+1,1)
-                      call build_sector(jsector,sectorJ)
-                      allocate(vvinit(sectorJ%Dim));vvinit=zero
-                      do i=1,sectorI%Dim
-                         call apply_op_CDG(i,j,sgn,jorb,1,1,sectorI,sectorJ)!bdg_up
-                         if(sgn==0d0.OR.j==0)cycle
-                         vvinit(j) = sgn*state_cvec(i)
-                      enddo
-                      do i=1,sectorI%Dim
-                         call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !a_dw
-                         if(sgn==0d0.OR.j==0)cycle
-                         vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                      enddo
-                      call delete_sector(sectorJ)
+                      vvinit  = apply_Cops(v_state,[one,one],[1,-1],[iorb,jorb],[1,2],isector,jsector)
                       phiscAB(iorb,jorb) = phiscAB(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                      deallocate(vvinit)
                    endif
-                   if(allocated(vvinit))deallocate(vvinit)
                 enddo
              enddo
           enddo
@@ -238,7 +219,7 @@ contains
           !
        endif
        !
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
 #ifdef _DEBUG
@@ -431,18 +412,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state    =  es_return_cvec(state_list,istate)
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG local_energy_superc: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -461,7 +434,7 @@ contains
                 ndw(iorb)=dble(ib(iorb+Ns))
              enddo
              !
-             gs_weight=peso*abs(state_cvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !> H_Imp: Diagonal Elements, i.e. local part
@@ -482,7 +455,7 @@ contains
                       call cdg(iorb,k1,k2,sg2)
                       j_el=binary_search(sectorI%H(1)%map,k2)
                       j   = j_el + (iph-1)*sectorI%DimEl
-                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
+                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
                    endif
                    !SPIN DW
                    Jcondition = &
@@ -494,7 +467,7 @@ contains
                       call cdg(iorb+Ns,k1,k2,sg2)
                       j_el=binary_search(sectorI%H(1)%map,k2)
                       j   = j_el + (iph-1)*sectorI%DimEl
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
                    endif
                 enddo
              enddo
@@ -548,8 +521,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j_el=binary_search(sectorI%H(1)%map,k4)
                          j   = j_el + (iph-1)*sectorI%DimEl
-                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
                       endif
                    enddo
                 enddo
@@ -574,8 +547,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j_el=binary_search(sectorI%H(1)%map,k4)
                          j   = j_el + (iph-1)*sectorI%DimEl
-                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
                       endif
                    enddo
                 enddo
@@ -600,7 +573,7 @@ contains
           call delete_sector(sectorI)
        endif
        !
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     !

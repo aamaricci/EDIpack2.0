@@ -110,7 +110,7 @@ MODULE ED_SECTOR
   public :: build_sector
   public :: delete_sector
   !
-  !public :: apply_Cops
+  public :: apply_Cops
   public :: apply_op_C
   public :: apply_op_CDG
   public :: apply_op_Sz
@@ -467,13 +467,20 @@ contains
 
 
 
+  !##################################################################
+  !##################################################################
+  !##################################################################
+  !##################################################################
+
+  
+  
 
 
-  function apply_op_C_d(V,iorb,ispin,jsector,sectorI) result(OV)
+
+  function apply_op_C_d(V,iorb,ispin,isector,jsector) result(OV)
     real(8),dimension(:),intent(in)  :: V
-    integer, intent(in)              :: iorb,ispin,jsector
-    type(sector),intent(in)          :: sectorI
-    type(sector)                     :: sectorJ
+    integer, intent(in)              :: iorb,ispin,isector,jsector
+    type(sector)                     :: sectorI,sectorJ
     real(8),dimension(:),allocatable :: OV
     real(8)                          :: sgn
     integer                          :: ialfa,ibeta,ipos,isite
@@ -495,6 +502,8 @@ contains
           ipos  = 1
        endif
        !
+       call build_sector(isector,sectorI)
+       !
        if(size(V)/=sectorI%Dim)stop "apply_op_C ERROR: size(V) != sectorI.Dim"
        !
        call build_sector(jsector,sectorJ)
@@ -508,6 +517,11 @@ contains
              write(LOGfile,"(A,I6,2I4,A,I6,2I4)")&
                   'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
                   'apply C  :',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
+             ! if(Jz_basis)then
+             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_a,s:',sectorJ%twoJz/2.
+             ! else
+             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_a,s:',sectorJ%Ntot
+             ! endif
           case default;stop "apply_Op_C ERROR: called with ed_mode != normal"
           end select
        endif
@@ -529,6 +543,7 @@ contains
           j     = j + (iph-1)*sectorJ%DimEl
           OV(j) = sgn*V(i)
        enddo
+       call delete_sector(sectorI)
        call delete_sector(sectorJ)
     else
        if(allocated(OV))deallocate(OV)
@@ -539,11 +554,10 @@ contains
 
 
 
-  function apply_op_C_c(V,iorb,ispin,jsector,sectorI) result(OV)
+  function apply_op_C_c(V,iorb,ispin,isector,jsector) result(OV)
     complex(8),dimension(:),intent(in)  :: V
-    integer, intent(in)                 :: iorb,ispin,jsector
-    type(sector),intent(in)             :: sectorI
-    type(sector)                        :: sectorJ
+    integer, intent(in)                 :: iorb,ispin,isector,jsector
+    type(sector)                        :: sectorI,sectorJ
     complex(8),dimension(:),allocatable :: OV
     real(8)                             :: sgn
     integer                             :: ialfa,ibeta,ipos,isite
@@ -556,6 +570,8 @@ contains
     integer,dimension(2*Ns)             :: ib
     !
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_C ERROR: size(V) != sectorI.Dim"
        !
@@ -592,6 +608,7 @@ contains
           !
           OV(j) = sgn*V(i)
        enddo
+       call delete_sector(sectorI)
        call delete_sector(sectorJ)
     else
        if(allocated(OV))deallocate(OV)
@@ -605,18 +622,17 @@ contains
 
 
 
+  
 
 
 
 
 
 
-
-  function apply_op_CDG_d(V,iorb,ispin,jsector,sectorI) result(OV)
+  function apply_op_CDG_d(V,iorb,ispin,isector,jsector) result(OV)
     real(8),dimension(:),intent(in)  :: V
-    integer, intent(in)              :: iorb,ispin,jsector
-    type(sector),intent(in)          :: sectorI
-    type(sector)                     :: sectorJ
+    integer, intent(in)              :: iorb,ispin,isector,jsector
+    type(sector)                     :: sectorI,sectorJ
     real(8),dimension(:),allocatable :: OV
     real(8)                          :: sgn
     integer                          :: ialfa,ibeta,ipos,isite
@@ -638,6 +654,8 @@ contains
           ialfa = iorb
           ipos  = 1
        endif
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_CDG ERROR: size(V) != sectorI.Dim"
        !
@@ -673,6 +691,7 @@ contains
           j     = j_el + (iph-1)*sectorJ%DimEl
           OV(j) = sgn*V(i)
        enddo
+       call delete_sector(sectorI)
        call delete_sector(sectorJ)
     else
        if(allocated(OV))deallocate(OV)
@@ -682,11 +701,10 @@ contains
   end function apply_op_CDG_d
 
 
-  function apply_op_CDG_c(V,iorb,ispin,jsector,sectorI) result(OV)
+  function apply_op_CDG_c(V,iorb,ispin,isector,jsector) result(OV)
     complex(8),dimension(:),intent(in)  :: V
-    integer, intent(in)                 :: iorb,ispin,jsector
-    type(sector),intent(in)             :: sectorI
-    type(sector)                        :: sectorJ
+    integer, intent(in)                 :: iorb,ispin,isector,jsector
+    type(sector)                        :: sectorI,sectorJ
     complex(8),dimension(:),allocatable :: OV
     real(8)                             :: sgn
     integer                             :: ialfa,ibeta,ipos,isite
@@ -699,6 +717,8 @@ contains
     integer,dimension(2*Ns)             :: ib
     !
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_CDG ERROR: size(V) != sectorI.Dim"
        !
@@ -733,6 +753,7 @@ contains
           j    = j_el + (iph-1)*sectorJ%DimEl
           OV(j) = sgn*V(i)
        enddo
+       call delete_sector(sectorI)
        call delete_sector(sectorJ)
     else
        if(allocated(OV))deallocate(OV)
@@ -751,14 +772,13 @@ contains
 
 
 
-  function apply_COps_d(V,As,Os,Pos,Spin,jsector,sectorI) result(OV)
+  function apply_COps_d(V,As,Os,Pos,Spin,isector,jsector) result(OV)
     real(8),dimension(:),intent(in)        :: V
     real(8),dimension(:),intent(in)        :: As
     integer,dimension(size(As)),intent(in) :: Os
     integer,dimension(size(As)),intent(in) :: Pos,Spin
-    integer, intent(in)                    :: jsector
-    type(sector),intent(in)                :: sectorI
-    type(sector)                           :: sectorJ
+    integer, intent(in)                    :: isector,jsector
+    type(sector)                           :: sectorI,sectorJ
     real(8),dimension(:),allocatable       :: OV
     integer                                :: ipos,ispin,ios,isite
     integer                                :: i,j,Nos,is,N,iph,i_el,j_el,ei
@@ -776,6 +796,8 @@ contains
     if(.not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
     !       
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_COps ERROR: size(V) != sectorI.Dim"
        !
@@ -865,6 +887,7 @@ contains
              OV(j) = OV(j) + sgn*V(i)*As(is)
           enddo
        enddo
+       call delete_sector(sectorI)
        call delete_sector(sectorJ)
     else
        if(allocated(OV))deallocate(OV)
@@ -876,14 +899,13 @@ contains
 
 
 
-  function apply_COps_c(V,As,Os,Pos,Spin,jsector,sectorI) result(OV)
+  function apply_COps_c(V,As,Os,Pos,Spin,isector,jsector) result(OV)
     complex(8),dimension(:),intent(in)     :: V
     complex(8),dimension(:),intent(in)     :: As
     integer,dimension(size(As)),intent(in) :: Os
     integer,dimension(size(As)),intent(in) :: Pos,Spin
-    integer, intent(in)                    :: jsector
-    type(sector),intent(in)                :: sectorI
-    type(sector)                           :: sectorJ
+    integer, intent(in)                    :: isector,jsector
+    type(sector)                           :: sectorI,sectorJ
     complex(8),dimension(:),allocatable    :: OV
     integer                                :: ipos,ispin,ios,isite
     integer                                :: i,j,Nos,is,N,iph,i_el,j_el,ei
@@ -901,6 +923,8 @@ contains
     if(.not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
     !
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_COps ERROR: size(V) != sectorI.Dim"
        !
@@ -963,6 +987,11 @@ contains
              write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
                   'From:',sectorI%index,sectorI%Ntot,&
                   ' -> apply:',Ostr,sectorI%index,sectorJ%Ntot
+             ! if(Jz_basis)then
+             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%twoJz/2.
+             ! else
+             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%Ntot
+             ! endif
           end select
        endif
        !
@@ -990,6 +1019,7 @@ contains
              OV(j) = OV(j) + sgn*V(i)*As(is)
           enddo
        enddo
+       call delete_sector(sectorI)
        call delete_sector(sectorJ)
     else
        if(allocated(OV))deallocate(OV)
@@ -1007,20 +1037,20 @@ contains
 
 
 
-  function apply_op_Sz_d(V,iorb,sectorI) result(OV)
+  function apply_op_Sz_d(V,iorb,isector) result(OV)
     real(8),dimension(:),intent(in)  :: V
-    integer, intent(in)                 :: iorb
-    type(sector),intent(in)             :: sectorI
+    integer, intent(in)              :: iorb,isector
     real(8),dimension(:),allocatable :: OV
-    real(8)                             :: sgn
-    integer                             :: ialfa,ibeta,ipos,isite
-    integer                             :: i,j,r
-    integer                             :: iph,i_el,j_el,ei
-    integer,dimension(2*Ns_Ud)          :: Indices
-    integer,dimension(2*Ns_Ud)          :: Jndices
-    integer,dimension(2,Ns_Orb)         :: Nud !Nbits(Ns_Orb)
-    integer,dimension(2)                :: Iud
-    integer,dimension(2*Ns)             :: ib
+    type(sector)                     :: sectorI
+    real(8)                          :: sgn
+    integer                          :: ialfa,ibeta,ipos,isite
+    integer                          :: i,j,r
+    integer                          :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)       :: Indices
+    integer,dimension(2*Ns_Ud)       :: Jndices
+    integer,dimension(2,Ns_Orb)      :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)             :: Iud
+    integer,dimension(2*Ns)          :: ib
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -1031,6 +1061,8 @@ contains
     endif
     !
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_Sz ERROR: size(V) != sectorI.Dim"
        !
@@ -1058,6 +1090,9 @@ contains
           sgn      = sgn/2d0
           OV(i)    = sgn*V(i)
        enddo
+       !
+       call delete_sector(sectorI)
+       !
     else
        if(allocated(OV))deallocate(OV)
        allocate(OV(1)) ; OV=0d0
@@ -1068,10 +1103,10 @@ contains
 
 
 
-  function apply_op_Sz_c(V,iorb,sectorI) result(OV)
+  function apply_op_Sz_c(V,iorb,isector) result(OV)
     complex(8),dimension(:),intent(in)  :: V
-    integer, intent(in)                 :: iorb
-    type(sector),intent(in)             :: sectorI
+    integer, intent(in)                 :: iorb,isector
+    type(sector)                        :: sectorI
     complex(8),dimension(:),allocatable :: OV
     real(8)                             :: sgn
     integer                             :: ialfa,ibeta,ipos,isite
@@ -1084,6 +1119,8 @@ contains
     integer,dimension(2*Ns)             :: ib
     !
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_Sz ERROR: size(V) != sectorI.Dim"
        !
@@ -1111,6 +1148,9 @@ contains
           sgn   = sgn/2d0
           OV(i) = sgn*V(i)
        enddo
+       !
+       call delete_sector(sectorI)
+       !
     else
        if(allocated(OV))deallocate(OV)
        allocate(OV(1)) ; OV=zero
@@ -1127,10 +1167,10 @@ contains
 
 
 
-  function apply_op_N_d(V,iorb,sectorI) result(OV)
+  function apply_op_N_d(V,iorb,isector) result(OV)
     real(8),dimension(:),intent(in) :: V
-    integer, intent(in)                :: iorb
-    type(sector),intent(in)            :: sectorI
+    integer, intent(in)                :: iorb,isector
+    type(sector)                  :: sectorI
     real(8),dimension(:),allocatable :: OV
     real(8)                            :: sgn
     integer                            :: ialfa,ibeta,ipos,isite
@@ -1151,6 +1191,8 @@ contains
           ialfa = iorb
           ipos  = 1
        endif
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_N ERROR: size(V) != sectorI.Dim"
        !
@@ -1177,6 +1219,9 @@ contains
           sgn      = dble(nud(1,ipos))+dble(nud(2,ipos))
           OV(i)    = sgn*V(i)
        enddo
+       !
+       call delete_sector(sectorI)       
+       !
     else
        if(allocated(OV))deallocate(OV)
        allocate(OV(1)) ; OV=0d0
@@ -1187,10 +1232,10 @@ contains
 
 
 
-  function apply_op_N_c(V,iorb,sectorI) result(OV)
+  function apply_op_N_c(V,iorb,isector) result(OV)
     complex(8),dimension(:),intent(in) :: V
-    integer, intent(in)                :: iorb
-    type(sector),intent(in)            :: sectorI
+    integer, intent(in)                :: iorb,isector
+    type(sector)                        :: sectorI
     complex(8),dimension(:),allocatable :: OV
     real(8)                            :: sgn
     integer                            :: ialfa,ibeta,ipos,isite
@@ -1203,6 +1248,8 @@ contains
     integer,dimension(2*Ns)            :: ib
     !
     if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
        !
        if(size(V)/=sectorI%Dim)stop "apply_op_N ERROR: size(V) != sectorI.Dim"
        !
@@ -1229,6 +1276,9 @@ contains
           sgn   = dble(ib(ipos))+dble(ib(ipos+Ns))
           OV(i) = sgn*V(i)
        enddo
+       !
+       call delete_sector(sectorI)
+       !
     else
        if(allocated(OV))deallocate(OV)
        allocate(OV(1)) ; OV=zero

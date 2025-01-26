@@ -28,8 +28,8 @@ MODULE ED_CHI_SPIN
   integer                          :: ipos,jpos
   integer                          :: i,j
   real(8)                          :: sgn,norm2
-  real(8),dimension(:),allocatable :: state_dvec
-  real(8)                          :: state_e
+  real(8),dimension(:),allocatable :: v_state
+  real(8)                          :: e_state
 
 
 
@@ -49,46 +49,26 @@ contains
     !
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
     !
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG build_Chi_spin_normal: build spin-Chi"
-#endif
     write(LOGfile,"(A)")"Get impurity spin Chi:"
+    if(MPIMASTER)call start_timer(unit=LOGfile)
+    !
     do iorb=1,Norb
-       write(LOGfile,"(A)")"Get Chi_spin_l"//reg(txtfy(iorb))
-       if(MPIMASTER)call start_timer(unit=LOGfile)
        call lanc_ed_build_spinChi_diag(iorb)
-       if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-       if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
     enddo
     !
     if(Norb>1)then
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             write(LOGfile,"(A)")"Get Chi_spin_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
-             if(MPIMASTER)call start_timer(unit=LOGfile)
              call lanc_ed_build_spinChi_mix(iorb,jorb)
-             if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-             if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
           end do
        end do
        !
        !
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             select case(ed_diag_type)
-             case default
-                spinChi_w(iorb,jorb,:)   = 0.5d0*(spinChi_w(iorb,jorb,:) - spinChi_w(iorb,iorb,:) - spinChi_w(jorb,jorb,:))
-                spinChi_tau(iorb,jorb,:) = 0.5d0*(spinChi_tau(iorb,jorb,:) - spinChi_tau(iorb,iorb,:) - spinChi_tau(jorb,jorb,:))
-                spinChi_iv(iorb,jorb,:)  = 0.5d0*(spinChi_iv(iorb,jorb,:) - spinChi_iv(iorb,iorb,:) - spinChi_iv(jorb,jorb,:))
-                !
-             case ("full")
-                ! The previous calculation is not needed in the FULL ED case
-             end select
+             spinChi_w(iorb,jorb,:)   = 0.5d0*(spinChi_w(iorb,jorb,:) - spinChi_w(iorb,iorb,:) - spinChi_w(jorb,jorb,:))
+             spinChi_tau(iorb,jorb,:) = 0.5d0*(spinChi_tau(iorb,jorb,:) - spinChi_tau(iorb,iorb,:) - spinChi_tau(jorb,jorb,:))
+             spinChi_iv(iorb,jorb,:)  = 0.5d0*(spinChi_iv(iorb,jorb,:) - spinChi_iv(iorb,iorb,:) - spinChi_iv(jorb,jorb,:))
              !
              spinChi_w(jorb,iorb,:)   = spinChi_w(iorb,jorb,:)
              spinChi_tau(jorb,iorb,:) = spinChi_tau(iorb,jorb,:)
@@ -96,6 +76,8 @@ contains
           enddo
        enddo
     endif
+    !
+    if(MPIMASTER)call stop_timer
     !
   end subroutine build_chi_spin_normal
 
@@ -118,122 +100,48 @@ contains
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_spinChi diag: Lanczos build spin Chi l"//str(iorb)
-#endif
-    !
-    if(ed_total_ud)then
-       ialfa = 1
-       ipos  = iorb
-    else
-       ialfa = iorb
-       ipos  = 1
-    endif
+    write(LOGfile,"(A)")"Get Chi_spin_l"//reg(txtfy(iorb))
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_dvec(state_list,istate)
        !
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
-               'Apply Sz',isector,sectorI%Nups,sectorI%Ndws
-          allocate(vvinit(sectorI%Dim)) ; vvinit=zero
-          do i=1,sectorI%Dim
-             call apply_op_Sz(i,sgn,ipos,ialfa,sectorI)            
-             vvinit(i) = sgn*state_dvec(i)
-          enddo
-          call delete_sector(sectorI)
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !
+       vvinit = apply_op_Sz(v_state,iorb,isector)       
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_spinChi(norm2,state_e,alfa_,beta_,iorb,iorb)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       call add_to_lanczos_spinChi(norm2,e_state,alfa_,beta_,iorb,iorb)
+       deallocate(alfa_,beta_,vvinit)
+       if(allocated(v_state))deallocate(v_state)
     enddo
+    !
     return
   end subroutine lanc_ed_build_spinChi_diag
 
 
 
-
-  !################################################################
-
+  
 
 
 
   subroutine lanc_ed_build_spinChi_mix(iorb,jorb)
     integer                     :: iorb,jorb
-    type(sector)                :: sectorI,sectorJ
-    real(8)                     :: Siorb,Sjorb
+    real(8),dimension(:),allocatable :: vI,vJ
     !
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_spinChi mix: Lanczos build spin Chi l"//str(iorb)//",m"//str(jorb)
-#endif
+    write(LOGfile,"(A)")"Get Chi_spin_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !    
-    if(ed_total_ud)then
-       ialfa = 1
-       jalfa = 1
-       ipos  = iorb
-       jpos  = jorb
-    else
-       ialfa = iorb
-       jalfa = jorb
-       ipos  = 1
-       jpos  = 1
-    endif
-    !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_dvec(state_list,istate)
        !
        !EVALUATE (Sz_jorb + Sz_iorb)|gs> = Sz_jorb|gs> + Sz_iorb|gs>
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
-               'From sector',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose>=3)write(LOGfile,"(A20,I15)")'Apply (Sz_a + Sz_b)',isector
-          allocate(vvinit(sectorI%Dim)) ; vvinit=zero
-          do i=1,sectorI%Dim
-             call apply_op_Sz(i,Siorb,ipos,ialfa,sectorI)
-             call apply_op_Sz(i,Sjorb,jpos,jalfa,sectorI)
-             sgn       = Siorb + Sjorb
-             vvinit(i) = sgn*state_dvec(i)
-          enddo
-          call delete_sector(sectorI)
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !
-       call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_spinChi(norm2,state_e,alfa_,beta_,iorb,jorb)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       vI = apply_op_Sz(v_state,iorb,isector)
+       vJ = apply_op_Sz(v_state,jorb,isector)
+       call tridiag_Hv_sector_normal(isector,vI+VJ,alfa_,beta_,norm2)
+       call add_to_lanczos_spinChi(norm2,e_state,alfa_,beta_,iorb,jorb)
+       deallocate(alfa_,beta_,vI,vJ)
+       if(allocated(v_state))deallocate(v_state)
     enddo
     return
   end subroutine lanc_ed_build_spinChi_mix
@@ -242,9 +150,9 @@ contains
 
 
 
-  !################################################################
 
 
+  
   subroutine add_to_lanczos_spinChi(vnorm2,Ei,alanc,blanc,iorb,jorb)
     real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
     integer                                    :: nlanc

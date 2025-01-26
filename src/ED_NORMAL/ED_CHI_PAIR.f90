@@ -22,15 +22,15 @@ MODULE ED_CHI_PAIR
 
   integer                          :: istate,iorb,jorb,ispin,jspin
   integer                          :: isector,jsector,ksector
-  real(8),allocatable              :: vvinit(:),vvinit_tmp(:)
+  real(8),allocatable              :: vvinit(:)
   real(8),allocatable              :: alfa_(:),beta_(:)
   integer                          :: ialfa
   integer                          :: jalfa
   integer                          :: ipos,jpos
   integer                          :: i,j,k
   real(8)                          :: sgn,norm2
-  real(8),dimension(:),allocatable :: state_dvec
-  real(8)                          :: state_e
+  real(8),dimension(:),allocatable :: v_state
+  real(8)                          :: e_state
 
 contains
 
@@ -46,46 +46,24 @@ contains
     !
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
     !
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG build_Chi_spin_normal: build pair-Chi"
-#endif
     write(LOGfile,"(A)")"Get impurity pair Chi:"
+    if(MPIMASTER)call start_timer(unit=LOGfile)
     do iorb=1,Norb
-       write(LOGfile,"(A)")"Get Chi_pair_l"//reg(txtfy(iorb))
-       if(MPIMASTER)call start_timer(unit=LOGfile)
        call lanc_ed_build_pairChi_diag(iorb)
-       if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-       if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
     enddo
-
+    !
     if(Norb>1)then
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             write(LOGfile,"(A)")"Get Chi_pair_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
-             if(MPIMASTER)call start_timer(unit=LOGfile)
              call lanc_ed_build_pairChi_mix(iorb,jorb)
-             if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-             if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
           end do
        end do
        !
-       !
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             select case(ed_diag_type)
-             case default
-                pairChi_w(iorb,jorb,:)   = 0.5d0*(pairChi_w(iorb,jorb,:) - pairChi_w(iorb,iorb,:) - pairChi_w(jorb,jorb,:))
-                pairChi_tau(iorb,jorb,:) = 0.5d0*(pairChi_tau(iorb,jorb,:) - pairChi_tau(iorb,iorb,:) - pairChi_tau(jorb,jorb,:))
-                pairChi_iv(iorb,jorb,:)  = 0.5d0*(pairChi_iv(iorb,jorb,:) - pairChi_iv(iorb,iorb,:) - pairChi_iv(jorb,jorb,:))
-                !
-             case ("full")
-                !
-             end select
+             pairChi_w(iorb,jorb,:)   = 0.5d0*(pairChi_w(iorb,jorb,:) - pairChi_w(iorb,iorb,:) - pairChi_w(jorb,jorb,:))
+             pairChi_tau(iorb,jorb,:) = 0.5d0*(pairChi_tau(iorb,jorb,:) - pairChi_tau(iorb,iorb,:) - pairChi_tau(jorb,jorb,:))
+             pairChi_iv(iorb,jorb,:)  = 0.5d0*(pairChi_iv(iorb,jorb,:) - pairChi_iv(iorb,iorb,:) - pairChi_iv(jorb,jorb,:))
              !
              pairChi_w(jorb,iorb,:)   = pairChi_w(iorb,jorb,:)
              pairChi_tau(jorb,iorb,:) = pairChi_tau(iorb,jorb,:)
@@ -93,7 +71,7 @@ contains
           enddo
        enddo
     endif
-    !
+    if(MPIMASTER)call stop_timer
 
   end subroutine build_chi_pair_normal
 
@@ -103,13 +81,10 @@ contains
   ! \chi_aa = <Delta*_a(\tau)Delta_a(0)>
   !         = <[C^+_a(\tau)C^+_a(\tau)][C_a(0)C_a(0)]>
   subroutine lanc_ed_build_pairChi_diag(iorb)
-    integer                     :: iorb
-    type(sector)                :: sectorI,sectorJ,sectorK
+    integer                          :: iorb
+    real(8),dimension(:),allocatable :: vtmp
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_pairChi diag: Lanczos build pair Chi l"//str(iorb)
-#endif
+    write(LOGfile,"(A)")"Get Chi_pair_l"//reg(txtfy(iorb))
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -120,58 +95,22 @@ contains
     endif
     !
     do istate=1,state_list%size
-       isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
+       isector  =  es_return_sector(state_list,istate)
+       e_state  =  es_return_energy(state_list,istate)
+       v_state  =  es_return_dvec(state_list,istate)
        !
        ksector = getCsector(ialfa,2,isector)
        jsector = getCsector(ialfa,1,ksector)
        if(jsector/=0.AND.ksector/=0)then
-          !
-          if(MpiMaster)then
-             call build_sector(isector,sectorI)
-             call build_sector(ksector,sectorK)
-             call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
-                  'Apply Cup*Cdw',isector,sectorI%Nups,sectorI%Ndws
-
-             allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-             allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
-             !C_dw|gs>=|tmp>
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,ipos,ialfa,2,sectorI,sectorK)
-                if(sgn==0d0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
-             enddo
-             !C_up|tmp>=C_up[C_dw|gs>]
-             do k=1,sectorK%Dim
-                call apply_op_C(k,j,sgn,ipos,ialfa,1,sectorK,sectorJ)
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*vvinit_tmp(k)
-             enddo
-             deallocate(vvinit_tmp)
-             call delete_sector(sectorI)
-             call delete_sector(sectorK)
-             call delete_sector(sectorJ)
-          else
-             allocate(vvinit(1));vvinit=0.d0
-          endif
-          !
+          !C_dw|gs>  = |tmp>
+          vtmp   = apply_op_C(v_state,iorb,2,isector,ksector)
+          !C_up|tmp> = C_up[C_dw|gs>] = |vvinit>
+          vvinit = apply_op_C(vtmp,iorb,1,ksector,jsector)
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_pairChi(norm2,state_e,alfa_,beta_,iorb,iorb)
-          deallocate(alfa_,beta_)
-          if(allocated(vvinit))deallocate(vvinit)
+          call add_to_lanczos_pairChi(norm2,e_state,alfa_,beta_,iorb,iorb)
+          deallocate(alfa_,beta_,vtmp,vvinit)
        endif
-       if(allocated(state_dvec))deallocate(state_dvec)
-       !
+       if(allocated(v_state))deallocate(v_state)
     enddo
     return
   end subroutine lanc_ed_build_pairChi_diag
@@ -187,89 +126,38 @@ contains
   !from aux: <[C^+_a C^+_a + C^+_b C^+_b][C_a C_a + C_b C_b]>  
   subroutine lanc_ed_build_pairChi_mix(iorb,jorb)
     integer                     :: iorb,jorb
-    type(sector)                :: sectorI,sectorJ,sectorK
+    real(8),dimension(:),allocatable :: va,vb,vtmp
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_pairChi mix: Lanczos build pair Chi l"//str(iorb)//",m"//str(jorb)
-#endif
+    write(LOGfile,"(A)")"Get Chi_pair_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !    
-    if(ed_total_ud)then
-       ialfa = 1
-       jalfa = 1
-       ipos  = iorb
-       jpos  = jorb
-    else
+    if(.not.ed_total_ud)then
        write(LOGfile,"(A)")"ED_CHI_PAIR warning: can not evaluate \Chi_pair_ab with ed_total_ud=F"
        return
     endif
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
-       !
-       !
+       e_state    =  es_return_energy(state_list,istate)
+       v_state  =  es_return_dvec(state_list,istate)
        ! --> Apply [C_b C_b + C_a C_a]|state>
-       ksector = getCsector(ialfa,2,isector)
-       jsector = getCsector(jalfa,1,ksector)
+       ksector = getCsector(1,2,isector)
+       jsector = getCsector(1,1,ksector)
        if(jsector/=0.AND.ksector/=0)then
-          if(MpiMaster)then
-             call build_sector(isector,sectorI)
-             call build_sector(ksector,sectorK)
-             call build_sector(jsector,sectorJ)
-             if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
-                  'Apply C_bu*C_bd+C_au*C_ad',isector,sectorI%Nups,sectorI%Ndws
-             allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-             allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
-             !
-             !Apply C_a,up*C_a,dw:
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,ipos,ialfa,2,sectorI,sectorK)
-                if(sgn==0d0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
-             enddo
-             do k=1,sectorK%Dim
-                call apply_op_C(k,j,sgn,ipos,ialfa,1,sectorK,sectorJ)
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = sgn*vvinit_tmp(k)
-             enddo
-             !
-             !+ C_b,up*C_b,dw
-             vvinit_tmp=0d0
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
-                if(sgn==0d0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
-             enddo
-             do k=1,sectorK%Dim
-                call apply_op_C(k,j,sgn,jpos,jalfa,1,sectorK,sectorJ)
-                if(sgn==0d0.OR.j==0)cycle
-                vvinit(j) = vvinit(j) + sgn*vvinit_tmp(k)
-             enddo
-             deallocate(vvinit_tmp)
-             call delete_sector(sectorI)
-             call delete_sector(sectorK)
-             call delete_sector(sectorJ)
-          else
-             allocate(vvinit(1));vvinit=0.d0
-          endif
-          !
-          call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-          call add_to_lanczos_pairChi(norm2,state_e,alfa_,beta_,iorb,jorb)
-          deallocate(alfa_,beta_)
-          if(allocated(vvinit))deallocate(vvinit)
+          !Apply C_a,up*C_a,dw:
+          !C_a.dw|gs>  = |tmp>
+          vtmp = apply_op_C(v_state,iorb,2,isector,ksector)
+          !C_a.up|tmp> = C_a.up[C_a.dw|gs>] = |vvinit>
+          va   = apply_op_C(vtmp,iorb,1,ksector,jsector)
+          !Apply + C_b,up*C_b,dw
+          !C_b.dw|gs>  = |tmp>
+          vtmp = apply_op_C(v_state,jorb,2,isector,ksector)
+          !C_b.up|tmp> = C_b.up[C_b.dw|gs>] = |vvinit>
+          vb   = apply_op_C(vtmp,jorb,1,ksector,jsector)
+          call tridiag_Hv_sector_normal(jsector,va+vb,alfa_,beta_,norm2)
+          call add_to_lanczos_pairChi(norm2,e_state,alfa_,beta_,iorb,jorb)
+          deallocate(alfa_,beta_,vtmp,va,vb)
        endif
-       if(allocated(state_dvec))deallocate(state_dvec)
-       !
+       if(allocated(v_state))deallocate(v_state)
     enddo
     return
   end subroutine lanc_ed_build_pairChi_mix
@@ -309,6 +197,7 @@ contains
     if(MpiStatus)then
        call Bcast_MPI(MpiComm,alanc)
        call Bcast_MPI(MpiComm,blanc)
+
     endif
 #endif
     diag(1:Nlanc)    = alanc(1:Nlanc)

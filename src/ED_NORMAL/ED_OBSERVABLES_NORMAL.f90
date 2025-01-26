@@ -59,8 +59,8 @@ MODULE ED_OBSERVABLES_NORMAL
   integer                            :: i,j,ii
   integer                            :: isector,jsector
   !
-  real(8),dimension(:),allocatable   :: vvinit
-  real(8),dimension(:),allocatable   :: state_dvec
+  real(8),dimension(:),allocatable   :: vvinit,v1,v2
+  real(8),dimension(:),allocatable   :: v_state
   logical                            :: Jcondition
   !
   type(sector)                       :: sectorI,sectorJ
@@ -122,19 +122,11 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state =  es_return_dvec(state_list,istate)
        !
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_normal: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
-       else
-          call es_return_dvector(state_list,istate,state_dvec) 
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        !
@@ -144,7 +136,7 @@ contains
        if(MpiMaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             gs_weight=peso*abs(state_dvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              call build_op_Ns(i,IbUp,IbDw,sectorI)
              nup = IbUp(1:Norb)
              ndw = IbDw(1:Norb)
@@ -184,12 +176,12 @@ contains
              !<X> and <X^2> with X=(b+bdg)/sqrt(2)
              if(iph<DimPh)then
                 j= i_el + (iph)*sectorI%DimEl
-                X_ph = X_ph + sqrt(2.d0*dble(iph))*(state_dvec(i)*state_dvec(j))*peso
+                X_ph = X_ph + sqrt(2.d0*dble(iph))*(v_state(i)*v_state(j))*peso
              end if
              X2_ph = X2_ph + 0.5d0*(1+2*(iph-1))*gs_weight
              if(iph<DimPh-1)then
                 j= i_el + (iph+1)*sectorI%DimEl
-                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*(state_dvec(i)*state_dvec(j))*peso
+                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*(v_state(i)*v_state(j))*peso
              end if
              !
              !compute the lattice probability distribution function
@@ -199,14 +191,14 @@ contains
                 do iorb=1,Norb
                    val = val + abs(nint(sign((nt(iorb) - 1.d0),real(g_ph(iorb,iorb)))))
                 enddo
-                call prob_distr_ph(state_dvec,val)
+                call prob_distr_ph(v_state,val)
              end if
           enddo
           !
           call delete_sector(sectorI)
        endif
        !
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
 #ifdef _DEBUG
@@ -223,79 +215,43 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state  =  es_return_dvec(state_list,istate)
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_normal: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
-       else
-          call es_return_dvector(state_list,istate,state_dvec) 
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
 
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
        peso = peso/zeta_function
        !
-       if(Mpimaster)call build_sector(isector,sectorI)
-       !    
        do iorb=1,Norb
           do jorb=iorb+1,Norb
              !
              !\Theta_upup = <v|v>, |v> = (C_aup + C_bup)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
+                vvinit =  apply_Cops(v_state,[1d0,1d0],[-1,-1],[iorb,jorb],[1,1],isector,jsector)
                 if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !c_b,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_dvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_dvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !
                    theta_upup(iorb,jorb) = theta_upup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
                 endif
+                if(allocated(vvinit))deallocate(vvinit)
              endif
              !
              !\Theta_dwdw = <v|v>, |v> = (C_adw + C_bdw)|>
              jsector = getCsector(1,2,isector)
              if(jsector/=0)then
+                vvinit =  apply_Cops(v_state,[1d0,1d0],[-1,-1],[iorb,jorb],[2,2],isector,jsector)
                 if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !c_b,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_dvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_dvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !
                    theta_dwdw(iorb,jorb) = theta_dwdw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
                 endif
+                if(allocated(vvinit))deallocate(vvinit)
              endif
              !
           enddo
        enddo
        !
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     !
@@ -320,18 +276,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state =  es_return_dvec(state_list,istate)              
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_normal: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
-       else
-          call es_return_dvector(state_list,istate,state_dvec) 
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -353,7 +301,7 @@ contains
                 do iorb=1,Norb
                    single_particle_density_matrix(ispin,ispin,iorb,iorb) = &
                         single_particle_density_matrix(ispin,ispin,iorb,iorb) + &
-                        peso*nud(ispin,iorb)*(state_dvec(i))*state_dvec(i)
+                        peso*nud(ispin,iorb)*(v_state(i))*v_state(i)
                 enddo
              enddo
              !
@@ -377,7 +325,7 @@ contains
                             !
                             single_particle_density_matrix(ispin,ispin,iorb,jorb) = &
                                  single_particle_density_matrix(ispin,ispin,iorb,jorb) + &
-                                 peso*sgn1*state_dvec(i)*sgn2*(state_dvec(j))
+                                 peso*sgn1*v_state(i)*sgn2*(v_state(j))
                          endif
                       enddo
                    enddo
@@ -389,7 +337,7 @@ contains
           call delete_sector(sectorI)         
        endif
        !
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
 #ifdef _DEBUG
@@ -478,18 +426,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state =  es_return_dvec(state_list,istate)
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG local_energy_normal: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec) 
-       else
-          call es_return_dvector(state_list,istate,state_dvec) 
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -512,7 +452,7 @@ contains
              Nup = Breorder(Nups)
              Ndw = Breorder(Ndws)
              !
-             gs_weight=peso*abs(state_dvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              !
              !> H_Imp: Diagonal Elements, i.e. local part
              do iorb=1,Norb
@@ -537,7 +477,7 @@ contains
                          jup = binary_search(sectorI%H(1)%map,k2)
                          j   = jup + (idw-1)*sectorI%DimUp
                          ed_Eknot = ed_Eknot + &
-                              impHloc(1,1,iorb,jorb)*sg1*sg2*state_dvec(i)*(state_dvec(j))*peso
+                              impHloc(1,1,iorb,jorb)*sg1*sg2*v_state(i)*(v_state(j))*peso
                       endif
                       !
                       !DW
@@ -550,7 +490,7 @@ contains
                          jdw = binary_search(sectorI%H(2)%map,k2)
                          j   = iup + (jdw-1)*sectorI%DimUp
                          ed_Eknot = ed_Eknot + &
-                              impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_dvec(i)*(state_dvec(j))*peso
+                              impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*v_state(i)*(v_state(j))*peso
                       endif
                    enddo
                 enddo
@@ -574,8 +514,8 @@ contains
                             jup=binary_search(sectorI%H(1)%map,k4)
                             j = jup + (jdw-1)*sectorI%DimUp
                             !
-                            ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_dvec(i)*state_dvec(j)*peso
-                            ed_Dse = ed_Dse + sg1*sg2*sg3*sg4*state_dvec(i)*state_dvec(j)*peso
+                            ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*v_state(i)*v_state(j)*peso
+                            ed_Dse = ed_Dse + sg1*sg2*sg3*sg4*v_state(i)*v_state(j)*peso
                             !
                          endif
                       enddo
@@ -600,8 +540,8 @@ contains
                             jup = binary_search(sectorI%H(1)%map,k4)
                             j = jup + (jdw-1)*sectorI%DimUp
                             !
-                            ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_dvec(i)*state_dvec(j)*peso
-                            ed_Dph = ed_Dph + sg1*sg2*sg3*sg4*state_dvec(i)*state_dvec(j)*peso
+                            ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*v_state(i)*v_state(j)*peso
+                            ed_Dph = ed_Dph + sg1*sg2*sg3*sg4*v_state(i)*v_state(j)*peso
                             !
                          endif
                       enddo
@@ -661,7 +601,7 @@ contains
           call delete_sector(sectorI)         
        endif
        !
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     !

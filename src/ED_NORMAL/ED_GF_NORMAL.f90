@@ -17,8 +17,8 @@ MODULE ED_GF_NORMAL
 
 
   public :: build_gf_normal
-  public :: rebuild_gf_normal
   public :: build_sigma_normal
+  public :: rebuild_gf_normal
 
 
   integer                          :: istate
@@ -65,6 +65,7 @@ contains
     write(Logfile,"(A)")"DEBUG build_gf NORMAL: build GFs"
 #endif
     !
+    if(MPIMASTER)call start_timer(unit=LOGfile)
     do ispin=1,Nspin
        do iorb=1,Norb
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
@@ -73,12 +74,12 @@ contains
     enddo
     !
     if(offdiag_gf_flag)then
-       write(LOGfile,"(A)")"Get mask(G):"
        Hmask= .true.
        if(.not.ed_all_g)then
           if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
           if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
        end if
+       write(LOGfile,"(A)")"Get mask(G):"
        do ispin=1,Nspin
           do iorb=1,Norb
              write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
@@ -96,6 +97,10 @@ contains
              enddo
           enddo
        enddo
+       !
+       !> PHONONS
+       if(DimPh>1)call lanc_build_gf_phonon_main()
+       !
        if(MPIMASTER)call stop_timer
        !
        !Put here off-diagonal manipulation by symmetry:
@@ -117,10 +122,8 @@ contains
     end if
     !
     !
-    !> PHONONS
-    if(DimPh>1)call lanc_build_gf_phonon_main()
+
     !
-    if(MPIMASTER)call start_timer(unit=LOGfile)
     !
   end subroutine build_gf_normal
 
@@ -133,10 +136,12 @@ contains
 
 
 
+  
+
+
 
   subroutine lanc_build_gf_normal_diag(iorb,ispin)
     integer,intent(in)          :: iorb,ispin
-    type(sector)                :: sectorI
     !
     if(ed_verbose>1)write(LOGfile,*)"Get G_l"//str(iorb,3)//"_m"//str(iorb,3)//"_s"//str(ispin)
     !
@@ -147,12 +152,10 @@ contains
        e_state    =  es_return_energy(state_list,istate)
        v_state    =  es_return_dvec(state_list,istate)
        !
-       if(MpiMaster)call build_sector(isector,sectorI)
-       !
        !ADD ONE PARTICLE:
        jsector = getCDGsector(ialfa,ispin,isector)
        if(jsector/=0)then 
-          vvinit = apply_op_CDG(v_state,iorb,ispin,jsector,sectorI)
+          vvinit = apply_op_CDG(v_state,iorb,ispin,isector,jsector)
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
           call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,1,iorb,iorb,ispin,ichan=1,istate=istate)
           deallocate(alfa_,beta_,vvinit)
@@ -163,7 +166,7 @@ contains
        !REMOVE ONE PARTICLE:
        jsector = getCsector(ialfa,ispin,isector)
        if(jsector/=0)then
-          vvinit =  apply_op_C(v_state,iorb,ispin,jsector,sectorI)
+          vvinit =  apply_op_C(v_state,iorb,ispin,isector,jsector)
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
           call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,-1,iorb,iorb,ispin,ichan=2,istate=istate)
           deallocate(alfa_,beta_,vvinit)
@@ -171,9 +174,7 @@ contains
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,2,Nexc=0)
        endif
        !
-       if(MpiMaster)call delete_sector(sectorI)
        if(allocated(v_state))deallocate(v_state)
-       !
     enddo
     return
   end subroutine lanc_build_gf_normal_diag
@@ -188,7 +189,6 @@ contains
 
   subroutine lanc_build_gf_normal_mix(iorb,jorb,ispin)
     integer                     :: iorb,jorb,ispin
-    type(sector)                :: sectorI
     !
     if(ed_verbose>1)write(LOGfile,*)"Get G_l"//str(iorb,3)//"_m"//str(jorb,3)//"_s"//str(ispin)
     !
@@ -200,14 +200,10 @@ contains
        e_state  =  es_return_energy(state_list,istate)
        v_state  =  es_return_dvec(state_list,istate)
        !
-       if(MpiMaster)call build_sector(isector,sectorI)
-       !
-       !EVALUATE (c^+_iorb + c^+_jorb)|gs> = [1,1].[C_{+1},C_{+1}].[iorb,jorb]
+       !(c^+_iorb + c^+_jorb)|gs> = [1,1].[C_{+1},C_{+1}].[iorb,jorb].[ispin,ispin]
        jsector = getCDGsector(ialfa,ispin,isector)
        if(jsector/=0)then
-          !
-          vvinit = apply_Cops(v_state,[1d0,1d0],[1,1],[iorb,jorb],[ispin,ispin],jsector,sectorI)
-          !
+          vvinit = apply_Cops(v_state,[1d0,1d0],[1,1],[iorb,jorb],[ispin,ispin],isector,jsector)
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
           call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,1,iorb,jorb,ispin,ichan=1,istate=istate)
           deallocate(alfa_,beta_,vvinit)
@@ -215,12 +211,10 @@ contains
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,1,Nexc=0)
        endif
        !
-       !EVALUATE (c_iorb + c_jorb)|gs> = [1,1].[C_{-1},C_{-1}].[iorb,jorb]
+       !(c_iorb + c_jorb)|gs> = [1,1].[C_{-1},C_{-1}].[iorb,jorb].[ispin,ispin]
        jsector = getCsector(ialfa,ispin,isector)
        if(jsector/=0)then
-          !
-          vvinit =  apply_Cops(v_state,[1d0,1d0],[-1,-1],[iorb,jorb],[ispin,ispin],jsector,sectorI)
-          !
+          vvinit =  apply_Cops(v_state,[1d0,1d0],[-1,-1],[iorb,jorb],[ispin,ispin],isector,jsector)
           call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
           call add_to_lanczos_gf_normal(one*norm2,e_state,alfa_,beta_,-1,iorb,jorb,ispin,2,istate)
           deallocate(alfa_,beta_,vvinit)
@@ -228,7 +222,6 @@ contains
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,2,Nexc=0)
        endif
        !
-       if(MpiMaster)call delete_sector(sectorI)
        if(allocated(v_state))deallocate(v_state)
        !
     enddo
@@ -340,7 +333,6 @@ contains
     !
     do ispin=1,Nspin
        do iorb=1,Norb
-          write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_s"//str(ispin)
           call rebuild_gf_normal_all(iorb,iorb,ispin)
        enddo
     enddo
@@ -362,8 +354,6 @@ contains
                 MaskBool=.true.   
                 if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
                 if(.not.MaskBool)cycle
-                !
-                write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
                 call rebuild_gf_normal_all(iorb,jorb,ispin)
              enddo
           enddo
@@ -373,10 +363,8 @@ contains
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb
-                !if(hybrid)always T; if(replica/general)T iff following condition is T
                 MaskBool=.true.   
                 if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                !
                 if(.not.MaskBool)cycle
                 impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
                      - impGmats(ispin,ispin,iorb,iorb,:) - impGmats(ispin,ispin,jorb,jorb,:))
@@ -394,6 +382,9 @@ contains
 
 
 
+
+  
+
   subroutine rebuild_gf_normal_all(iorb,jorb,ispin)
     integer,intent(in) :: iorb,jorb,ispin
     integer            :: Nstates,istate
@@ -403,8 +394,9 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG rebuild_gf NORMAL: reconstruct impurity GFs"
+         "DEBUG rebuild_gf_normal_all: reconstruct impurity GFs"
 #endif
+    write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
     if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) then
        print*, "ED_GF_NORMAL WARNING: impGmatrix%state not allocated. Nothing to do"
        return
@@ -533,15 +525,7 @@ contains
        !
        isector    =  es_return_sector(state_list,istate)
        e_state    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,v_state) 
-       else
-          call es_return_dvector(state_list,istate,v_state) 
-       endif
-#else
-       call es_return_dvector(state_list,istate,v_state) 
-#endif
+       v_state    =  es_return_dvec(state_list,istate)
        !
        call get_Nup(isector,Nups)
        call get_Ndw(isector,Ndws)

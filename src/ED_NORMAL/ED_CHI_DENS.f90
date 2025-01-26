@@ -22,7 +22,7 @@ MODULE ED_CHI_DENS
 
   integer                          :: istate,iorb,jorb,ispin,jspin
   integer                          :: isector
-  real(8),allocatable              :: vvinit(:),vI(:),vJ(:)
+  real(8),allocatable              :: vvinit(:)
   real(8),allocatable              :: alfa_(:),beta_(:)
   integer                          :: ialfa
   integer                          :: jalfa
@@ -50,6 +50,7 @@ contains
     !
     write(LOGfile,"(A)")"Get impurity dens Chi:"
     if(MPIMASTER)call start_timer(unit=LOGfile)
+    !
     do iorb=1,Norb
        call lanc_ed_build_densChi_diag(iorb)
     enddo
@@ -90,7 +91,6 @@ contains
 
   subroutine lanc_ed_build_densChi_diag(iorb)
     integer                     :: iorb
-    type(sector)                :: sectorI,sectorJ
     !
     write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))
     !
@@ -99,25 +99,28 @@ contains
        e_state    =  es_return_energy(state_list,istate)
        v_state    =  es_return_dvec(state_list,istate)
        !
-       if(MpiMaster)call build_sector(isector,sectorI)
-       vvinit = apply_op_N(v_state,iorb,sectorI)
+       vvinit = apply_op_N(v_state,iorb,isector)
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
        call add_to_lanczos_densChi(norm2,e_state,alfa_,beta_,iorb,iorb)
        deallocate(alfa_,beta_,vvinit)
-       if(MpiMaster)call delete_sector(sectorI)
+       if(allocated(v_state))deallocate(v_state)
     enddo
     !
-    if(allocated(v_state))deallocate(v_state)
     return
   end subroutine lanc_ed_build_densChi_diag
 
 
 
 
+
+
+
+  
+
+
   subroutine lanc_ed_build_densChi_mix(iorb,jorb)
-    integer                     :: iorb,jorb
-    type(sector)                :: sectorI,sectorJ
-    real(8)                     :: Niorb,Njorb
+    integer                          :: iorb,jorb
+    real(8),dimension(:),allocatable :: vI,vJ
     !
     write(LOGfile,"(A)")"Get Chi_dens_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
@@ -127,20 +130,22 @@ contains
        v_state    =  es_return_dvec(state_list,istate)
        !
        !EVALUATE (N_jorb + N_iorb)|gs> = N_jorb|gs> + N_iorb|gs>
-       if(MpiMaster)call build_sector(isector,sectorI)
-       vI = apply_op_N(v_state,iorb,sectorI)
-       vJ = apply_op_N(v_state,jorb,sectorI)
+       vI = apply_op_N(v_state,iorb,isector)
+       vJ = apply_op_N(v_state,jorb,isector)
        call tridiag_Hv_sector_normal(isector,vI+vJ,alfa_,beta_,norm2)
        call add_to_lanczos_densChi(norm2,e_state,alfa_,beta_,iorb,jorb)
        deallocate(alfa_,beta_,vI,vJ)
-       if(MpiMaster)call delete_sector(sectorI)
+       if(allocated(v_state))deallocate(v_state)
     enddo
-    if(allocated(v_state))deallocate(v_state)
     return
   end subroutine lanc_ed_build_densChi_mix
 
 
 
+
+
+
+  
 
   subroutine add_to_lanczos_densChi(vnorm2,Ei,alanc,blanc,iorb,jorb)
     integer                                    :: iorb,jorb

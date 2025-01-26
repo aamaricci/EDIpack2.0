@@ -24,10 +24,8 @@ MODULE ED_CHI_EXCT
 
   integer                          :: istate,iorb,jorb,ispin,jspin
   integer                          :: isector,jsector,ksector
-  real(8),allocatable              :: vvinit(:),vvinit_tmp(:)
+  real(8),allocatable              :: vvinit(:)
   real(8),allocatable              :: alfa_(:),beta_(:)
-  integer                          :: ialfa
-  integer                          :: jalfa
   integer                          :: ipos,jpos
   integer                          :: i,j,k
   real(8)                          :: sgn,norm2
@@ -80,7 +78,8 @@ contains
   !\Delta_ab = \sum_\sigma C^+_{a\sigma}C_{b\sigma}
   subroutine lanc_ed_build_exctChi_singlet(iorb,jorb)
     integer      :: iorb,jorb
-    type(sector) :: sectorI,sectorK
+    type(sector) :: sectorI
+    real(8),dimension(:),allocatable :: vup,vdw,vtmp
     !
     write(LOGfile,"(A)")"Get singlet Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
@@ -89,60 +88,24 @@ contains
        e_state    =  es_return_energy(state_list,istate)
        v_state    =  es_return_dvec(state_list,istate)
        !
-       !C^+_as C_bs => jsector == isector
-       if(MpiMaster)call build_sector(isector,sectorI)
-       !
-       ksector = getCsector(jalfa,2,isector)       
+       ksector = getCsector(1,2,isector)       
        if(ksector/=0)then
-          if(MpiMaster)then
-             call build_sector(ksector,sectorK)
-             allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-             !C_b,up|gs>=|tmp>
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
-                if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*v_state(i)
-             enddo
-             !C^+_a,up|tmp>=|vvinit>
-             do k=1,sectorK%Dim
-                call apply_op_CDG(k,i,sgn,ipos,ialfa,2,sectorK,sectorI)
-                if(sgn==0.OR.k==0)cycle
-                vvinit(i) = sgn*vvinit_tmp(k)
-             enddo
-             deallocate(vvinit_tmp)
-             call delete_sector(sectorK)
-          endif
+          !C_b,dw|gs>=|tmp>
+          vtmp = apply_op_C(v_state,jorb,2,isector,ksector)
+          !C^+_a,dw|tmp>=|vvinit>
+          vdw  = apply_op_CDG(vtmp,iorb,2,ksector,isector)
        endif
-       ksector = getCsector(jalfa,1,isector)
+       ksector = getCsector(1,1,isector)
        if(ksector/=0)then
-          if(MpiMaster)then
-             call build_sector(ksector,sectorK)
-             allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-             !C_b,dw|gs>=|tmp>
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,jpos,jalfa,1,sectorI,sectorK)
-                if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*v_state(i)
-             enddo
-             !C^+_a,dw|tmp>=|vvinit>
-             do k=1,sectorK%Dim
-                call apply_op_CDG(k,i,sgn,ipos,ialfa,1,sectorK,sectorI)
-                if(sgn==0.OR.k==0)cycle
-                vvinit(i) = vvinit(i) + sgn*vvinit_tmp(k)
-             enddo
-             deallocate(vvinit_tmp)
-             call delete_sector(sectorK)
-          endif
+          !C_b,up|gs>=|tmp>
+          vtmp = apply_op_C(v_state,jorb,1,isector,ksector)
+          !C^+_a,up|tmp>=|vvinit>
+          vup  = apply_op_CDG(vtmp,iorb,1,ksector,isector)
        endif
-       !
-       if(MpiMaster)call delete_sector(sectorI)
-       !
-       call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
+       call tridiag_Hv_sector_normal(isector,vup+vdw,alfa_,beta_,norm2)
        call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,0)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
+       deallocate(alfa_,beta_,vup,vdw)
        if(allocated(v_state))deallocate(v_state)
-       !
     enddo
     return
   end subroutine lanc_ed_build_exctChi_singlet
@@ -156,93 +119,36 @@ contains
   ! \chi_ab  = <Z_ab(\tau)Z_ab(0)>
   !Z_ab = \sum_sp C^+_{as}.tau^z_{sp}.C_{bp}
   subroutine lanc_ed_build_exctChi_tripletZ(iorb,jorb)
-    integer      :: iorb,jorb
-    type(sector) :: sectorI,sectorK,sectorG
+    integer                          :: iorb,jorb
+    real(8),dimension(:),allocatable :: vup,vdw,vtmp
     !
     write(LOGfile,"(A)")"Get triplet Z Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
-    if(ed_total_ud)then
-       ialfa = 1
-       jalfa = 1
-       ipos  = iorb
-       jpos  = jorb
-    else
-       write(LOGfile,"(A)")"ED_CHI_EXCITION warning: can not evaluate \Chi_exc=t_triplet with ed_total_ud=F"
-       return
-    endif
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
        e_state    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,v_state)
-       else
-          call es_return_dvector(state_list,istate,v_state)
-       endif
-#else
-       call es_return_dvector(state_list,istate,v_state)
-#endif
+       v_state    =  es_return_dvec(state_list,istate)
        !
        !Z - Component:
        !Z_{ab}= C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          allocate(vvinit(sectorI%Dim))     ;  vvinit=0d0
-          if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
-               'Apply \sum_s C^+_as.C_bs',isector,sectorI%Nups,sectorI%Ndws
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !Intermediate sectors:
-       ksector = getCsector(jalfa,2,isector)
+       ksector = getCsector(1,2,isector)
        if(ksector/=0)then
-          if(MpiMaster)then
-             call build_sector(ksector,sectorK)
-             allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-             !C_b,dw|gs>=|tmp>
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
-                if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*v_state(i)
-             enddo
-             !C^+_a,dw|tmp>=|vvinit>
-             do k=1,sectorK%Dim
-                call apply_op_CDG(k,i,sgn,ipos,ialfa,2,sectorK,sectorI)
-                if(sgn==0.OR.k==0)cycle
-                vvinit(i) = -sgn*vvinit_tmp(k) 
-             enddo
-             deallocate(vvinit_tmp)
-             call delete_sector(sectorK)
-          endif
+          !C_b,dw  |gs> =|tmp>
+          vtmp = apply_op_C(v_state,jorb,2,isector,ksector)
+          !C^+_a,dw|tmp>=|vvinit>
+          vdw  = apply_op_CDG(vtmp,iorb,2,ksector,isector)
        endif
-       ksector = getCsector(jalfa,1,isector)
+       ksector = getCsector(1,1,isector)
        if(ksector/=0)then
-          if(MpiMaster)then
-             call build_sector(ksector,sectorK)
-             allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-             !C_b,up|gs>=|tmp>
-             do i=1,sectorI%Dim
-                call apply_op_C(i,k,sgn,jpos,jalfa,1,sectorI,sectorK)
-                if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*v_state(i)
-             enddo
-             !C^+_a,up|tmp>=|vvinit>
-             do k=1,sectorK%Dim
-                call apply_op_CDG(k,i,sgn,ipos,ialfa,1,sectorK,sectorI)
-                if(sgn==0.OR.k==0)cycle
-                vvinit(i) =  sgn*vvinit_tmp(k) + vvinit(i)
-             enddo
-             deallocate(vvinit_tmp)
-             call delete_sector(sectorK)
-          endif
+          !C_b,up  |gs> =|tmp>
+          vtmp = apply_op_C(v_state,jorb,1,isector,ksector)
+          !C^+_a,up|tmp>=|vvinit>
+          vup  = apply_op_CDG(vtmp,iorb,1,ksector,isector)
        endif
-       if(MpiMaster)call delete_sector(sectorI)
-       !
-       call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
+       call tridiag_Hv_sector_normal(isector,vup-vdw,alfa_,beta_,norm2)
        call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,2)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
+       deallocate(alfa_,beta_,vup,vdw)
        if(allocated(v_state))deallocate(v_state)
     enddo
     return
@@ -275,114 +181,46 @@ contains
   ! in that case |v> and |w> belong to the same sector (the same as |0>) and the
   ! mixed term is in general non null.
   subroutine lanc_ed_build_exctChi_tripletXY(iorb,jorb)
-    integer      :: iorb,jorb
-    type(sector) :: sectorI,sectorK,sectorJ
+    integer                          :: iorb,jorb
+    real(8),dimension(:),allocatable :: vtmp
     !
     write(LOGfile,"(A)")"Get triplet XY Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
-    !
-    if(ed_total_ud)then
-       ialfa = 1
-       jalfa = 1
-       ipos  = iorb
-       jpos  = jorb
-    else
-       write(LOGfile,"(A)")"ED_CHI_EXCITION warning: can not evaluate \Chi_exc=t_triplet with ed_total_ud=F"
-       return
-    endif
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
        e_state    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,v_state)
-       else
-          call es_return_dvector(state_list,istate,v_state)
-       endif
-#else
-       call es_return_dvector(state_list,istate,v_state)
-#endif
+       v_state    =  es_return_dvec(state_list,istate)
        !
        !X - Component == Y -Component 
        !X_{ab}= C^+_{a,up}C_{b,dw} + C^+_{a,dw}C_{b,up}
        !
        !C^+_{a,dw}C_{b,up}:
-       ksector = getCsector(jalfa,1,isector)
+       ksector = getCsector(1,1,isector)
        if(ksector/=0)then
-          jsector = getCDGsector(ialfa,2,ksector)
+          jsector = getCDGsector(1,2,ksector)
           if(jsector/=0)then
-             if(MpiMaster)then
-                call build_sector(isector,sectorI)
-                call build_sector(ksector,sectorK)
-                call build_sector(jsector,sectorJ)
-                if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
-                     'Apply C^+_{a,dw}C_{b,up}',isector,sectorI%Nups,sectorI%Ndws
-                allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-                allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
-                !C_{b,up}|0>=|tmp>
-                do i=1,sectorI%Dim
-                   call apply_op_C(i,k,sgn,jpos,jalfa,1,sectorI,sectorK)
-                   if(sgn==0.OR.k==0)cycle
-                   vvinit_tmp(k) = sgn*v_state(i)
-                enddo
-                !C^+_{a,dw}|tmp>=|vvinit>
-                do k=1,sectorK%Dim
-                   call apply_op_CDG(k,i,sgn,ipos,ialfa,2,sectorK,sectorJ)
-                   if(sgn==0.OR.k==0)cycle
-                   vvinit(i) = sgn*vvinit_tmp(k)
-                enddo
-                deallocate(vvinit_tmp)
-                call delete_sector(sectorI)
-                call delete_sector(sectorK)
-                call delete_sector(sectorJ)
-             else
-                allocate(vvinit(1));vvinit=0.d0
-             endif
-             !
+             !C_{b,up}|gs>   =|tmp>
+             vtmp   = apply_op_C(v_state,jorb,1,isector,ksector)
+             !C^+_{a,dw}|tmp>=|vvinit>
+             vvinit = apply_op_CDG(vtmp,iorb,2,ksector,jsector)
              call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
              call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,1)
-             deallocate(alfa_,beta_)
-             if(allocated(vvinit))deallocate(vvinit)
+             deallocate(alfa_,beta_,vtmp,vvinit)
           endif
        endif
        !
        !C^+_{a,up}C_{b,dw}:
-       ksector = getCsector(jalfa,2,isector)
+       ksector = getCsector(1,2,isector)
        if(ksector/=0)then
-          jsector = getCDGsector(ialfa,1,ksector)
+          jsector = getCDGsector(1,1,ksector)
           if(jsector/=0)then
-             if(MpiMaster)then
-                call build_sector(isector,sectorI)
-                call build_sector(ksector,sectorK)
-                call build_sector(jsector,sectorJ)
-                if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
-                     'Apply C^+_{a,dw}C_{b,up}',isector,sectorI%Nups,sectorI%Ndws
-                allocate(vvinit_tmp(sectorK%Dim)) ;  vvinit_tmp=0d0
-                allocate(vvinit(sectorJ%Dim))     ;  vvinit=0d0
-                !C_{b,dw}|0>=|tmp>
-                do i=1,sectorI%Dim
-                   call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
-                   if(sgn==0.OR.k==0)cycle
-                   vvinit_tmp(k) = sgn*v_state(i)
-                enddo
-                !C^+_{a,up}|tmp>=|vvinit>
-                do k=1,sectorK%Dim
-                   call apply_op_CDG(k,i,sgn,ipos,ialfa,1,sectorK,sectorJ)
-                   if(sgn==0.OR.k==0)cycle
-                   vvinit(i) = sgn*vvinit_tmp(k)
-                enddo
-                deallocate(vvinit_tmp)
-                call delete_sector(sectorI)
-                call delete_sector(sectorK)
-                call delete_sector(sectorJ)
-             else
-                allocate(vvinit(1));vvinit=0.d0
-             endif
-             !
+             !C_{b,dw}|gs>   =|tmp>
+             vtmp   = apply_op_C(v_state,jorb,2,isector,ksector)
+             !C^+_{a,up}|tmp>=|vvinit>
+             vvinit = apply_op_CDG(vtmp,iorb,1,ksector,jsector)
              call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
              call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,1)
-             deallocate(alfa_,beta_)
-             if(allocated(vvinit))deallocate(vvinit)
+             deallocate(alfa_,beta_,vtmp,vvinit)
           endif
        endif
        if(allocated(v_state))deallocate(v_state)
