@@ -15,6 +15,9 @@ MODULE ED_GF_SUPERC
   private
 
   public :: build_gf_superc
+  public :: get_Gimp_superc
+  public :: get_Sigma_superc
+  !
   public :: rebuild_gf_superc
   public :: build_sigma_superc
 
