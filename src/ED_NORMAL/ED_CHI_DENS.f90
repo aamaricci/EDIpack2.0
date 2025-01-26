@@ -22,7 +22,7 @@ MODULE ED_CHI_DENS
 
   integer                          :: istate,iorb,jorb,ispin,jspin
   integer                          :: isector
-  real(8),allocatable              :: vvinit(:)
+  real(8),allocatable              :: vvinit(:),vI(:),vJ(:)
   real(8),allocatable              :: alfa_(:),beta_(:)
   integer                          :: ialfa
   integer                          :: jalfa
@@ -30,8 +30,8 @@ MODULE ED_CHI_DENS
   integer                          :: i,j
   integer                          :: iph,i_el
   real(8)                          :: sgn,norm2
-  real(8),dimension(:),allocatable :: state_dvec
-  real(8)                          :: state_e
+  real(8),dimension(:),allocatable :: v_state
+  real(8)                          :: e_state
 
 
 contains
@@ -48,46 +48,25 @@ contains
     !
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos.
     !
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG build_Chi_dens_normal: build dens-Chi"
-#endif
     write(LOGfile,"(A)")"Get impurity dens Chi:"
+    if(MPIMASTER)call start_timer(unit=LOGfile)
     do iorb=1,Norb
-       write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))
-       if(MPIMASTER)call start_timer(unit=LOGfile)
        call lanc_ed_build_densChi_diag(iorb)
-       if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-       if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
     enddo
     !
     if(Norb>1)then
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             write(LOGfile,"(A)")"Get Chi_dens_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
-             if(MPIMASTER)call start_timer(unit=LOGfile)
              call lanc_ed_build_densChi_mix(iorb,jorb)
-             if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-             if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
           end do
        end do
        !
        !
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             select case(ed_diag_type)
-             case default
-                densChi_w(iorb,jorb,:)   = 0.5d0*(densChi_w(iorb,jorb,:) - densChi_w(iorb,iorb,:) - densChi_w(jorb,jorb,:))
-                densChi_tau(iorb,jorb,:) = 0.5d0*(densChi_tau(iorb,jorb,:) - densChi_tau(iorb,iorb,:) - densChi_tau(jorb,jorb,:))
-                densChi_iv(iorb,jorb,:)  = 0.5d0*(densChi_iv(iorb,jorb,:) - densChi_iv(iorb,iorb,:) - densChi_iv(jorb,jorb,:))
-                !
-             case ("full")
-                ! The previous calculation is not needed in the FULL ED case
-             end select
+             densChi_w(iorb,jorb,:)   = 0.5d0*(densChi_w(iorb,jorb,:) - densChi_w(iorb,iorb,:) - densChi_w(jorb,jorb,:))
+             densChi_tau(iorb,jorb,:) = 0.5d0*(densChi_tau(iorb,jorb,:) - densChi_tau(iorb,iorb,:) - densChi_tau(jorb,jorb,:))
+             densChi_iv(iorb,jorb,:)  = 0.5d0*(densChi_iv(iorb,jorb,:) - densChi_iv(iorb,iorb,:) - densChi_iv(jorb,jorb,:))
              !
              densChi_w(jorb,iorb,:)   = densChi_w(iorb,jorb,:)
              densChi_tau(jorb,iorb,:) = densChi_tau(iorb,jorb,:)
@@ -96,18 +75,14 @@ contains
        enddo
     endif
     !
+    if(MPIMASTER)call stop_timer
+    !
   end subroutine build_chi_dens_normal
 
 
 
 
-
-
-  !################################################################
-  !################################################################
-  !################################################################
-  !################################################################
-
+  
 
 
 
@@ -117,59 +92,25 @@ contains
     integer                     :: iorb
     type(sector)                :: sectorI,sectorJ
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_densChi diag: Lanczos build dens Chi l"//str(iorb)
-#endif
-    !
-    if(ed_total_ud)then
-       ialfa = 1
-       ipos  = iorb
-    else
-       ialfa = iorb
-       ipos  = 1
-    endif
+    write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_dvec(state_list,istate)
        !
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
-               'From sector',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose==3)write(LOGfile,"(A20,I12)")'Apply N',isector
-          allocate(vvinit(sectorI%Dim)) ; vvinit=zero
-          do i=1,sectorI%Dim
-             call apply_op_N(i,sgn,ipos,ialfa,sectorI)
-             vvinit(i) = sgn*state_dvec(i)
-          enddo
-          call delete_sector(sectorI)
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !
+       if(MpiMaster)call build_sector(isector,sectorI)
+       vvinit = apply_op_N(v_state,iorb,sectorI)
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_densChi(norm2,state_e,alfa_,beta_,iorb,iorb)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       call add_to_lanczos_densChi(norm2,e_state,alfa_,beta_,iorb,iorb)
+       deallocate(alfa_,beta_,vvinit)
+       if(MpiMaster)call delete_sector(sectorI)
     enddo
+    !
+    if(allocated(v_state))deallocate(v_state)
     return
   end subroutine lanc_ed_build_densChi_diag
 
-
-
-  !################################################################
 
 
 
@@ -178,67 +119,25 @@ contains
     type(sector)                :: sectorI,sectorJ
     real(8)                     :: Niorb,Njorb
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_densChi mix: Lanczos build dens Chi l"//str(iorb)//",m"//str(jorb)
-#endif
-    !
-    if(ed_total_ud)then
-       ialfa = 1
-       jalfa = 1
-       ipos  = iorb
-       jpos  = jorb
-    else
-       ialfa = iorb
-       jalfa = jorb
-       ipos  = 1
-       jpos  = 1
-    endif
+    write(LOGfile,"(A)")"Get Chi_dens_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_dvec(state_list,istate)
        !
        !EVALUATE (N_jorb + N_iorb)|gs> = N_jorb|gs> + N_iorb|gs>
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
-               'From sector',isector,sectorI%Nups,sectorI%Ndws
-          if(ed_verbose>=3)write(LOGfile,"(A20,I15)")'Apply Na+Nb',isector
-          allocate(vvinit(sectorI%Dim)) ; vvinit=zero
-          do i=1,sectorI%Dim
-             call apply_op_N(i,Niorb,ipos,ialfa,sectorI)
-             call apply_op_N(i,Njorb,jpos,jalfa,sectorI)
-             sgn       = Niorb + Njorb
-             vvinit(i) = sgn*state_dvec(i)
-          enddo
-          call delete_sector(sectorI)
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !
-       call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_densChi(norm2,state_e,alfa_,beta_,iorb,jorb)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(MpiMaster)call build_sector(isector,sectorI)
+       vI = apply_op_N(v_state,iorb,sectorI)
+       vJ = apply_op_N(v_state,jorb,sectorI)
+       call tridiag_Hv_sector_normal(isector,vI+vJ,alfa_,beta_,norm2)
+       call add_to_lanczos_densChi(norm2,e_state,alfa_,beta_,iorb,jorb)
+       deallocate(alfa_,beta_,vI,vJ)
+       if(MpiMaster)call delete_sector(sectorI)
     enddo
+    if(allocated(v_state))deallocate(v_state)
     return
   end subroutine lanc_ed_build_densChi_mix
-
-
-
-
-  !################################################################
 
 
 

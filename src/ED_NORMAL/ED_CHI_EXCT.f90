@@ -31,8 +31,8 @@ MODULE ED_CHI_EXCT
   integer                          :: ipos,jpos
   integer                          :: i,j,k
   real(8)                          :: sgn,norm2
-  real(8),dimension(:),allocatable :: state_dvec
-  real(8)                          :: state_e
+  real(8),dimension(:),allocatable :: v_state
+  real(8)                          :: e_state
 
 contains
 
@@ -53,84 +53,44 @@ contains
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
     !
     if(Norb>1)then
-#ifdef _DEBUG
-       if(ed_verbose>1)write(Logfile,"(A)")&
-            "DEBUG build_Chi_exct_normal: build exct-Chi"
-#endif
        write(LOGfile,"(A)")"Get impurity exciton Chi:"
+       if(MPIMASTER)call start_timer(unit=LOGfile)
        do iorb=1,Norb
           do jorb=iorb+1,Norb
-             write(LOGfile,"(A)")"Get singlet Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
-             if(MPIMASTER)call start_timer(unit=LOGfile)
              call lanc_ed_build_exctChi_singlet(iorb,jorb)
-             if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-             if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
-             !
-             write(LOGfile,"(A)")"Get triplet Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
-             if(MPIMASTER)call start_timer(unit=LOGfile)
              call lanc_ed_build_exctChi_tripletXY(iorb,jorb)
              call lanc_ed_build_exctChi_tripletZ(iorb,jorb)
-             if(MPIMASTER)call stop_timer
-#ifdef _DEBUG
-             if(ed_verbose>1)write(Logfile,"(A)")""
-#endif
              !
              exctChi_w(0:,jorb,iorb,:)   = exctChi_w(0:,iorb,jorb,:)
              exctChi_tau(0:,jorb,iorb,:) = exctChi_tau(0:,iorb,jorb,:)
              exctChi_iv(0:,jorb,iorb,:)  = exctChi_iv(0:,iorb,jorb,:)
           end do
        end do
+       if(MPIMASTER)call stop_timer
     endif
   end subroutine build_chi_exct_normal
 
 
 
 
+
+
+  
   ! \chi_ab  = <Delta*_ab(\tau)Delta_ab(0)>
   !\Delta_ab = \sum_\sigma C^+_{a\sigma}C_{b\sigma}
   subroutine lanc_ed_build_exctChi_singlet(iorb,jorb)
     integer      :: iorb,jorb
     type(sector) :: sectorI,sectorK
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_exctChi SINGLET: Lanczos build exct Chi l"//str(iorb)//",m"//str(jorb)
-#endif
-    !
-    if(ed_total_ud)then
-       ialfa = 1
-       jalfa = 1
-       ipos  = iorb
-       jpos  = jorb
-    else
-       write(LOGfile,"(A)")"ED_CHI_EXCITION warning: can not evaluate \Chi_exct_singlet with ed_total_ud=F"
-       return
-    endif
+    write(LOGfile,"(A)")"Get singlet Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
-       else
-          call es_return_dvector(state_list,istate,state_dvec)
-       endif
-#else
-       call es_return_dvector(state_list,istate,state_dvec)
-#endif
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_dvec(state_list,istate)
        !
        !C^+_as C_bs => jsector == isector
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A30,I6,20I4)")&
-               'Apply \sum_s C^+_as.C_bs',isector,sectorI%Nups,sectorI%Ndws
-          allocate(vvinit(sectorI%Dim))     ;  vvinit=0d0
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
+       if(MpiMaster)call build_sector(isector,sectorI)
        !
        ksector = getCsector(jalfa,2,isector)       
        if(ksector/=0)then
@@ -141,7 +101,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
                 if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
+                vvinit_tmp(k) = sgn*v_state(i)
              enddo
              !C^+_a,up|tmp>=|vvinit>
              do k=1,sectorK%Dim
@@ -162,7 +122,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,k,sgn,jpos,jalfa,1,sectorI,sectorK)
                 if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
+                vvinit_tmp(k) = sgn*v_state(i)
              enddo
              !C^+_a,dw|tmp>=|vvinit>
              do k=1,sectorK%Dim
@@ -178,10 +138,10 @@ contains
        if(MpiMaster)call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,0)
+       call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,0)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     return
@@ -199,10 +159,7 @@ contains
     integer      :: iorb,jorb
     type(sector) :: sectorI,sectorK,sectorG
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_exctChi TRIPLET Z: Lanczos build exct Chi l"//str(iorb)//",m"//str(jorb)
-#endif
+    write(LOGfile,"(A)")"Get triplet Z Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -216,15 +173,15 @@ contains
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
+          call es_return_dvector(MpiComm,state_list,istate,v_state)
        else
-          call es_return_dvector(state_list,istate,state_dvec)
+          call es_return_dvector(state_list,istate,v_state)
        endif
 #else
-       call es_return_dvector(state_list,istate,state_dvec)
+       call es_return_dvector(state_list,istate,v_state)
 #endif
        !
        !Z - Component:
@@ -247,7 +204,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
                 if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
+                vvinit_tmp(k) = sgn*v_state(i)
              enddo
              !C^+_a,dw|tmp>=|vvinit>
              do k=1,sectorK%Dim
@@ -268,7 +225,7 @@ contains
              do i=1,sectorI%Dim
                 call apply_op_C(i,k,sgn,jpos,jalfa,1,sectorI,sectorK)
                 if(sgn==0.OR.k==0)cycle
-                vvinit_tmp(k) = sgn*state_dvec(i)
+                vvinit_tmp(k) = sgn*v_state(i)
              enddo
              !C^+_a,up|tmp>=|vvinit>
              do k=1,sectorK%Dim
@@ -283,10 +240,10 @@ contains
        if(MpiMaster)call delete_sector(sectorI)
        !
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,2)
+       call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,2)
        deallocate(alfa_,beta_)
        if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
     enddo
     return
   end subroutine lanc_ed_build_exctChi_tripletZ
@@ -321,10 +278,7 @@ contains
     integer      :: iorb,jorb
     type(sector) :: sectorI,sectorK,sectorJ
     !
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")&
-         "DEBUG lanc_ed_build_exctChi TRIPLET XY: Lanczos build exct Chi l"//str(iorb)//",m"//str(jorb)
-#endif
+    write(LOGfile,"(A)")"Get triplet XY Chi_exct_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
     if(ed_total_ud)then
        ialfa = 1
@@ -338,15 +292,15 @@ contains
     !
     do istate=1,state_list%size
        isector    =  es_return_sector(state_list,istate)
-       state_e    =  es_return_energy(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)
 #ifdef _MPI
        if(MpiStatus)then
-          call es_return_dvector(MpiComm,state_list,istate,state_dvec)
+          call es_return_dvector(MpiComm,state_list,istate,v_state)
        else
-          call es_return_dvector(state_list,istate,state_dvec)
+          call es_return_dvector(state_list,istate,v_state)
        endif
 #else
-       call es_return_dvector(state_list,istate,state_dvec)
+       call es_return_dvector(state_list,istate,v_state)
 #endif
        !
        !X - Component == Y -Component 
@@ -369,7 +323,7 @@ contains
                 do i=1,sectorI%Dim
                    call apply_op_C(i,k,sgn,jpos,jalfa,1,sectorI,sectorK)
                    if(sgn==0.OR.k==0)cycle
-                   vvinit_tmp(k) = sgn*state_dvec(i)
+                   vvinit_tmp(k) = sgn*v_state(i)
                 enddo
                 !C^+_{a,dw}|tmp>=|vvinit>
                 do k=1,sectorK%Dim
@@ -386,7 +340,7 @@ contains
              endif
              !
              call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-             call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,1)
+             call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,1)
              deallocate(alfa_,beta_)
              if(allocated(vvinit))deallocate(vvinit)
           endif
@@ -409,7 +363,7 @@ contains
                 do i=1,sectorI%Dim
                    call apply_op_C(i,k,sgn,jpos,jalfa,2,sectorI,sectorK)
                    if(sgn==0.OR.k==0)cycle
-                   vvinit_tmp(k) = sgn*state_dvec(i)
+                   vvinit_tmp(k) = sgn*v_state(i)
                 enddo
                 !C^+_{a,up}|tmp>=|vvinit>
                 do k=1,sectorK%Dim
@@ -426,12 +380,12 @@ contains
              endif
              !
              call tridiag_Hv_sector_normal(jsector,vvinit,alfa_,beta_,norm2)
-             call add_to_lanczos_exctChi(norm2,state_e,alfa_,beta_,iorb,jorb,1)
+             call add_to_lanczos_exctChi(norm2,e_state,alfa_,beta_,iorb,jorb,1)
              deallocate(alfa_,beta_)
              if(allocated(vvinit))deallocate(vvinit)
           endif
        endif
-       if(allocated(state_dvec))deallocate(state_dvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     return

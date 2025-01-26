@@ -92,8 +92,10 @@ module ED_EIGENSPACE
   !
   public :: es_return_sector       !get the sector of a state       !checked
   public :: es_return_energy       !get the energy of a state       !checked
+  !subroutine
   public :: es_return_dvector      !get the vector of a state       !checked
   public :: es_return_cvector      !get the vector of a state       !checked
+  !functions
   public :: es_return_dvec
   public :: es_return_cvec
   public :: es_return_gs_degeneracy!get the number of degenerate GS !checked
