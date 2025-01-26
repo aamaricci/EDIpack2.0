@@ -516,12 +516,7 @@ contains
           case ("normal")
              write(LOGfile,"(A,I6,2I4,A,I6,2I4)")&
                   'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
-                  'apply C  :',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
-             ! if(Jz_basis)then
-             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_a,s:',sectorJ%twoJz/2.
-             ! else
-             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_a,s:',sectorJ%Ntot
-             ! endif
+                  ' -> apply C  :',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
           case default;stop "apply_Op_C ERROR: called with ed_mode != normal"
           end select
        endif
@@ -560,7 +555,7 @@ contains
     type(sector)                        :: sectorI,sectorJ
     complex(8),dimension(:),allocatable :: OV
     real(8)                             :: sgn
-    integer                             :: ialfa,ibeta,ipos,isite
+    integer                             :: ialfa,ibeta,isite
     integer                             :: i,j,r
     integer                             :: iph,i_el,j_el,ei
     integer,dimension(2*Ns_Ud)          :: Indices
@@ -586,17 +581,22 @@ contains
           case ("superc")
              write(LOGfile,"(A,I6,I3,A,I6,I3)")&
                   'From:',sectorI%index,sectorI%Sz,&
-                  'apply C  :',sectorJ%index,sectorJ%Sz
+                  ' -> apply C  :',sectorJ%index,sectorJ%Sz
           case ("nonsu2")
-             write(LOGfile,"(A,I6,I3,A,I6,I3)")&
-                  'From:',sectorI%index,sectorI%Ntot,&
-                  'apply C  :',sectorJ%index,sectorJ%Ntot
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply C  :',sectorJ%index,sectorJ%twoJz/2.
+             else
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply C  :',sectorJ%index,sectorJ%Ntot
+             endif
           end select
        endif
        !
        do i=1,sectorI%Dim
-          !
-          isite= ipos + (ispin-1)*Ns
+          isite= iorb + (ispin-1)*Ns
           iph  = (i-1)/(sectorI%DimEl)+1
           i_el = mod(i-1,sectorI%DimEl)+1
           ei   = sectorI%H(1)%map(i_el)
@@ -669,7 +669,7 @@ contains
           case ("normal")
              write(LOGfile,"(A,I6,2I4,A,I6,2I4)")&
                   'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
-                  'apply C^+:',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
+                  ' -> apply C^+:',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
           case default;stop "apply_op_CDG ERROR: called with ed_mode/=normal"
           end select
        endif
@@ -707,7 +707,7 @@ contains
     type(sector)                        :: sectorI,sectorJ
     complex(8),dimension(:),allocatable :: OV
     real(8)                             :: sgn
-    integer                             :: ialfa,ibeta,ipos,isite
+    integer                             :: ialfa,ibeta,isite
     integer                             :: i,j,r
     integer                             :: iph,i_el,j_el,ei
     integer,dimension(2*Ns_Ud)          :: Indices
@@ -733,16 +733,22 @@ contains
           case ("superc")
              write(LOGfile,"(A,I6,I3,A,I6,I3)")&
                   'From:',sectorI%index,sectorI%Sz,&
-                  'apply C^+:',sectorJ%index,sectorJ%Sz
+                  ' -> apply C^+:',sectorJ%index,sectorJ%Sz
           case ("nonsu2")
-             write(LOGfile,"(A,I6,I3,A,I6,I3)")&
-                  'From:',sectorI%index,sectorI%Ntot,&
-                  'apply C^+:',sectorJ%index,sectorJ%Ntot
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply C^+:',sectorJ%index,sectorJ%twoJz/2.
+             else
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply C^+:',sectorJ%index,sectorJ%Ntot
+             endif
           end select
        endif
        !
        do i=1,sectorI%Dim
-          isite= ipos + (ispin-1)*Ns
+          isite= iorb + (ispin-1)*Ns
           iph  = (i-1)/(sectorI%DimEl)+1
           i_el = mod(i-1,sectorI%DimEl) + 1
           ei   = sectorI%H(1)%map(i_el)
@@ -855,7 +861,7 @@ contains
           case ("normal")
              write(LOGfile,"(A,I6,2I4,A,A"//str(N)//",I6,2I4)")&
                   'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
-                  ' -> apply:',Ostr,sectorI%index,sectorJ%Nups,sectorJ%Ndws
+                  ' -> apply:',Ostr,sectorJ%index,sectorJ%Nups,sectorJ%Ndws
           end select
        endif
        !
@@ -982,16 +988,17 @@ contains
           case ("superc")
              write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
                   'From:',sectorI%index,sectorI%Sz,&
-                  ' -> apply:',Ostr,sectorI%index,sectorJ%Sz
+                  ' -> apply:',Ostr,sectorJ%index,sectorJ%Sz
           case ("nonsu2")
-             write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
-                  'From:',sectorI%index,sectorI%Ntot,&
-                  ' -> apply:',Ostr,sectorI%index,sectorJ%Ntot
-             ! if(Jz_basis)then
-             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%twoJz/2.
-             ! else
-             !    if(ed_verbose>=3)write(LOGfile,"(A26,I3)")'apply c^+_b,s + c^+_a,s:',sectorJ%Ntot
-             ! endif
+             if(Jz_basis)then                    
+                write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply:',Ostr,sectorJ%index,sectorJ%Ntot
+             else
+                write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply:',Ostr,sectorJ%index,sectorJ%twoJz/2.
+             endif
           end select
        endif
        !
@@ -1134,8 +1141,13 @@ contains
              write(LOGfile,"(A,I6,I3)")&
                   'apply Sz :',sectorI%index,sectorI%Sz
           case ("nonsu2")
-             write(LOGfile,"(A,I6,I3)")&
-                  'apply Sz :',sectorI%index,sectorI%Ntot
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply Sz :',sectorI%index,sectorI%twoJz/2.
+             else
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply Sz :',sectorI%index,sectorI%Ntot
+             endif
           end select
        endif
        !
@@ -1263,8 +1275,13 @@ contains
              write(LOGfile,"(A,I6,I3)")&
                   'apply N  :',sectorI%index,sectorI%Sz
           case ("nonsu2")
-             write(LOGfile,"(A,I6,I3)")&
-                  'apply N  :',sectorI%index,sectorI%Ntot
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply N  :',sectorI%index,sectorI%twoJz/2.
+             else
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply N  :',sectorI%index,sectorI%Ntot
+             endif
           end select
        endif
        !
