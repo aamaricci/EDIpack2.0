@@ -258,24 +258,6 @@ MODULE ED_VARS_GLOBAL
   !Impurity Green's function for phonons
   !PRIVATE (now public but accessible thru routine)
   !=========================================================
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSmats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSreal
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impGmats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impGreal
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0mats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impG0real
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impD0mats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impD0real
-  !
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAmats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impSAreal
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impFmats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impFreal
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0mats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impF0real
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impT0mats
-  complex(8),allocatable,dimension(:,:,:,:,:)        :: impT0real
-  !
   complex(8),allocatable,dimension(:)                :: impDmats_ph
   complex(8),allocatable,dimension(:)                :: impDreal_ph
   !
@@ -362,7 +344,9 @@ MODULE ED_VARS_GLOBAL
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Fmats_ineq,Freal_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: G0mats_ineq,G0real_ineq
   complex(8),dimension(:,:,:,:,:,:),allocatable,save :: F0mats_ineq,F0real_ineq
+
   complex(8),dimension(:,:),allocatable,save         :: Dmats_ph_ineq,Dreal_ph_ineq
+  
   complex(8),dimension(:,:,:,:,:),allocatable,save   :: single_particle_density_matrix_ineq
   complex(8),dimension(:,:,:),allocatable,save       :: impurity_density_matrix_ineq
   real(8),dimension(:,:),allocatable,save            :: dens_ineq 

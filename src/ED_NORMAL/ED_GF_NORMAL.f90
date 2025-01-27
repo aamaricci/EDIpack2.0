@@ -2,7 +2,7 @@ MODULE ED_GF_NORMAL
   !Constructs the interacting impurity electronic Green's functions. On request it evaluated the phononic Green's functions and and different susceptibilities.  
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER  
-  USE SF_IOTOOLS, only: str,reg,txtfy
+  USE SF_IOTOOLS, only: str,reg,txtfy,to_lower
   USE SF_LINALG,  only: inv,eigh,eye
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
@@ -16,12 +16,10 @@ MODULE ED_GF_NORMAL
   private
 
 
-  public :: build_gf_normal
+  public :: build_Gimp_normal
   public :: get_Gimp_normal
   public :: get_Sigma_normal
 
-  public :: build_sigma_normal
-  public :: rebuild_gf_normal
 
 
   integer                          :: istate
@@ -61,7 +59,7 @@ contains
   !                        NORMAL
   !+------------------------------------------------------------------+
 
-  subroutine build_gf_normal()
+  subroutine build_Gimp_normal()
     !
     !Evaluates the impurity electrons Green's function :math:`G(z)` and the phonons one :math:`D(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ] and rank-1 array :f:var:`impdmats`, :f:var:`impdreal`.    
     !
@@ -72,8 +70,6 @@ contains
     ! .. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
     !
     integer                                     :: iorb,jorb,ispin,jspin,i
-    logical                                     :: MaskBool
-    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
     !
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG build_gf NORMAL: build GFs"
@@ -88,24 +84,12 @@ contains
     enddo
     !
     if(offdiag_gf_flag)then
-       Hmask= .true.
-       if(.not.ed_all_g)then
-          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
-       end if
-       write(LOGfile,"(A)")"Get mask(G):"
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
-          enddo
-       enddo
+       call PrintHmask()
        !
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
+                if(.not.Gbool(ispin,ispin,iorb,jorb))cycle
                 call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
                 call lanc_build_gf_normal_mix(iorb,jorb,ispin)
              enddo
@@ -116,40 +100,10 @@ contains
        if(DimPh>1)call lanc_build_gf_phonon_main()
        !
        if(MPIMASTER)call stop_timer
-       !
-       !Put here off-diagonal manipulation by symmetry:
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             do jorb=iorb+1,Norb
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
-                impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
-                     - impGmats(ispin,ispin,iorb,iorb,:) - impGmats(ispin,ispin,jorb,jorb,:))
-                impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,ispin,iorb,jorb,:) &
-                     - impGreal(ispin,ispin,iorb,iorb,:) - impGreal(ispin,ispin,jorb,jorb,:))
-                impGmats(ispin,ispin,jorb,iorb,:) = impGmats(ispin,ispin,iorb,jorb,:)
-                impGreal(ispin,ispin,jorb,iorb,:) = impGreal(ispin,ispin,iorb,jorb,:)
-             enddo
-          enddo
-       enddo
     end if
     !
-    !
+  end subroutine build_Gimp_normal
 
-    !
-    !
-  end subroutine build_gf_normal
-
-
-
-
-
-
-
-
-  !################################################################
-  !################################################################
 
 
 
@@ -200,9 +154,6 @@ contains
 
 
 
-
-
-
   subroutine lanc_build_gf_normal_mix(iorb,jorb,ispin)
     integer                     :: iorb,jorb,ispin
     !
@@ -243,11 +194,6 @@ contains
     enddo
     return
   end subroutine lanc_build_gf_normal_mix
-
-
-
-  !################################################################
-  !################################################################
 
 
 
@@ -314,107 +260,8 @@ contains
        !
        impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(j) = peso
        impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(j)  = isign*de
-       !
-       do i=1,Lmats
-          iw=xi*wm(i)
-          impGmats(ispin,ispin,iorb,jorb,i)=impGmats(ispin,ispin,iorb,jorb,i) + peso/(iw-isign*de)
-       enddo
-       do i=1,Lreal
-          iw=dcmplx(wr(i),eps)
-          impGreal(ispin,ispin,iorb,jorb,i)=impGreal(ispin,ispin,iorb,jorb,i) + peso/(iw-isign*de)
-       enddo
     enddo
   end subroutine add_to_lanczos_gf_normal
-
-
-
-
-
-
-  !################################################################
-  !################################################################
-  !################################################################
-  !################################################################
-
-
-
-
-
-
-
-
-  subroutine build_sigma_normal
-    !
-    ! Obtains the self-energy function :math:`\Sigma` on the current Matsubara and Real-axis intervals using impurity Dyson equation   :math:`\hat{\Sigma}(z) = \hat{G}^{-1}_0(z) - \hat{G}^{-1}(z)`. 
-    !
-    integer                                           :: i,ispin,iorb
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: invG0mats,invGmats
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: invG0real,invGreal
-    complex(8),dimension(Norb,Norb)                   :: invGimp
-    !
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG build_sigma NORMAL: get Self-energy"
-#endif
-    !
-    invG0mats = zero
-    invGmats  = zero
-    invG0real = zero
-    invGreal  = zero
-    impSmats  = zero
-    impSreal  = zero
-    !
-    !
-    !Get G0^-1
-    invG0mats(:,:,:,:,:) = invg0_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
-    invG0real(:,:,:,:,:) = invg0_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !
-    !Get Gimp^-1
-    select case(bath_type)
-       !
-       !
-    case default
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             invGmats(ispin,ispin,iorb,iorb,:) = one/impGmats(ispin,ispin,iorb,iorb,:)
-             invGreal(ispin,ispin,iorb,iorb,:) = one/impGreal(ispin,ispin,iorb,iorb,:)
-          enddo
-       enddo
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             impSmats(ispin,ispin,iorb,iorb,:) = invG0mats(ispin,ispin,iorb,iorb,:) - invGmats(ispin,ispin,iorb,iorb,:)
-             impSreal(ispin,ispin,iorb,iorb,:) = invG0real(ispin,ispin,iorb,iorb,:) - invGreal(ispin,ispin,iorb,iorb,:)
-          enddo
-       enddo
-       !
-       !
-    case ("hybrid","replica","general")   !Diagonal in spin
-       do ispin=1,Nspin
-          do i=1,Lmats
-             invGimp = impGmats(ispin,ispin,:,:,i)
-             call inv(invGimp)
-             invGmats(ispin,ispin,:,:,i)=invGimp
-          enddo
-          !
-          do i=1,Lreal
-             invGimp = impGreal(ispin,ispin,:,:,i)
-             call inv(invGimp)
-             invGreal(ispin,ispin,:,:,i)=invGimp
-          enddo
-       enddo
-       do ispin=1,Nspin
-          impSmats(ispin,ispin,:,:,:) = invG0mats(ispin,ispin,:,:,:) - invGmats(ispin,ispin,:,:,:)
-          impSreal(ispin,ispin,:,:,:) = invG0real(ispin,ispin,:,:,:) - invGreal(ispin,ispin,:,:,:)
-       enddo
-       !
-       !
-    end select
-    !
-    !Get G0and:
-    impG0mats(:,:,:,:,:) = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
-    impG0real(:,:,:,:,:) = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !
-  end subroutine build_sigma_normal
 
 
 
@@ -436,8 +283,6 @@ contains
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Gf
     integer                                                :: iorb,jorb,ispin,jspin,i
-    logical                                                :: MaskBool
-    logical(8),dimension(Nspin,Nspin,Norb,Norb)            :: Hmask
     character(len=1)                                       :: axis_
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG get_Gimp_normal: Get GFs on a input array zeta"
@@ -451,28 +296,18 @@ contains
     !
     do ispin=1,Nspin
        do iorb=1,Norb
-          Gf(ispin,ispin,iorb,iorb,:) = get_Gimp_normal_component(iorb,iorb,ispin)
+          call get_normal_Gab(iorb,iorb,ispin)
        enddo
     enddo
     !
     if(offdiag_gf_flag)then
-       Hmask= .true.
-       if(.not.ed_all_g)then
-          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
-       endif
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
-          enddo
-       enddo
+       call PrintHmask()
+       !
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb
-                MaskBool=.true.   
-                if(bath_type=="replica".OR.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
-                Gf(ispin,ispin,iorb,jorb,:) = get_Gimp_normal_component(iorb,jorb,ispin)
+                if(.not.Gbool(ispin,ispin,iorb,jorb))cycle
+                call get_normal_Gab(iorb,jorb,ispin)
              enddo
           enddo
        enddo
@@ -480,9 +315,7 @@ contains
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=iorb+1,Norb
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
+                if(.not.Gbool(ispin,ispin,iorb,jorb))cycle
                 Gf(ispin,ispin,iorb,jorb,:) = 0.5d0*(Gf(ispin,ispin,iorb,jorb,:) &
                      - Gf(ispin,ispin,iorb,iorb,:) - Gf(ispin,ispin,jorb,jorb,:))
                 Gf(ispin,ispin,jorb,iorb,:) = Gf(ispin,ispin,iorb,jorb,:)
@@ -493,38 +326,37 @@ contains
     !
   contains
     !
-    function get_Gimp_normal_component(iorb,jorb,ispin) result(Gf)
-      complex(8),dimension(size(zeta))   :: Gf
+    subroutine get_normal_Gab(iorb,jorb,ispin)
       integer,intent(in)                 :: iorb,jorb,ispin
       integer                            :: Nstates,istate
       integer                            :: Nchannels,ichan
       integer                            :: Nexcs,iexc
       real(8)                            :: peso,de
       !
-      Gf=zero
+      Gf(ispin,ispin,iorb,jorb,:)=zero
       !
       write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
-      if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) then
-         write(LOGfile,*)"get_Gimp_normal_component: impGmatrix%state not allocated. Nothing to do"
-         return
-      endif
+      if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) return
       !
-      Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
-      do istate=1,Nstates
-         if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel))cycle
-         Nchannels = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel)
-         do ichan=1,Nchannels
-            Nexcs  = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles)
-            if(Nexcs==0)cycle
-            do iexc=1,Nexcs
-               peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
-               de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-               Gf    = Gf + peso/(zeta-de)
-            enddo
-         enddo
-      enddo
+      associate(G => Gf(ispin,ispin,iorb,jorb,:)) !just an alias 
+        G= zero
+        Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
+        do istate=1,Nstates
+           if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel))cycle
+           Nchannels = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel)
+           do ichan=1,Nchannels
+              Nexcs  = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles)
+              if(Nexcs==0)cycle
+              do iexc=1,Nexcs
+                 peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
+                 de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
+                 G     = G + peso/(zeta-de)
+              enddo
+           enddo
+        enddo
+      end associate
       return
-    end function get_Gimp_normal_component
+    end subroutine get_normal_Gab
     !
   end function get_Gimp_normal
 
@@ -536,9 +368,9 @@ contains
     character(len=*),optional                              :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Sigma,invG0,invG
     complex(8),dimension(Norb,Norb)                        :: iGzeta
-    character(len=4)                                       :: axis_
+    character(len=1)                                       :: axis_
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(axis)
     !
     !Get G0^-1
     invG0 = invg0_bath_function(zeta,dmft_bath,axis_)
@@ -583,116 +415,6 @@ contains
 
 
 
-
-  subroutine rebuild_gf_normal()
-    !
-    ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
-    !
-    integer                                     :: iorb,jorb,ispin,jspin,i
-    logical                                     :: MaskBool
-    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
-    !
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG rebuild_gf NORMAL: rebuild GFs"
-#endif
-    !
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          call rebuild_gf_normal_all(iorb,iorb,ispin)
-       enddo
-    enddo
-    !
-    if(offdiag_gf_flag)then
-       Hmask= .true.
-       if(.not.ed_all_g)then
-          if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-          if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
-       endif
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
-          enddo
-       enddo
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             do jorb=iorb+1,Norb
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
-                call rebuild_gf_normal_all(iorb,jorb,ispin)
-             enddo
-          enddo
-       enddo
-       !
-       !
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             do jorb=iorb+1,Norb
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
-                impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
-                     - impGmats(ispin,ispin,iorb,iorb,:) - impGmats(ispin,ispin,jorb,jorb,:))
-                impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,ispin,iorb,jorb,:) &
-                     - impGreal(ispin,ispin,iorb,iorb,:) - impGreal(ispin,ispin,jorb,jorb,:))
-                impGmats(ispin,ispin,jorb,iorb,:) = impGmats(ispin,ispin,iorb,jorb,:)
-                impGreal(ispin,ispin,jorb,iorb,:) = impGreal(ispin,ispin,iorb,jorb,:)
-             enddo
-          enddo
-       enddo
-    end if
-    !
-  end subroutine rebuild_gf_normal
-
-
-
-
-
-  subroutine rebuild_gf_normal_all(iorb,jorb,ispin)
-    integer,intent(in) :: iorb,jorb,ispin
-    integer            :: Nstates,istate
-    integer            :: Nchannels,ichan
-    integer            :: Nexcs,iexc
-    real(8)            :: peso,de
-    !
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG rebuild_gf_normal_all: reconstruct impurity GFs"
-#endif
-    write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
-    if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) then
-       print*, "ED_GF_NORMAL WARNING: impGmatrix%state not allocated. Nothing to do"
-       return
-    endif
-    !
-    Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
-    do istate=1,Nstates
-       if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel))cycle
-       Nchannels = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel)
-       do ichan=1,Nchannels
-          Nexcs  = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles)
-          if(Nexcs==0)cycle
-          do iexc=1,Nexcs
-             peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
-             de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-             impGmats(ispin,ispin,iorb,jorb,:)=impGmats(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(0d0,wm(:))-de)
-             impGreal(ispin,ispin,iorb,jorb,:)=impGreal(ispin,ispin,iorb,jorb,:) + peso/(dcmplx(wr(:),eps)-de)
-          enddo
-       enddo
-    enddo
-    return
-  end subroutine rebuild_gf_normal_all
-
-
-
-
-
-
-
-
-  !################################################################
-  !################################################################
-  !################################################################
-  !################################################################
 
 
 
@@ -820,40 +542,57 @@ contains
 
 
 
-  ! subroutine rebuild_gf_phonon()
-  !   integer            :: Nstates,istate
-  !   integer            :: Nchannels,ichan
-  !   integer            :: Nexcs,iexc
-  !   real(8)            :: peso,de
-  !   !
-  !   !
-  !   Nstates = size(impDmatrix%state)
-  !   do istate=1,Nstates
-  !      Nchannels = size(impDmatrix%state(istate)%channel)
-  !      do ichan=1,Nchannels
-  !         Nexcs  = size(impDmatrix%state(istate)%channel(ichan)%poles)
-  !         if(Nexcs==0)cycle
-  !         do iexc=1,Nexcs
-  !            peso = impDmatrix%state(istate)%channel(ichan)%weight(iexc)
-  !            de   = impDmatrix%state(istate)%channel(ichan)%poles(iexc)
-  !            if(beta*de > 1d-3)impDmats_ph(0)=impDmats_ph(0) - peso*2*(1d0-exp(-beta*de))/de 
-  !            do i=1,Lmats
-  !               impDmats_ph(i)=impDmats_ph(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
-  !            enddo
-  !            do i=1,Lreal
-  !               impDreal_ph(i)=impDreal_ph(i) + peso*(1d0-exp(-beta*dE))*&
-  !                    ( one/(dcmplx(vr(i),eps)-dE) - one/(dcmplx(vr(i),eps)+dE) )
-  !            enddo
-  !         enddo
-  !      enddo
-  !   enddo
-  !   return
-  ! end subroutine rebuild_gf_phonon
 
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
+
+
+
+
+  subroutine PrintHmask()
+    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+    integer                                     :: iorb,jorb,ispin,jspin
+    Hmask= .true.
+    if(.not.ed_all_g)then
+       if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+    endif
+    write(LOGfile,"(A)")"Get mask(G):"
+    do ispin=1,Nspin
+       do iorb=1,Norb
+          write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
+       enddo
+    enddo
+  end subroutine PrintHmask
+
+
+
+  function Gbool(ispin,jspin,iorb,jorb) result(bool)
+    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+    integer                                     :: iorb,jorb,ispin,jspin
+    logical                                     :: bool
+    Hmask= .true.
+    if(.not.ed_all_g)then
+       if(bath_type=="replica")Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       if(bath_type=="general")Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+    endif
+    bool=.true.   
+    if(bath_type=="replica".or.bath_type=="general")bool=Hmask(ispin,ispin,iorb,jorb)
+  end function Gbool
 
 
 
 END MODULE ED_GF_NORMAL
+
+
+
+
+
+
+
 
 
 

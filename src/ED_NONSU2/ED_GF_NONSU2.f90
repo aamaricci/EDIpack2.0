@@ -1,7 +1,7 @@
 MODULE ED_GF_NONSU2
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER  
-  USE SF_IOTOOLS, only: str,reg,txtfy
+  USE SF_IOTOOLS, only: str,reg,txtfy,to_lower
   USE SF_LINALG,  only: inv,eigh,eye
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
@@ -16,8 +16,8 @@ MODULE ED_GF_NONSU2
 
 
   public :: build_gf_nonsu2
-  public :: build_sigma_nonsu2
-  public :: rebuild_gf_nonsu2
+  public :: get_Gimp_nonsu2
+  public :: get_Sigma_nonsu2
 
 
 
@@ -47,6 +47,7 @@ contains
 
 
 
+
   !+------------------------------------------------------------------+
   !                            NONSU2
   !+------------------------------------------------------------------+
@@ -69,21 +70,7 @@ contains
     write(Logfile,"(A)")"DEBUG build_gf NONSU2: build GFs"
 #endif
     !    
-
-    Hmask=.true. !Aren't we sure about hermiticity? -> Hmask=Hreplica_mask(wdiag=.false.,uplo=.true.)
-    if(.not.ed_all_g)then
-       select case(bath_type)
-       case("replica");Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-       case("general");Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
-       case default;stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
-       end select
-    end if
-    write(LOGfile,"(A)")"Get mask(G):"
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
-       enddo
-    enddo
+    call PrintHmask
     !
     if(MPIMASTER)call start_timer(unit=LOGfile)
     !same orbital, same spin GF: G_{aa}^{ss}(z)    
@@ -100,103 +87,44 @@ contains
        do jspin=1,Nspin
           if(ispin==jspin)cycle
           do iorb=1,Norb
-             MaskBool=.true.   
-             if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,iorb)
-             if(.not.MaskBool)cycle
+             if(.not.Gbool(ispin,jspin,iorb,iorb))cycle
              call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,iorb),Nstate=state_list%size)
              call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,iorb,ispin,jspin)
           enddo
        enddo
     enddo
+    !
+    !
+    if(bath_type=="normal")return
+    !
+    !
+    !different orbital, same spin GF: G_{ab}^{ss}(z)
     do ispin=1,Nspin
-       do jspin=1,Nspin
-          if(ispin==jspin)cycle
-          do iorb=1,Norb
-             !
-             impGmats(ispin,jspin,iorb,iorb,:) = 0.5d0*(impGmats(ispin,jspin,iorb,iorb,:) &
-                  - (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) &
-                  - (one-xi)*impGmats(jspin,jspin,iorb,iorb,:))
-             !
-             impGreal(ispin,jspin,iorb,iorb,:) = 0.5d0*(impGreal(ispin,jspin,iorb,iorb,:) &
-                  - (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) &
-                  - (one-xi)*impGreal(jspin,jspin,iorb,iorb,:))
-             !
+       do iorb=1,Norb
+          do jorb=1,Norb
+             if(iorb==jorb)cycle
+             if(.not.Gbool(ispin,ispin,iorb,jorb))cycle
+             call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
+             call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,ispin)
           enddo
        enddo
     enddo
     !
     !
-    !
-    !different orbital, same spin GF: G_{ab}^{ss}(z)
-    select case(bath_type)
-    case default;
-    case("hybrid","replica","general")
-       do ispin=1,Nspin
+    !different orbital, different spin GF: G_{ab}^{ss'}(z)
+    do ispin=1,Nspin
+       do jspin=1,Nspin
+          if(ispin==jspin)cycle
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
-                !
-                call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),Nstate=state_list%size)
-                call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,ispin)
+                if(.not.Gbool(ispin,jspin,iorb,jorb))cycle
+                call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,jorb),Nstate=state_list%size)
+                call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
              enddo
           enddo
        enddo
-       do ispin=1,Nspin
-          do iorb=1,Norb
-             do jorb=1,Norb
-                if(iorb==jorb)cycle
-                impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
-                     - (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) &
-                     - (one-xi)*impGmats(ispin,ispin,jorb,jorb,:))
-                !
-                impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,ispin,iorb,jorb,:) &
-                     - (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) &
-                     - (one-xi)*impGreal(ispin,ispin,jorb,jorb,:))
-                !
-             enddo
-          enddo
-       enddo
-       !
-       !
-       !
-       !different orbital, different spin GF: G_{ab}^{ss'}(z)
-       do ispin=1,Nspin
-          do jspin=1,Nspin
-             if(ispin==jspin)cycle
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   if(iorb==jorb)cycle
-                   MaskBool=.true.   
-                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,jorb)
-                   if(.not.MaskBool)cycle
-                   !
-                   call allocate_GFmatrix(impGmatrix(ispin,jspin,iorb,jorb),Nstate=state_list%size)
-                   call lanc_build_gf_nonsu2_mixOrb_mixSpin(iorb,jorb,ispin,jspin)
-                enddo
-             enddo
-          enddo
-       enddo
-       do ispin=1,Nspin
-          do jspin=1,Nspin
-             if(ispin==jspin)cycle
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   if(iorb==jorb)cycle
-                   impGmats(ispin,jspin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,jspin,iorb,jorb,:) &
-                        - (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) &
-                        - (one-xi)*impGmats(jspin,jspin,jorb,jorb,:))
-                   !
-                   impGreal(ispin,jspin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,jspin,iorb,jorb,:) &
-                        - (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) &
-                        - (one-xi)*impGreal(jspin,jspin,jorb,jorb,:))
-                enddo
-             enddo
-          enddo
-       enddo
-    end select
+    enddo
     !
   end subroutine build_gf_nonsu2
 
@@ -411,20 +339,11 @@ contains
        impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%weight(j) = peso
        impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%poles(j)  = isign*de
        !       
-       do i=1,Lmats
-          iw=xi*wm(i)
-          impGmats(ispin,jspin,iorb,jorb,i)=impGmats(ispin,jspin,iorb,jorb,i) + peso/(iw-isign*de)
-       enddo
-       do i=1,Lreal
-          iw=dcmplx(wr(i),eps)
-          impGreal(ispin,jspin,iorb,jorb,i)=impGreal(ispin,jspin,iorb,jorb,i) + peso/(iw-isign*de)
-       enddo
     enddo
   end subroutine add_to_lanczos_gf_nonsu2
 
 
 
-
   !################################################################
   !################################################################
   !################################################################
@@ -433,166 +352,68 @@ contains
 
 
 
-  !+------------------------------------------------------------------+
-  !PURPOSE  : Build the Self-energy functions, NONSU2 case
-  !+------------------------------------------------------------------+
-  subroutine build_sigma_nonsu2
-    !
-    ! Obtains the self-energy function :math:`\Sigma` on the current Matsubara and Real-axis intervals using impurity Dyson equation  :math:`\hat{\Sigma}(z) = \hat{G}^{-1}_0(z) - \hat{G}^{-1}(z)`
-    !
-    !
-    integer                                           :: i,j,isign,unit(7),iorb,jorb,ispin,jspin,io,jo
-    complex(8)                                        :: fg0
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: invG0mats
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: invG0real
-    complex(8),dimension(Nspin*Norb,Nspin*Norb)       :: invGimp,invG0imp
-    character(len=20)                                 :: suffix
-    !
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")&
-         "DEBUG build_sigma NONSU2: get Self-energy"
-#endif
-    !
-    impG0mats = zero
-    impG0real = zero
-    invG0mats = zero
-    invG0real = zero
-    impSmats  = zero
-    impSreal  = zero
-    !
-    !
-    !Get G0^-1
-    invG0mats = invg0_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
-    invG0real = invg0_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !
-    !Get Gimp^-1 - Matsubara freq.
-    !Get Gimp^-1 - Real freq.
-    do i=1,Lmats
-       invGimp  = nn2so_reshape(impGmats(:,:,:,:,i),Nspin,Norb)
-       call inv(invGimp)
-       do ispin=1,Nspin
-          do jspin=1,Nspin
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   io = iorb + (ispin-1)*Norb
-                   jo = jorb + (jspin-1)*Norb
-                   impSmats(ispin,jspin,iorb,jorb,i) = invG0mats(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
-                enddo
-             enddo
-          enddo
-       enddo
-    enddo
-    !
-    do i=1,Lreal
-       invGimp  = nn2so_reshape(impGreal(:,:,:,:,i),Nspin,Norb)
-       call inv(invGimp)
-       do ispin=1,Nspin
-          do jspin=1,Nspin
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   io = iorb + (ispin-1)*Norb
-                   jo = jorb + (jspin-1)*Norb
-                   impSreal(ispin,jspin,iorb,jorb,i) = invG0real(ispin,jspin,iorb,jorb,i) - invGimp(io,jo)
-                enddo
-             enddo
-          enddo
-       enddo
-    enddo
-    !
-    !Get G0and:
-    impG0mats(:,:,:,:,:) = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath)
-    impG0real(:,:,:,:,:) = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath)
-    !
-  end subroutine build_sigma_nonsu2
 
-
-
-
-
-  !################################################################
-  !################################################################
-  !################################################################
-  !################################################################
-
-
-  subroutine rebuild_gf_nonsu2()
+  function get_Gimp_nonsu2(zeta,axis) result(Gf)
     !
     ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
     !
-    integer                                     :: iorb,jorb,ispin,jspin,i,io,jo
-    logical                                     :: MaskBool
-    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
-    !
+    complex(8),dimension(:),intent(in)                     :: zeta
+    character(len=*),optional                              :: axis
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Gf
+    integer                                                :: iorb,jorb,ispin,jspin,i
+    character(len=1)                                       :: axis_
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG rebuild_gf NONSU2: rebuild GFs"
+    write(Logfile,"(A)")"DEBUG get_Gimp_nonsu2: Get GFs on a input array zeta"
 #endif
     !
-    Hmask= .true.
-    if(.not.ed_all_g)then
-       select case(bath_type)
-       case("replica");Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
-       case("general");Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
-       case default;stop "ERROR: ED_ALL_G=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
-       end select
-    endif
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
-       enddo
-    enddo
+    axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
+    !
+    if(.not.allocated(impGmatrix))stop "get_Gimp_nonsu2 ERROR: impGmatrix not allocated!"
+    !
+    call PrintHmask()
+    !
+    Gf = zero
     !
     !same orbital, same spin GF: G_{aa}^{ss}(z)
     do ispin=1,Nspin
        do iorb=1,Norb
-          call rebuild_gf_nonsu2_main(iorb,iorb,ispin,ispin)
+          call get_nonsu2_Gab(iorb,iorb,ispin,ispin)
        enddo
     enddo
-    !
     !
     !same orbital, different spin GF: G_{aa}^{ss'}(z)
     do ispin=1,Nspin
        do jspin=1,Nspin
           if(ispin==jspin)cycle
           do iorb=1,Norb
-             MaskBool=.true.   
-             if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,iorb)
-             if(.not.MaskBool)cycle
-             !
-             call rebuild_gf_nonsu2_main(iorb,iorb,ispin,jspin)
+             if(.not.Gbool(ispin,jspin,iorb,iorb))cycle
+             call get_nonsu2_Gab(iorb,iorb,ispin,jspin)
           enddo
        enddo
     enddo
+    !
     do ispin=1,Nspin
        do jspin=1,Nspin
           if(ispin==jspin)cycle
           do iorb=1,Norb
-             impGmats(ispin,jspin,iorb,iorb,:) = 0.5d0*(impGmats(ispin,jspin,iorb,iorb,:) &
-                  - (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) &
-                  - (one-xi)*impGmats(jspin,jspin,iorb,iorb,:))
-             !
-             impGreal(ispin,jspin,iorb,iorb,:) = 0.5d0*(impGreal(ispin,jspin,iorb,iorb,:) &
-                  - (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) &
-                  - (one-xi)*impGreal(jspin,jspin,iorb,iorb,:))
-             !
+             Gf(ispin,jspin,iorb,iorb,:) = 0.5d0*(Gf(ispin,jspin,iorb,iorb,:) &
+                  - (one-xi)*Gf(ispin,ispin,iorb,iorb,:) &
+                  - (one-xi)*Gf(jspin,jspin,iorb,iorb,:))
           enddo
        enddo
     enddo
     !
-    !
-    !
     select case(bath_type)
+    case ("normal");
     case default;
-    case("hybrid","replica","general")
+       !
        !different orbital, same spin GF: G_{ab}^{ss}(z)
        do ispin=1,Nspin
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
-                MaskBool=.true.   
-                if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,ispin,iorb,jorb)
-                if(.not.MaskBool)cycle
-                !
-                call rebuild_gf_nonsu2_main(iorb,jorb,ispin,ispin)
+                if(.not.Gbool(ispin,ispin,iorb,jorb))cycle
+                call get_nonsu2_Gab(iorb,jorb,ispin,ispin)
              enddo
           enddo
        enddo
@@ -600,19 +421,12 @@ contains
           do iorb=1,Norb
              do jorb=1,Norb
                 if(iorb==jorb)cycle
-                impGmats(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,ispin,iorb,jorb,:) &
-                     - (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) &
-                     - (one-xi)*impGmats(ispin,ispin,jorb,jorb,:))
-                !
-                impGreal(ispin,ispin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,ispin,iorb,jorb,:) &
-                     - (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) &
-                     - (one-xi)*impGreal(ispin,ispin,jorb,jorb,:))
-                !
+                Gf(ispin,ispin,iorb,jorb,:) = 0.5d0*(Gf(ispin,ispin,iorb,jorb,:) &
+                     - (one-xi)*Gf(ispin,ispin,iorb,iorb,:) &
+                     - (one-xi)*Gf(ispin,ispin,jorb,jorb,:))
              enddo
           enddo
        enddo
-       !
-       !
        !
        !different orbital, different spin GF: G_{ab}^{ss'}(z)
        do ispin=1,Nspin
@@ -621,11 +435,8 @@ contains
              do iorb=1,Norb
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
-                   MaskBool=.true.   
-                   if(bath_type=="replica".or.bath_type=="general")MaskBool=Hmask(ispin,jspin,iorb,jorb)
-                   if(.not.MaskBool)cycle
-                   !
-                   call rebuild_gf_nonsu2_main(iorb,jorb,ispin,jspin)
+                   if(.not.Gbool(ispin,jspin,iorb,jorb))cycle
+                   call get_nonsu2_Gab(iorb,jorb,ispin,jspin)
                 enddo
              enddo
           enddo
@@ -636,65 +447,145 @@ contains
              do iorb=1,Norb
                 do jorb=1,Norb
                    if(iorb==jorb)cycle
-                   impGmats(ispin,jspin,iorb,jorb,:) = 0.5d0*(impGmats(ispin,jspin,iorb,jorb,:) &
-                        - (one-xi)*impGmats(ispin,ispin,iorb,iorb,:) &
-                        - (one-xi)*impGmats(jspin,jspin,jorb,jorb,:))
-                   !
-                   impGreal(ispin,jspin,iorb,jorb,:) = 0.5d0*(impGreal(ispin,jspin,iorb,jorb,:) &
-                        - (one-xi)*impGreal(ispin,ispin,iorb,iorb,:) &
-                        - (one-xi)*impGreal(jspin,jspin,jorb,jorb,:))
+                   Gf(ispin,jspin,iorb,jorb,:) = 0.5d0*(Gf(ispin,jspin,iorb,jorb,:) &
+                        - (one-xi)*Gf(ispin,ispin,iorb,iorb,:) &
+                        - (one-xi)*Gf(jspin,jspin,jorb,jorb,:))
                 enddo
              enddo
           enddo
        enddo
+       !
     end select
     !
-  end subroutine rebuild_gf_nonsu2
+  contains
+    !
+    subroutine get_nonsu2_Gab(iorb,jorb,ispin,jspin)
+      integer,intent(in)                 :: iorb,jorb,ispin,jspin
+      integer                            :: Nstates,istate
+      integer                            :: Nchannels,ichan
+      integer                            :: Nexcs,iexc
+      real(8)                            :: peso,de
+      !
+      Gf(ispin,jspin,iorb,jorb,:)=zero
+      !
+      write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
+      if(.not.allocated(impGmatrix(ispin,jspin,iorb,jorb)%state)) return
+      !
+      associate(G => Gf(ispin,jspin,iorb,jorb,:)) !just an alias 
+        G= zero
+        Nstates = size(impGmatrix(ispin,jspin,iorb,jorb)%state)
+        do istate=1,Nstates
+           if(.not.allocated(impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel))cycle
+           Nchannels = size(impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel)
+           do ichan=1,Nchannels
+              Nexcs  = size(impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%poles)
+              if(Nexcs==0)cycle
+              do iexc=1,Nexcs
+                 peso  = impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
+                 de    = impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
+                 G     = G + peso/(zeta-de)
+              enddo
+           enddo
+        enddo
+      end associate
+      return
+    end subroutine get_nonsu2_Gab
+    !
+  end function get_Gimp_nonsu2
 
 
 
-  subroutine rebuild_gf_nonsu2_main(iorb,jorb,ispin,jspin)
-    integer,intent(in) :: iorb,jorb,ispin,jspin
-    integer            :: Nstates,istate
-    integer            :: Nchannels,ichan
-    integer            :: Nexcs,iexc
-    complex(8)         :: peso
-    real(8)            :: de
+
+
+  function get_Sigma_nonsu2(zeta,axis) result(Sigma)
+    complex(8),dimension(:),intent(in)                     :: zeta
+    character(len=*),optional                              :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
+    character(len=1)                                       :: axis_
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Sigma,invG0,invG
+    complex(8),dimension(Nspin*Norb,Nspin*Norb)            :: iGzeta
     !
-    write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
+    axis_="m";if(present(axis))axis_=str(axis)
     !
-    if(.not.allocated(impGmatrix(ispin,jspin,iorb,jorb)%state)) then
-       print*, "ED_GF_NONSU2 WARNING: impGmatrix%state not allocated. Nothing to do"
-       return
-    endif
+    !Get G0^-1
+    invG0 = invg0_bath_function(zeta,dmft_bath,axis_)
     !
-    Nstates = size(impGmatrix(ispin,jspin,iorb,jorb)%state)
-    do istate=1,Nstates
-       Nchannels = size(impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel)
-       do ichan=1,Nchannels
-          Nexcs  = size(impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%poles)
-          if(Nexcs==0)cycle
-          do iexc=1,Nexcs
-             peso  = impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
-             de    = impGmatrix(ispin,jspin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-             impGmats(ispin,jspin,iorb,jorb,:)=impGmats(ispin,jspin,iorb,jorb,:) + &
-                  peso/(dcmplx(0d0,wm(i))-de)
-             impGreal(ispin,jspin,iorb,jorb,:)=impGreal(ispin,jspin,iorb,jorb,:) + &
-                  peso/(dcmplx(wr(i),eps)-de)
-          enddo
+    !Get G^-1
+    invG  = get_Gimp_nonsu2(zeta)
+    !
+    !Get Sigma= G0^-1 - G^-1
+    do i=1,size(zeta)     
+       iGzeta =  nn2so_reshape(invG(:,:,:,:,i),Nspin,Norb)
+       call inv(iGzeta)
+       invG(:,:,:,:,i)=so2nn_reshape(iGzeta,Nspin,Norb)
+       Sigma(:,:,:,:,1) = invG0(:,:,:,:,1) - invG(:,:,:,:,i)
+    enddo
+    !
+  end function get_Sigma_nonsu2
+
+
+
+
+
+
+
+
+
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
+
+
+
+
+
+  subroutine PrintHmask()
+    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+    integer                                     :: iorb,jorb,ispin,jspin
+    Hmask=.true.
+    if(.not.ed_all_g)then
+       select case(bath_type)
+       case("replica");Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       case("general");Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       case default;stop "ERROR: PrintHmask=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+       end select
+    end if
+    write(LOGfile,"(A)")"Get mask(G):"
+    do ispin=1,Nspin
+       do iorb=1,Norb
+          write(LOGfile,*)((Hmask(ispin,jspin,iorb,jorb),jorb=1,Norb),jspin=1,Nspin)
        enddo
     enddo
-    return
-  end subroutine rebuild_gf_nonsu2_main
+  end subroutine PrintHmask
 
 
-
-
-
-
+  function Gbool(ispin,jspin,iorb,jorb) result(bool)
+    logical(8),dimension(Nspin,Nspin,Norb,Norb) :: Hmask
+    integer                                     :: iorb,jorb,ispin,jspin
+    logical                                     :: bool
+    Hmask=.true.
+    if(.not.ed_all_g)then
+       select case(bath_type)
+       case("replica");Hmask=Hreplica_mask(wdiag=.true.,uplo=.false.)
+       case("general");Hmask=Hgeneral_mask(wdiag=.true.,uplo=.false.)
+       case default;stop "ERROR: PrintHmask=FALSE AND BATH_TYPE!=REPLICA/GENERAL"
+       end select
+    end if
+    bool=.true.   
+    if(bath_type=="replica".or.bath_type=="general")bool=Hmask(ispin,ispin,iorb,jorb)
+  end function Gbool
 
 
 
 
 
 END MODULE ED_GF_NONSU2
+
+
+
+
+

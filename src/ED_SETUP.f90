@@ -302,43 +302,6 @@ contains
        call assert_shape(impHloc,[Nspin,Nspin,Norb,Norb],"init_ed_structure","impHloc")
     endif
     !
-    !allocate functions
-    allocate(impSmats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impSreal(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impSAmats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impSAreal(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impSmats=zero
-    impSreal=zero
-    impSAmats=zero
-    impSAreal=zero
-    !
-    allocate(impGmats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impGreal(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impFmats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impFreal(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impGmats=zero
-    impGreal=zero
-    impFmats=zero
-    impFreal=zero
-    !
-    allocate(impG0mats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impG0real(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impF0mats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impF0real(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impG0mats=zero
-    impG0real=zero
-    impF0mats=zero
-    impF0real=zero
-    !
-    allocate(impD0mats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impD0real(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impT0mats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impT0real(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impD0mats=zero
-    impD0real=zero
-    impT0mats=zero
-    impT0real=zero
-    !
     allocate(impDmats_ph(0:Lmats))
     allocate(impDreal_ph(Lreal))
     impDmats_ph=zero
@@ -429,22 +392,6 @@ contains
     if(allocated(sectors_mask))deallocate(sectors_mask)
     if(allocated(neigen_sector))deallocate(neigen_sector)
     if(allocated(impHloc))deallocate(impHloc)
-    if(allocated(impSmats))deallocate(impSmats)
-    if(allocated(impSreal))deallocate(impSreal)
-    if(allocated(impSAmats))deallocate(impSAmats)
-    if(allocated(impSAreal))deallocate(impSAreal)
-    if(allocated(impGmats))deallocate(impGmats)
-    if(allocated(impGreal))deallocate(impGreal)
-    if(allocated(impFmats))deallocate(impFmats)
-    if(allocated(impFreal))deallocate(impFreal)
-    if(allocated(impG0mats))deallocate(impG0mats)
-    if(allocated(impG0real))deallocate(impG0real)
-    if(allocated(impF0mats))deallocate(impF0mats)
-    if(allocated(impF0real))deallocate(impF0real)
-    if(allocated(impD0mats))deallocate(impD0mats)
-    if(allocated(impD0real))deallocate(impD0real)
-    if(allocated(impT0mats))deallocate(impT0mats)
-    if(allocated(impT0real))deallocate(impT0real)
     if(allocated(impDmats_ph))deallocate(impDmats_ph)
     if(allocated(impDreal_ph))deallocate(impDreal_ph)
     if(allocated(impGmatrix))deallocate(impGmatrix)
