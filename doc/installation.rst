@@ -1,3 +1,5 @@
+.. _edipack_install:
+
 Install
 #####################
 
