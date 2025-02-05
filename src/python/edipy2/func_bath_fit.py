@@ -53,11 +53,12 @@ def chi2_fitgf(self,*args,ispin=0,iorb=None,fmpi=True):
        
      
       :type ispin: int 
-      :param ispin: spin species to be fitted. For the normal \
-      and superconducting cases, if :data:`Nspin` = :code:`2`, the fitting function \
+      :param ispin: spin species to be fitted. For the normal case, \
+      if :data:`Nspin` = :code:`2`, the fitting function \
       needs to be called twice. Only the corresponding elements of :code:`bath` \
       will be updated each time. For the non-SU(2) case, this argument is irrelevant, \
-      since all the elements of the Weiss/Delta function need to be fitted.
+      since all the elements of the Weiss/Delta function need to be fitted. This is also \
+      the case if :f:var:`bath_type` = :code:`REPLICA, GENERAL`.
         
       :type iorb: int 
       :param iorb: the orbital to be fitted. If omitted, all orbitals will be fitted
