@@ -19,6 +19,10 @@ These functions pass to the userspace the observables and response functions cal
 
 .. autofunction:: edipy2.global_env.get_sigma
 
+.. autofunction:: edipy2.global_env.get_g0and
+
+.. autofunction:: edipy2.global_env.get_delta
+
 
 
 

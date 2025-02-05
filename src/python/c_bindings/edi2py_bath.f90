@@ -186,3 +186,5 @@ subroutine save_array_as_bath_ineq_c(bath,dim_bath) bind(c, name='save_array_as_
   real(c_double),dimension(dim_bath(1),dim_bath(2))     :: bath
   call ed_save_array_as_bath(bath)
 end subroutine save_array_as_bath_ineq_c
+
+

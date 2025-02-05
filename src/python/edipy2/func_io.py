@@ -48,9 +48,9 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n"):
        :raise ValueError: If :code:`ishape` is incompatible woth :code:`ilat` or not in the previous list.
        :raise ValueError: If :code:`axis` is not in the previous list.
          
-       :return: An array of floats that contains the self-energy along the specific axis, \
+       :return: An array of complexes that contains the self-energy along the specific axis, \
        with dimension set by :code:`ishape` and :code:`axis`.  
-       :rtype: np.array(dtype=float) 
+       :rtype: np.array(dtype=complex)
 
     """
 
@@ -184,9 +184,9 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
        :raise ValueError: If :code:`ishape` is incompatible woth :code:`ilat` or not in the previous list.
        :raise ValueError: If :code:`axis` is not in the previous list.
          
-       :return: An array of floats that contains the Green's function along the specific \
+       :return: An array of complexes that contains the Green's function along the specific \
        axis, with dimension set by :code:`ishape` and :code:`axis`.  
-       :rtype: np.array(dtype=float) 
+       :rtype: np.array(dtype=complex)
        
     """
 
@@ -272,6 +272,186 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n"):
             return gimp[ilat]
         else:
             return gimp
+            
+            
+#Anderson Impurity Model functions
+
+#gimp
+def get_g0and(self,zeta,bath,ishape=None,typ="n"):
+    """
+
+       This function calculates the value of the Anderson Impurity Model's \\
+       noninteracting Green's function on a given frequency array.
+
+       :type zeta: complex 
+       :param zeta: the array of frequencies (only frequencies on the real and imaginary axes are supported)
+       
+       :type bath: real
+       :param bath: the user-accessibla bath array  
+            
+       :type ishape: int 
+       :param ishape: this variable determines the shape of the returned array. Possible values:
+       
+        * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
+        * :code:`3`: the output array will have shape [ :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]
+        * :code:`5`: the output array will have shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` ,  :code:`len(zeta)` ]
+               
+       :type typ: str 
+       :param typ: whether to return the normal or anomalous Green's function \
+       (for the superconducting case). Can be :code:`n` for normal or :code:`a` for anomalous.
+       
+       :raise ValueError: If :code:`zeta` is not completely real or completely imaginary
+       :raise ValueError: If :code:`ishape` is not 3 or 5.
+               
+       :return: An array of complex that contains :math:`G^{And}_{0}(z)` function along the specific \
+       frequency array, with dimension set by :code:`ishape` and :code:`zeta`.  
+       :rtype: np.array(dtype=complex)
+       
+    """
+
+    ed_get_g0and_n3 = self.library.get_g0and_n3
+    ed_get_g0and_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
+                                  np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_char_p,
+                                  c_char_p                                  
+                                  ]
+    ed_get_g0and_n3.restype = None
+    
+    ed_get_g0and_n5 = self.library.get_g0and_n5
+    ed_get_g0and_n5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
+                                  np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_char_p,
+                                  c_char_p                                  
+                                  ]
+    ed_get_g0and_n5.restype = None
+
+    norb_aux = c_int.in_dll(self.library, "Norb").value
+    nspin_aux = c_int.in_dll(self.library, "Nspin").value
+    
+    zeta = zeta.astype(complex)
+    
+    nfreq = np.shape(zeta)[0]
+    dimbath = np.shape(bath)[0]
+    
+    if any(np.real(zeta) != 0):
+        print("Obtaining impurity G0 on real axis")
+        axis = "r"
+    elif any(np.imag(zeta) != 0):
+        print("Obtaining impurity G0 on Matsubara axis")
+        axis = "m"
+    else:
+        raise ValueError("Frequencies can only be purely real or purely imaginary") 
+    if ishape is None:
+        ishape = self.dim_hloc + 1
+    
+    if ishape==3:
+        G0and = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+        DimG0and = np.asarray([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
+        ed_get_g0and_n3(zeta,nfreq,bath,dimbath,G0and,DimG0and,c_char_p(axis.encode()),c_char_p(typ.encode()))
+    elif ishape==5:
+        G0and = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+        DimG0and = np.asarray([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
+        ed_get_g0and_n5(zeta,nfreq,bath,dimbath,G0and,DimG0and,c_char_p(axis.encode()),c_char_p(typ.encode()))
+    else:
+        raise ValueError('Shape(array) != 3,5 in get_gimp_site')
+    return G0and
+
+#Delta
+def get_delta(self,zeta,bath,ishape=None,typ="n"):
+    """
+
+       This function calculates the value of the Anderson Impurity Model's \\
+       hybridization function on a given frequency array.
+
+       :type zeta: complex 
+       :param zeta: the array of frequencies (only frequencies on the real and imaginary axes are supported)   
+
+       :type bath: real
+       :param bath: the user-accessibla bath array  
+            
+       :type ishape: int 
+       :param ishape: this variable determines the shape of the returned array. Possible values:
+       
+        * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
+        * :code:`3`: the output array will have shape [ :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]
+        * :code:`5`: the output array will have shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` ,  :code:`len(zeta)` ]
+               
+       :type typ: str 
+       :param typ: whether to return the normal or anomalous Green's function \
+       (for the superconducting case). Can be :code:`n` for normal or :code:`a` for anomalous.
+       
+       :raise ValueError: If :code:`zeta` is not completely real or completely imaginary
+       :raise ValueError: If :code:`ishape` is not 3 or 5.
+               
+       :return: An array of complex that contains :math:`\\Delta(z)` along the specific \
+       frequency array, with dimension set by :code:`ishape` and :code:`zeta`.  
+       :rtype: np.array(dtype=complex) 
+       
+    """
+
+    ed_get_delta_n3 = self.library.get_delta_n3
+    ed_get_delta_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'),
+                                  np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_char_p,
+                                  c_char_p                                  
+                                  ]
+    ed_get_delta_n3.restype = None
+    
+    ed_get_delta_n5 = self.library.get_delta_n5
+    ed_get_delta_n5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_int,
+                                  np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'),
+                                  np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
+                                  c_char_p,
+                                  c_char_p                                  
+                                  ]
+    ed_get_delta_n5.restype = None
+
+    norb_aux = c_int.in_dll(self.library, "Norb").value
+    nspin_aux = c_int.in_dll(self.library, "Nspin").value
+    
+    zeta = zeta.astype(complex)
+    
+    nfreq = np.shape(zeta)[0]
+    dimbath = np.shape(bath)[0]
+    
+    if any(np.real(zeta) != 0):
+        print("Obtaining impurity G0 on real axis")
+        axis = "r"
+    elif any(np.imag(zeta) != 0):
+        print("Obtaining impurity G0 on Matsubara axis")
+        axis = "m"
+    else:
+        raise ValueError("Frequencies can only be purely real or purely imaginary") 
+    if ishape is None:
+        ishape = self.dim_hloc + 1
+    
+    if ishape==3:
+        Delta = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+        DimDelta = np.asarray([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=np.int64,order="F")
+        ed_get_delta_n3(zeta,nfreq,bath,dimbath,Delta,DimDelta,c_char_p(axis.encode()),c_char_p(typ.encode()))
+    elif ishape==5:
+        Delta = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+        DimDelta = np.asarray([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
+        ed_get_delta_n5(zeta,nfreq,bath,dimbath,Delta,DimDelta,c_char_p(axis.encode()),c_char_p(typ.encode()))
+    else:
+        raise ValueError('Shape(array) != 3,5 in get_gimp_site')
+    return Delta
+
     
     
 #observables
@@ -558,9 +738,9 @@ def build_sigma(self,zeta,ilat=None,ishape=None,typ="n"):
     :raise ValueError: If :code:`ishape` is incompatible woth :code:`ilat` or not in the previous list.
     :raise ValueError: If :code:`axis` is not in the previous list.
      
-    :return: An array of floats that contains the self-energy along the \
+    :return: An array of complexes that contains the self-energy along the \
     specific axis, with dimension set by :code:`ishape` and :code:`zeta`.  
-    :rtype: np.array(dtype=float) 
+    :rtype: np.array(dtype=complex) 
     """
    
     ed_build_sigma_site_n3 = self.library.build_sigma_single_n3
@@ -703,9 +883,9 @@ def build_gimp(self,zeta,ilat=None,ishape=None,typ="n"):
      or not in the previous list.
      :raise ValueError: If :code:`axis` is not in the previous list.
      
-     :return: An array of floats that contains the Green's function along the \
+     :return: An array of complexes that contains the Green's function along the \
      specific axis, with dimension set by :code:`ishape` and :code:`zeta`.  
-     :rtype: np.array(dtype=float)   
+     :rtype: np.array(dtype=complex) 
     
     """
 

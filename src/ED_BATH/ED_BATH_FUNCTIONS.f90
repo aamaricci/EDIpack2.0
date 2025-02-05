@@ -32,7 +32,7 @@ MODULE ED_BATH_FUNCTIONS
 
   interface Fdelta_bath_function
      !
-     ! Evaluates the anomalouse hybridization function :math:`\Theta(x)`.
+     ! Evaluates the anomalous hybridization function :math:`\Theta(x)`.
      !
      ! Output:
      !   * :f:var:`fdelta` : complex rank-5 array with dimension [ |Nspin| , |Nspin| , |Norb| , |Norb| , :code:`size(x)` ]

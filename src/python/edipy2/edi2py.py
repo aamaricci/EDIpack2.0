@@ -205,6 +205,8 @@ global_env.finalize_solver = types.MethodType(func_main.finalize_solver, global_
 import func_io
 global_env.get_sigma = types.MethodType(func_io.get_sigma, global_env)
 global_env.get_gimp = types.MethodType(func_io.get_gimp, global_env)
+global_env.get_g0and= types.MethodType(func_io.get_g0and, global_env)
+global_env.get_delta= types.MethodType(func_io.get_delta, global_env)
 global_env.get_dens = types.MethodType(func_io.get_dens, global_env)
 global_env.get_mag = types.MethodType(func_io.get_mag, global_env)
 global_env.get_docc = types.MethodType(func_io.get_docc, global_env)

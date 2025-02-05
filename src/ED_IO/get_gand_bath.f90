@@ -83,6 +83,7 @@ subroutine ed_get_delta_n3(x,bath_,delta,axis,type)
   integer                                             :: L
   !
   axis_='mats';if(present(axis))axis_=axis
+  type_='n';if(present(type))type_=trim(type)
   check= check_bath_dimension(bath_)
   if(.not.check)stop "delta_bath_mats_main_ error: wrong bath dimensions"
   call allocate_dmft_bath(dmft_bath_)
@@ -115,6 +116,7 @@ subroutine ed_get_delta_n5(x,bath_,delta,axis,type)
   integer                                             :: L
   !
   axis_='mats';if(present(axis))axis_=axis
+  type_='n';if(present(type))type_=trim(type)
   check= check_bath_dimension(bath_)
   if(.not.check)stop "delta_bath_mats_main_ error: wrong bath dimensions"
   call allocate_dmft_bath(dmft_bath_)
