@@ -286,7 +286,7 @@ def get_g0and(self,zeta,bath,ishape=None,typ="n"):
        :type zeta: complex 
        :param zeta: the array of frequencies (only frequencies on the real and imaginary axes are supported)
        
-       :type bath: real
+       :type bath: float
        :param bath: the user-accessibla bath array  
             
        :type ishape: int 
@@ -374,7 +374,7 @@ def get_delta(self,zeta,bath,ishape=None,typ="n"):
        :type zeta: complex 
        :param zeta: the array of frequencies (only frequencies on the real and imaginary axes are supported)   
 
-       :type bath: real
+       :type bath: float
        :param bath: the user-accessibla bath array  
             
        :type ishape: int 
