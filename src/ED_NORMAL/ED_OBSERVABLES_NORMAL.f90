@@ -435,6 +435,7 @@ contains
        call Bcast_MPI(MpiComm,ed_dens_dw)
        call Bcast_MPI(MpiComm,ed_dens)
        call Bcast_MPI(MpiComm,ed_docc)
+       call Bcast_MPI(MpiComm,ed_mag)
        call Bcast_MPI(MpiComm,ed_imp_info)
        if(allocated(single_particle_density_matrix))call Bcast_MPI(MpiComm,single_particle_density_matrix)
     endif
