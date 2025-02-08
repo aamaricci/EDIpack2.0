@@ -21,17 +21,20 @@ MODULE ED_GREENS_FUNCTIONS
 
   public :: buildGf_impurity
 
-  public :: get_G_impurity
-  public :: get_F_impurity
-  public :: get_Sigma_impurity
-  public :: get_Self_impurity
+  public :: get_impG
+  public :: get_impF
+  public :: get_Sigma
+  public :: get_Self
 
+
+
+  real(8),dimension(:,:),allocatable :: zimp !quasiparticle weight
+  real(8),dimension(:,:),allocatable :: simp !scattering rate
+  real(8)                            :: w_ph ! Renormalized phonon frequency
 contains
 
 
-  !+------------------------------------------------------------------+
-  ! GF CALCULATIONS
-  !+------------------------------------------------------------------+
+
   subroutine buildGF_impurity()
     ! 
     ! Build the quantum impurity electrons Green's functions :math:`\hat{G}` , the self-energy :math:`\hat{\Sigma}` and the phonons Green's function :math:`\hat{D}` , calling the correct procedure according to the value of :f:var:`ed_mode` .
@@ -45,18 +48,15 @@ contains
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG build_GF: build GFs"
 #endif
-    call allocate_grids
     !
     call deallocate_GFmatrix(impGmatrix)
-    !
-    impDmats_ph=zero
-    impDreal_ph=zero
+    call deallocate_GFmatrix(impDmatrix)
     !
     write(LOGfile,"(A)")"Get impurity Greens functions:"
     select case(ed_mode)
-    case default  ;call build_Gimp_normal()
-    case("superc");call build_Gimp_superc()
-    case("nonsu2");call build_Gimp_nonsu2()
+    case default  ;call build_impG_normal()
+    case("superc");call build_impG_superc()
+    case("nonsu2");call build_impG_nonsu2()
     end select
     !
 #ifdef _DEBUG
@@ -64,52 +64,71 @@ contains
     write(Logfile,"(A)")""
 #endif
     if(MPIMASTER)then
-       call print_impGmatrix()
        if(ed_print_Sigma)        call print_Sigma()
        if(ed_print_G)            call print_impG()
        if(ed_print_G0)           call print_impG0()
-       if(ed_print_G.AND.DimPh>1)call print_impD()
+       if(ed_print_G.AND.Nph>0)call print_impD()
+       call print_impGmatrix()
+       call print_impDmatrix()
+       !
+       call get_szr
+       call write_szr()
     endif
-    !
-    call deallocate_grids
     !
   end subroutine buildGF_impurity
 
 
 
 
+  !+------------------------------------------------------------------+
+  !+------------------------------------------------------------------+
 
-  function get_G_impurity(zeta,axis) result(self)
+  function get_impG(zeta,axis) result(self)
     complex(8),dimension(:),intent(in)                     :: zeta
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
     character(len=1)                                       :: axis_
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
-    case default  ;stop "get_Gimp error: not a valid ed_mode"
-    case("normal");self = get_Gimp_normal(zeta,axis_)
-    case("superc");self = get_Gimp_superc(zeta,axis_)
-    case("nonsu2");self = get_Gimp_nonsu2(zeta,axis_)
+    case default  ;stop "get_impG error: not a valid ed_mode"
+    case("normal");self = get_impG_normal(zeta,axis_)
+    case("superc");self = get_impG_superc(zeta,axis_)
+    case("nonsu2");self = get_impG_nonsu2(zeta,axis_)
     end select
-  end function get_G_impurity
+  end function get_impG
   !
-  function get_F_impurity(zeta,axis) result(self)
+  function get_impF(zeta,axis) result(self)
     complex(8),dimension(:),intent(in)                     :: zeta
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
     character(len=1)                                       :: axis_
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
-    case default  ;stop "get_Fimp error: not a valid ed_mode"
-    case("superc");self = get_Fimp_superc(zeta,axis_)
+    case default  ;stop "get_impF error: not a valid ed_mode"
+    case("superc");self = get_impF_superc(zeta,axis_)
     end select
-  end function get_F_impurity
+  end function get_impF
+  !
+  function get_impD(zeta,axis) result(self)
+    complex(8),dimension(:),intent(in) :: zeta
+    character(len=*),optional          :: axis
+    complex(8),dimension(size(zeta))   :: self
+    character(len=1)                   :: axis_
+    axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
+    select case(ed_mode)
+    case default  ;stop "get_impD error: not a valid ed_mode"
+    case("normal");self = get_impD_normal(zeta,axis_)
+    case("superc");self = get_impD_superc(zeta,axis_)
+    end select
+  end function get_impD
 
 
 
+  !+------------------------------------------------------------------+
+  !+------------------------------------------------------------------+
 
 
-  function get_Sigma_impurity(zeta,axis) result(self)
+  function get_Sigma(zeta,axis) result(self)
     complex(8),dimension(:),intent(in)                     :: zeta
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
@@ -121,9 +140,9 @@ contains
     case("superc");self = get_Sigma_superc(zeta,axis_)
     case("nonsu2");self = get_Sigma_nonsu2(zeta,axis_)
     end select
-  end function get_Sigma_impurity
+  end function get_Sigma
   !
-  function get_Self_impurity(zeta,axis) result(self)
+  function get_Self(zeta,axis) result(self)
     complex(8),dimension(:),intent(in)                     :: zeta
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
@@ -133,7 +152,42 @@ contains
     case default  ;stop "get_Self error: not a valid ed_mode"
     case("superc");self = get_Self_superc(zeta,axis_)
     end select
-  end function get_Self_impurity
+  end function get_Self
+
+
+
+  !+-------------------------------------------------------------------+
+  !PURPOSE  : get scattering rate and renormalization constant Z
+  !+-------------------------------------------------------------------+
+  subroutine get_szr()
+    !Calculate the values of the scattering rate and quasiparticle weight
+    integer                                       :: ispin,iorb
+    real(8)                                       :: wm(2),vm(1)
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,2) :: Smats
+    complex(8),dimension(1)                       :: Dmats
+    real(8)                                       :: iS1,iS2
+    wm    = pi/beta*(2*arange(1,2)-1)
+    vm    = 0d0
+    Smats = get_Sigma(xi*wm,'m')
+
+    if(allocate(simp))deallocate(simp)
+    if(allocate(zimp))deallocate(zimp)
+    allocate(simp(Norb,Nspin))
+    allocate(zimp(Norb,Nspin))
+    w_ph  = w0_ph
+    if(Nph>0)then
+       Dmats = get_impD(xi*vm,'m')
+       w_ph  = sqrt(-2.d0*w0_ph/Dmats(1)) !renormalized phonon frequency
+    endif
+    do ispin=1,Nspin
+       do iorb=1,Norb
+          iS1 = dimag(Smats(ispin,ispin,iorb,iorb,1))
+          iS2 = dimag(Smats(ispin,ispin,iorb,iorb,2))
+          simp(iorb,ispin) = iS1 - wm(1)*(iS2-iS1)/(wm(2)-wm(1))
+          zimp(iorb,ispin) = 1d0/( 1d0 + abs( iS1/wm(1) ))
+       enddo
+    enddo
+  end subroutine get_szr
 
 
 
@@ -143,24 +197,65 @@ contains
 
 
 
-
-
-  !##################################################################
-  !##################################################################
+  !+------------------------------------------------------------------+
   !                    PRINT FUNCTIONS
-  !##################################################################
-  !##################################################################
+  !+------------------------------------------------------------------+
   subroutine print_impGmatrix(file)
     !This subroutine prints weights and poles of the impurity Green's function by calling :f:func:`write_GFmatrix`. These are stored
-    !one a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !in a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
     !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
     !
     character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
     character(len=256)        :: file_
-    if(.not.allocated(impGmatrix))stop "ED_PRINT_IMPGFMATRIX ERROR: impGmatrix not allocated!"
+    if(.not.allocated(impGmatrix))stop "ED_PRINT_IMPGMATRIX ERROR: impGmatrix not allocated!"
     file_="gfmatrix";if(present(file))file_=str(file)
     call write_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
   end subroutine print_impGmatrix
+
+  subroutine print_impDmatrix(file)
+    !This subroutine prints weights and poles of the  phonon Green's function by calling :f:func:`write_GFmatrix`. These are stored
+    !in a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    !
+    character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
+    character(len=256)        :: file_
+    if(.not.allocated(impDmatrix))stop "ED_PRINT_IMPDMATRIX ERROR: impDmatrix not allocated!"
+    file_="dfmatrix";if(present(file))file_=str(file)
+    call write_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine print_impDmatrix
+
+
+
+  subroutine read_impGmatrix(file)
+    !This subroutine reads weights and poles of the impurity Green's function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
+    if(allocated(impGmatrix))deallocate(impGmatrix)
+    if(ed_mode=="superc")then
+       allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
+    else
+       allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    endif
+    file_="gfmatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_impGmatrix
+
+  subroutine read_impDmatrix(file)
+    !This subroutine reads weights and poles of the phonons Green's function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(impDmatrix))call deallocate_GFmatrix(impDmatrix)
+    if(allocated(impDmatrix))deallocate(impDmatrix)
+    file_="dfmatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_impDmatrix
 
 
 
@@ -185,25 +280,25 @@ contains
     call allocate_grids
     select case(ed_mode)
     case ("normal");
-       impSmats  = get_Sigma_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impSreal  = get_Sigma_impurity(dcmplx(wr(:),eps),axis='r')
-       call Gprint_normal("_impSigma",impSmats,'m')
-       call Gprint_normal("_impSigma",impSreal,'r')
+       impSmats  = get_Sigma(dcmplx(0d0,wm(:)),axis='m')
+       impSreal  = get_Sigma(dcmplx(wr(:),eps),axis='r')
+       call Gprint_normal("impSigma",impSmats,'m')
+       call Gprint_normal("impSigma",impSreal,'r')
     case ("superc");
-       impSmats  = get_Sigma_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impSreal  = get_Sigma_impurity(dcmplx(wr(:),eps),axis='r')
-       impSAmats = get_Self_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impSAreal = get_Self_impurity(dcmplx(wr(:),eps),axis='r')
-       call Gprint_superc("_impSigma",impSmats,'m')
-       call Gprint_superc("_impSelf",impSAmats,'m')
-       call Gprint_superc("_impSigma",impSreal,'r')
-       call Gprint_superc("_impSelf",impSAreal,'r')
+       impSmats  = get_Sigma(dcmplx(0d0,wm(:)),axis='m')
+       impSreal  = get_Sigma(dcmplx(wr(:),eps),axis='r')
+       impSAmats = get_Self(dcmplx(0d0,wm(:)),axis='m')
+       impSAreal = get_Self(dcmplx(wr(:),eps),axis='r')
+       call Gprint_superc("impSigma",impSmats,'m')
+       call Gprint_superc("impSelf",impSAmats,'m')
+       call Gprint_superc("impSigma",impSreal,'r')
+       call Gprint_superc("impSelf",impSAreal,'r')
     case ("nonsu2");
-       impSmats  = get_Sigma_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impSreal  = get_Sigma_impurity(dcmplx(wr(:),eps),axis='r')
-       call Gprint_nonsu2("_impSigma",impSmats,'m')
-       call Gprint_nonsu2("_impSigma",impSreal,'r')
-    case default;stop "ed_print_Sigma error: ed_mode not valid"
+       impSmats  = get_Sigma(dcmplx(0d0,wm(:)),axis='m')
+       impSreal  = get_Sigma(dcmplx(wr(:),eps),axis='r')
+       call Gprint_nonsu2("impSigma",impSmats,'m')
+       call Gprint_nonsu2("impSigma",impSreal,'r')
+    case default;stop "print_Sigma error: ed_mode not valid"
     end select
     call deallocate_grids
   end subroutine print_Sigma
@@ -232,34 +327,56 @@ contains
     call allocate_grids
     select case(ed_mode)
     case ("normal");
-       impGmats  = get_G_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impGreal  = get_G_impurity(dcmplx(wr(:),eps),axis='r')
-       call Gprint_normal("_impG",impGmats,'m')
-       call Gprint_normal("_impG",impGreal,'r')
+       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
+       call Gprint_normal("impG",impGmats,'m')
+       call Gprint_normal("impG",impGreal,'r')
     case ("superc");
-       impGmats  = get_G_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impGreal  = get_G_impurity(dcmplx(wr(:),eps),axis='r')
+       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
        impFmats = get_F_impurity(dcmplx(0d0,wm(:)),axis='m')
        impFreal = get_F_impurity(dcmplx(wr(:),eps),axis='r')
-       call Gprint_superc("_impG",impGmats,'m')
-       call Gprint_superc("_impF",impFmats,'m')
-       call Gprint_superc("_impG",impGreal,'r')
-       call Gprint_superc("_impF",impFreal,'r')
+       call Gprint_superc("impG",impGmats,'m')
+       call Gprint_superc("impF",impFmats,'m')
+       call Gprint_superc("impG",impGreal,'r')
+       call Gprint_superc("impF",impFreal,'r')
     case ("nonsu2");
-       impGmats  = get_G_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impGreal  = get_G_impurity(dcmplx(wr(:),eps),axis='r')
-       call Gprint_nonsu2("_impG",impGmats,'m')
-       call Gprint_nonsu2("_impG",impGreal,'r')
+       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
+       call Gprint_nonsu2("impG",impGmats,'m')
+       call Gprint_nonsu2("impG",impGreal,'r')
     case default;stop "ed_print_impG error: ed_mode not valid"
     end select
     call deallocate_grids
-  end subroutine Print_ImpG
+  end subroutine print_impG
+
+
+
+  subroutine print_impD
+    !This subroutine print the impurity phonon self-energy on the files
+    !  * :code:`"impDph_iw.ed"`  matsubara axis
+    !  * :code:`impDph_realw.ed"` real frequency axis
+    !
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impDmats
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impDreal
+    call allocate_grids()
+    !Print the impurity functions:
+    select case(ed_mode)
+    case ("normal","superc")
+       impDmats  = get_impD(dcmplx(0d0,wm(:)),axis='m')
+       impDreal  = get_impD(dcmplx(wr(:),eps),axis='r')
+       call splot("impDph_iw.ed"   ,vm,impDmats(:))
+       call splot("impDph_realw.ed",vr,impDreal(:))
+    case("nonsu2");
+       write(LOGfile,*)"print_impD WARNING: phonon GF is not available in ed_mode=nonsu2."
+    end select
+    call deallocate_grids()
+  end subroutine Print_ImpD
 
 
 
 
-
-  subroutine ed_print_impG0
+  subroutine print_impG0
     !This subroutine print the non-interacting impurity Green's function on plain text files in the execution folder.
     !The files are formatted like :math:`[\omega,\mathrm{Im}G_{0},\mathrm{Re}G_{0}]` .
     !One file per Green's function component, with the name
@@ -280,43 +397,91 @@ contains
     case ("normal");
        impG0mats  = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
        impG0real  = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
-       call Gprint_normal("_impG0",impG0mats,'m')
-       call Gprint_normal("_impG0",impG0real,'r')
+       call Gprint_normal("impG0",impG0mats,'m')
+       call Gprint_normal("impG0",impG0real,'r')
     case ("superc");
        impG0mats  = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
-       impF0mats = f0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
+       impF0mats  = f0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
        impG0real  = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
-       impF0real = f0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
-       call Gprint_superc("_impG0",impG0mats,'m')
-       call Gprint_superc("_impF0",impF0mats,'m')
-       call Gprint_superc("_impG0",impG0real,'r')
-       call Gprint_superc("_impF0",impF0real,'r')
+       impF0real  = f0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
+       call Gprint_superc("impG0",impG0mats,'m')
+       call Gprint_superc("impF0",impF0mats,'m')
+       call Gprint_superc("impG0",impG0real,'r')
+       call Gprint_superc("impF0",impF0real,'r')
     case ("nonsu2");
        impG0mats  = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
        impG0real  = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
-       call Gprint_nonsu2("_impG0",impG0mats,'m')
-       call Gprint_nonsu2("_impG0",impG0real,'r')
+       call Gprint_nonsu2("impG0",impG0mats,'m')
+       call Gprint_nonsu2("impG0",impG0real,'r')
     case default;stop "ed_print_impG0 error: ed_mode not valid"
     end select
     call deallocate_grids
-  end subroutine Ed_Print_ImpG0
+  end subroutine Print_ImpG0
 
 
 
 
 
 
-  subroutine ed_print_impD
-    !This subroutine print the impurity phonon self-energy on the files
-    !  * :code:`"impDph_iw.ed"`  matsubara axis
-    !  * :code:`impDph_realw.ed"` real frequency axis
+  subroutine write_szr()
+    integer :: unit,iorb,jorb,ispin
+    !Z renormalization constant
+    unit = free_unit()
+    open(unit,file="Z_info.ed")
+    write(unit,"(A1,*(A10,6X))") "# ",&
+         ((str(iorb+(ispin-1)*Norb)//"z_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
     !
-    call allocate_grids()
-    !Print the impurity functions:
-    call splot("impDph_iw.ed"   ,vm,impDmats_ph(:))
-    call splot("impDph_realw.ed",vr,impDreal_ph(:))
-    call deallocate_grids()
-  end subroutine Ed_Print_ImpD
+    !\Sigma scattering rate
+    unit = free_unit()
+    open(unit,file="Sig_info.ed")
+    write(unit,"(A1,*(A10,6X))") "#",&
+         ((str(iorb+(ispin-1)*Norb)//"sig_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !Z renormalization constant
+    unit = free_unit()
+    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    !\Sigma scattering rate
+    unit = free_unit()
+    open(unit,file="Sig_last"//reg(ed_file_suffix)//".ed")
+    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+    close(unit)
+    !
+    if(Nph>0)then
+       unit = free_unit()
+       open(unit,file="wph_last"//reg(ed_file_suffix)//".ed")
+       write(unit,"(F15.9)") w_ph
+       close(unit)
+    endif
+    !
+    if(ed_obs_all)then
+       !Z renormalization constant
+       unit = free_unit()
+       open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
+       write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+       close(unit)
+       !
+       !\Sigma scattering rate
+       unit = free_unit()
+       open(unit,file="Sig_all"//reg(ed_file_suffix)//".ed",position='append')
+       write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
+       close(unit)
+       !
+       if(Nph>0)then
+          unit = free_unit()
+          open(unit,file="wph_all"//reg(ed_file_suffix)//".ed",position='append')
+          write(unit,"(F15.9)") w_ph
+          close(unit)
+       end if
+    endif
+    !
+  end subroutine write_szr
+
+
 
 
 

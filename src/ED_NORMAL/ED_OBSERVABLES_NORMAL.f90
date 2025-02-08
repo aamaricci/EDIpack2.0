@@ -12,6 +12,7 @@ MODULE ED_OBSERVABLES_NORMAL
   USE ED_SECTOR
   USE ED_BATH
   USE ED_HAMILTONIAN_NORMAL
+  !
   implicit none
   private
   !
@@ -27,8 +28,6 @@ MODULE ED_OBSERVABLES_NORMAL
   real(8),dimension(:,:),allocatable :: sz2! :math:`\langle S^{z}_{i} S^{z}_{j} \rangle` for i,j orbitals
   real(8),dimension(:,:),allocatable :: exct_s0 !excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{0}c_{js^{'}} \rangle`
   real(8),dimension(:,:),allocatable :: exct_tz !excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{z}c_{js^{'}} \rangle`
-  real(8),dimension(:,:),allocatable :: zimp !quasiparticle weight
-  real(8),dimension(:,:),allocatable :: simp !scattering rate
   real(8)                            :: dens_ph !phonon density
   real(8)                            :: X_ph ! :math:`\langle X \rangle` with :math:`X = \frac{b + b^{dagger}}{2}`
   real(8)                            :: X2_ph ! :math:`\langle X^{2} \rangle` with :math:`X = \frac{b + b^{dagger}}{2}`
@@ -39,7 +38,6 @@ MODULE ED_OBSERVABLES_NORMAL
   real(8),dimension(:),allocatable   :: prob_ph ! Phonon probability
   real(8),dimension(:),allocatable   :: pdf_ph ! Phonon probability distribution :f:func:`prob_distr_ph`
   real(8),dimension(:,:),allocatable :: pdf_part ! Lattice probability distribution as obtained by :f:func:`prob_distr_ph`
-  real(8)                            :: w_ph ! Renormalized phonon frequency
   !
   integer                            :: iorb,jorb,iorb1,jorb1
   integer                            :: ispin,jspin
@@ -86,7 +84,6 @@ contains
     allocate(dens(Norb),dens_up(Norb),dens_dw(Norb))
     allocate(docc(Norb))
     allocate(magz(Norb),sz2(Norb,Norb),n2(Norb,Norb))
-    allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
     allocate(exct_S0(Norb,Norb),exct_Tz(Norb,Norb))
     allocate(Prob(3**Norb))
     allocate(prob_ph(DimPh))
@@ -113,7 +110,7 @@ contains
     X2_ph= 0.d0
     pdf_ph  = 0.d0
     pdf_part= 0.d0
-    w_ph    = w0_ph
+
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
@@ -172,7 +169,7 @@ contains
              i_el = mod(i-1,sectorI%DimEl) + 1
              prob_ph(iph) = prob_ph(iph) + gs_weight
              dens_ph = dens_ph + (iph-1)*gs_weight
-
+             !
              !<X> and <X^2> with X=(b+bdg)/sqrt(2)
              if(iph<DimPh)then
                 j= i_el + (iph)*sectorI%DimEl
@@ -204,7 +201,7 @@ contains
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
-
+    !
     !EVALUATE EXCITON OP <S_ab> AND <T^z_ab>
     !<S_ab>  :=   <C^+_{a,up}C_{b,up} + C^+_{a,dw}C_{b,dw}>
     !<T^z_ab>:=   <C^+_{a,up}C_{b,up} - C^+_{a,dw}C_{b,dw}>
@@ -344,14 +341,7 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
     !
-
     !
-    !
-    if(MPIMASTER)then
-       call get_szr
-       if(DimPh>1) w_ph = sqrt(-2.d0*w0_ph/impDmats_ph(0)) !renormalized phonon frequency
-       call write_observables()
-    endif
     write(LOGfile,"(A,10f18.12,f18.12)")&
          " dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
     write(LOGfile,"(A,10f18.12)")&
@@ -364,8 +354,10 @@ contains
          "excS0"//reg(ed_file_suffix)//"=",((exct_S0(iorb,jorb),iorb=1,Norb),jorb=1,Norb)
     if(any(abs(exct_tz)>1d-9))write(LOGfile,"(A,10f18.12)")&
          "excTZ"//reg(ed_file_suffix)//"=",((exct_Tz(iorb,jorb),iorb=1,Norb),jorb=1,Norb)
-
-    if(DimPh>1)call write_pdf()
+    !
+    if(DimPh>1)then
+       call write_pdf()
+    endif
     !
     do iorb=1,Norb
        ed_dens_up(iorb)=dens_up(iorb)
@@ -376,6 +368,7 @@ contains
     enddo
     !
     ed_imp_info=[s2tot,egs]
+    !
     !
 #ifdef _MPI
     if(MpiStatus)then
@@ -388,9 +381,13 @@ contains
     endif
 #endif
     !
+    if(MPIMASTER)then
+       call write_observables()
+    endif
+    !
     deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2,Prob)
     deallocate(exct_S0,exct_Tz)
-    deallocate(simp,zimp,prob_ph,pdf_ph,pdf_part)
+    deallocate(prob_ph,pdf_ph,pdf_part)
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
@@ -647,23 +644,6 @@ contains
   !####################################################################
   !                    COMPUTATIONAL ROUTINES
   !####################################################################
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : get scattering rate and renormalization constant Z
-  !+-------------------------------------------------------------------+
-  subroutine get_szr()
-    !Calculate the values of the scattering rate and quasiparticle weight
-    integer                  :: ispin,iorb
-    real(8)                  :: wm1,wm2
-    wm1 = pi/beta ; wm2=3d0*pi/beta
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          simp(iorb,ispin) = dimag(impSmats(ispin,ispin,iorb,iorb,1)) - &
-               wm1*(dimag(impSmats(ispin,ispin,iorb,iorb,2))-dimag(impSmats(ispin,ispin,iorb,iorb,1)))/(wm2-wm1)
-          zimp(iorb,ispin)   = 1.d0/( 1.d0 + abs( dimag(impSmats(ispin,ispin,iorb,iorb,1))/wm1 ))
-       enddo
-    enddo
-  end subroutine get_szr
-
 
 
 
@@ -706,20 +686,6 @@ contains
          str(5*Norb+1)//"s2tot",str(5*Norb+2)//"egs"
     close(unit)
     !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_info.ed")
-    write(unit,"(A1,*(A10,6X))") "# ",&
-         ((str(iorb+(ispin-1)*Norb)//"z_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_info.ed")
-    write(unit,"(A1,*(A10,6X))") "#",&
-         ((str(iorb+(ispin-1)*Norb)//"sig_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
     !Spin-Spin correlation
     unit = free_unit()
     open(unit,file="Sz2_info.ed")
@@ -744,7 +710,7 @@ contains
     if(Nph>0)then
        unit = free_unit()
        open(unit,file="nph_info.ed")
-       write(unit,"(A1,*(A10,6X))") "#","1nph", "2w_ph","3X_ph", "4X2_ph"
+       write(unit,"(A1,*(A10,6X))") "#","1nph","2X_ph", "3X2_ph"
        close(unit)
        !
        !N_ph probability:
@@ -777,18 +743,6 @@ contains
          (dens_dw(iorb),iorb=1,Norb),&
          (magz(iorb),iorb=1,Norb),&
          s2tot,egs
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation
@@ -829,7 +783,7 @@ contains
     if(Nph>0)then
        unit = free_unit()
        open(unit,file="nph_last"//reg(ed_file_suffix)//".ed")
-       write(unit,"(90(F15.9,1X))") dens_ph, w_ph, X_ph, X2_ph
+       write(unit,"(90(F15.9,1X))") dens_ph, X_ph, X2_ph
        close(unit)
        !
        unit = free_unit()
@@ -862,18 +816,6 @@ contains
          (dens_dw(iorb),iorb=1,Norb),&
          (magz(iorb),iorb=1,Norb),&
          s2tot,egs
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation
@@ -913,7 +855,7 @@ contains
     if(Nph>0)then
        unit = free_unit()
        open(unit,file="nph_all"//reg(ed_file_suffix)//".ed",position='append')
-       write(unit,"(*(F15.9,1X))") dens_ph, w_ph, X_ph, X2_ph
+       write(unit,"(*(F15.9,1X))") dens_ph,X_ph, X2_ph
        close(unit)
     endif
   end subroutine write_obs_all

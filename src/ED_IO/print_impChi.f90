@@ -1,62 +1,97 @@
-!                         SPIN-SPIN
-subroutine print_chi_spin
-  integer                               :: i,j,iorb,jorb
+! SPIN-SPIN
+subroutine print_chi_spin(Self,axis)
+  complex(8),dimension(:,:,:) :: Self
+  character(len=1)            :: axis
+  integer                     :: i,j,iorb,jorb
+  integer                     :: L,i,ispin,isign
+  character(len=20)           :: suffix
+  call allocate_grids
   do iorb=1,Norb
      do jorb=1,Norb
-        call splot("spinChi_l"//str(iorb)//str(jorb)//"_tau"//reg(ed_file_suffix)//".ed",tau,spinChi_tau(iorb,jorb,0:))
-        call splot("spinChi_l"//str(iorb)//str(jorb)//"_realw"//reg(ed_file_suffix)//".ed",vr,spinChi_w(iorb,jorb,:))
-        call splot("spinChi_l"//str(iorb)//str(jorb)//"_iw"//reg(ed_file_suffix)//".ed",vm,spinChi_iv(iorb,jorb,:))
+        suffix="_l"//str(iorb)//str(jorb)
+        select case(to_lower(axis))
+        case default;stop "print_chi_spib error: axis not supported"
+        case("m");call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(iorb,jorb,:))
+        case("r");call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(iorb,jorb,:))
+        case("t");call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(iorb,jorb,:))
+        end select
      enddo
   enddo
+  call deallocate_grids
 end subroutine print_chi_spin
-!                     DENSITY-DENSITY
-subroutine print_chi_dens
-  integer                               :: i,j,iorb,jorb
+
+! DENSITY-DENSITY
+subroutine print_chi_dens(Self,axis)
+  complex(8),dimension(:,:,:,:,:) :: Self
+  character(len=1)                :: axis
+  integer                         :: i,j,iorb,jorb
+  integer                         :: L,i,ispin,isign
+  character(len=20)               :: suffix
+  call allocate_grids
   do iorb=1,Norb
      do jorb=1,Norb
-        call splot("densChi_l"//str(iorb)//str(jorb)//"_tau"//reg(ed_file_suffix)//".ed",tau,densChi_tau(iorb,jorb,0:))
-        call splot("densChi_l"//str(iorb)//str(jorb)//"_realw"//reg(ed_file_suffix)//".ed",vr,densChi_w(iorb,jorb,:))
-        call splot("densChi_l"//str(iorb)//str(jorb)//"_iw"//reg(ed_file_suffix)//".ed",vm,densChi_iv(iorb,jorb,:))
+        suffix="_l"//str(iorb)//str(jorb)
+        select case(to_lower(axis))
+        case default;stop "print_chi_spib error: axis not supported"
+        case("m");call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(iorb,jorb,:))
+        case("r");call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(iorb,jorb,:))
+        case("t");call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(iorb,jorb,:))
+        end select
      enddo
   enddo
+  call deallocate_grids
 end subroutine print_chi_dens
-!                     PAIR-PAIR
-subroutine print_chi_pair
-  integer                               :: i,j,iorb,jorb
+
+! PAIR-PAIR
+subroutine print_chi_pair(Self,axis)
+  complex(8),dimension(:,:,:,:,:) :: Self
+  character(len=1)                :: axis
+  integer                         :: i,j,iorb,jorb
+  integer                         :: L,i,ispin,isign
+  character(len=20)               :: suffix
+  call allocate_grids
   do iorb=1,Norb
      do jorb=1,Norb
-        call splot("pairChi_l"//str(iorb)//str(jorb)//"_tau"//reg(ed_file_suffix)//".ed",tau,pairChi_tau(iorb,jorb,0:))
-        call splot("pairChi_l"//str(iorb)//str(jorb)//"_realw"//reg(ed_file_suffix)//".ed",vr,pairChi_w(iorb,jorb,:))
-        call splot("pairChi_l"//str(iorb)//str(jorb)//"_iw"//reg(ed_file_suffix)//".ed",vm,pairChi_iv(iorb,jorb,:))
+        suffix="_l"//str(iorb)//str(jorb)
+        select case(to_lower(axis))
+        case default;stop "print_chi_spib error: axis not supported"
+        case("m");call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(iorb,jorb,:))
+        case("r");call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(iorb,jorb,:))
+        case("t");call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(iorb,jorb,:))
+        end select
      enddo
   enddo
+  call deallocate_grids
 end subroutine print_chi_pair
-!                     EXCITON
-subroutine print_chi_exct
-  integer                               :: i,j,iorb,jorb
+
+! EXCITON
+subroutine print_chi_exct(Self,axis)
+  complex(8),dimension(:,:,:,:,:) :: Self
+  character(len=1)                :: axis
+  integer                         :: i,j,iorb,jorb
+  integer                         :: L,i,ispin,isign
+  character(len=20)               :: suffix
+  call allocate_grids
   do iorb=1,Norb
      do jorb=iorb+1,Norb
-        call splot("exctChi_singlet_l"//str(iorb)//str(jorb)//"_tau"//reg(ed_file_suffix)//".ed",tau,exctChi_tau(0,iorb,jorb,0:))
-        call splot("exctChi_singlet_l"//str(iorb)//str(jorb)//"_realw"//reg(ed_file_suffix)//".ed",vr,exctChi_w(0,iorb,jorb,:))
-        call splot("exctChi_singlet_l"//str(iorb)//str(jorb)//"_iw"//reg(ed_file_suffix)//".ed",vm,exctChi_iv(0,iorb,jorb,:))
+        suffix="_l"//str(iorb)//str(jorb)
+        select case(to_lower(axis))
+        case default;stop "print_chi_spib error: axis not supported"
+        case("m")
+           call splot("exctChi_singlet"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(1,orb,jorb,:))
+           call splot("exctChi_tripletXY"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(1,iorb,jorb,:))
+           call splot("exctChi_tripletZ"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(1,iorb,jorb,:))
+        case("r")
+           call splot("exctChi_singlet"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(2,iorb,jorb,:))
+           call splot("exctChi_tripletXY"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(2,iorb,jorb,:))
+           call splot("exctChi_tripletZ"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(2,iorb,jorb,:))
+        case("t")
+           call splot("exctChi_singlet"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(3,iorb,jorb,:))
+           call splot("exctChi_tripletXY"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(3,iorb,jorb,:))
+           call splot("exctChi_tripletZ"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(3,iorb,jorb,:))
+        end select
      enddo
   enddo
-  !
-  do iorb=1,Norb
-     do jorb=iorb+1,Norb
-        call splot("exctChi_tripletXY_l"//str(iorb)//str(jorb)//"_tau"//reg(ed_file_suffix)//".ed",tau,exctChi_tau(1,iorb,jorb,0:))
-        call splot("exctChi_tripletXY_l"//str(iorb)//str(jorb)//"_realw"//reg(ed_file_suffix)//".ed",vr,exctChi_w(1,iorb,jorb,:))
-        call splot("exctChi_tripletXY_l"//str(iorb)//str(jorb)//"_iw"//reg(ed_file_suffix)//".ed",vm,exctChi_iv(1,iorb,jorb,:))
-     enddo
-  enddo
-  !
-  do iorb=1,Norb
-     do jorb=iorb+1,Norb
-        call splot("exctChi_tripletZ_l"//str(iorb)//str(jorb)//"_tau"//reg(ed_file_suffix)//".ed",tau,exctChi_tau(2,iorb,jorb,0:))
-        call splot("exctChi_tripletZ_l"//str(iorb)//str(jorb)//"_realw"//reg(ed_file_suffix)//".ed",vr,exctChi_w(2,iorb,jorb,:))
-        call splot("exctChi_tripletZ_l"//str(iorb)//str(jorb)//"_iw"//reg(ed_file_suffix)//".ed",vm,exctChi_iv(2,iorb,jorb,:))
-     enddo
-  enddo
-  !
+  call deallocate_grids
 end subroutine print_chi_exct
 

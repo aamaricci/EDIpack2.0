@@ -13,6 +13,7 @@ MODULE ED_OBSERVABLES_NONSU2
   USE ED_BATH
   USE ED_HAMILTONIAN_NONSU2
   !
+  !
   implicit none
   private
   !
@@ -34,8 +35,6 @@ MODULE ED_OBSERVABLES_NONSU2
   real(8),dimension(:,:),allocatable    :: exct_tx ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{x}c_{js^{'}} \rangle`
   real(8),dimension(:,:),allocatable    :: exct_ty ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{y}c_{js^{'}} \rangle`
   real(8),dimension(:,:),allocatable    :: exct_tz ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{z}c_{js^{'}} \rangle`
-  real(8),dimension(:,:),allocatable    :: zimp ! quasiparticle weight
-  real(8),dimension(:,:),allocatable    :: simp ! scattering rate
   real(8)                               :: s2tot ! :math:`\langle S_{z}^{2} \rangle`
   real(8)                               :: Egs ! Ground-state energy
   real(8)                               :: Ei
@@ -99,7 +98,6 @@ contains
     allocate(magX(Norb),magY(Norb))
     allocate(exct_S0(Norb,Norb),exct_Tz(Norb,Norb))
     allocate(exct_Tx(Norb,Norb),exct_Ty(Norb,Norb))
-    allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
     !
     Egs     = state_list%emin
     dens    = 0.d0
@@ -437,13 +435,6 @@ contains
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
-
-    !
-    !
-    if(MPIMASTER)then
-       call get_szr
-       call write_observables()
-    endif
     !
     write(LOGfile,"(A,10f18.12,f18.12)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
     write(LOGfile,"(A,10f18.12)")    "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
@@ -505,11 +496,14 @@ contains
     endif
 #endif
     !
+    if(MPIMASTER)then
+       call write_observables()
+    endif
+    !
     deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2)
     deallocate(magX,magY)
     deallocate(exct_S0,exct_Tz)
     deallocate(exct_Tx,exct_Ty)
-    deallocate(simp,zimp)
   end subroutine observables_nonsu2
 
 
@@ -754,6 +748,7 @@ subroutine local_energy_nonsu2()
      write(LOGfile,"(A,10f18.12)")"Dse     =",ed_Dse
      write(LOGfile,"(A,10f18.12)")"Dph     =",ed_Dph
   endif
+  !
   if(MPIMASTER)then
      call write_energy()
   endif
@@ -766,22 +761,6 @@ end subroutine local_energy_nonsu2
   !####################################################################
   !                    COMPUTATIONAL ROUTINES
   !####################################################################
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : get scattering rate and renormalization constant Z
-  !+-------------------------------------------------------------------+
-  subroutine get_szr()
-    !Calculate the values of the scattering rate and quasiparticle weight
-    integer                  :: ispin,iorb
-    real(8)                  :: wm1,wm2
-    wm1 = pi/beta ; wm2=3d0*pi/beta
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          simp(iorb,ispin) = dimag(impSmats(ispin,ispin,iorb,iorb,1)) - &
-               wm1*(dimag(impSmats(ispin,ispin,iorb,iorb,2))-dimag(impSmats(ispin,ispin,iorb,iorb,1)))/(wm2-wm1)
-          zimp(iorb,ispin)   = 1.d0/( 1.d0 + abs( dimag(impSmats(ispin,ispin,iorb,iorb,1))/wm1 ))
-       enddo
-    enddo
-  end subroutine get_szr
 
 
 
@@ -830,20 +809,6 @@ end subroutine local_energy_nonsu2
     unit = free_unit()
     open(unit,file="magXYZ_info.ed")
     write(unit,"(A1,*(A10,6X))") "# ",(str(iorb)//"mag_"//str(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_info.ed")
-    write(unit,"(A1,*(A10,6X))") "# ",&
-         ((str(iorb+(ispin-1)*Norb)//"z_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_info.ed")
-    write(unit,"(A1,*(A10,6X))") "#",&
-         ((str(iorb+(ispin-1)*Norb)//"sig_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation
@@ -907,18 +872,6 @@ end subroutine local_energy_nonsu2
     unit = free_unit()
     open(unit,file="magZ_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation
@@ -1001,18 +954,6 @@ end subroutine local_energy_nonsu2
     unit = free_unit()
     open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
     write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation

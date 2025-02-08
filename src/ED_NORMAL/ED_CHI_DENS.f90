@@ -7,18 +7,18 @@ MODULE ED_CHI_DENS
   USE SF_LINALG,  only: inv,eigh,eye
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
+  USE ED_AUX_FUNX
   USE ED_EIGENSPACE
   USE ED_BATH
   USE ED_SETUP
   USE ED_SECTOR
   USE ED_HAMILTONIAN_NORMAL
-  USE ED_AUX_FUNX
-
   implicit none
   private
 
 
-  public :: build_chi_dens_normal
+  public :: build_densChi_normal
+  public :: get_densChi_normal
 
   integer                          :: istate,iorb,jorb,ispin,jspin
   integer                          :: isector
@@ -34,6 +34,8 @@ MODULE ED_CHI_DENS
   real(8)                          :: e_state
 
 
+
+
 contains
 
 
@@ -42,48 +44,43 @@ contains
   !PURPOSE  : Evaluate the Dens susceptibility \Chi_dens for a 
   ! \chi_ab = <n_a(\tau)n_b(0)>
   !+------------------------------------------------------------------+
-  subroutine build_chi_dens_normal()
+  subroutine build_densChi_normal()
     !
-    ! Evaluates the impurity Spin susceptibility :math:`\chi^{n}=\langle T_\tau n_a(\tau) n_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
+    ! Evaluates the impurity density susceptibility :math:`\chi^{n}=\langle T_\tau n_a(\tau) n_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
     !
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos.
     !
-    write(LOGfile,"(A)")"Get impurity dens Chi:"
+    write(LOGfile,"(A)")"Get dens Chi:"
     if(MPIMASTER)call start_timer(unit=LOGfile)
     !
     do iorb=1,Norb
+       call allocate_GFmatrix(densChimatrix(iorb,iorb),Nstate=state_list%size)
        call lanc_ed_build_densChi_diag(iorb)
     enddo
     !
     if(Norb>1)then
        do iorb=1,Norb
           do jorb=iorb+1,Norb
+             call allocate_GFmatrix(densChimatrix(iorb,jorb),Nstate=state_list%size)
              call lanc_ed_build_densChi_mix(iorb,jorb)
           end do
        end do
-       !
-       !
-       do iorb=1,Norb
-          do jorb=iorb+1,Norb
-             densChi_w(iorb,jorb,:)   = 0.5d0*(densChi_w(iorb,jorb,:) - densChi_w(iorb,iorb,:) - densChi_w(jorb,jorb,:))
-             densChi_tau(iorb,jorb,:) = 0.5d0*(densChi_tau(iorb,jorb,:) - densChi_tau(iorb,iorb,:) - densChi_tau(jorb,jorb,:))
-             densChi_iv(iorb,jorb,:)  = 0.5d0*(densChi_iv(iorb,jorb,:) - densChi_iv(iorb,iorb,:) - densChi_iv(jorb,jorb,:))
-             !
-             densChi_w(jorb,iorb,:)   = densChi_w(iorb,jorb,:)
-             densChi_tau(jorb,iorb,:) = densChi_tau(iorb,jorb,:)
-             densChi_iv(jorb,iorb,:)  = densChi_iv(iorb,jorb,:)
-          enddo
-       enddo
     endif
     !
     if(MPIMASTER)call stop_timer
     !
-  end subroutine build_chi_dens_normal
+  end subroutine build_densChi_normal
 
 
 
 
-  
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
 
 
 
@@ -95,6 +92,7 @@ contains
     write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))
     !
     do istate=1,state_list%size
+       call allocate_GFmatrix(densChimatrix(iorb,iorb),istate,Nchan=1)
        isector    =  es_return_sector(state_list,istate)
        e_state    =  es_return_energy(state_list,istate)
        v_state    =  es_return_dvec(state_list,istate)
@@ -111,20 +109,14 @@ contains
 
 
 
-
-
-
-
-  
-
-
   subroutine lanc_ed_build_densChi_mix(iorb,jorb)
     integer                          :: iorb,jorb
     real(8),dimension(:),allocatable :: vI,vJ
     !
-    write(LOGfile,"(A)")"Get Chi_dens_mix_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
+    write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
     !
     do istate=1,state_list%size
+       call allocate_GFmatrix(densChimatrix(iorb,jorb),istate,Nchan=1)
        isector    =  es_return_sector(state_list,istate)
        e_state    =  es_return_energy(state_list,istate)
        v_state    =  es_return_dvec(state_list,istate)
@@ -145,7 +137,7 @@ contains
 
 
 
-  
+
 
   subroutine add_to_lanczos_densChi(vnorm2,Ei,alanc,blanc,iorb,jorb)
     integer                                    :: iorb,jorb
@@ -169,8 +161,13 @@ contains
     Nlanc = size(alanc)
     !
     pesoF  = vnorm2/zeta_function 
-    pesoBZ = 1d0
-    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
+    if((finiteT).and.(beta*(Ei-Egs) < 200))then
+       pesoBZ = exp(-beta*(Ei-Egs))
+    elseif(.not.finiteT)then
+       pesoBZ = 1d0
+    else
+       pesoBZ = 0d0
+    endif
     !
 #ifdef _MPI
     if(MpiStatus)then
@@ -186,31 +183,111 @@ contains
 #endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
+    call allocate_GFmatrix(densChiMatrix(iorb,jorb),istate,1,Nlanc)
+    !
     do j=1,nlanc
        Ej     = diag(j)
        dE     = Ej-Ei
        pesoAB = Z(1,j)*Z(1,j)
        peso   = pesoF*pesoAB*pesoBZ
-       ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
-       ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
-       ! This ensures that the correct null contribution is obtained.
-       ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
-       ! we do not include the contribution (because we are in the situation described above).
-       ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
-       if(beta*dE > 1d-3)densChi_iv(iorb,jorb,0)=densChi_iv(iorb,jorb,0) + peso*2*(1d0-exp(-beta*dE))/dE 
-       do i=1,Lmats
-          densChi_iv(iorb,jorb,i)=densChi_iv(iorb,jorb,i) + peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
-       enddo
-       do i=0,Ltau
-          densChi_tau(iorb,jorb,i)=densChi_tau(iorb,jorb,i) + exp(-tau(i)*dE)*peso
-       enddo
-       do i=1,Lreal
-          densChi_w(iorb,jorb,i)=densChi_w(iorb,jorb,i) - &
-               peso*(1d0-exp(-beta*dE))*(1d0/(dcmplx(vr(i),eps) - dE) - 1d0/(dcmplx(vr(i),eps) + dE))
-       enddo
+       !
+       densChiMatrix(iorb,jorb)%state(istate)%channel(1)%weight(j) = peso
+       densChiMatrix(iorb,jorb)%state(istate)%channel(1)%poles(j)  = de
+       !
     enddo
     !
   end subroutine add_to_lanczos_densChi
+
+
+
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
+
+
+
+  
+  function get_densChi_normal(zeta,axis) result(Chi)
+    !
+    ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
+    !
+    complex(8),dimension(:),intent(in)         :: zeta
+    character(len=*),optional                  :: axis
+    complex(8),dimension(Norb,Norb,size(zeta)) :: Chi
+    integer                                    :: iorb,jorb,i
+    character(len=1)                           :: axis_
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_densChi_normal: Get GFs on a input array zeta"
+#endif
+    !
+    axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
+    !
+    if(.not.allocated(densChimatrix))stop "get_densChi_normal ERROR: densChimatrix not allocated!"
+    !
+    Chi = zero
+    !
+    do iorb=1,Norb
+       call get_Chiab(iorb,iorb)
+    enddo
+    !
+    if(Norb>1)then
+       do iorb=1,Norb
+          do jorb=iorb+1,Norb
+             call get_Chiab(iorb,jorb)
+             Chi(iorb,jorb,:) = 0.5d0*(Chi(iorb,jorb,:)-Chi(iorb,iorb,:)-Chi(jorb,jorb,:))
+             Chi(jorb,iorb,:) = Chi(iorb,jorb,:)
+          enddo
+       enddo
+    end if
+    !
+  contains
+    !
+    subroutine get_Chiab(iorb,jorb)
+      integer,intent(in) :: iorb,jorb
+      integer            :: Nstates,istate
+      integer            :: Nchannels,ichan
+      integer            :: Nexcs,iexc
+      real(8)            :: peso,de
+      !
+      write(LOGfile,"(A)")"Get Chi_dens_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
+      if(.not.allocated(densChimatrix(iorb,jorb)%state)) return
+      !
+      Chi(iorb,jorb,:)= zero
+      Nstates = size(densChimatrix(iorb,jorb)%state)
+      do istate=1,Nstates
+         if(.not.allocated(densChimatrix(iorb,jorb)%state(istate)%channel))cycle
+         Nchannels = size(densChimatrix(iorb,jorb)%state(istate)%channel)
+         do ichan=1,Nchannels
+            Nexcs  = size(densChimatrix(iorb,jorb)%state(istate)%channel(ichan)%poles)
+            if(Nexcs==0)cycle
+            do iexc=1,Nexcs
+               peso = densChimatrix(iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
+               de   = densChimatrix(iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
+               do i=1,size(zeta)
+                  select case(axis_)
+                  case("m","M")
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) + &
+                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2 + dE**2)
+                  case("r","R")
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
+                          peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
+                  case("t","T")
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
+                          peso*exp(-zeta(i)*dE)
+                  end select
+               enddo
+            enddo
+         enddo
+      enddo
+      return
+    end subroutine get_Chiab
+    !
+  end function get_densChi_normal
 
 
 

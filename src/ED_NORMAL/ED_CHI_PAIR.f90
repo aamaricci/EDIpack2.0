@@ -7,18 +7,18 @@ MODULE ED_CHI_PAIR
   USE SF_LINALG,  only: inv,eigh
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
+  USE ED_AUX_FUNX
   USE ED_EIGENSPACE
   USE ED_BATH
   USE ED_SETUP
   USE ED_SECTOR
   USE ED_HAMILTONIAN_NORMAL
-  USE ED_AUX_FUNX
-
   implicit none
   private
 
 
-  public :: build_chi_pair_normal
+  public :: build_pairChi_normal
+  public :: get_pairChi_normal
 
   integer                          :: istate,iorb,jorb,ispin,jspin
   integer                          :: isector,jsector,ksector
@@ -32,6 +32,9 @@ MODULE ED_CHI_PAIR
   real(8),dimension(:),allocatable :: v_state
   real(8)                          :: e_state
 
+
+
+
 contains
 
 
@@ -40,7 +43,7 @@ contains
   !PURPOSE  : Evaluate the pair susceptibility \Chi_pair for a 
   ! \chi_ab = <Delta*_a(\tau)Delta_b(0)>
   !+------------------------------------------------------------------+
-  subroutine build_chi_pair_normal()
+  subroutine build_pairChi_normal()
     !
     ! Evaluates the impurity Pair susceptibility :math:`\chi^{\Delta}=\langle T_\tau \Delta_a(\tau) \Delta_b\rangle` in the Matsubara :math:`i\omega_n` and Real :math:`\omega` frequency axis as well as imaginary time :math:`\tau`.
     !
@@ -48,32 +51,32 @@ contains
     !
     write(LOGfile,"(A)")"Get impurity pair Chi:"
     if(MPIMASTER)call start_timer(unit=LOGfile)
+    !
     do iorb=1,Norb
+       call allocate_GFmatrix(pairChimatrix(iorb,iorb),Nstate=state_list%size)
        call lanc_ed_build_pairChi_diag(iorb)
     enddo
     !
     if(Norb>1)then
        do iorb=1,Norb
           do jorb=iorb+1,Norb
+             call allocate_GFmatrix(pairChimatrix(iorb,jorb),Nstate=state_list%size)
              call lanc_ed_build_pairChi_mix(iorb,jorb)
           end do
        end do
-       !
-       do iorb=1,Norb
-          do jorb=iorb+1,Norb
-             pairChi_w(iorb,jorb,:)   = 0.5d0*(pairChi_w(iorb,jorb,:) - pairChi_w(iorb,iorb,:) - pairChi_w(jorb,jorb,:))
-             pairChi_tau(iorb,jorb,:) = 0.5d0*(pairChi_tau(iorb,jorb,:) - pairChi_tau(iorb,iorb,:) - pairChi_tau(jorb,jorb,:))
-             pairChi_iv(iorb,jorb,:)  = 0.5d0*(pairChi_iv(iorb,jorb,:) - pairChi_iv(iorb,iorb,:) - pairChi_iv(jorb,jorb,:))
-             !
-             pairChi_w(jorb,iorb,:)   = pairChi_w(iorb,jorb,:)
-             pairChi_tau(jorb,iorb,:) = pairChi_tau(iorb,jorb,:)
-             pairChi_iv(jorb,iorb,:)  = pairChi_iv(iorb,jorb,:)
-          enddo
-       enddo
     endif
+    !
     if(MPIMASTER)call stop_timer
+    !
+  end subroutine build_pairChi_normal
 
-  end subroutine build_chi_pair_normal
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
 
 
 
@@ -95,6 +98,7 @@ contains
     endif
     !
     do istate=1,state_list%size
+       call allocate_GFmatrix(pairChimatrix(iorb,iorb),istate,Nchan=1)
        isector  =  es_return_sector(state_list,istate)
        e_state  =  es_return_energy(state_list,istate)
        v_state  =  es_return_dvec(state_list,istate)
@@ -119,8 +123,6 @@ contains
 
 
 
-
-
   ! \chi_ab = <Delta*_a(\tau)Delta_b(0)>
   !         = <[C^+_a(\tau)C^+_a(\tau)][C_b(0)C_b(0)]>
   !from aux: <[C^+_a C^+_a + C^+_b C^+_b][C_a C_a + C_b C_b]>  
@@ -136,6 +138,7 @@ contains
     endif
     !
     do istate=1,state_list%size
+       call allocate_GFmatrix(pairChimatrix(iorb,jorb),istate,Nchan=1)
        isector    =  es_return_sector(state_list,istate)
        e_state    =  es_return_energy(state_list,istate)
        v_state  =  es_return_dvec(state_list,istate)
@@ -190,8 +193,13 @@ contains
     Nlanc = size(alanc)
     !
     pesoF  = vnorm2/zeta_function 
-    pesoBZ = 1d0
-    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
+    if((finiteT).and.(beta*(Ei-Egs) < 200))then
+       pesoBZ = exp(-beta*(Ei-Egs))
+    elseif(.not.finiteT)then
+       pesoBZ = 1d0
+    else
+       pesoBZ = 0d0
+    endif
     !
 #ifdef _MPI
     if(MpiStatus)then
@@ -208,31 +216,106 @@ contains
 #endif
     call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
     !
+    call allocate_GFmatrix(pairChiMatrix(iorb,jorb),istate,1,Nlanc)
+    !
     do j=1,nlanc
        Ej     = diag(j)
        dE     = Ej-Ei
        pesoAB = Z(1,j)*Z(1,j)
        peso   = pesoF*pesoAB*pesoBZ
-       ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
-       ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
-       ! This ensures that the correct null contribution is obtained.
-       ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
-       ! we do not include the contribution (because we are in the situation described above).
-       ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
-       if(beta*dE > 1d-3)pairChi_iv(iorb,jorb,0)=pairChi_iv(iorb,jorb,0) + peso*2*(1d0-exp(-beta*dE))/dE 
-       do i=1,Lmats
-          pairChi_iv(iorb,jorb,i)=pairChi_iv(iorb,jorb,i) + peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
-       enddo
-       do i=0,Ltau
-          pairChi_tau(iorb,jorb,i)=pairChi_tau(iorb,jorb,i) + exp(-tau(i)*dE)*peso
-       enddo
-       do i=1,Lreal
-          pairChi_w(iorb,jorb,i)=pairChi_w(iorb,jorb,i) - &
-               peso*(1d0-exp(-beta*dE))*(1d0/(dcmplx(vr(i),eps) - dE) - 1d0/(dcmplx(vr(i),eps) + dE))
-       enddo
+       !
+       pairChiMatrix(iorb,jorb)%state(istate)%channel(1)%weight(j) = peso
+       pairChiMatrix(iorb,jorb)%state(istate)%channel(1)%poles(j)  = de
     enddo
     !
   end subroutine add_to_lanczos_pairChi
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
+
+
+
+  function get_pairChi_normal(zeta,axis) result(Chi)
+    !
+    ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
+    !
+    complex(8),dimension(:),intent(in)         :: zeta
+    character(len=*),optional                  :: axis
+    complex(8),dimension(Norb,Norb,size(zeta)) :: Chi
+    integer                                    :: iorb,jorb,i
+    character(len=1)                           :: axis_
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_pairChi_normal: Get GFs on a input array zeta"
+#endif
+    !
+    axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
+    !
+    if(.not.allocated(pairChimatrix))stop "get_pairChi_normal ERROR: pairChimatrix not allocated!"
+    !
+    Chi = zero
+    !
+    do iorb=1,Norb
+       call get_Chiab(iorb,iorb)
+    enddo
+    !
+    if(Norb>1)then
+       do iorb=1,Norb
+          do jorb=iorb+1,Norb
+             call get_Chiab(iorb,jorb)
+             Chi(iorb,jorb,:) = 0.5d0*(Chi(iorb,jorb,:)-Chi(iorb,iorb,:)-Chi(jorb,jorb,:))
+             Chi(jorb,iorb,:) = Chi(iorb,jorb,:)
+          enddo
+       enddo
+    end if
+    !
+  contains
+    !
+    subroutine get_Chiab(iorb,jorb)
+      integer,intent(in) :: iorb,jorb
+      integer            :: Nstates,istate
+      integer            :: Nchannels,ichan
+      integer            :: Nexcs,iexc
+      real(8)            :: peso,de
+      !
+      write(LOGfile,"(A)")"Get Chi_pair_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
+      if(.not.allocated(pairChimatrix(iorb,jorb)%state)) return
+      !
+      Chi(iorb,jorb,:)= zero
+      Nstates = size(pairChimatrix(iorb,jorb)%state)
+      do istate=1,Nstates
+         if(.not.allocated(pairChimatrix(iorb,jorb)%state(istate)%channel))cycle
+         Nchannels = size(pairChimatrix(iorb,jorb)%state(istate)%channel)
+         do ichan=1,Nchannels
+            Nexcs  = size(pairChimatrix(iorb,jorb)%state(istate)%channel(ichan)%poles)
+            if(Nexcs==0)cycle
+            do iexc=1,Nexcs
+               peso = pairChimatrix(iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
+               de   = pairChimatrix(iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
+               do i=1,size(zeta)
+                  select case(axis_)
+                  case("m","M")
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) + &
+                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2 + dE**2)
+                  case("r","R")
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
+                          peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
+                  case("t","T")
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
+                          peso*exp(-zeta(i)*dE)
+                  end select
+               enddo
+            enddo
+         enddo
+      enddo
+      return
+    end subroutine get_Chiab
+    !
+  end function get_pairChi_normal
 
 
 

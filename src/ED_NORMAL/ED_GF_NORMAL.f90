@@ -16,10 +16,10 @@ MODULE ED_GF_NORMAL
   private
 
 
-  public :: build_Gimp_normal
-  public :: get_Gimp_normal
+  public :: build_impG_normal
+  public :: get_impG_normal
+  public :: get_impD_normal
   public :: get_Sigma_normal
-
 
 
   integer                          :: istate
@@ -59,7 +59,7 @@ contains
   !                        NORMAL
   !+------------------------------------------------------------------+
 
-  subroutine build_Gimp_normal()
+  subroutine build_impG_normal()
     !
     !Evaluates the impurity electrons Green's function :math:`G(z)` and the phonons one :math:`D(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ] and rank-1 array :f:var:`impdmats`, :f:var:`impdreal`.    
     !
@@ -76,6 +76,7 @@ contains
 #endif
     !
     if(MPIMASTER)call start_timer(unit=LOGfile)
+    !
     do ispin=1,Nspin
        do iorb=1,Norb
           call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),Nstate=state_list%size)
@@ -97,12 +98,15 @@ contains
        enddo
        !
        !> PHONONS
-       if(DimPh>1)call lanc_build_gf_phonon_main()
+       if(DimPh>1)then
+          call allocate_GFmatrix(impDmatrix,Nstate=state_list%size)
+          call lanc_build_gf_phonon_main()
+       endif
        !
        if(MPIMASTER)call stop_timer
     end if
     !
-  end subroutine build_Gimp_normal
+  end subroutine build_impG_normal
 
 
 
@@ -197,6 +201,83 @@ contains
 
 
 
+  subroutine lanc_build_gf_phonon_main()
+    integer,dimension(Ns_Ud)    :: iDimUps,iDimDws
+    integer                     :: Nups(Ns_Ud)
+    integer                     :: Ndws(Ns_Ud)
+    !
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf_phonon: build phonon GF"
+#endif
+    do istate=1,state_list%size
+       !
+       call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
+       !
+       isector    =  es_return_sector(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_dvec(state_list,istate)
+       !
+       call get_Nup(isector,Nups)
+       call get_Ndw(isector,Ndws)
+       if(MpiMaster.AND.ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
+            'From sector',isector,Nups,Ndws
+       !
+       idim = getdim(isector)
+       call get_DimUp(isector,iDimUps)
+       call get_DimDw(isector,iDimDws)
+       iDimUp = product(iDimUps)
+       iDimDw = product(iDimDws)
+       !
+       if(MpiMaster)then
+          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
+          !
+          allocate(vvinit(idim));vvinit=0d0
+          !
+          do i=1,iDim
+             iph = (i-1)/(iDimUp*iDimDw) + 1
+             i_el = mod(i-1,iDimUp*iDimDw) + 1
+             !
+             !apply destruction operator
+             if(iph>1) then
+                j = i_el + ((iph-1)-1)*iDimUp*iDimDw
+                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*v_state(i)
+             endif
+             !
+             !apply creation operator
+             if(iph<DimPh) then
+                j = i_el + ((iph+1)-1)*iDimUp*iDimDw
+                vvinit(j) = vvinit(j) + sqrt(dble(iph))*v_state(i)
+             endif
+          enddo
+       else
+          allocate(vvinit(1));vvinit=0.d0
+       endif
+       !
+       call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
+       call add_to_lanczos_phonon(norm2,e_state,alfa_,beta_,istate)
+       deallocate(alfa_,beta_)
+       if(allocated(vvinit))deallocate(vvinit)
+       if(allocated(v_state))deallocate(v_state)
+    enddo
+    return
+  end subroutine lanc_build_gf_phonon_main
+
+
+
+
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
+
+
+
+
 
   subroutine add_to_lanczos_gf_normal(vnorm2,Ei,alanc,blanc,isign,iorb,jorb,ispin,ichan,istate)
     complex(8)                                 :: vnorm2,pesoBZ,peso
@@ -243,7 +324,6 @@ contains
     endif
 #endif
     !
-    Z                = eye(Nlanc)
     diag(1:Nlanc)    = alanc(1:Nlanc)
     subdiag(2:Nlanc) = blanc(2:Nlanc)
 #ifdef _DEBUG
@@ -255,7 +335,7 @@ contains
     call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,jorb),istate,ichan,Nlanc)
     !
     do j=1,nlanc
-       de = diag(j)-Ei
+       de   = diag(j)-Ei
        peso = pesoBZ*Z(1,j)*Z(1,j)
        !
        impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(j) = peso
@@ -267,6 +347,51 @@ contains
 
 
 
+
+  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
+    real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
+    integer                                    :: nlanc
+    real(8),dimension(:)                       :: alanc
+    real(8),dimension(size(alanc))             :: blanc 
+    real(8),dimension(size(alanc),size(alanc)) :: Z
+    real(8),dimension(size(alanc))             :: diag,subdiag
+    integer                                    :: i,j,istate
+    complex(8)                                 :: iw
+    !
+    Egs = state_list%emin       !get the gs energy
+    !
+    Nlanc = size(alanc)
+    !
+    pesoF  = vnorm2/zeta_function 
+    pesoBZ = 1d0
+    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
+    !
+#ifdef _MPI
+    if(MpiStatus)then
+       call Bcast_MPI(MpiComm,alanc)
+       call Bcast_MPI(MpiComm,blanc)
+    endif
+#endif
+    diag(1:Nlanc)    = alanc(1:Nlanc)
+    subdiag(2:Nlanc) = blanc(2:Nlanc)
+    call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
+    !
+    call allocate_GFmatrix(impDmatrix,istate,1,Nexc=Nlanc) !ichan=1
+    !
+    do j=1,nlanc
+       Ej     = diag(j)
+       dE     = Ej-Ei
+       pesoAB = Z(1,j)*Z(1,j)
+       peso   = pesoF*pesoAB*pesoBZ
+       !
+       impDmatrix%state(istate)%channel(1)%weight(j) = peso
+       impDmatrix%state(istate)%channel(1)%poles(j)  = de
+    enddo
+  end subroutine add_to_lanczos_phonon
+
+
+
+
   !################################################################
   !################################################################
   !################################################################
@@ -275,7 +400,7 @@ contains
 
 
 
-  function get_Gimp_normal(zeta,axis) result(Gf)
+  function get_impG_normal(zeta,axis) result(Gf)
     !
     ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
     !
@@ -358,7 +483,70 @@ contains
       return
     end subroutine get_normal_Gab
     !
-  end function get_Gimp_normal
+  end function get_impG_normal
+
+
+
+  function get_impD_normal(zeta,axis) result(G)
+    !
+    ! Reconstructs the phonon Green's functions using :f:var:`impdmatrix` to retrieve weights and poles.
+    !
+    complex(8),dimension(:),intent(in) :: zeta
+    character(len=*),optional          :: axis
+    complex(8),dimension(size(zeta))   :: G
+    character(len=1)                   :: axis_
+    !
+    integer                            :: Nstates,istate
+    integer                            :: Nchannels,ichan,i
+    integer                            :: Nexcs,iexc
+    real(8)                            :: peso,de
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_Gimp_normal: Get GFs on a input array zeta"
+#endif
+    !
+    axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
+    !
+    G = zero
+    !
+    write(LOGfile,"(A)")"Get D"
+    if(.not.allocated(impDmatrix%state)) return
+    !
+    G= zero
+    Nstates = size(impDmatrix%state)
+    do istate=1,Nstates
+       if(.not.allocated(impDmatrix%state(istate)%channel))cycle
+       Nchannels = size(impDmatrix%state(istate)%channel)
+       do ichan=1,Nchannels
+          Nexcs  = size(impDmatrix%state(istate)%channel(ichan)%poles)
+          if(Nexcs==0)cycle
+          do iexc=1,Nexcs
+             peso  = impDmatrix%state(istate)%channel(ichan)%weight(iexc)
+             de    = impDmatrix%state(istate)%channel(ichan)%poles(iexc)
+             ! ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
+             ! ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
+             ! ! This ensures that the correct null contribution is obtained.
+             ! ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
+             ! ! we do not include the contribution (because we are in the situation described above).
+             ! ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
+             select case(axis_)
+             case("m","M")                
+                if(beta*dE > 1d-3)G(1)=G(1) - peso*2*(1d0-exp(-beta*dE))/dE 
+                do i=2,size(zeta)
+                   G(i)=G(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2+dE**2)
+                enddo
+             case("r","R")
+                do i=1,size(zeta)
+                   G(i)=G(i) + peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
+                enddo
+             end select
+          enddo
+       enddo
+    enddo
+    !
+  end function get_impD_normal
+
+
+
 
 
 
@@ -376,7 +564,7 @@ contains
     invG0 = invg0_bath_function(zeta,dmft_bath,axis_)
     !
     !Get G^-1
-    invG  = get_Gimp_normal(zeta)
+    invG  = get_impG_normal(zeta)
     !
     !Get Sigma= G0^-1 - G^-1
     do ispin=1,Nspin
@@ -397,147 +585,6 @@ contains
     enddo
     !
   end function get_Sigma_normal
-
-
-
-
-
-
-
-
-  !################################################################
-  !################################################################
-  !################################################################
-  !################################################################
-
-
-
-
-
-
-
-
-
-  subroutine lanc_build_gf_phonon_main()
-    integer,dimension(Ns_Ud)    :: iDimUps,iDimDws
-    integer                     :: Nups(Ns_Ud)
-    integer                     :: Ndws(Ns_Ud)
-    !
-#ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")&
-         "DEBUG lanc_build_gf_phonon: build phonon GF"
-#endif
-    do istate=1,state_list%size
-       !
-       ! call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
-       !
-       isector    =  es_return_sector(state_list,istate)
-       e_state    =  es_return_energy(state_list,istate)
-       v_state    =  es_return_dvec(state_list,istate)
-       !
-       call get_Nup(isector,Nups)
-       call get_Ndw(isector,Ndws)
-       if(MpiMaster.AND.ed_verbose>=3)write(LOGfile,"(A20,I6,20I4)")&
-            'From sector',isector,Nups,Ndws
-       !
-       idim = getdim(isector)
-       call get_DimUp(isector,iDimUps)
-       call get_DimDw(isector,iDimDws)
-       iDimUp = product(iDimUps)
-       iDimDw = product(iDimDws)
-       !
-       if(MpiMaster)then
-          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
-          !
-          allocate(vvinit(idim));vvinit=0d0
-          !
-          do i=1,iDim
-             iph = (i-1)/(iDimUp*iDimDw) + 1
-             i_el = mod(i-1,iDimUp*iDimDw) + 1
-             !
-             !apply destruction operator
-             if(iph>1) then
-                j = i_el + ((iph-1)-1)*iDimUp*iDimDw
-                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*v_state(i)
-             endif
-             !
-             !apply creation operator
-             if(iph<DimPh) then
-                j = i_el + ((iph+1)-1)*iDimUp*iDimDw
-                vvinit(j) = vvinit(j) + sqrt(dble(iph))*v_state(i)
-             endif
-          enddo
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !
-       call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_phonon(norm2,e_state,alfa_,beta_,istate)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(v_state))deallocate(v_state)
-    enddo
-    return
-  end subroutine lanc_build_gf_phonon_main
-
-
-
-  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
-    real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
-    integer                                    :: nlanc
-    real(8),dimension(:)                       :: alanc
-    real(8),dimension(size(alanc))             :: blanc 
-    real(8),dimension(size(alanc),size(alanc)) :: Z
-    real(8),dimension(size(alanc))             :: diag,subdiag
-    integer                                    :: i,j,istate
-    complex(8)                                 :: iw
-    !
-    Egs = state_list%emin       !get the gs energy
-    !
-    Nlanc = size(alanc)
-    !
-    pesoF  = vnorm2/zeta_function 
-    pesoBZ = 1d0
-    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
-    !
-#ifdef _MPI
-    if(MpiStatus)then
-       call Bcast_MPI(MpiComm,alanc)
-       call Bcast_MPI(MpiComm,blanc)
-    endif
-#endif
-    diag(1:Nlanc)    = alanc(1:Nlanc)
-    subdiag(2:Nlanc) = blanc(2:Nlanc)
-    call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
-    !
-    ! call allocate_GFmatrix(impDmatrx,istate,1,Nexc=Nlanc)
-    !
-    do j=1,nlanc
-       Ej     = diag(j)
-       dE     = Ej-Ei
-       pesoAB = Z(1,j)*Z(1,j)
-       peso   = pesoF*pesoAB*pesoBZ
-       !
-       ! impDmatrix%state(istate)%channel(ichan)%weight(j) = peso
-       ! impDmatrix%state(istate)%channel(ichan)%poles(j)  = de
-       !
-       ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
-       ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
-       ! This ensures that the correct null contribution is obtained.
-       ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
-       ! we do not include the contribution (because we are in the situation described above).
-       ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
-       if(beta*dE > 1d-3)impDmats_ph(0)=impDmats_ph(0) - peso*2*(1d0-exp(-beta*dE))/dE 
-       do i=1,Lmats
-          impDmats_ph(i)=impDmats_ph(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
-       enddo
-       do i=1,Lreal
-          impDreal_ph(i)=impDreal_ph(i) + peso*(1d0-exp(-beta*dE))*(1d0/(dcmplx(vr(i),eps) - dE) - 1d0/(dcmplx(vr(i),eps) + dE))
-       enddo
-    enddo
-  end subroutine add_to_lanczos_phonon
-
-
 
 
 

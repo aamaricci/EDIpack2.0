@@ -15,7 +15,7 @@ MODULE ED_GF_SUPERC
   private
 
   public :: build_gf_superc
-  public :: get_Gimp_superc , get_Fimp_superc
+  public :: get_impG_superc , get_impF_superc, get_impD_superc
   public :: get_Sigma_superc, get_Self_superc
 
   integer                               :: istate
@@ -111,7 +111,10 @@ contains
     end select
     !
     !PHONONS
-    if(DimPh>1)call lanc_build_gf_phonon_main()
+    if(DimPh>1)then
+       call allocate_GFmatrix(impDmatrix,Nstate=state_list%size)
+       call lanc_build_gf_phonon_main()
+    endif
     !
     if(MPIMASTER)call stop_timer
     !
@@ -353,6 +356,73 @@ contains
 
 
 
+  subroutine lanc_build_gf_phonon_main()
+    type(sector)                :: sectorI
+    integer,dimension(Ns_Ud)    :: iDimUps,iDimDws
+    integer                     :: Nups(Ns_Ud)
+    integer                     :: Ndws(Ns_Ud)
+    !
+    write(LOGfile,"(A)")"Get phonon Green function:"
+    do istate=1,state_list%size
+       !
+       call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
+       !
+       isector    =  es_return_sector(state_list,istate)
+       e_state    =  es_return_energy(state_list,istate)
+       v_state    =  es_return_cvec(state_list,istate)
+       !
+       if(MpiMaster)then
+          call build_sector(isector,sectorI)
+          if(ed_verbose>=3)write(LOGfile,"(A,I6,I6)")&
+               'From sector  :',isector,sectorI%Sz
+       endif
+       !
+       if(MpiMaster)then
+          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
+          !
+          allocate(vvinit(sectorI%Dim));vvinit=0d0
+          !
+          do i=1,sectorI%Dim
+             iph = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             !
+             !apply destruction operator
+             if(iph>1) then
+                j = i_el + ((iph-1)-1)*sectorI%DimEl
+                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*v_state(i)
+             endif
+             !
+             !apply creation operator
+             if(iph<DimPh) then
+                j = i_el + ((iph+1)-1)*sectorI%DimEl
+                vvinit(j) = vvinit(j) + sqrt(dble(iph))*v_state(i)
+             endif
+          enddo
+       else
+          allocate(vvinit(1));vvinit=0.d0
+       endif
+       !
+       call tridiag_Hv_sector_superc(isector,vvinit,alfa_,beta_,norm2)
+       call add_to_lanczos_phonon(norm2,e_state,alfa_,beta_,istate)
+       deallocate(alfa_,beta_)
+       if(allocated(vvinit))deallocate(vvinit)
+       if(allocated(v_state))deallocate(v_state)
+    end do
+    return
+  end subroutine lanc_build_gf_phonon_main
+
+
+
+
+
+  !################################################################
+  !################################################################
+  !################################################################
+  !################################################################
+
+
+
+
 
   subroutine add_to_lanczos_gf_superc(vnorm2,Ei,alanc,blanc,isign,ichan,iorb,jorb,ic,istate)
     complex(8)                                 :: vnorm2,pesoBZ,peso
@@ -375,16 +445,16 @@ contains
     !
     Nlanc = size(alanc)
     !
-    ! if((finiteT).and.(beta*(Ei-Egs).lt.200))then
-    !    pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
-    ! elseif(.not.finiteT)then
-    !    pesoBZ = vnorm2/zeta_function
-    ! else
-    !    pesoBZ=0.d0
-    ! endif
+    if((finiteT).and.(beta*(Ei-Egs).lt.200))then
+       pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
+    elseif(.not.finiteT)then
+       pesoBZ = vnorm2/zeta_function
+    else
+       pesoBZ=0.d0
+    endif
     !
-    pesoBZ = vnorm2/zeta_function
-    if(finiteT)pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
+    ! pesoBZ = vnorm2/zeta_function
+    ! if(finiteT)pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
     !
 #ifdef _MPI
     if(MpiStatus)then
@@ -430,6 +500,48 @@ contains
 
 
 
+  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
+    real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
+    integer                                    :: nlanc
+    real(8),dimension(:)                       :: alanc
+    real(8),dimension(size(alanc))             :: blanc
+    real(8),dimension(size(alanc),size(alanc)) :: Z
+    real(8),dimension(size(alanc))             :: diag,subdiag
+    integer                                    :: i,j,istate
+    complex(8)                                 :: iw
+    !
+    Egs = state_list%emin       !get the gs energy
+    !
+    Nlanc = size(alanc)
+    !
+    pesoF  = vnorm2/zeta_function
+    pesoBZ = 1d0
+    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
+    !
+#ifdef _MPI
+    if(MpiStatus)then
+       call Bcast_MPI(MpiComm,alanc)
+       call Bcast_MPI(MpiComm,blanc)
+    endif
+#endif
+    diag(1:Nlanc)    = alanc(1:Nlanc)
+    subdiag(2:Nlanc) = blanc(2:Nlanc)
+    call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
+    !
+    call allocate_GFmatrix(impDmatrix,istate,1,Nexc=Nlanc)
+    !
+    do j=1,nlanc
+       Ej     = diag(j)
+       dE     = Ej-Ei
+       pesoAB = Z(1,j)*Z(1,j)
+       peso   = pesoF*pesoAB*pesoBZ
+       !
+       impDmatrix%state(istate)%channel(1)%weight(j) = peso
+       impDmatrix%state(istate)%channel(1)%poles(j)  = de
+    enddo
+  end subroutine add_to_lanczos_phonon
+
+
 
 
   !################################################################
@@ -443,7 +555,7 @@ contains
 
 
 
-  function get_Gimp_superc(zeta,axis) result(Gf)
+  function get_impG_superc(zeta,axis) result(Gf)
     !
     ! Reconstructs the system impurity electrons normal Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
     !
@@ -456,12 +568,12 @@ contains
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Gimp_superc: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impG_superc: Get GFs on a input array zeta"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
     !
-    if(.not.allocated(impGmatrix))stop "get_Gimp_superc ERROR: impGmatrix not allocated!"
+    if(.not.allocated(impGmatrix))stop "get_impG_superc ERROR: impGmatrix not allocated!"
     !
     auxG = zero
     barG = zero
@@ -555,7 +667,7 @@ contains
       end associate
       return
     end subroutine get_superc_Gmix
-  end function get_Gimp_superc
+  end function get_impG_superc
 
 
 
@@ -565,7 +677,7 @@ contains
 
 
 
-  function get_Fimp_superc(zeta,axis) result(Ff)
+  function get_impF_superc(zeta,axis) result(Ff)
     !
     ! Reconstructs the system impurity anomalous electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
     !
@@ -579,12 +691,12 @@ contains
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Fimp_superc: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impF_superc: Get GFs on a input array zeta"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
     !
-    if(.not.allocated(impGmatrix))stop "get_Fimp_superc ERROR: impGmatrix not allocated!"
+    if(.not.allocated(impGmatrix))stop "get_impF_superc ERROR: impGmatrix not allocated!"
     !
     auxG = zero
     barG = zero
@@ -686,10 +798,71 @@ contains
       return
     end subroutine get_superc_Fmix
     !
-  end function get_Fimp_superc
+  end function get_impF_superc
 
 
 
+
+
+
+
+  function get_impD_superc(zeta,axis) result(G)
+    !
+    ! Reconstructs the phonon Green's functions using :f:var:`impdmatrix` to retrieve weights and poles.
+    !
+    complex(8),dimension(:),intent(in) :: zeta
+    character(len=*),optional          :: axis
+    complex(8),dimension(size(zeta))   :: G
+    character(len=1)                   :: axis_
+    !
+    integer                            :: Nstates,istate
+    integer                            :: Nchannels,ichan,i
+    integer                            :: Nexcs,iexc
+    real(8)                            :: peso,de
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_impG_normal: Get GFs on a input array zeta"
+#endif
+    !
+    axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
+    !
+    G = zero
+    !
+    write(LOGfile,"(A)")"Get D"
+    if(.not.allocated(impDmatrix%state)) return
+    !
+    G= zero
+    Nstates = size(impDmatrix%state)
+    do istate=1,Nstates
+       if(.not.allocated(impDmatrix%state(istate)%channel))cycle
+       Nchannels = size(impDmatrix%state(istate)%channel)
+       do ichan=1,Nchannels
+          Nexcs  = size(impDmatrix%state(istate)%channel(ichan)%poles)
+          if(Nexcs==0)cycle
+          do iexc=1,Nexcs
+             peso  = impDmatrix%state(istate)%channel(ichan)%weight(iexc)
+             de    = impDmatrix%state(istate)%channel(ichan)%poles(iexc)
+             ! ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
+             ! ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
+             ! ! This ensures that the correct null contribution is obtained.
+             ! ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
+             ! ! we do not include the contribution (because we are in the situation described above).
+             ! ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
+             select case(axis_)
+             case("m","M")                
+                if(beta*dE > 1d-3)G(1)=G(1) - peso*2*(1d0-exp(-beta*dE))/dE 
+                do i=2,size(zeta)
+                   G(i)=G(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2+dE**2)
+                enddo
+             case("r","R")
+                do i=1,size(zeta)
+                   G(i)=G(i) + peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
+                enddo
+             end select
+          enddo
+       enddo
+    enddo
+    !
+  end function get_impD_superc
 
 
 
@@ -720,8 +893,8 @@ contains
     invF0 = invf0_bath_function(zeta,dmft_bath,axis_)
     !
     !Get G, F
-    G     = get_Gimp_superc(zeta)
-    F     = get_Fimp_superc(zeta)
+    G     = get_impG_superc(zeta)
+    F     = get_impF_superc(zeta)
     !
     !get G^{-1},F^{-1} --> Sigma
     Sigma = zero
@@ -798,8 +971,8 @@ contains
     invF0 = invf0_bath_function(zeta,dmft_bath,axis_)
     !
     !Get G, F
-    G     = get_Gimp_superc(zeta)
-    F     = get_Fimp_superc(zeta)
+    G     = get_impG_superc(zeta)
+    F     = get_impF_superc(zeta)
     !
     !get G^{-1},F^{-1} --> Self
     Self = zero
@@ -853,129 +1026,6 @@ contains
 
 
 
-
-  !################################################################
-  !################################################################
-  !################################################################
-  !################################################################
-
-
-
-
-
-
-
-
-  subroutine lanc_build_gf_phonon_main()
-    type(sector)                :: sectorI
-    integer,dimension(Ns_Ud)    :: iDimUps,iDimDws
-    integer                     :: Nups(Ns_Ud)
-    integer                     :: Ndws(Ns_Ud)
-    !
-    write(LOGfile,"(A)")"Get phonon Green function:"
-    do istate=1,state_list%size
-       !
-       ! call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
-       !
-       isector    =  es_return_sector(state_list,istate)
-       e_state    =  es_return_energy(state_list,istate)
-       v_state    =  es_return_cvec(state_list,istate)
-       !
-       if(MpiMaster)then
-          call build_sector(isector,sectorI)
-          if(ed_verbose>=3)write(LOGfile,"(A,I6,I6)")&
-               'From sector  :',isector,sectorI%Sz
-       endif
-       !
-       if(MpiMaster)then
-          if(ed_verbose>=3)write(LOGfile,"(A20,I12)")'Apply x',isector
-          !
-          allocate(vvinit(sectorI%Dim));vvinit=0d0
-          !
-          do i=1,sectorI%Dim
-             iph = (i-1)/(sectorI%DimEl) + 1
-             i_el = mod(i-1,sectorI%DimEl) + 1
-             !
-             !apply destruction operator
-             if(iph>1) then
-                j = i_el + ((iph-1)-1)*sectorI%DimEl
-                vvinit(j) = vvinit(j) + sqrt(dble(iph-1))*v_state(i)
-             endif
-             !
-             !apply creation operator
-             if(iph<DimPh) then
-                j = i_el + ((iph+1)-1)*sectorI%DimEl
-                vvinit(j) = vvinit(j) + sqrt(dble(iph))*v_state(i)
-             endif
-          enddo
-       else
-          allocate(vvinit(1));vvinit=0.d0
-       endif
-       !
-       call tridiag_Hv_sector_superc(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_phonon(norm2,e_state,alfa_,beta_,istate)
-       deallocate(alfa_,beta_)
-       if(allocated(vvinit))deallocate(vvinit)
-       if(allocated(v_state))deallocate(v_state)
-    end do
-    return
-  end subroutine lanc_build_gf_phonon_main
-
-
-  subroutine add_to_lanczos_phonon(vnorm2,Ei,alanc,blanc,istate)
-    real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
-    integer                                    :: nlanc
-    real(8),dimension(:)                       :: alanc
-    real(8),dimension(size(alanc))             :: blanc
-    real(8),dimension(size(alanc),size(alanc)) :: Z
-    real(8),dimension(size(alanc))             :: diag,subdiag
-    integer                                    :: i,j,istate
-    complex(8)                                 :: iw
-    !
-    Egs = state_list%emin       !get the gs energy
-    !
-    Nlanc = size(alanc)
-    !
-    pesoF  = vnorm2/zeta_function
-    pesoBZ = 1d0
-    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
-    !
-#ifdef _MPI
-    if(MpiStatus)then
-       call Bcast_MPI(MpiComm,alanc)
-       call Bcast_MPI(MpiComm,blanc)
-    endif
-#endif
-    diag(1:Nlanc)    = alanc(1:Nlanc)
-    subdiag(2:Nlanc) = blanc(2:Nlanc)
-    call eigh(diag(1:Nlanc),subdiag(2:Nlanc),Ev=Z(:Nlanc,:Nlanc))
-    !
-    ! call allocate_GFmatrix(impDmatrx,istate,1,Nexc=Nlanc)
-    !
-    do j=1,nlanc
-       Ej     = diag(j)
-       dE     = Ej-Ei
-       pesoAB = Z(1,j)*Z(1,j)
-       peso   = pesoF*pesoAB*pesoBZ
-       !COPYPASTE FROM NORMAL, TO CHECK
-       ! impDmatrix%state(istate)%channel(ichan)%weight(j) = peso
-       ! impDmatrix%state(istate)%channel(ichan)%poles(j)  = de
-       !
-       ! the correct behavior for beta*dE << 1 is recovered only by assuming that v_n is still finite
-       ! beta*dE << v_n for v_n--> 0 slower. First limit beta*dE--> 0 and only then v_n -->0.
-       ! This ensures that the correct null contribution is obtained.
-       ! So we impose that: if (beta*dE is larger than a small qty) we sum up the contribution, else
-       ! we do not include the contribution (because we are in the situation described above).
-       ! For the real-axis case this problem is circumvented by the usual i*0+ = xi*eps
-       if(beta*dE > 1d-3)impDmats_ph(0)=impDmats_ph(0) - peso*2*(1d0-exp(-beta*dE))/dE
-       do i=1,Lmats
-          impDmats_ph(i)=impDmats_ph(i) - peso*(1d0-exp(-beta*dE))*2d0*dE/(vm(i)**2+dE**2)
-       enddo
-       do i=1,Lreal
-          impDreal_ph(i)=impDreal_ph(i) + peso*(1d0-exp(-beta*dE))*(1d0/(dcmplx(vr(i),eps) - dE) - 1d0/(dcmplx(vr(i),eps) + dE))
-       enddo
-    enddo
-  end subroutine add_to_lanczos_phonon
 
 
 

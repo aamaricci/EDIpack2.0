@@ -16,7 +16,7 @@ MODULE ED_GF_NONSU2
 
 
   public :: build_gf_nonsu2
-  public :: get_Gimp_nonsu2
+  public :: get_impG_nonsu2
   public :: get_Sigma_nonsu2
 
 
@@ -353,7 +353,7 @@ contains
 
 
 
-  function get_Gimp_nonsu2(zeta,axis) result(Gf)
+  function get_impG_nonsu2(zeta,axis) result(Gf)
     !
     ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
     !
@@ -363,12 +363,12 @@ contains
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Gimp_nonsu2: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impG_nonsu2: Get GFs on a input array zeta"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     !
-    if(.not.allocated(impGmatrix))stop "get_Gimp_nonsu2 ERROR: impGmatrix not allocated!"
+    if(.not.allocated(impGmatrix))stop "get_impG_nonsu2 ERROR: impGmatrix not allocated!"
     !
     call PrintHmask()
     !
@@ -491,7 +491,7 @@ contains
       return
     end subroutine get_nonsu2_Gab
     !
-  end function get_Gimp_nonsu2
+  end function get_impG_nonsu2
 
 
 
@@ -510,7 +510,7 @@ contains
     invG0 = invg0_bath_function(zeta,dmft_bath,axis_)
     !
     !Get G^-1
-    invG  = get_Gimp_nonsu2(zeta)
+    invG  = get_impG_nonsu2(zeta)
     !
     !Get Sigma= G0^-1 - G^-1
     do i=1,size(zeta)     

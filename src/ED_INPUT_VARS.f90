@@ -72,6 +72,10 @@ MODULE ED_INPUT_VARS
   logical              :: ed_print_Sigma      !flag to print impurity Self-energies
   logical              :: ed_print_G          !flag to print impurity Green`s functions
   logical              :: ed_print_G0         !flag to print impurity non-interacting Green`s functions
+  logical              :: ed_print_chispin    !flag to print impurity spin susceptibility
+  logical              :: ed_print_chidens    !flag to print impurity dens susceptibility
+  logical              :: ed_print_chipair    !flag to print impurity pair susceptibility
+  logical              :: ed_print_chiexct    !flag to print impurity exct susceptibility
   logical              :: ed_all_G            !flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries
   logical              :: ed_sectors          !flag to reduce sector scan for the spectrum to specific sectors +/- ed_sectors_shift
   integer              :: ed_sectors_shift    !shift to the ed_sectors scan
@@ -228,6 +232,10 @@ contains
     call parse_input_variable(ed_print_Sigma,"ED_PRINT_SIGMA",INPUTunit,default=.true.,comment="flag to print impurity Self-energies")
     call parse_input_variable(ed_print_G,"ED_PRINT_G",INPUTunit,default=.true.,comment="flag to print impurity Greens function")
     call parse_input_variable(ed_print_G0,"ED_PRINT_G0",INPUTunit,default=.true.,comment="flag to print non-interacting impurity Greens function")
+    call parse_input_variable(ed_print_chispin,"ED_PRINT_CHISPIN",INPUTunit,default=.true.,comment="flag to print impurity spin susceptibility")
+    call parse_input_variable(ed_print_chidens,"ED_PRINT_CHIDENS",INPUTunit,default=.true.,comment="flag to print impurity dens susceptibility")
+    call parse_input_variable(ed_print_chipair,"ED_PRINT_CHIPAIR",INPUTunit,default=.true.,comment="flag to print impurity pair susceptibility")
+    call parse_input_variable(ed_print_chiexct,"ED_PRINT_CHIEXCT",INPUTunit,default=.true.,comment="flag to print impurity exct susceptibility")
     call parse_input_variable(ed_all_G,"ED_ALL_G",INPUTunit,default=.true.,comment="flag to evaluate all the components of the impurity Green`s functions irrespective of the symmetries")
     call parse_input_variable(ed_verbose,"ED_VERBOSE",INPUTunit,default=3,comment="Verbosity level: 0=almost nothing --> 5:all. Really: all")
     call parse_input_variable(ed_hw_bath,"ed_hw_bath",INPUTunit,default=2d0,comment="half-bandwidth for the bath initialization: flat in -ed_hw_bath:ed_hw_bath")

@@ -7,7 +7,8 @@ MODULE ED_VARS_GLOBAL
   USE SF_IOTOOLS, only:free_unit,reg,str
   USE ED_SPARSE_MATRIX
   USE ED_SPARSE_MAP
-  USE ED_INPUT_VARS, only:ed_verbose,logfile
+  USE ED_GFMATRIX
+  USE ED_INPUT_VARS, only:ed_verbose,logfile  
 #ifdef _MPI
   USE MPI
   USE SF_MPI
@@ -88,60 +89,6 @@ MODULE ED_VARS_GLOBAL
   end type sector
 
 
-
-  !-------------- GMATRIX FOR FAST EVALUATION OF GF ------------------!
-  !The contributions to the GF Kallen-Lehmann sum are stored as
-  !GF_{ab,sr}%state%channel%{w,e}.
-  !A couple of weight,poles {w,e} is stored for each *channel, corresponding to c,cdg or any
-  !their combination thereof as well as for any state |n> of the spectrum such that
-  !GF(z) = sum w/z-e
-  type GFspectrum
-     complex(8),dimension(:),allocatable       :: weight
-     real(8),dimension(:),allocatable          :: poles
-  end type GFspectrum
-
-  !N_channel = c,cdag,c \pm cdag, c \pm i*cdag, ...
-  type GFchannel
-     type(GFspectrum),dimension(:),allocatable :: channel 
-  end type GFchannel
-
-  !state_list%size = # of state in the spectrum 
-  type GFmatrix
-     type(GFchannel),dimension(:),allocatable  :: state
-     logical                                   :: status=.false.
-  end type GFmatrix
-
-
-  interface allocate_GFmatrix
-     module procedure :: allocate_GFmatrix_Nstate
-     module procedure :: allocate_GFmatrix_Nchan
-     module procedure :: allocate_GFmatrix_Nexc
-  end interface allocate_GFmatrix
-
-
-  interface deallocate_GFmatrix
-     module procedure :: deallocate_GFmatrix_single
-     module procedure :: deallocate_GFmatrix_all1
-     module procedure :: deallocate_GFmatrix_all2
-     module procedure :: deallocate_GFmatrix_all3
-     module procedure :: deallocate_GFmatrix_all4
-  end interface deallocate_GFmatrix
-
-  interface write_GFmatrix
-     module procedure :: write_GFmatrix_single
-     module procedure :: write_GFmatrix_all1
-     module procedure :: write_GFmatrix_all2
-     module procedure :: write_GFmatrix_all3
-     module procedure :: write_GFmatrix_all4
-  end interface write_GFmatrix
-
-  interface read_GFmatrix
-     module procedure :: read_GFmatrix_single
-     module procedure :: read_GFmatrix_all1
-     module procedure :: read_GFmatrix_all2
-     module procedure :: read_GFmatrix_all3
-     module procedure :: read_GFmatrix_all4
-  end interface read_GFmatrix
 
 
   !------------------ ABTRACT INTERFACES PROCEDURES ------------------!
@@ -254,52 +201,19 @@ MODULE ED_VARS_GLOBAL
 
 
 
-  !Impurity Green's function and Self-Energies: (Nspin,Nspin,Norb,Norb,:)
-  !Impurity Green's function for phonons
-  !PRIVATE (now public but accessible thru routine)
-  !=========================================================
-  complex(8),allocatable,dimension(:)                :: impDmats_ph
-  complex(8),allocatable,dimension(:)                :: impDreal_ph
-  !
-  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impGmatrix    
+  
+  !Green's functions
+  type(GFmatrix),allocatable,dimension(:,:,:,:)      :: impGmatrix
   type(GFmatrix)                                     :: impDmatrix
-
-
-
   !Spin Susceptibilities
-  !=========================================================
-  real(8),allocatable,dimension(:,:,:)               :: spinChi_tau
-  complex(8),allocatable,dimension(:,:,:)            :: spinChi_w
-  complex(8),allocatable,dimension(:,:,:)            :: spinChi_iv
-  !
   type(GFmatrix),allocatable,dimension(:,:)          :: spinChimatrix
-
   !Diagonal/Off-diagonal charge-charge Susceptibilities
-  !=========================================================  
-  real(8),allocatable,dimension(:,:,:)               :: densChi_tau
-  complex(8),allocatable,dimension(:,:,:)            :: densChi_w
-  complex(8),allocatable,dimension(:,:,:)            :: densChi_iv
-  !
   type(GFmatrix),allocatable,dimension(:,:)          :: densChimatrix
-
-
   !Pair-Pair Susceptibilities
-  !=========================================================
-  real(8),allocatable,dimension(:,:,:)               :: pairChi_tau
-  complex(8),allocatable,dimension(:,:,:)            :: pairChi_w
-  complex(8),allocatable,dimension(:,:,:)            :: pairChi_iv
-  !
   type(GFmatrix),allocatable,dimension(:,:)          :: pairChimatrix
-
-
-
   !Exciton Susceptibilities
-  !=========================================================
-  real(8),allocatable,dimension(:,:,:,:)             :: exctChi_tau ![0:4,:]
-  complex(8),allocatable,dimension(:,:,:,:)          :: exctChi_w
-  complex(8),allocatable,dimension(:,:,:,:)          :: exctChi_iv
-  !
   type(GFmatrix),allocatable,dimension(:,:,:)        :: exctChimatrix
+
 
 
 
@@ -338,15 +252,7 @@ MODULE ED_VARS_GLOBAL
 
   !--------------- LATTICE WRAP VARIABLES -----------------!
   complex(8),dimension(:,:,:,:,:),allocatable        :: Hloc_ineq
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Smats_ineq,Sreal_ineq
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: SAmats_ineq,SAreal_ineq
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Gmats_ineq,Greal_ineq
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: Fmats_ineq,Freal_ineq
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: G0mats_ineq,G0real_ineq
-  complex(8),dimension(:,:,:,:,:,:),allocatable,save :: F0mats_ineq,F0real_ineq
-
   complex(8),dimension(:,:),allocatable,save         :: Dmats_ph_ineq,Dreal_ph_ineq
-  
   complex(8),dimension(:,:,:,:,:),allocatable,save   :: single_particle_density_matrix_ineq
   complex(8),dimension(:,:,:),allocatable,save       :: impurity_density_matrix_ineq
   real(8),dimension(:,:),allocatable,save            :: dens_ineq 
@@ -439,348 +345,6 @@ contains
   !=========================================================
 
 
-
-
-  !=========================================================
-  !Allocate the channels in GFmatrix structure
-  subroutine allocate_gfmatrix_Nstate(self,Nstate)
-    type(GFmatrix) :: self
-    integer        :: Nstate
-#ifdef _DEBUG
-    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG allocate_gfmatrix_Nstate: allocate self"
-#endif
-    if(allocated(self%state))deallocate(self%state)
-    allocate(self%state(Nstate))
-    self%status=.true.
-  end subroutine allocate_gfmatrix_Nstate
-
-  subroutine allocate_gfmatrix_Nchan(self,istate,Nchan)
-    type(GFmatrix) :: self
-    integer        :: istate,Nchan
-#ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG allocate_gfmatrix_Nchan: allocate self, istate:"//str(istate)
-#endif
-    if(allocated(self%state(istate)%channel))deallocate(self%state(istate)%channel)
-    allocate(self%state(istate)%channel(Nchan))
-
-  end subroutine allocate_gfmatrix_Nchan
-
-  !Allocate the Excitations spectrum at a given channel
-  subroutine allocate_gfmatrix_Nexc(self,istate,ichan,Nexc)
-    type(GFmatrix) :: self
-    integer        :: istate,ichan
-    integer        :: Nexc
-#ifdef _DEBUG
-    if(ed_verbose>4)write(Logfile,"(A,2I8)")"DEBUG allocate_gfmatrix_Nchan: allocate self, istate:"//str(istate)//", ichan:"//str(ichan)
-#endif
-    if(allocated(self%state(istate)%channel(ichan)%weight))&
-         deallocate(self%state(istate)%channel(ichan)%weight)
-    if(allocated(self%state(istate)%channel(ichan)%poles))&
-         deallocate(self%state(istate)%channel(ichan)%poles)
-    !
-    allocate(self%state(istate)%channel(ichan)%weight(Nexc))
-    allocate(self%state(istate)%channel(ichan)%poles(Nexc))
-  end subroutine allocate_gfmatrix_Nexc
-
-
-
-
-
-  subroutine deallocate_gfmatrix_single(self)
-    type(GFmatrix) :: self
-    integer        :: istate,ichan
-#ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG deallocate_gfmatrix_single: deallocate self"
-#endif
-    if(self%status)then
-       do istate=1,size(self%state)
-          if(allocated(self%state(istate)%channel))then
-             do ichan=1,size(self%state(istate)%channel)
-                if(allocated(self%state(istate)%channel(ichan)%weight))&
-                     deallocate(self%state(istate)%channel(ichan)%weight)
-                !
-                if(allocated(self%state(istate)%channel(ichan)%poles))&
-                     deallocate(self%state(istate)%channel(ichan)%poles)
-             enddo
-             deallocate(self%state(istate)%channel)
-          endif
-       enddo
-       deallocate(self%state)       
-    endif
-    self%status=.false.
-  end subroutine deallocate_gfmatrix_single
-
-  subroutine deallocate_gfmatrix_all1(self)
-    type(GFmatrix),dimension(:) :: self
-    integer                     :: i1
-    do i1=1,size(self)
-       call deallocate_gfmatrix_single(self(i1))
-    enddo
-  end subroutine deallocate_gfmatrix_all1
-
-  subroutine deallocate_gfmatrix_all2(self)
-    type(GFmatrix),dimension(:,:) :: self
-    integer                       :: i1,i2
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          call deallocate_gfmatrix_single(self(i1,i2))
-       enddo
-    enddo
-  end subroutine deallocate_gfmatrix_all2
-
-  subroutine deallocate_gfmatrix_all3(self)
-    type(GFmatrix),dimension(:,:,:) :: self
-    integer                         :: i1,i2,i3
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          do i3=1,size(self,3)
-             call deallocate_gfmatrix_single(self(i1,i2,i3))
-          enddo
-       enddo
-    enddo
-  end subroutine deallocate_gfmatrix_all3
-
-  subroutine deallocate_gfmatrix_all4(self)
-    type(GFmatrix),dimension(:,:,:,:) :: self
-    integer                           :: i1,i2,i3,i4
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          do i3=1,size(self,3)
-             do i4=1,size(self,4)
-                call deallocate_gfmatrix_single(self(i1,i2,i3,i4))
-             enddo
-          enddo
-       enddo
-    enddo
-  end subroutine deallocate_gfmatrix_all4
-
-
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : WRITE GFmatrix to file
-  !+-------------------------------------------------------------------+
-  subroutine write_gfmatrix_single(self,file)
-    class(GFmatrix)    :: self
-    character(len=*)   :: file
-    integer            :: unit_
-#ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")"DEBUG write_gfmatrix_single: write self"
-#endif
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    call write_formatted_gfmatrix(self,unit_)
-    close(unit_)
-  end subroutine write_gfmatrix_single
-
-  subroutine write_gfmatrix_all1(self,file)
-    class(GFmatrix)  :: self(:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    do i1=1,size(self)
-       call write_formatted_gfmatrix(self(i1),unit_)
-    enddo
-    close(unit_)
-  end subroutine write_gfmatrix_all1
-
-  subroutine write_gfmatrix_all2(self,file)
-    class(GFmatrix)  :: self(:,:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          call write_formatted_gfmatrix(self(i1,i2),unit_)
-       enddo
-    enddo
-    close(unit_)
-  end subroutine write_gfmatrix_all2
-
-  subroutine write_gfmatrix_all3(self,file)
-    class(GFmatrix)  :: self(:,:,:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2,i3
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          do i3=1,size(self,3)
-             call write_formatted_gfmatrix(self(i1,i2,i3),unit_)
-          enddo
-       enddo
-    enddo
-    close(unit_)
-  end subroutine write_gfmatrix_all3
-
-  subroutine write_gfmatrix_all4(self,file)
-    class(GFmatrix)  :: self(:,:,:,:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2,i3,i4
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          do i3=1,size(self,3)
-             do i4=1,size(self,4)
-                call write_formatted_gfmatrix(self(i1,i2,i3,i4),unit_)
-             enddo
-          enddo
-       enddo
-    enddo
-    close(unit_)
-  end subroutine write_gfmatrix_all4
-
-
-
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : Read cluster GF from file
-  !+-------------------------------------------------------------------+
-  subroutine read_gfmatrix_single(self,file)
-    class(GFmatrix)  :: self
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2,i3,i4
-#ifdef _DEBUG
-    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG reading_gfmatrix_single: reading self"
-#endif
-    call deallocate_GFmatrix(self)
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    rewind(unit_)
-    call read_formatted_gfmatrix(self,unit_)
-    close(unit_)
-  end subroutine read_gfmatrix_single
-
-  subroutine read_gfmatrix_all1(self,file)
-    class(GFmatrix)  :: self(:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1
-    call deallocate_GFmatrix(self)
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    rewind(unit_)
-    do i1=1,size(self)
-       call read_formatted_gfmatrix(self(i1),unit_)
-    enddo
-    close(unit_)
-  end subroutine read_gfmatrix_all1
-
-  subroutine read_gfmatrix_all2(self,file)
-    class(GFmatrix)  :: self(:,:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2
-    call deallocate_GFmatrix(self)
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    rewind(unit_)
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          call read_formatted_gfmatrix(self(i1,i2),unit_)
-       enddo
-    enddo
-    close(unit_)
-  end subroutine read_gfmatrix_all2
-
-  subroutine read_gfmatrix_all3(self,file)
-    class(GFmatrix)  :: self(:,:,:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2,i3
-    call deallocate_GFmatrix(self)
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    rewind(unit_)
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          do i3=1,size(self,3)
-             call read_formatted_gfmatrix(self(i1,i2,i3),unit_)
-          enddo
-       enddo
-    enddo
-    close(unit_)
-  end subroutine read_gfmatrix_all3
-
-  subroutine read_gfmatrix_all4(self,file)
-    class(GFmatrix)  :: self(:,:,:,:)
-    character(len=*) :: file
-    integer          :: unit_
-    integer          :: i1,i2,i3,i4
-    call deallocate_GFmatrix(self)
-    unit_=free_unit()
-    open(unit_,file=str(file))
-    rewind(unit_)
-    do i1=1,size(self,1)
-       do i2=1,size(self,2)
-          do i3=1,size(self,3)
-             do i4=1,size(self,4)
-                call read_formatted_gfmatrix(self(i1,i2,i3,i4),unit_)
-             enddo
-          enddo
-       enddo
-    enddo
-    close(unit_)
-  end subroutine read_gfmatrix_all4
-
-
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : write overload for GFmatrix type (formatted)
-  !+-------------------------------------------------------------------+
-  subroutine write_formatted_gfmatrix(dtv, unit)
-    class(GFmatrix), intent(in)         :: dtv
-    integer, intent(in)                 :: unit
-    integer                             :: iexc,Ichan,istate
-    integer                             :: Nexc,Nchan,Nstates
-    write(unit,*) dtv%status
-    if(.not.dtv%status)return
-    Nstates = size(dtv%state)
-    write(unit,*) Nstates
-    do istate=1,Nstates
-       Nchan = size(dtv%state(istate)%channel)
-       write(unit,*)Nchan
-       do ichan=1,Nchan
-          write(unit,*) size(dtv%state(istate)%channel(ichan)%poles)
-          write(unit,*) dtv%state(istate)%channel(ichan)%poles
-          write(unit,*) dtv%state(istate)%channel(ichan)%weight
-       enddo
-    enddo
-    write(unit,*)""
-  end subroutine write_formatted_gfmatrix
-
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : read overload for GFmatrix type (formatted)
-  !+-------------------------------------------------------------------+
-  subroutine read_formatted_gfmatrix(dtv, unit)
-    class(GFmatrix), intent(inout)                :: dtv
-    integer, intent(in)                           :: unit
-    logical                                       :: alloc
-    integer                                       :: ichan,Nchan,Nlanc,istate,Nstates
-    !
-    read(unit,*) alloc
-    if(.not.alloc)return
-    read(unit,*)Nstates
-    call allocate_GFmatrix(dtv,Nstate=Nstates)
-    do istate=1,Nstates
-       read(unit,*)Nchan
-       call allocate_GFmatrix(dtv,istate=istate,Nchan=Nchan)
-       do ichan=1,Nchan
-          read(unit,*)Nlanc
-          call allocate_GFmatrix(dtv,istate=istate,ichan=ichan,Nexc=Nlanc)
-          read(unit,*) dtv%state(istate)%channel(ichan)%poles
-          read(unit,*) dtv%state(istate)%channel(ichan)%weight
-       enddo
-    enddo
-    !
-  end subroutine read_formatted_gfmatrix
 
 
 END MODULE ED_VARS_GLOBAL

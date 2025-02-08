@@ -1186,19 +1186,16 @@ contains
   !PURPOSE  : Allocate arrays and setup frequencies and times
   !+------------------------------------------------------------------+
   subroutine allocate_grids
-    integer :: i
     if(.not.allocated(wm))allocate(wm(Lmats))
-    if(.not.allocated(vm))allocate(vm(0:Lmats))          !bosonic frequencies
+    if(.not.allocated(vm))allocate(vm(Lmats))          !bosonic frequencies
     if(.not.allocated(wr))allocate(wr(Lreal))
     if(.not.allocated(vr))allocate(vr(Lreal))
-    if(.not.allocated(tau))allocate(tau(0:Ltau))
-    wm     = pi/beta*real(2*arange(1,Lmats)-1,8)
-    do i=0,Lmats
-       vm(i) = pi/beta*2*i
-    enddo
-    wr     = linspace(wini,wfin,Lreal)
-    vr     = linspace(0d0,wfin,Lreal)
-    tau(0:)= linspace(0d0,beta,Ltau+1)
+    if(.not.allocated(tau))allocate(tau(Ltau))
+    wm  = pi/beta*(2*arange(1,Lmats)-1)
+    vm  = pi/beta*(2*arange(1,Lmats)-2)
+    wr  = linspace(wini,wfin,Lreal)
+    vr  = linspace(0d0,wfin,Lreal)
+    tau = linspace(0d0,beta,Ltau)
   end subroutine allocate_grids
 
 

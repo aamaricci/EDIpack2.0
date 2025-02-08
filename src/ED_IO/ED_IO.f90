@@ -436,8 +436,17 @@ MODULE ED_IO
   !****************************************************************************************!
 
 
-  character(len=64)                :: suffix
+  character(len=64)                           :: suffix
 
+
+  integer                                     :: ilat,jlat
+  integer                                     :: iorb,jorb
+  integer                                     :: ispin,jspin
+  integer                                     :: is,js
+  integer                                     :: io,jo
+  integer                                     :: i,j
+  integer                                     :: L
+  complex(8),dimension(:,:,:,:,:),allocatable :: F
 
 
 
