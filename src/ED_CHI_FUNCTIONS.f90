@@ -1,12 +1,11 @@
 MODULE ED_CHI_FUNCTIONS
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER  
-  USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy
+  USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy,to_lower
   USE SF_LINALG,  only: inv,eigh,eye
   USE SF_SP_LINALG, only: sp_lanc_tridiag
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
-  USE ED_IO                     !< this contains the routine to print GF,Sigma and G0
   USE ED_SETUP
   USE ED_AUX_FUNX
   !
@@ -24,6 +23,13 @@ MODULE ED_CHI_FUNCTIONS
   public :: get_densChi
   public :: get_pairChi
   public :: get_exctChi
+
+
+  public :: read_spinChimatrix
+  public :: read_densChimatrix
+  public :: read_pairChimatrix
+  public :: read_exctChimatrix
+  
 
 contains
 
@@ -117,17 +123,17 @@ contains
   end function get_pairChi
 
 
-  function get_pairChi(zeta,axis) result(self)
-    complex(8),dimension(:),intent(in)         :: zeta
-    character(len=*),optional                  :: axis
-    complex(8),dimension(0:2,Norb,Norb,size(zeta)) :: self
-    character(len=1)                           :: axis_
+  function get_exctChi(zeta,axis) result(self)
+    complex(8),dimension(:),intent(in)           :: zeta
+    character(len=*),optional                    :: axis
+    complex(8),dimension(3,Norb,Norb,size(zeta)) :: self
+    character(len=1)                             :: axis_
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
     case default  ;stop "get_exctChi error: not a valid ed_mode"
     case("normal");self = get_exctChi_normal(zeta,axis_)
     end select
-  end function get_pairChi
+  end function get_exctChi
 
 
 
@@ -261,102 +267,121 @@ contains
 
 
 
+
+
   ! SPIN-SPIN
-  subroutine print_spinChi(Self,axis)
-    complex(8),dimension(:,:,:) :: Self
-    character(len=1)            :: axis
-    integer                     :: i,j,iorb,jorb
-    integer                     :: L,i,ispin,isign
-    character(len=20)           :: suffix
+  subroutine print_spinChi()
+    complex(8),dimension(Norb,Norb,Lmats) :: Cmats
+    complex(8),dimension(Norb,Norb,Lreal) :: Creal
+    complex(8),dimension(Norb,Norb,Ltau)  :: Ctau
+    character(len=1)                      :: axis
+    integer                               :: L,i,j,iorb,jorb,ispin,isign
+    character(len=20)                     :: suffix
     call allocate_grids
+    !
+    Cmats = get_spinChi(dcmplx(0d0,wm),axis='m')
+    Creal = get_spinChi(dcmplx(wr,eps),axis='r')
+    Ctau  = get_spinChi(dcmplx(tau,0d0),axis='t')
+    !
     do iorb=1,Norb
        do jorb=1,Norb
           suffix="_l"//str(iorb)//str(jorb)
-          select case(to_lower(axis))
-          case default;stop "print_chi_spib error: axis not supported"
-          case("m");call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(iorb,jorb,:))
-          case("r");call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(iorb,jorb,:))
-          case("t");call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(iorb,jorb,:))
-          end select
+          call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(iorb,jorb,:))
+          call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(iorb,jorb,:))
+          call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(iorb,jorb,:))
        enddo
     enddo
     call deallocate_grids
   end subroutine print_spinChi
 
+
+
   ! DENSITY-DENSITY
-  subroutine print_densChi(Self,axis)
-    complex(8),dimension(:,:,:,:,:) :: Self
-    character(len=1)                :: axis
-    integer                         :: i,j,iorb,jorb
-    integer                         :: L,i,ispin,isign
-    character(len=20)               :: suffix
+  subroutine print_densChi()
+    complex(8),dimension(Norb,Norb,Lmats) :: Cmats
+    complex(8),dimension(Norb,Norb,Lreal) :: Creal
+    complex(8),dimension(Norb,Norb,Ltau)  :: Ctau
+    character(len=1)                      :: axis
+    integer                               :: L,i,j,iorb,jorb,idens,isign
+    character(len=20)                     :: suffix
     call allocate_grids
+    !
+    Cmats = get_densChi(dcmplx(0d0,wm),axis='m')
+    Creal = get_densChi(dcmplx(wr,eps),axis='r')
+    Ctau  = get_densChi(dcmplx(tau,0d0),axis='t')
+    !
     do iorb=1,Norb
        do jorb=1,Norb
           suffix="_l"//str(iorb)//str(jorb)
-          select case(to_lower(axis))
-          case default;stop "print_chi_spib error: axis not supported"
-          case("m");call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(iorb,jorb,:))
-          case("r");call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(iorb,jorb,:))
-          case("t");call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(iorb,jorb,:))
-          end select
+          call splot("densChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(iorb,jorb,:))
+          call splot("densChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(iorb,jorb,:))
+          call splot("densChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(iorb,jorb,:))
        enddo
     enddo
     call deallocate_grids
   end subroutine print_densChi
 
+
   ! PAIR-PAIR
-  subroutine print_pairChi(Self,axis)
-    complex(8),dimension(:,:,:,:,:) :: Self
-    character(len=1)                :: axis
-    integer                         :: i,j,iorb,jorb
-    integer                         :: L,i,ispin,isign
-    character(len=20)               :: suffix
+  subroutine print_pairChi()
+    complex(8),dimension(Norb,Norb,Lmats) :: Cmats
+    complex(8),dimension(Norb,Norb,Lreal) :: Creal
+    complex(8),dimension(Norb,Norb,Ltau)  :: Ctau
+    character(len=1)                      :: axis
+    integer                               :: L,i,j,iorb,jorb,ipair,isign
+    character(len=20)                     :: suffix
     call allocate_grids
+    !
+    Cmats = get_pairChi(dcmplx(0d0,wm),axis='m')
+    Creal = get_pairChi(dcmplx(wr,eps),axis='r')
+    Ctau  = get_pairChi(dcmplx(tau,0d0),axis='t')
+    !
     do iorb=1,Norb
        do jorb=1,Norb
           suffix="_l"//str(iorb)//str(jorb)
-          select case(to_lower(axis))
-          case default;stop "print_chi_spib error: axis not supported"
-          case("m");call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(iorb,jorb,:))
-          case("r");call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(iorb,jorb,:))
-          case("t");call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(iorb,jorb,:))
-          end select
+          call splot("pairChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(iorb,jorb,:))
+          call splot("pairChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(iorb,jorb,:))
+          call splot("pairChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(iorb,jorb,:))
        enddo
     enddo
     call deallocate_grids
   end subroutine print_pairChi
 
+
+
   ! EXCITON
-  subroutine print_exctChi(Self,axis)
-    complex(8),dimension(:,:,:,:,:) :: Self
-    character(len=1)                :: axis
-    integer                         :: i,j,iorb,jorb
-    integer                         :: L,i,ispin,isign
-    character(len=20)               :: suffix
+  subroutine print_exctChi()
+    complex(8),dimension(3,Norb,Norb,Lmats) :: Cmats
+    complex(8),dimension(3,Norb,Norb,Lreal) :: Creal
+    complex(8),dimension(3,Norb,Norb,Ltau)  :: Ctau
+    character(len=1)                      :: axis
+    integer                               :: L,i,j,iorb,jorb,iexct,isign
+    character(len=20)                     :: suffix
     call allocate_grids
+    !
+    Cmats = get_exctChi(dcmplx(0d0,wm),axis='m')
+    Creal = get_exctChi(dcmplx(wr,eps),axis='r')
+    Ctau  = get_exctChi(dcmplx(tau,0d0),axis='t')
+    !
     do iorb=1,Norb
        do jorb=iorb+1,Norb
           suffix="_l"//str(iorb)//str(jorb)
-          select case(to_lower(axis))
-          case default;stop "print_chi_spib error: axis not supported"
-          case("m")
-             call splot("exctChi_singlet"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(1,orb,jorb,:))
-             call splot("exctChi_tripletXY"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(1,iorb,jorb,:))
-             call splot("exctChi_tripletZ"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Self(1,iorb,jorb,:))
-          case("r")
-             call splot("exctChi_singlet"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(2,iorb,jorb,:))
-             call splot("exctChi_tripletXY"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(2,iorb,jorb,:))
-             call splot("exctChi_tripletZ"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Self(2,iorb,jorb,:))
-          case("t")
-             call splot("exctChi_singlet"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(3,iorb,jorb,:))
-             call splot("exctChi_tripletXY"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(3,iorb,jorb,:))
-             call splot("exctChi_tripletZ"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Self(3,iorb,jorb,:))
-          end select
+          call splot("exctChi_singlet"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(1,iorb,jorb,:))
+          call splot("exctChi_tripletXY"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(2,iorb,jorb,:))
+          call splot("exctChi_tripletZ"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(3,iorb,jorb,:))
+          !
+          call splot("exctChi_singlet"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(1,iorb,jorb,:))
+          call splot("exctChi_tripletXY"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(2,iorb,jorb,:))
+          call splot("exctChi_tripletZ"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(3,iorb,jorb,:))
+          !
+          call splot("exctChi_singlet"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(1,iorb,jorb,:))
+          call splot("exctChi_tripletXY"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(2,iorb,jorb,:))
+          call splot("exctChi_tripletZ"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(3,iorb,jorb,:))
        enddo
     enddo
     call deallocate_grids
   end subroutine print_exctChi
+
 
 
 

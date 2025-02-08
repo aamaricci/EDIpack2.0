@@ -337,7 +337,7 @@ contains
        do ilat = 1 + MPI_ID, Nineq, MPI_SIZE
           write(LOGfile,*)"CPU: "//str(MPI_ID)//" SOLVES INEQ SITE: "//str(ilat,Npad=4)
           !
-          ed_file_suffix=reg(ineq_site_suffix)//str(ilat,site_indx_padding)
+          call ed_set_suffix(ilat)
           !
           !If required set the local value of U per each site
           if(present(Uloc_ii))Uloc(1:Norb) = Uloc_ii(ilat,1:Norb)

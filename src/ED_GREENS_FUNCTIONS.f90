@@ -1,11 +1,11 @@
 MODULE ED_GREENS_FUNCTIONS
   USE SF_CONSTANTS, only:one,xi,zero,pi
-  USE SF_TIMER  
+  USE SF_TIMER
+  USE SF_ARRAYS, only:arange
   USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy,to_lower
   USE SF_LINALG,  only: inv,eigh,eye
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
-  ! USE ED_IO                     !< this contains the routine to print GF,Sigma and G0
   USE ED_EIGENSPACE
   USE ED_BATH
   USE ED_SETUP
@@ -23,14 +23,21 @@ MODULE ED_GREENS_FUNCTIONS
 
   public :: get_impG
   public :: get_impF
+  public :: get_impD
   public :: get_Sigma
   public :: get_Self
+  !
+  public :: read_ImpGMatrix
+  public :: read_ImpDMatrix
 
 
 
   real(8),dimension(:,:),allocatable :: zimp !quasiparticle weight
   real(8),dimension(:,:),allocatable :: simp !scattering rate
   real(8)                            :: w_ph ! Renormalized phonon frequency
+
+
+
 contains
 
 
@@ -170,8 +177,8 @@ contains
     vm    = 0d0
     Smats = get_Sigma(xi*wm,'m')
 
-    if(allocate(simp))deallocate(simp)
-    if(allocate(zimp))deallocate(zimp)
+    if(allocated(simp))deallocate(simp)
+    if(allocated(zimp))deallocate(zimp)
     allocate(simp(Norb,Nspin))
     allocate(zimp(Norb,Nspin))
     w_ph  = w0_ph
@@ -195,38 +202,10 @@ contains
 
 
 
-
-
   !+------------------------------------------------------------------+
-  !                    PRINT FUNCTIONS
+  !                    READ IMP G and D matrix
   !+------------------------------------------------------------------+
-  subroutine print_impGmatrix(file)
-    !This subroutine prints weights and poles of the impurity Green's function by calling :f:func:`write_GFmatrix`. These are stored
-    !in a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    !
-    character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
-    character(len=256)        :: file_
-    if(.not.allocated(impGmatrix))stop "ED_PRINT_IMPGMATRIX ERROR: impGmatrix not allocated!"
-    file_="gfmatrix";if(present(file))file_=str(file)
-    call write_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine print_impGmatrix
-
-  subroutine print_impDmatrix(file)
-    !This subroutine prints weights and poles of the  phonon Green's function by calling :f:func:`write_GFmatrix`. These are stored
-    !in a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    !
-    character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
-    character(len=256)        :: file_
-    if(.not.allocated(impDmatrix))stop "ED_PRINT_IMPDMATRIX ERROR: impDmatrix not allocated!"
-    file_="dfmatrix";if(present(file))file_=str(file)
-    call write_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine print_impDmatrix
-
-
-
-  subroutine read_impGmatrix(file)
+  subroutine read_ImpGmatrix(file)
     !This subroutine reads weights and poles of the impurity Green's function by calling :f:func:`read_GFmatrix`. These are read 
     !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
     !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
@@ -251,11 +230,43 @@ contains
     character(len=*),optional :: file
     character(len=256)        :: file_
     !
-    if(allocated(impDmatrix))call deallocate_GFmatrix(impDmatrix)
-    if(allocated(impDmatrix))deallocate(impDmatrix)
+    call deallocate_GFmatrix(impDmatrix)
     file_="dfmatrix";if(present(file))file_=str(file)
     call read_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
   end subroutine read_impDmatrix
+
+
+
+
+  
+  !+------------------------------------------------------------------+
+  !                    PRINT FUNCTIONS
+  !+------------------------------------------------------------------+
+  subroutine print_impGmatrix(file)
+    !This subroutine prints weights and poles of the impurity Green's function by calling :f:func:`write_GFmatrix`. These are stored
+    !in a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    !
+    character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
+    character(len=256)        :: file_
+    if(.not.allocated(impGmatrix))stop "ED_PRINT_IMPGMATRIX ERROR: impGmatrix not allocated!"
+    file_="gfmatrix";if(present(file))file_=str(file)
+    call write_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine print_impGmatrix
+
+  subroutine print_impDmatrix(file)
+    !This subroutine prints weights and poles of the  phonon Green's function by calling :f:func:`write_GFmatrix`. These are stored
+    !in a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    !
+    character(len=*),optional :: file !filename prefix (default :code:`gfmatrix`)
+    character(len=256)        :: file_
+    file_="dfmatrix";if(present(file))file_=str(file)
+    call write_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine print_impDmatrix
+
+
+
 
 
 
@@ -332,10 +343,10 @@ contains
        call Gprint_normal("impG",impGmats,'m')
        call Gprint_normal("impG",impGreal,'r')
     case ("superc");
-       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
-       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
-       impFmats = get_F_impurity(dcmplx(0d0,wm(:)),axis='m')
-       impFreal = get_F_impurity(dcmplx(wr(:),eps),axis='r')
+       impGmats = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impGreal = get_impG(dcmplx(wr(:),eps),axis='r')
+       impFmats = get_impF(dcmplx(0d0,wm(:)),axis='m')
+       impFreal = get_impF(dcmplx(wr(:),eps),axis='r')
        call Gprint_superc("impG",impGmats,'m')
        call Gprint_superc("impF",impFmats,'m')
        call Gprint_superc("impG",impGreal,'r')
@@ -357,8 +368,8 @@ contains
     !  * :code:`"impDph_iw.ed"`  matsubara axis
     !  * :code:`impDph_realw.ed"` real frequency axis
     !
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impDmats
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impDreal
+    complex(8),dimension(Lmats) :: impDmats
+    complex(8),dimension(Lreal) :: impDreal
     call allocate_grids()
     !Print the impurity functions:
     select case(ed_mode)
@@ -392,7 +403,6 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impF0mats
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impG0real
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impF0real
-    call allocate_grids
     select case(ed_mode)
     case ("normal");
        impG0mats  = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
@@ -415,7 +425,6 @@ contains
        call Gprint_nonsu2("impG0",impG0real,'r')
     case default;stop "ed_print_impG0 error: ed_mode not valid"
     end select
-    call deallocate_grids
   end subroutine Print_ImpG0
 
 
@@ -536,6 +545,7 @@ contains
     if(l/=totNorb)stop "print_gf_normal error counting the orbitals"
     !!
     !Print the impurity functions:
+    call allocate_grids
     do ispin=1,Nspin
        do l=1,totNorb
           iorb=getIorb(l)
@@ -548,6 +558,7 @@ contains
           end select
        enddo
     enddo
+    call deallocate_grids
     !
   end subroutine Gprint_Normal
 
@@ -592,6 +603,7 @@ contains
     if(l/=totNorb)stop "print_gf_superc error counting the orbitals"
     !!
     !!PRINT OUT GF:
+    call allocate_grids
     do ispin=1,Nspin
        do l=1,totNorb
           iorb=getIorb(l)
@@ -604,6 +616,7 @@ contains
           end select
        enddo
     enddo
+    call deallocate_grids
     !
   end subroutine Gprint_superc
 
@@ -659,6 +672,7 @@ contains
     if(l/=totNso)stop "print_gf_nonsu2 error counting the spin-orbitals"
     !!
     !!PRINT OUT GF:
+    call allocate_grids
     do l=1,totNso
        iorb=getIorb(l)
        jorb=getJorb(l)
@@ -672,6 +686,7 @@ contains
        case("r");call splot(reg(file)//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,Self(ispin,ispin,iorb,jorb,:))
        end select
     enddo
+    call deallocate_grids
     !
   end subroutine Gprint_nonsu2
 
