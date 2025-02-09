@@ -39,10 +39,12 @@ MODULE EDIPACK2
 
   USE ED_BATH, only:                                                    &
        ed_set_Hreplica                 => set_Hreplica                 , &
-       ed_Hreplica_mask                => Hreplica_mask                , &
        ed_set_Hgeneral                 => set_Hgeneral                 , &
+       ed_Hreplica_mask                => Hreplica_mask                , &
        ed_Hgeneral_mask                => Hgeneral_mask                , &
        ed_get_bath_dimension           => get_bath_dimension           , &
+       ed_get_g0and                    => ed_get_g0and                 , &
+       ed_get_delta                    => ed_get_delta                 , &
        ed_spin_symmetrize_bath         => spin_symmetrize_bath         , &
        ed_orb_symmetrize_bath          => orb_symmetrize_bath          , &
        ed_orb_equality_bath            => orb_equality_bath            , &
@@ -50,7 +52,7 @@ MODULE EDIPACK2
        ed_ph_trans_bath                => ph_trans_bath                , &
        ed_break_symmetry_bath          => break_symmetry_bath          , &
        ed_enforce_normal_bath          => enforce_normal_bath          , &
-       ed_save_array_as_bath          => save_array_as_bath       
+       ed_save_array_as_bath           => save_array_as_bath       
 
 
   USE ED_AUX_FUNX, only:                        &
@@ -63,10 +65,13 @@ MODULE EDIPACK2
 
   USE ED_IO, only: &
        ed_get_gimp            , &
+       ed_get_dimp            , &
        ed_get_sigma           , &
        ed_get_g0imp           , &
-       ed_get_g0and           , &
-       ed_get_delta           , &
+       ed_get_spinChi         , &
+       ed_get_densChi         , &
+       ed_get_pairChi         , &
+       ed_get_exctChi         , &       
        ed_get_dens            , &
        ed_get_phi             , &
        ed_get_mag             , &
@@ -78,16 +83,17 @@ MODULE EDIPACK2
        ed_get_eknot           , &
        ed_get_doubles         , &
        ed_get_imp_info        , &
-       ed_get_impurity_rdm    , &
-       ed_get_reduced_rdm     , &
-       ed_get_sp_dm           , &
-       ed_build_gimp          , &
-       ed_build_sigma
+       ed_get_sp_dm           
+
+
+  USE ED_RDM, only: &
+       ed_get_impurity_rdm  => get_impurity_rdm     , &
+       ed_get_reduced_rdm   => get_reduced_rdm
+
 
 
   USE ED_MAIN, only:    &
        ed_init_solver , &
-       ed_rebuild_gf  , &
        ed_solve       , &
        ed_finalize_solver
 

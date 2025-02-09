@@ -25,10 +25,6 @@ MODULE ED_CHI_FUNCTIONS
   public :: get_exctChi
 
 
-  public :: read_spinChimatrix
-  public :: read_densChimatrix
-  public :: read_pairChimatrix
-  public :: read_exctChimatrix
   
 
 contains
@@ -204,61 +200,6 @@ contains
 
 
 
-  subroutine read_spinChimatrix(file)
-    !This subroutine reads weights and poles of the impurity spin susceptibility function by calling :f:func:`read_GFmatrix`. These are read 
-    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    character(len=*),optional :: file
-    character(len=256)        :: file_
-    !
-    if(allocated(spinChimatrix))call deallocate_GFmatrix(spinChimatrix)
-    if(allocated(spinChimatrix))deallocate(spinChimatrix)
-    allocate(spinChimatrix(Norb,Norb))
-    file_="spinchimatrix";if(present(file))file_=str(file)
-    call read_GFmatrix(spinChimatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine read_spinChimatrix
-
-  subroutine read_densChimatrix(file)
-    !This subroutine reads weights and poles of the impurity charge density susceptibility function by calling :f:func:`read_GFmatrix`. These are read 
-    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    character(len=*),optional :: file
-    character(len=256)        :: file_
-    !
-    if(allocated(densChimatrix))call deallocate_GFmatrix(densChimatrix)
-    if(allocated(densChimatrix))deallocate(densChimatrix)
-    allocate(densChimatrix(Norb,Norb))
-    file_="denschimatrix";if(present(file))file_=str(file)
-    call read_GFmatrix(densChimatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine read_densChimatrix
-
-  subroutine read_pairChimatrix(file)
-    !This subroutine reads weights and poles of the impurity pair susceptibility function by calling :f:func:`read_GFmatrix`. These are read 
-    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    character(len=*),optional :: file
-    character(len=256)        :: file_
-    !
-    if(allocated(pairChimatrix))call deallocate_GFmatrix(pairChimatrix)
-    if(allocated(pairChimatrix))deallocate(pairChimatrix)
-    allocate(pairChimatrix(Norb,Norb))
-    file_="pairchimatrix";if(present(file))file_=str(file)
-    call read_GFmatrix(pairChimatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine read_pairChimatrix
-
-  subroutine read_exctChimatrix(file)
-    !This subroutine reads weights and poles of the impurity exciton susceptibilities calling :f:func:`read_GFmatrix`. These are read 
-    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    character(len=*),optional :: file
-    character(len=256)        :: file_
-    !
-    if(allocated(exctChimatrix))call deallocate_GFmatrix(exctChimatrix)
-    if(allocated(exctChimatrix))deallocate(exctChimatrix)
-    allocate(exctChimatrix(0:2,Norb,Norb))
-    file_="exctchimatrix";if(present(file))file_=str(file)
-    call read_GFmatrix(exctChimatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine read_exctChimatrix
 
 
 

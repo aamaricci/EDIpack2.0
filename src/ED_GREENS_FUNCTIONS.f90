@@ -27,9 +27,6 @@ MODULE ED_GREENS_FUNCTIONS
   public :: get_Sigma
   public :: get_Self
   !
-  public :: read_ImpGMatrix
-  public :: read_ImpDMatrix
-
 
 
   real(8),dimension(:,:),allocatable :: zimp !quasiparticle weight
@@ -202,38 +199,6 @@ contains
 
 
 
-  !+------------------------------------------------------------------+
-  !                    READ IMP G and D matrix
-  !+------------------------------------------------------------------+
-  subroutine read_ImpGmatrix(file)
-    !This subroutine reads weights and poles of the impurity Green's function by calling :f:func:`read_GFmatrix`. These are read 
-    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    character(len=*),optional :: file
-    character(len=256)        :: file_
-    !
-    if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
-    if(allocated(impGmatrix))deallocate(impGmatrix)
-    if(ed_mode=="superc")then
-       allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
-    else
-       allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
-    endif
-    file_="gfmatrix";if(present(file))file_=str(file)
-    call read_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine read_impGmatrix
-
-  subroutine read_impDmatrix(file)
-    !This subroutine reads weights and poles of the phonons Green's function by calling :f:func:`read_GFmatrix`. These are read 
-    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
-    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
-    character(len=*),optional :: file
-    character(len=256)        :: file_
-    !
-    call deallocate_GFmatrix(impDmatrix)
-    file_="dfmatrix";if(present(file))file_=str(file)
-    call read_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
-  end subroutine read_impDmatrix
 
 
 
