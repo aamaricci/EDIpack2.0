@@ -44,7 +44,17 @@ INCLUDE(${CMAKE_MODULE_PATH}/MpiConfig.cmake)
 # Look for required libraries: scifor
 # (includes Blas/Lapack/Scalapack/Quadpack/Minpack/FFTpack/Arpack/...) 
 ############################################################
-INCLUDE(${CMAKE_MODULE_PATH}/FindOrFetchSciFortran.cmake)
+# Find Scifor
+FIND_PACKAGE(PkgConfig)
+PKG_SEARCH_MODULE(SCIFOR REQUIRED scifor)
+IF(${SCIFOR_FOUND})
+  MESSAGE(STATUS "SCIFOR found at: ${SCIFOR_PREFIX}")
+ELSE()
+  MESSAGE(FATAL_ERROR "
+Can not find SciFortran in this system. Check SciFor installation. Try adding the provided PKG-CONFIG file to the environment:
+$ export PKG_CONFIG_PATH=<path_to_scifor_dir>/etc:$PKG_CONFIG_PATH")
+ENDIF()
+INCLUDE_DIRECTORIES(BEFORE ${SCIFOR_INCLUDE_DIRS})
 
 
 ############################################################
@@ -93,6 +103,7 @@ SET(LIB_TARGET_DIR ${CMAKE_INSTALL_PREFIX})
 SET(CMAKE_Fortran_MODULE_DIRECTORY ${LIB_TMP_INC})
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_Fortran_MODULE_DIRECTORY})
 
+
 ADD_SUBDIRECTORY(${LIB_SRC}/ED_BATH)
 
 ADD_SUBDIRECTORY(${LIB_SRC}/ED_IO)
@@ -107,12 +118,6 @@ ADD_SUBDIRECTORY(${LIB_SRC}/ED_FIT)
 
 ADD_SUBDIRECTORY(${LIB_SRC})
 
-
-IF(NOT SCIFOR_FOUND)
-  ADD_DEPENDENCIES(ED_INIT_LIB
-    SciFortran
-  )
-ENDIF()
 
 ADD_DEPENDENCIES(ED_BATH_LIB
   ED_INIT_LIB
