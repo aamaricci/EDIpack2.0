@@ -75,6 +75,8 @@ contains
     
     !include library functions
     include "edi2py_read_input.f90"
+    include "edi2py_aux_funx.f90"
+    include "edi2py_bath.f90"
     include "edi2py_bath_fit.f90"
 
 end module edi2py_bindings
