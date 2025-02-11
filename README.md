@@ -1,5 +1,8 @@
 # EDIpack2.0: Massively parallel Exact Diagonalization for generic Quantum Impurity problems
 
+
+split fit test branch
+
 [![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/EDIpack2.0/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/EDIpack2.0/actions/workflows/PushWorkflow.yml) 
 [![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://aamaricci.github.io/EDIpack2.0/)
 
