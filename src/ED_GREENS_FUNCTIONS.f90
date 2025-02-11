@@ -2,7 +2,7 @@ MODULE ED_GREENS_FUNCTIONS
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER
   USE SF_ARRAYS, only:arange
-  USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy,to_lower
+  USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy,to_lower,splot
   USE SF_LINALG,  only: inv,eigh,eye
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
@@ -300,6 +300,9 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impFmats
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impGreal
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impFreal
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG print_impG"
+#endif
     call allocate_grids
     select case(ed_mode)
     case ("normal");
@@ -335,6 +338,9 @@ contains
     !
     complex(8),dimension(Lmats) :: impDmats
     complex(8),dimension(Lreal) :: impDreal
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG print_impD"
+#endif
     call allocate_grids()
     !Print the impurity functions:
     select case(ed_mode)
@@ -368,8 +374,15 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impF0mats
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impG0real
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impF0real
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG print_impG0"
+#endif
+    call allocate_grids()
     select case(ed_mode)
     case ("normal");
+#ifdef _DEBUG
+       write(Logfile,"(A)")"DEBUG Gprint_Normal"
+#endif
        impG0mats  = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
        impG0real  = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
        call Gprint_normal("impG0",impG0mats,'m')
@@ -390,6 +403,7 @@ contains
        call Gprint_nonsu2("impG0",impG0real,'r')
     case default;stop "ed_print_impG0 error: ed_mode not valid"
     end select
+    call deallocate_grids()
   end subroutine Print_ImpG0
 
 
@@ -481,6 +495,9 @@ contains
     integer,dimension(:),allocatable :: getIorb,getJorb
     integer                          :: totNorb
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG Gprint_Normal"
+#endif
     L = size(self,5)
     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],"Gprint_Normal","Self")
     !
@@ -540,6 +557,9 @@ contains
     integer,dimension(:),allocatable :: getIorb,getJorb
     integer                          :: totNorb,L
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG Gprint_Superc"
+#endif
     L = size(self,5)
     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],"Gprint_Superc","Self")
     !
@@ -595,6 +615,9 @@ contains
     integer                          :: totNso,totNorb,totNspin,l,io,jo
     character(len=20)                :: suffix
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG Gprint_nonsu2"
+#endif
     L = size(self,5)
     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],"Gprint_nonSU2","Self")
     !

@@ -119,6 +119,8 @@ contains
     !
     if(ed_verbose>1)write(LOGfile,*)"Get G_l"//str(iorb,3)//"_m"//str(iorb,3)//"_s"//str(ispin)
     !
+    ialfa=1 ; if(.not.ed_total_ud)ialfa = iorb
+    !
     do istate=1,state_list%size
        call allocate_GFmatrix(impGmatrix(ispin,ispin,iorb,iorb),istate,Nchan=2)
        !
@@ -153,7 +155,7 @@ contains
     return
   end subroutine lanc_build_gf_normal_diag
 
-
+  
 
 
 
@@ -162,6 +164,8 @@ contains
     integer                     :: iorb,jorb,ispin
     !
     if(ed_verbose>1)write(LOGfile,*)"Get G_l"//str(iorb,3)//"_m"//str(jorb,3)//"_s"//str(ispin)
+    !
+    ialfa=1 ; if(.not.ed_total_ud)ialfa = iorb
     !
     do istate=1,state_list%size
        !
@@ -463,23 +467,20 @@ contains
       write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
       if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) return
       !
-      associate(G => Gf(ispin,ispin,iorb,jorb,:)) !just an alias 
-        G= zero
-        Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
-        do istate=1,Nstates
-           if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel))cycle
-           Nchannels = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel)
-           do ichan=1,Nchannels
-              Nexcs  = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles)
-              if(Nexcs==0)cycle
-              do iexc=1,Nexcs
-                 peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
-                 de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-                 G     = G + peso/(zeta-de)
-              enddo
-           enddo
-        enddo
-      end associate
+      Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
+      do istate=1,Nstates
+         if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel))cycle
+         Nchannels = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel)
+         do ichan=1,Nchannels
+            Nexcs  = size(impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles)
+            if(Nexcs==0)cycle
+            do iexc=1,Nexcs
+               peso  = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
+               de    = impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
+               Gf(ispin,ispin,iorb,jorb,:) = Gf(ispin,ispin,iorb,jorb,:) + peso/(zeta-de)
+            enddo
+         enddo
+      enddo
       return
     end subroutine get_normal_Gab
     !

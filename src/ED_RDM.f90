@@ -98,7 +98,7 @@ contains
     doprint_=.false.; if(present(doprint)) doprint_=doprint
     !
     select case(ed_mode)
-    case default  ;call ed_get_reduced_rdm_normal(rdm,orbital_mask,doprint)
+    case default  ;call get_reduced_rdm_normal(rdm,orbital_mask,doprint)
     case("superc");stop "it is not implemented"
     case("nonsu2");stop "it is not implemented"
     end select

@@ -14,7 +14,7 @@ MODULE ED_GF_SUPERC
   implicit none
   private
 
-  public :: build_gf_superc
+  public :: build_impG_superc
   public :: get_impG_superc , get_impF_superc, get_impD_superc
   public :: get_Sigma_superc, get_Self_superc
 
@@ -46,7 +46,7 @@ contains
   !+------------------------------------------------------------------+
   !                        SUPERC
   !+------------------------------------------------------------------+
-  subroutine build_gf_superc()
+  subroutine build_impG_superc()
     !
     !
     !Evaluates the impurity electrons Green's functions :math:`G(z)` and :math:`F(z)` and the phonons one :math:`D(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` , :f:var:`impfmats` , :f:var:`impfreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ] and rank-1 array :f:var:`impdmats`, :f:var:`impdreal`.    
@@ -118,7 +118,7 @@ contains
     !
     if(MPIMASTER)call stop_timer
     !
-  end subroutine build_gf_superc
+  end subroutine build_impG_superc
 
 
 

@@ -15,7 +15,7 @@ MODULE ED_GF_NONSU2
   private
 
 
-  public :: build_gf_nonsu2
+  public :: build_impG_nonsu2
   public :: get_impG_nonsu2
   public :: get_Sigma_nonsu2
 
@@ -51,7 +51,7 @@ contains
   !+------------------------------------------------------------------+
   !                            NONSU2
   !+------------------------------------------------------------------+
-  subroutine build_gf_nonsu2()
+  subroutine build_impG_nonsu2()
     !
     !
     !Evaluates the impurity electrons Green's functions :math:`G(z)` using dynamical Lanczos method. The result is stored in rank-5 arrays :f:var:`impgmats`, :f:var:`impgreal` , :f:var:`impfmats` , :f:var:`impfreal` of dimensions [ |Nspin| , |Nspin| , |Norb| , |Norb| , :f:var:`Lmats` / :f:var:`Lreal` ]
@@ -126,7 +126,7 @@ contains
        enddo
     enddo
     !
-  end subroutine build_gf_nonsu2
+  end subroutine build_impG_nonsu2
 
 
 

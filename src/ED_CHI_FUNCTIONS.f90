@@ -1,9 +1,8 @@
 MODULE ED_CHI_FUNCTIONS
   USE SF_CONSTANTS, only:one,xi,zero,pi
   USE SF_TIMER  
-  USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy,to_lower
+  USE SF_IOTOOLS, only: str,free_unit,reg,free_units,txtfy,to_lower,splot
   USE SF_LINALG,  only: inv,eigh,eye
-  USE SF_SP_LINALG, only: sp_lanc_tridiag
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_SETUP
