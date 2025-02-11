@@ -5,8 +5,8 @@ python = import('python').find_installation(pure: false)
 scifor_dep= dependency('scifor', required:true)
 edipack_dep= dependency('edipack2', required:true)
 
-fortran_src = ['src/ED_INPUT_VARS.f90',
-               'src/python/c_bindings/edi2py.f90']
+fortran_solver_src = ['src/python/c_bindings/edi2py_solver.f90']
+fortran_fit_src = ['src/python/c_bindings/edi2py_fit.f90']
 python_src  = ['src/python/edipy2/edi2py.py',
                'src/python/edipy2/func_read_input.py',
                'src/python/edipy2/func_aux_funx.py',
@@ -16,8 +16,16 @@ python_src  = ['src/python/edipy2/edi2py.py',
                'src/python/edipy2/func_bath_fit.py',
                'src/python/edipy2/__init__.py']
 
-library('edi2py', 
-                    fortran_src,
+library('edi2pysolver', 
+                    fortran_solver_src,
+                    fortran_args: ['-ffree-line-length-none', '-cpp', '-D_MPI'],
+                    dependencies: [scifor_dep,edipack_dep],
+                    install: true,
+                    install_dir: python.get_install_dir() / 'edipy2'
+)
+
+library('edi2pyfit', 
+                    fortran_fit_src,
                     fortran_args: ['-ffree-line-length-none', '-cpp', '-D_MPI'],
                     dependencies: [scifor_dep,edipack_dep],
                     install: true,

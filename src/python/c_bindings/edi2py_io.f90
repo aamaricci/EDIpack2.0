@@ -139,7 +139,7 @@ end subroutine ed_get_dens_n2_c
 subroutine ed_get_mag_n2_c(self) bind(c,name="ed_get_mag_n2")
   use, intrinsic :: iso_c_binding
   real(c_double)           :: self(3,Norb)
-  integer(c_int)           :: icomp,iorb
+  integer(c_int)           :: iorb
   do iorb = 1,Norb
     call ed_get_mag(self(1,iorb),component="x",iorb=iorb)
     call ed_get_mag(self(2,iorb),component="y",iorb=iorb)
