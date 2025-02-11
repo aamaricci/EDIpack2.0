@@ -31,7 +31,7 @@ MODULE ED_RDM_SUPERC
   real(8)                          :: peso
   real(8)                          :: norm
   !
-  integer                          :: i,j,ii,io,jo
+  integer                          :: i,j,ii,jj,io,jo
   integer                          :: isector,jsector
   !
   complex(8),dimension(:),allocatable :: state_cvec
@@ -68,8 +68,11 @@ contains
     !:math:`I_\sigma` and :math:`J_\sigma`. This reduces the sum to all and only the terms contributing to the RDM.
     !
     !In the  :code:`superc` mode we need to enforce the link between different spin orientation imposed by the symmetry of the sectors.
-    integer                         :: istate,val
-    real(8),dimension(Norb)         :: nup,ndw
+    integer                 :: istate,val
+    integer                 :: ibathUp,ibathDw
+    integer                 :: IsgnUp,IsgnDw,JsgnUp,JsgnDw,nIdw,nJdw,nBup
+    integer                 :: Isign,Jsign,signI,signJ,Sign
+    real(8),dimension(Norb) :: nup,ndw
 
     !
 #ifdef _DEBUG
@@ -129,17 +132,34 @@ contains
                       !=== >>> TRACE over bath states <<< =================================================
                       do ib=1,lenBath
                          iBath = Bath(ib)
-                         !get state I
-                         i = binary_search(sectorI%H(1)%map,iImpUp + iImpDw*2**Ns + iBath*2**Norb)
                          !
-                         !get state J
-                         j = binary_search(sectorI%H(1)%map,jImpUp + jImpDw*2**Ns + iBath*2**Norb)
+                         !Decompose iBath into IBath_Up, IBath_Dww
+                         ! then use the following expression
+                         ! to reconstruct the Fock state. 
+                         !IBath --> {IBathUp,IBathDw}
+                         iBathUp = mod(iBath,2**Nbath)
+                         iBathDw = (iBath)/2**Nbath
+                         !I: get the Fock state ii, search the corresponding sector i
+                         ii= iImpUp + iImpDw*2**Ns + 2**Norb*(IBathUp + IBathDw*2**Ns)
+                         i = binary_search(sectorI%H(1)%map,ii)
+                         !
+                         !J: get the Fock state jj, search the corresponding sector j
+                         jj= jImpUp + jImpDw*2**Ns + 2**Norb*(IBathUp + IBathDw*2**Ns)
+                         j = binary_search(sectorI%H(1)%map,jj)
+                         !
+                         !Construct the sign of each components of RDM(io,jo)
+                         nBup  = popcnt(Ibits(ii,Norb,Norb*Nbath))
+                         nIdw  = popcnt(Ibits(ii,Ns,Norb))
+                         nJdw  = popcnt(Ibits(jj,Ns,Norb))
+                         signI = (-1)**(nIdw*nBup)
+                         signJ = (-1)**(nJdw*nBup)
+                         sign  = signI*signJ
                          !
                          !Build (i,j)_th contribution to the (io,jo)_th element of \rho_IMP
                          io = (iImpUp+1) + 2**Norb*iImpDw
                          jo = (jImpUp+1) + 2**Norb*jImpDw
                          impurity_density_matrix(io,jo) = impurity_density_matrix(io,jo) + &
-                              state_cvec(i)*conjg(state_cvec(j))*peso
+                              state_cvec(i)*conjg(state_cvec(j))*peso*sign
                          !-----------------------------------------------------------------
                       enddo
                    enddo !=============================================================================
@@ -167,11 +187,11 @@ contains
           enddo
 #ifdef _DEBUG
           if(Norb==1)then
-             ! Cfr Eq. 4 in Mod Phys Lett B 2013 27:05
              write(LOGfile,*)1-ed_dens_up(1)-ed_dens_dw(1)+ed_docc(1),abs(1-ed_dens_up(1)-ed_dens_dw(1)+ed_docc(1)-impurity_density_matrix(1,1))
              write(LOGfile,*)ed_dens_up(1)-ed_docc(1),abs(ed_dens_up(1)-ed_docc(1)-impurity_density_matrix(2,2))
              write(LOGfile,*)ed_dens_dw(1)-ed_docc(1),abs(ed_dens_dw(1)-ed_docc(1)-impurity_density_matrix(3,3))
              write(LOGfile,*)ed_docc(1),abs(ed_docc(1)-impurity_density_matrix(4,4))
+             write(LOGfile,*)ed_phisc(1),-impurity_density_matrix(1,4),abs(ed_phisc(1)+impurity_density_matrix(1,4))
           endif
 #endif
        endif

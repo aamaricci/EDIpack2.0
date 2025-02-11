@@ -216,7 +216,9 @@ contains
                 ! This ensures that, when needed, we could decompose the iImp from (2) into Iup .+. Idw
                 ! correctly and reconstruct the exact iImp index as in (1). 
                 iImp    = iImpUp  + iImpDw*(2**Norb)
-                iBath   = iBathUp + iBathDw*(2**Ns)
+                !>>ACTHUNG: modified map:
+                iBath   = iBathUp + iBathDw*(2**Nbath)!bathDw*(2**Ns)
+                !<<+++++++
                 call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
              endif
           enddo
@@ -276,7 +278,9 @@ contains
                    ! This ensures that, when needed, we could decompose the iImp from (2) into Iup .+. Idw
                    ! correctly and reconstruct the exact iImp index as in (1). 
                    iImp    = iImpUp  + iImpDw*(2**Norb)
-                   iBath   = iBathUp + iBathDw*(2**Ns)
+                   !>>ACTHUNG: modified map:
+                   iBath   = iBathUp + iBathDw*(2**Nbath)!bathDw*(2**Ns)
+                   !<<+++++++
                    call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
                 endif
              enddo
@@ -319,7 +323,9 @@ contains
                 ! This ensures that, when needed, we could decompose the iImp from (2) into Iup .+. Idw
                 ! correctly and reconstruct the exact iImp index as in (1). 
                 iImp    = iImpUp  + iImpDw*(2**Norb)
-                iBath   = iBathUp + iBathDw*(2**Ns)
+                !>>ACTHUNG: modified map:
+                iBath   = iBathUp + iBathDw*(2**Nbath)!bathDw*(2**Ns)
+                !<<+++++++
                 call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
              enddo
           enddo
