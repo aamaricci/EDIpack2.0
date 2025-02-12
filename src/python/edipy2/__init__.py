@@ -4,5 +4,6 @@ import numpy as np
 
 
 #this ed class contains all the global variables and methods
-solver = edi2py.solver
-fit    = edi2py.fit
+solver1 = edi2py.solver1
+solver2 = edi2py.solver2
+#fit    = edi2py.fit
