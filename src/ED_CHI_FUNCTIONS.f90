@@ -40,7 +40,8 @@ contains
     !
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG buildChi_impurity: build susceptibilities Chi"
+    if(any([chispin_flag,chidens_flag,chipair_flag,chiexct_flag]))&
+         write(Logfile,"(A)")"DEBUG buildChi_impurity: build susceptibilities Chi"
 #endif
     !
     call deallocate_GFmatrix(spinChimatrix)
@@ -52,24 +53,29 @@ contains
     case default;return
     case("normal")
        !BUILD SPIN SUSCEPTIBILITY
-       if(chispin_flag)call build_spinChi_normal()
+       if(chispin_flag)then
+          call build_spinChi_normal()
+          call print_spinChiMatrix()
+          if(ed_print_chispin)call print_spinChi()
+       endif
        !BUILD CHARGE SUSCEPTIBILITY
-       if(chidens_flag)call build_densChi_normal()
+       if(chidens_flag)then
+          call build_densChi_normal()
+          call print_densChiMatrix()
+          if(ed_print_chidens)call print_densChi()
+       endif
        !BUILD PAIR SUSCEPTIBILITY
-       if(chipair_flag)call build_pairChi_normal()
+       if(chipair_flag)then
+          call build_pairChi_normal()
+          call print_pairChiMatrix()
+          if(ed_print_chipair)call print_pairChi()
+       endif
        !BUILD EXCITON SUSCEPTIBILITY
-       if(chiexct_flag)call build_exctChi_normal()
-       !
-       !Print ChiMatrices
-       if(chispin_flag)call print_spinChiMatrix()
-       if(chidens_flag)call print_densChiMatrix()
-       if(chipair_flag)call print_pairChiMatrix()
-       if(chiexct_flag)call print_exctChiMatrix()
-       !Print functions
-       if(ed_print_chispin)call print_spinChi()
-       if(ed_print_chidens)call print_densChi()
-       if(ed_print_chipair)call print_pairChi()
-       if(ed_print_chiexct)call print_exctChi()
+       if(chiexct_flag)then
+          call build_exctChi_normal()
+          call print_exctChiMatrix()
+          if(ed_print_chiexct)call print_exctChi()
+       endif
     end select
   end subroutine buildChi_impurity
 
@@ -217,10 +223,11 @@ contains
     character(len=1)                      :: axis
     integer                               :: L,i,j,iorb,jorb,ispin,isign
     character(len=20)                     :: suffix
+    !
     call allocate_grids
     !
-    Cmats = get_spinChi(dcmplx(0d0,wm),axis='m')
-    Creal = get_spinChi(dcmplx(wr,eps),axis='r')
+    Cmats = get_spinChi(dcmplx(0d0,vm),axis='m')
+    Creal = get_spinChi(dcmplx(vr,eps),axis='r')
     Ctau  = get_spinChi(dcmplx(tau,0d0),axis='t')
     !
     do iorb=1,Norb
@@ -228,7 +235,7 @@ contains
           suffix="_l"//str(iorb)//str(jorb)
           call splot("spinChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(iorb,jorb,:))
           call splot("spinChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(iorb,jorb,:))
-          call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(iorb,jorb,:))
+          call splot("spinChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,dreal(Ctau(iorb,jorb,:)))
        enddo
     enddo
     call deallocate_grids
@@ -246,8 +253,8 @@ contains
     character(len=20)                     :: suffix
     call allocate_grids
     !
-    Cmats = get_densChi(dcmplx(0d0,wm),axis='m')
-    Creal = get_densChi(dcmplx(wr,eps),axis='r')
+    Cmats = get_densChi(dcmplx(0d0,vm),axis='m')
+    Creal = get_densChi(dcmplx(vr,eps),axis='r')
     Ctau  = get_densChi(dcmplx(tau,0d0),axis='t')
     !
     do iorb=1,Norb
@@ -255,7 +262,7 @@ contains
           suffix="_l"//str(iorb)//str(jorb)
           call splot("densChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(iorb,jorb,:))
           call splot("densChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(iorb,jorb,:))
-          call splot("densChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(iorb,jorb,:))
+          call splot("densChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,dreal(Ctau(iorb,jorb,:)))
        enddo
     enddo
     call deallocate_grids
@@ -272,8 +279,8 @@ contains
     character(len=20)                     :: suffix
     call allocate_grids
     !
-    Cmats = get_pairChi(dcmplx(0d0,wm),axis='m')
-    Creal = get_pairChi(dcmplx(wr,eps),axis='r')
+    Cmats = get_pairChi(dcmplx(0d0,vm),axis='m')
+    Creal = get_pairChi(dcmplx(vr,eps),axis='r')
     Ctau  = get_pairChi(dcmplx(tau,0d0),axis='t')
     !
     do iorb=1,Norb
@@ -281,7 +288,7 @@ contains
           suffix="_l"//str(iorb)//str(jorb)
           call splot("pairChi"//str(suffix)//"_iv"//reg(ed_file_suffix)//".ed",vm,Cmats(iorb,jorb,:))
           call splot("pairChi"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(iorb,jorb,:))
-          call splot("pairChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(iorb,jorb,:))
+          call splot("pairChi"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,dreal(Ctau(iorb,jorb,:)))
        enddo
     enddo
     call deallocate_grids
@@ -299,8 +306,8 @@ contains
     character(len=20)                     :: suffix
     call allocate_grids
     !
-    Cmats = get_exctChi(dcmplx(0d0,wm),axis='m')
-    Creal = get_exctChi(dcmplx(wr,eps),axis='r')
+    Cmats = get_exctChi(dcmplx(0d0,vm),axis='m')
+    Creal = get_exctChi(dcmplx(vr,eps),axis='r')
     Ctau  = get_exctChi(dcmplx(tau,0d0),axis='t')
     !
     do iorb=1,Norb
@@ -314,9 +321,9 @@ contains
           call splot("exctChi_tripletXY"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(2,iorb,jorb,:))
           call splot("exctChi_tripletZ"//str(suffix)//"_realw"//reg(ed_file_suffix)//".ed",vr,Creal(3,iorb,jorb,:))
           !
-          call splot("exctChi_singlet"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(1,iorb,jorb,:))
-          call splot("exctChi_tripletXY"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(2,iorb,jorb,:))
-          call splot("exctChi_tripletZ"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,Ctau(3,iorb,jorb,:))
+          call splot("exctChi_singlet"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,dreal(Ctau(1,iorb,jorb,:)))
+          call splot("exctChi_tripletXY"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,dreal(Ctau(2,iorb,jorb,:)))
+          call splot("exctChi_tripletZ"//str(suffix)//"_tau"//reg(ed_file_suffix)//".ed",tau,dreal(Ctau(3,iorb,jorb,:)))
        enddo
     enddo
     call deallocate_grids

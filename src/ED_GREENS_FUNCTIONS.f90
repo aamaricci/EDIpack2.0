@@ -65,12 +65,11 @@ contains
     !
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG build_GF: writing results"
-    write(Logfile,"(A)")""
 #endif
     if(MPIMASTER)then
-       if(ed_print_Sigma)        call print_Sigma()
-       if(ed_print_G)            call print_impG()
-       if(ed_print_G0)           call print_impG0()
+       if(ed_print_Sigma)      call print_Sigma()
+       if(ed_print_G)          call print_impG()
+       if(ed_print_G0)         call print_impG0()
        if(ed_print_G.AND.Nph>0)call print_impD()
        call print_impGmatrix()
        call print_impDmatrix()
@@ -92,6 +91,9 @@ contains
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
     character(len=1)                                       :: axis_
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impG"
+#endif
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
     case default  ;stop "get_impG error: not a valid ed_mode"
@@ -106,6 +108,9 @@ contains
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
     character(len=1)                                       :: axis_
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impF"
+#endif
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
     case default  ;stop "get_impF error: not a valid ed_mode"
@@ -118,6 +123,9 @@ contains
     character(len=*),optional          :: axis
     complex(8),dimension(size(zeta))   :: self
     character(len=1)                   :: axis_
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impD"
+#endif
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
     case default  ;stop "get_impD error: not a valid ed_mode"
@@ -137,6 +145,9 @@ contains
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
     character(len=1)                                       :: axis_
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma"
+#endif
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
     case default  ;stop "get_Sigma error: not a valid ed_mode"
@@ -151,6 +162,9 @@ contains
     character(len=*),optional                              :: axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: self
     character(len=1)                                       :: axis_
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Self"
+#endif
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
     select case(ed_mode)
     case default  ;stop "get_Self error: not a valid ed_mode"
@@ -170,10 +184,12 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,2) :: Smats
     complex(8),dimension(1)                       :: Dmats
     real(8)                                       :: iS1,iS2
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Szr"
+#endif
     wm    = pi/beta*(2*arange(1,2)-1)
     vm    = 0d0
     Smats = get_Sigma(xi*wm,'m')
-
     if(allocated(simp))deallocate(simp)
     if(allocated(zimp))deallocate(zimp)
     allocate(simp(Norb,Nspin))
@@ -203,7 +219,7 @@ contains
 
 
 
-  
+
   !+------------------------------------------------------------------+
   !                    PRINT FUNCTIONS
   !+------------------------------------------------------------------+
@@ -253,6 +269,9 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impSAmats
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impSreal
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impSAreal
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_Sigma"
+#endif
     call allocate_grids
     select case(ed_mode)
     case ("normal");
@@ -301,7 +320,7 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impGreal
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impFreal
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG print_impG"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impG"
 #endif
     call allocate_grids
     select case(ed_mode)
@@ -339,7 +358,7 @@ contains
     complex(8),dimension(Lmats) :: impDmats
     complex(8),dimension(Lreal) :: impDreal
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG print_impD"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impD"
 #endif
     call allocate_grids()
     !Print the impurity functions:
@@ -375,14 +394,11 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impG0real
     complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impF0real
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG print_impG0"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impG0"
 #endif
     call allocate_grids()
     select case(ed_mode)
     case ("normal");
-#ifdef _DEBUG
-       write(Logfile,"(A)")"DEBUG Gprint_Normal"
-#endif
        impG0mats  = g0and_bath_function(dcmplx(0d0,wm(:)),dmft_bath,axis='mats')
        impG0real  = g0and_bath_function(dcmplx(wr(:),eps),dmft_bath,axis='real')
        call Gprint_normal("impG0",impG0mats,'m')
@@ -494,10 +510,6 @@ contains
     character(len=20)                :: suffix
     integer,dimension(:),allocatable :: getIorb,getJorb
     integer                          :: totNorb
-    !
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG Gprint_Normal"
-#endif
     L = size(self,5)
     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],"Gprint_Normal","Self")
     !
@@ -556,10 +568,6 @@ contains
     character(len=20)                :: suffix
     integer,dimension(:),allocatable :: getIorb,getJorb
     integer                          :: totNorb,L
-    !
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG Gprint_Superc"
-#endif
     L = size(self,5)
     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],"Gprint_Superc","Self")
     !
@@ -614,10 +622,6 @@ contains
     integer,dimension(:),allocatable :: getIorb,getJorb,getIspin,getJspin
     integer                          :: totNso,totNorb,totNspin,l,io,jo
     character(len=20)                :: suffix
-    !
-#ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG Gprint_nonsu2"
-#endif
     L = size(self,5)
     call assert_shape(self,[Nspin,Nspin,Norb,Norb,L],"Gprint_nonSU2","Self")
     !

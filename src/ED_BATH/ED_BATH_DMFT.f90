@@ -12,7 +12,7 @@ MODULE ED_BATH_DMFT
   USE ED_BATH_AUX
   USE ED_BATH_DIM 
   implicit none
-  
+
   ! private
 
 
@@ -20,6 +20,7 @@ MODULE ED_BATH_DMFT
   ! public :: deallocate_dmft_bath
   ! public :: init_dmft_bath
   ! public :: write_dmft_bath
+  ! public :: read_dmft_bath
   ! public :: save_dmft_bath
   ! public :: set_dmft_bath
   ! public :: get_dmft_bath
@@ -181,7 +182,7 @@ contains
 
   subroutine init_dmft_bath(dmft_bath_,used)
 #if __INTEL_COMPILER
-  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+    use ED_INPUT_VARS, only: Nspin,Norb,Nbath
 #endif
     !
     ! Initialize the :f:var:`effective_bath` input :f:var:`dmft_bath_`.
@@ -446,7 +447,7 @@ contains
 
   subroutine write_dmft_bath(dmft_bath_,unit)
 #if __INTEL_COMPILER
-  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+    use ED_INPUT_VARS, only: Nspin,Norb,Nbath
 #endif
     !
     ! Write the :f:var:`effective_bath` on input to std.output or to a file associated to the [optional] unit.
@@ -598,9 +599,140 @@ contains
              write(unit_,*)""
           enddo
        endif
-
     end select
   end subroutine write_dmft_bath
+
+
+
+  
+
+  subroutine read_dmft_bath(dmft_bath_,file,used)
+#if __INTEL_COMPILER
+    use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+#endif
+    !
+    ! Read the :f:var:`effective_bath` from a file associated to the [optional] unit.
+    !
+    type(effective_bath)      :: dmft_bath_
+    character(len=*),optional :: file
+    logical,optional          :: used
+    character(len=120)        :: file_
+    logical                   :: used_
+    logical                   :: IOfile
+    integer                   :: i,io,jo,iorb,ispin,flen,unit
+    character(len=20)         :: hsuffix
+    !
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG read_dmft_bath"
+#endif
+    !
+    used_   = .true.   ;if(present(used))used_=used
+    hsuffix = ".used";if(.not.used_)hsuffix=reg(".restart")
+    file_   = str(Hfile)//str(ed_file_suffix)//str(hsuffix)
+    if(present(file))file_=str(file)
+    !
+    !
+    inquire(file=str(file_),exist=IOfile)
+    if(.not.IOfile)stop "read_dmft_bath ERROR: indicated file does not exist"
+    if(ed_verbose>2)write(LOGfile,"(A)")'Reading bath from file '//str(file_)
+    !
+    if(dmft_bath_%status)call deallocate_dmft_bath(dmft_bath_)
+    call allocate_dmft_bath(dmft_bath_)
+
+    open(free_unit(unit),file=str(file_))
+    select case(bath_type)
+    case default
+       !
+       !Take case of the comment in the preamble:
+       read(unit,*)
+       !
+       select case(ed_mode)
+       case default
+          do i=1,Nbath
+             read(unit,*)((&
+                  dmft_bath_%e(ispin,iorb,i),&
+                  dmft_bath_%v(ispin,iorb,i),&
+                  iorb=1,Norb),ispin=1,Nspin)
+          enddo
+       case ("superc")
+          do i=1,Nbath
+             read(unit,*)((&
+                  dmft_bath_%e(ispin,iorb,i),&
+                  dmft_bath_%d(ispin,iorb,i),&
+                  dmft_bath_%v(ispin,iorb,i),&
+                  iorb=1,Norb),ispin=1,Nspin)
+          enddo
+       case("nonsu2")
+          do i=1,Nbath
+             read(unit,*)((&
+                  dmft_bath_%e(ispin,iorb,i),&
+                  dmft_bath_%v(ispin,iorb,i),&
+                  dmft_bath_%u(ispin,iorb,i),&
+                  iorb=1,Norb),ispin=1,Nspin)
+          enddo
+       end select
+       !
+    case('hybrid')
+       !
+       !Take case of the comment in the preamble:
+       read(unit,*)
+       !
+       select case(ed_mode)
+       case default
+          do i=1,Nbath
+             read(unit,*)(&
+                  dmft_bath_%e(ispin,1,i),&
+                  (&
+                  dmft_bath_%v(ispin,iorb,i),&
+                  iorb=1,Norb),&
+                  ispin=1,Nspin)
+          enddo
+       case ("superc")
+          do i=1,Nbath
+             read(unit,*)(&
+                  dmft_bath_%e(ispin,1,i),&
+                  dmft_bath_%d(ispin,1,i),&
+                  (&
+                  dmft_bath_%v(ispin,iorb,i),&
+                  iorb=1,Norb),&
+                  ispin=1,Nspin)
+          enddo
+       case ("nonsu2")
+          do i=1,Nbath
+             read(unit,*)(&
+                  dmft_bath_%e(ispin,1,i),&
+                  (&
+                  dmft_bath_%v(ispin,iorb,i),&
+                  dmft_bath_%u(ispin,iorb,i),&
+                  iorb=1,Norb),&
+                  ispin=1,Nspin)
+          enddo
+       end select
+       !
+    case ('replica')
+       read(unit,*)
+       !
+       read(unit,*)dmft_bath_%Nbasis
+       do i=1,Nbath
+          read(unit,*)dmft_bath_%item(i)%v,&
+               (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
+       enddo
+       !
+       !
+    case ('general')
+       read(unit,*)
+       !
+       read(unit,*)dmft_bath_%Nbasis
+       do i=1,Nbath
+          read(unit,*)dmft_bath_%item(i)%vg(:),&
+               (dmft_bath_%item(i)%lambda(io),io=1,dmft_bath_%Nbasis)
+       enddo
+       !
+    end select
+    !
+    close(unit)
+    !
+  end subroutine read_dmft_bath
 
 
 
@@ -846,7 +978,7 @@ contains
 
   subroutine get_dmft_bath(dmft_bath_,bath_)
 #if __INTEL_COMPILER
-  use ED_INPUT_VARS, only: Nspin,Norb,Nbath
+    use ED_INPUT_VARS, only: Nspin,Norb,Nbath
 #endif
     !
     ! Set the user input bath :f:var:`bath_` from the components of the :f:var:`effective_bath` :f:var:`dmft_bath_` , i.e. it dumps the internal data structure to the user bath. 

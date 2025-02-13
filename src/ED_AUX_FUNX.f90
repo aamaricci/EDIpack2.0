@@ -446,6 +446,7 @@ contains
     !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
     character(len=*),optional :: file
     character(len=256)        :: file_
+    
     !
     if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
     if(allocated(impGmatrix))deallocate(impGmatrix)

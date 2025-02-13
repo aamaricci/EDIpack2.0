@@ -83,7 +83,12 @@ contains
     !    write(LOGfile,*)"ED_WARNING: chi2_figgf_*_superc: revert to cg_grad=1(numeric)"
     !    cg_grad=1
     ! endif
-
+    !
+    if(Norb==1)then
+       chiexct_flag    =.false.
+       ed_print_chiexct=.false.
+    endif
+    !    
   end subroutine ed_checks_global
 
 

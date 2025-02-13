@@ -363,7 +363,7 @@ contains
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impG_nonsu2: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impG_nonsu2"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
@@ -503,6 +503,10 @@ contains
     character(len=1)                                       :: axis_
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Sigma,invG0,invG
     complex(8),dimension(Nspin*Norb,Nspin*Norb)            :: iGzeta
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_Sigma_nonsu2"
+#endif
     !
     axis_="m";if(present(axis))axis_=str(axis)
     !

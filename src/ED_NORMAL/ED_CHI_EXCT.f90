@@ -52,9 +52,6 @@ contains
     !
     ! As for the Green's function, the off-diagonal component of the the susceptibility is determined using an algebraic manipulation to ensure use of Hermitian operator in the dynamical Lanczos. 
     !
-    if(Norb==1)return
-
-
     write(LOGfile,"(A)")"Get exciton Chi:"
     if(MPIMASTER)call start_timer(unit=LOGfile)
     !
@@ -256,7 +253,7 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")&
-         "DEBUG add_to_lanczos_exctChi: add-up to GF"
+         "DEBUG add_to_lanczos_exctChi: add-up to GF istate "//str(istate)
 #endif
     !
     if(vnorm2==0)return
@@ -342,8 +339,9 @@ contains
     complex(8),dimension(0:2,Norb,Norb,size(zeta)) :: Chi
     integer                                        :: iorb,jorb,i,indx
     character(len=1)                               :: axis_
+    !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_exctChi_normal: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_exctChi_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -389,19 +387,24 @@ contains
             do iexc=1,Nexcs
                peso = exctChimatrix(indx,iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
                de   = exctChimatrix(indx,iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-               do i=1,size(zeta)
-                  select case(axis_)
-                  case("m","M")
+               select case(axis_)
+               case("m","M")
+                  if(beta*dE > 1d-3)Chi(indx,iorb,jorb,1)=Chi(indx,iorb,jorb,1) + &
+                       peso*2*(1d0-exp(-beta*dE))/dE 
+                  do i=2,size(zeta)
                      Chi(indx,iorb,jorb,i)=Chi(indx,iorb,jorb,i) + &
-                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2 + dE**2)
-                  case("r","R")
+                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dimag(zeta(i))**2 + dE**2)
+                  enddo
+               case("r","R")
+                  do i=1,size(zeta)
                      Chi(indx,iorb,jorb,i)=Chi(indx,iorb,jorb,i) - &
                           peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
-                  case("t","T")
-                     Chi(indx,iorb,jorb,i)=Chi(indx,iorb,jorb,i) - &
-                          peso*exp(-zeta(i)*dE)
-                  end select
-               enddo
+                  enddo
+               case("t","T")
+                  do i=1,size(zeta)
+                     Chi(indx,iorb,jorb,i)=Chi(indx,iorb,jorb,i) + peso*exp(-zeta(i)*dE)
+                  enddo
+               end select
             enddo
          enddo
       enddo

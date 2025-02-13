@@ -153,7 +153,7 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")&
-         "DEBUG add_to_lanczos_densChi: add-up to GF"
+         "DEBUG add_to_lanczos_densChi: add-up to GF istate "//str(istate)
 #endif
     !
     Egs = state_list%emin       !get the gs energy
@@ -221,8 +221,9 @@ contains
     complex(8),dimension(Norb,Norb,size(zeta)) :: Chi
     integer                                    :: iorb,jorb,i
     character(len=1)                           :: axis_
+    !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_densChi_normal: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_densChi_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -268,19 +269,24 @@ contains
             do iexc=1,Nexcs
                peso = densChimatrix(iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
                de   = densChimatrix(iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-               do i=1,size(zeta)
-                  select case(axis_)
-                  case("m","M")
+               select case(axis_)
+               case("m","M")
+                  if(beta*dE > 1d-3)Chi(iorb,jorb,1)=Chi(iorb,jorb,1) + &
+                       peso*2*(1d0-exp(-beta*dE))/dE 
+                  do i=2,size(zeta)
                      Chi(iorb,jorb,i)=Chi(iorb,jorb,i) + &
-                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2 + dE**2)
-                  case("r","R")
+                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dimag(zeta(i))**2 + dE**2)
+                  enddo
+               case("r","R")
+                  do i=1,size(zeta)
                      Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
                           peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
-                  case("t","T")
-                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
-                          peso*exp(-zeta(i)*dE)
-                  end select
-               enddo
+                  enddo
+               case("t","T")
+                  do i=1,size(zeta)
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) + peso*exp(-zeta(i)*dE)
+                  enddo
+               end select
             enddo
          enddo
       enddo

@@ -1,9 +1,4 @@
-!
-!Rank _nX refers here to the rank of Self WITHOUT the frequency dimension
-!
-
-
-subroutine ed_get_sigma_site_n2(self,axis,type,z)
+subroutine ed_get_sigma_site_n3(self,axis,type,z)
   complex(8),dimension(:,:,:),intent(inout)   :: self ! Green's function matrix
   character(len=*),optional                   :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
   character(len=*),optional                   :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
@@ -12,12 +7,17 @@ subroutine ed_get_sigma_site_n2(self,axis,type,z)
   character(len=1)                            :: type_
   complex(8),dimension(:),allocatable         :: z_
   complex(8),dimension(:,:,:,:,:),allocatable :: gf
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_n2"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
   !
   !
   call allocate_grids
+  if(.not.dmft_bath%status)call read_dmft_bath(dmft_bath)
+  if(.not.allocated(impGmatrix))call read_impGmatrix()
   !
   if(present(z))then
      allocate(z_, source=z)
@@ -25,9 +25,9 @@ subroutine ed_get_sigma_site_n2(self,axis,type,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -46,25 +46,29 @@ subroutine ed_get_sigma_site_n2(self,axis,type,z)
   self = nn2so_reshape( gf, Nspin,Norb,L)
   !
   call deallocate_grids
+  call deallocate_dmft_bath(dmft_bath)
   !
-end subroutine ed_get_sigma_site_n2
+end subroutine ed_get_sigma_site_n3
 
-
-subroutine ed_get_sigma_site_n4(self,axis,type,z)
+subroutine ed_get_sigma_site_n5(self,axis,type,z)
   complex(8),dimension(:,:,:,:,:),intent(inout) :: self
-  character(len=*),optional                   :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
-  character(len=*),optional                   :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
-  complex(8),dimension(:),optional            :: z    ! User provided array of complex frequency where to evaluate Self
+  character(len=*),optional                     :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
+  character(len=*),optional                     :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
+  complex(8),dimension(:),optional              :: z    ! User provided array of complex frequency where to evaluate Self
   character(len=1)                              :: axis_
   character(len=1)                              :: type_
   complex(8),dimension(:),allocatable           :: z_
-  !
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_n4"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
   !
   !
   call allocate_grids
+  if(.not.dmft_bath%status)call read_dmft_bath(dmft_bath)
+  if(.not.allocated(impGmatrix))call read_impGmatrix()
   !
   if(present(z))then
      allocate(z_, source=z)
@@ -72,9 +76,9 @@ subroutine ed_get_sigma_site_n4(self,axis,type,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -91,8 +95,9 @@ subroutine ed_get_sigma_site_n4(self,axis,type,z)
   end select
   !
   call deallocate_grids
+  call deallocate_dmft_bath(dmft_bath)
   !
-end subroutine ed_get_sigma_site_n4
+end subroutine ed_get_sigma_site_n5
 
 
 !##################################################################
@@ -100,7 +105,7 @@ end subroutine ed_get_sigma_site_n4
 !##################################################################
 
 
-subroutine ed_get_sigma_lattice_n2(self,nlat,axis,type,z)
+subroutine ed_get_sigma_lattice_n3(self,nlat,axis,type,z)
   complex(8),dimension(:,:,:),intent(inout)     :: self !! [Nlso,Nlso,:]
   integer,intent(in)                            :: nlat  ! Number of inequivalent impurity sites for real-space DMFT
   character(len=*),optional                     :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
@@ -111,6 +116,9 @@ subroutine ed_get_sigma_lattice_n2(self,nlat,axis,type,z)
   complex(8),dimension(:),allocatable           :: z_
   integer                                       :: ilat
   complex(8),dimension(:,:,:,:,:,:),allocatable :: gf
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_lattice_n2"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -124,9 +132,9 @@ subroutine ed_get_sigma_lattice_n2(self,nlat,axis,type,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -139,6 +147,7 @@ subroutine ed_get_sigma_lattice_n2(self,nlat,axis,type,z)
   !
   do ilat=1,Nlat
      call ed_set_suffix(ilat)
+     call read_dmft_bath(dmft_bath)
      call read_impGmatrix()
      select case(type_)
      case default; stop "ed_get_sigma ERROR: type is neither Normal, nor Anomalous"
@@ -154,8 +163,9 @@ subroutine ed_get_sigma_lattice_n2(self,nlat,axis,type,z)
   deallocate(gf)
   if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
   if(allocated(impGmatrix))deallocate(impGmatrix)
+  call deallocate_dmft_bath(dmft_bath)
   !
-end subroutine ed_get_sigma_lattice_n2
+end subroutine ed_get_sigma_lattice_n3
 
 subroutine ed_get_sigma_lattice_n4(self,nlat,axis,type,z)
   complex(8),dimension(:,:,:,:),intent(inout) :: self !! [Nlat,Nso,Nso,:]
@@ -168,6 +178,9 @@ subroutine ed_get_sigma_lattice_n4(self,nlat,axis,type,z)
   complex(8),dimension(:),allocatable         :: z_
   integer                                     :: ilat
   complex(8),dimension(:,:,:,:,:),allocatable :: gf
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_lattice_n4"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -179,9 +192,9 @@ subroutine ed_get_sigma_lattice_n4(self,nlat,axis,type,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -191,9 +204,9 @@ subroutine ed_get_sigma_lattice_n4(self,nlat,axis,type,z)
   !
   allocate(gf(Nspin,Nspin,Norb,Norb,L))
   gf = zero
-
   do ilat=1,Nlat
      call ed_set_suffix(ilat)
+     call read_dmft_bath(dmft_bath)
      call read_impGmatrix()
      !
      select case(type_)
@@ -211,6 +224,7 @@ subroutine ed_get_sigma_lattice_n4(self,nlat,axis,type,z)
   deallocate(gf)
   if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
   if(allocated(impGmatrix))deallocate(impGmatrix)
+  call deallocate_dmft_bath(dmft_bath)
   !
 end subroutine ed_get_sigma_lattice_n4
 
@@ -224,6 +238,9 @@ subroutine ed_get_sigma_lattice_n6(self,nlat,axis,type,z)
   character(len=1)                                :: type_
   complex(8),dimension(:),allocatable             :: z_
   integer                                         :: ilat
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_lattice_n6"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -235,9 +252,9 @@ subroutine ed_get_sigma_lattice_n6(self,nlat,axis,type,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -247,6 +264,7 @@ subroutine ed_get_sigma_lattice_n6(self,nlat,axis,type,z)
   !
   do ilat=1,Nlat
      call ed_set_suffix(ilat)
+     call read_dmft_bath(dmft_bath)
      call read_impGmatrix()
      select case(type_)
      case default; stop "ed_get_sigma ERROR: type is neither Normal, nor Anomalous"
@@ -259,5 +277,6 @@ subroutine ed_get_sigma_lattice_n6(self,nlat,axis,type,z)
   call deallocate_grids()
   if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
   if(allocated(impGmatrix))deallocate(impGmatrix)
+  call deallocate_dmft_bath(dmft_bath)
   !
 end subroutine ed_get_sigma_lattice_n6

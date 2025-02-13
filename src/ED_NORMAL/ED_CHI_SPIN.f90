@@ -98,9 +98,9 @@ contains
        e_state    =  es_return_energy(state_list,istate)
        v_state    =  es_return_dvec(state_list,istate)
        !
-       vvinit = apply_op_Sz(v_state,iorb,isector)       
+       vvinit = apply_op_Sz(v_state,iorb,isector)
        call tridiag_Hv_sector_normal(isector,vvinit,alfa_,beta_,norm2)
-       call add_to_lanczos_spinChi(norm2,e_state,alfa_,beta_,iorb,iorb)
+       call add_to_lanczos_spinChi(one*norm2,e_state,alfa_,beta_,iorb,iorb)
        deallocate(alfa_,beta_,vvinit)
        if(allocated(v_state))deallocate(v_state)
     enddo
@@ -127,7 +127,7 @@ contains
        vI = apply_op_Sz(v_state,iorb,isector)
        vJ = apply_op_Sz(v_state,jorb,isector)
        call tridiag_Hv_sector_normal(isector,vI+VJ,alfa_,beta_,norm2)
-       call add_to_lanczos_spinChi(norm2,e_state,alfa_,beta_,iorb,jorb)
+       call add_to_lanczos_spinChi(one*norm2,e_state,alfa_,beta_,iorb,jorb)
        deallocate(alfa_,beta_,vI,vJ)
        if(allocated(v_state))deallocate(v_state)
     enddo
@@ -139,7 +139,8 @@ contains
 
 
   subroutine add_to_lanczos_spinChi(vnorm2,Ei,alanc,blanc,iorb,jorb)
-    real(8)                                    :: vnorm2,Ei,Ej,Egs,pesoF,pesoAB,pesoBZ,de,peso
+    complex(8)                                 :: vnorm2,peso,pesoF
+    real(8)                                    :: Ei,Ej,Egs,pesoAB,pesoBZ,de
     integer                                    :: nlanc
     real(8),dimension(:)                       :: alanc
     real(8),dimension(size(alanc))             :: blanc 
@@ -151,7 +152,7 @@ contains
     !
 #ifdef _DEBUG
     if(ed_verbose>3)write(Logfile,"(A)")&
-         "DEBUG add_to_lanczos_spinChi: add-up to GF"
+         "DEBUG add_to_lanczos_spinChi:  add-up to GF istate "//str(istate)
 #endif
     !
     Egs = state_list%emin       !get the gs energy
@@ -162,9 +163,9 @@ contains
     if((finiteT).and.(beta*(Ei-Egs) < 200))then
        pesoBZ = exp(-beta*(Ei-Egs))
     elseif(.not.finiteT)then
-       pesoBZ = 1d0
+       pesoBZ = one
     else
-       pesoBZ = 0d0
+       pesoBZ = zero
     endif
     !
 #ifdef _MPI
@@ -233,8 +234,9 @@ contains
     complex(8),dimension(Norb,Norb,size(zeta)) :: Chi
     integer                                    :: iorb,jorb,i
     character(len=1)                           :: axis_
+    !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_spinChi_normal: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_spinChi_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -266,7 +268,7 @@ contains
       integer            :: Nexcs,iexc
       real(8)            :: peso,de
       !
-      write(LOGfile,"(A)")"Get Chi_spin_l"//reg(txtfy(iorb))//reg(txtfy(jorb))
+      write(LOGfile,"(A)")"Get Chi_spin_l"//reg(txtfy(iorb))//reg(txtfy(jorb))//"_axis:"//str(axis_)
       if(.not.allocated(spinChimatrix(iorb,jorb)%state)) return
       !
       Chi(iorb,jorb,:)= zero
@@ -280,19 +282,23 @@ contains
             do iexc=1,Nexcs
                peso = spinChimatrix(iorb,jorb)%state(istate)%channel(ichan)%weight(iexc)
                de   = spinChimatrix(iorb,jorb)%state(istate)%channel(ichan)%poles(iexc)
-               do i=1,size(zeta)
-                  select case(axis_)
-                  case("m","M")
+               select case(axis_)
+               case("m","M")
+                  if(beta*dE > 1d-3)Chi(iorb,jorb,1)=Chi(iorb,jorb,1) + peso*2*(1d0-exp(-beta*dE))/dE 
+                  do i=2,size(zeta)
                      Chi(iorb,jorb,i)=Chi(iorb,jorb,i) + &
-                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dreal(zeta(i))**2 + dE**2)
-                  case("r","R")
-                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
+                          peso*(1d0-exp(-beta*dE))*2d0*dE/(dimag(zeta(i))**2 + dE**2)
+                  enddo
+               case("r","R")
+                  do i=1,size(zeta)
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) -&
                           peso*(1d0-exp(-beta*dE))*(1d0/(zeta(i) - dE) - 1d0/(zeta(i) + dE))
-                  case("t","T")
-                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) - &
-                          peso*exp(-zeta(i)*dE)
-                  end select
-               enddo
+                  enddo
+               case("t","T")
+                  do i=1,size(zeta)
+                     Chi(iorb,jorb,i)=Chi(iorb,jorb,i) + peso*exp(-zeta(i)*dE)
+                  enddo
+               end select
             enddo
          enddo
       enddo

@@ -29,9 +29,9 @@ MODULE ED_IO
      !  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_gimp_site_n2
-     module procedure :: ed_get_gimp_site_n4
-     module procedure :: ed_get_gimp_lattice_n2
+     module procedure :: ed_get_gimp_site_n3
+     module procedure :: ed_get_gimp_site_n5
+     module procedure :: ed_get_gimp_lattice_n3
      module procedure :: ed_get_gimp_lattice_n4
      module procedure :: ed_get_gimp_lattice_n6
   end interface ed_get_gimp
@@ -45,7 +45,7 @@ MODULE ED_IO
      !  * [ :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`,  :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_dimp_site_n2
+     module procedure :: ed_get_dimp_site_n1
      module procedure :: ed_get_dimp_lattice_n2
   end interface ed_get_dimp
 
@@ -61,9 +61,9 @@ MODULE ED_IO
      !  * [:f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`, :f:var:`nspin`, :f:var:`nspin`, :f:var:`norb`, :f:var:`norb`, :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_sigma_site_n2
-     module procedure :: ed_get_sigma_site_n4
-     module procedure :: ed_get_sigma_lattice_n2
+     module procedure :: ed_get_sigma_site_n3
+     module procedure :: ed_get_sigma_site_n5
+     module procedure :: ed_get_sigma_lattice_n3
      module procedure :: ed_get_sigma_lattice_n4
      module procedure :: ed_get_sigma_lattice_n6
   end interface ed_get_sigma
@@ -91,9 +91,9 @@ MODULE ED_IO
      !
      !Where :f:var:`nb` is the length of the :f:var:`bath` array.
      !
-     module procedure :: ed_get_g0imp_site_n2
-     module procedure :: ed_get_g0imp_site_n4
-     module procedure :: ed_get_g0imp_lattice_n2
+     module procedure :: ed_get_g0imp_site_n3
+     module procedure :: ed_get_g0imp_site_n5
+     module procedure :: ed_get_g0imp_lattice_n3
      module procedure :: ed_get_g0imp_lattice_n4
      module procedure :: ed_get_g0imp_lattice_n6
   end interface ed_get_g0imp
@@ -108,10 +108,9 @@ MODULE ED_IO
      !  * [ :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`,  :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_spinChi_site_n2
-     module procedure :: ed_get_spinChi_lattice_n2
+     module procedure :: ed_get_spinChi_site_n3
+     module procedure :: ed_get_spinChi_lattice_n3
   end interface ed_get_spinChi
-
 
   interface ed_get_densChi
      !This subroutine gets from the EDIpack2 library the value of the impurity dens susceptibility function calculated 
@@ -122,8 +121,8 @@ MODULE ED_IO
      !  * [ :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`,  :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_densChi_site_n2
-     module procedure :: ed_get_densChi_lattice_n2
+     module procedure :: ed_get_densChi_site_n3
+     module procedure :: ed_get_densChi_lattice_n3
   end interface ed_get_densChi
 
   interface ed_get_pairChi
@@ -135,8 +134,8 @@ MODULE ED_IO
      !  * [ :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`,  :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_pairChi_site_n2
-     module procedure :: ed_get_pairChi_lattice_n2
+     module procedure :: ed_get_pairChi_site_n3
+     module procedure :: ed_get_pairChi_lattice_n3
   end interface ed_get_pairChi
 
   interface ed_get_exctChi
@@ -148,8 +147,8 @@ MODULE ED_IO
      !  * [ :f:var:`lmats` / :f:var:`lreal`]
      !  * [:f:var:`nlat`,  :f:var:`lmats` / :f:var:`lreal`]
      !
-     module procedure :: ed_get_exctChi_site_n2
-     module procedure :: ed_get_exctChi_lattice_n2
+     module procedure :: ed_get_exctChi_site_n3
+     module procedure :: ed_get_exctChi_lattice_n3
   end interface ed_get_exctChi
 
 

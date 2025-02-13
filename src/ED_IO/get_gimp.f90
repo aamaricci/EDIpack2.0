@@ -1,9 +1,4 @@
-!
-!Rank _nX refers here to the rank of Self WITHOUT the frequency dimension
-!
-
-
-subroutine ed_get_gimp_site_n2(self,axis,type,z)
+subroutine ed_get_gimp_site_n3(self,axis,type,z)
   complex(8),dimension(:,:,:),intent(inout)   :: self ! Green's function matrix
   character(len=*),optional                   :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
   character(len=*),optional                   :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
@@ -18,16 +13,17 @@ subroutine ed_get_gimp_site_n2(self,axis,type,z)
   !
   !
   call allocate_grids
+  if(.not.allocated(impGmatrix))call read_impGmatrix()
   !
   if(present(z))then
      allocate(z_, source=z)
   else
      select case(axis_)
-     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -47,10 +43,9 @@ subroutine ed_get_gimp_site_n2(self,axis,type,z)
   !
   call deallocate_grids
   !
-end subroutine ed_get_gimp_site_n2
+end subroutine ed_get_gimp_site_n3
 
-
-subroutine ed_get_gimp_site_n4(self,axis,type,z)
+subroutine ed_get_gimp_site_n5(self,axis,type,z)
   complex(8),dimension(:,:,:,:,:),intent(inout) :: self
   character(len=*),optional                   :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
   character(len=*),optional                   :: type ! Can be :f:var:`"n"` for Normal (default), :f:var:`"a"` for anomalous
@@ -65,16 +60,17 @@ subroutine ed_get_gimp_site_n4(self,axis,type,z)
   !
   !
   call allocate_grids
+  if(.not.allocated(impGmatrix))call read_impGmatrix()
   !
   if(present(z))then
      allocate(z_, source=z)
   else
      select case(axis_)
-     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -92,7 +88,7 @@ subroutine ed_get_gimp_site_n4(self,axis,type,z)
   !
   call deallocate_grids
   !
-end subroutine ed_get_gimp_site_n4
+end subroutine ed_get_gimp_site_n5
 
 
 !##################################################################
@@ -100,7 +96,7 @@ end subroutine ed_get_gimp_site_n4
 !##################################################################
 
 
-subroutine ed_get_gimp_lattice_n2(self,nlat,axis,type,z)
+subroutine ed_get_gimp_lattice_n3(self,nlat,axis,type,z)
   complex(8),dimension(:,:,:),intent(inout)     :: self !! [Nlso,Nlso,:]
   integer,intent(in)                            :: nlat  ! Number of inequivalent impurity sites for real-space DMFT
   character(len=*),optional                     :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
@@ -122,11 +118,11 @@ subroutine ed_get_gimp_lattice_n2(self,nlat,axis,type,z)
      allocate(z_, source=z)
   else
      select case(axis_)
-     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -155,7 +151,7 @@ subroutine ed_get_gimp_lattice_n2(self,nlat,axis,type,z)
   if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
   if(allocated(impGmatrix))deallocate(impGmatrix)
   !
-end subroutine ed_get_gimp_lattice_n2
+end subroutine ed_get_gimp_lattice_n3
 
 subroutine ed_get_gimp_lattice_n4(self,nlat,axis,type,z)
   complex(8),dimension(:,:,:,:),intent(inout) :: self !! [Nlat,Nso,Nso,:]
@@ -177,11 +173,11 @@ subroutine ed_get_gimp_lattice_n4(self,nlat,axis,type,z)
      allocate(z_, source=z)
   else
      select case(axis_)
-     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !
@@ -191,7 +187,6 @@ subroutine ed_get_gimp_lattice_n4(self,nlat,axis,type,z)
   !
   allocate(gf(Nspin,Nspin,Norb,Norb,L))
   gf = zero
-
   do ilat=1,Nlat
      call ed_set_suffix(ilat)
      call read_impGmatrix()
@@ -233,11 +228,11 @@ subroutine ed_get_gimp_lattice_n6(self,nlat,axis,type,z)
      allocate(z_, source=z)
   else
      select case(axis_)
-     case default;stop "ed_get_gimp ERROR: axis is neither Matsubara, nor Realaxis"
+     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        z_ = dcmplx(0d0,wm)
+        allocate(z_, source=dcmplx(0d0,wm))
      case ('r','R')
-        z_ = dcmplx(wr,eps)
+        allocate(z_, source=dcmplx(wr,eps))
      end select
   endif
   !

@@ -525,12 +525,13 @@ contains
           ibeta = ialfa + (ispin-1)*Ns_Ud
           iph   = (i-1)/(sectorI%DimEl) + 1
           i_el  = mod(i-1,sectorI%DimEl) + 1
+          !
           call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
           iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
           iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
           nud(1,:) = Bdecomp(iud(1),Ns_Orb)
           nud(2,:) = Bdecomp(iud(2),Ns_Orb)
-          if(Nud(ispin,ipos)/=1)return
+          if(Nud(ispin,ipos)/=1)cycle
           call c(ipos,iud(ispin),r,sgn)
           Jndices        = Indices
           Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
@@ -601,7 +602,7 @@ contains
           i_el = mod(i-1,sectorI%DimEl)+1
           ei   = sectorI%H(1)%map(i_el)
           ib   = bdecomp(ei,2*Ns)
-          if(ib(isite)/=1)return
+          if(ib(isite)/=1)cycle
           call c(isite,ei,r,sgn)
           j_el = binary_search(sectorJ%H(1)%map,r)
           j    = j_el + (iph-1)*sectorJ%DimEl
@@ -654,6 +655,7 @@ contains
           ialfa = iorb
           ipos  = 1
        endif
+       print*,ialfa,ipos
        !
        call build_sector(isector,sectorI)
        !
@@ -678,12 +680,13 @@ contains
           ibeta  = ialfa + (ispin-1)*Ns_Ud
           iph = (i-1)/(sectorI%DimEl) + 1
           i_el = mod(i-1,sectorI%DimEl) + 1
+          !
           call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
           iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
           iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
           nud(1,:) = Bdecomp(iud(1),Ns_Orb)
           nud(2,:) = Bdecomp(iud(2),Ns_Orb)
-          if(Nud(ispin,ipos)/=0)return
+          if(Nud(ispin,ipos)/=0)cycle
           call cdg(ipos,iud(ispin),r,sgn)
           Jndices        = Indices
           Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
@@ -753,7 +756,7 @@ contains
           i_el = mod(i-1,sectorI%DimEl) + 1
           ei   = sectorI%H(1)%map(i_el)
           ib   = bdecomp(ei,2*Ns)
-          if(ib(isite)/=0)return
+          if(ib(isite)/=0)cycle
           call cdg(isite,ei,r,sgn)
           j_el = binary_search(sectorJ%H(1)%map,r)
           j    = j_el + (iph-1)*sectorJ%DimEl

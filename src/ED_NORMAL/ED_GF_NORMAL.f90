@@ -284,7 +284,7 @@ contains
 
 
   subroutine add_to_lanczos_gf_normal(vnorm2,Ei,alanc,blanc,isign,iorb,jorb,ispin,ichan,istate)
-    complex(8)                                 :: vnorm2,pesoBZ,peso
+    complex(8)                                 :: vnorm2,pesoBZ,peso,pesoF
     real(8)                                    :: Ei,Egs,de
     integer                                    :: nlanc,itype
     real(8),dimension(:)                       :: alanc
@@ -305,16 +305,15 @@ contains
     Nlanc = size(alanc)
     !
     !
-    if((finiteT).and.(beta*(Ei-Egs) < 200))then
-       pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
-    elseif(.not.finiteT)then
-       pesoBZ = vnorm2/zeta_function
-    else
-       pesoBZ=0.d0
+    pesoF  = vnorm2/zeta_function
+    pesoBZ = one
+    if(finiteT)then
+       if(beta*(Ei-Egs) < 200)then
+          pesoBZ = one*exp(-beta*(Ei-Egs))
+       else
+          pesoBZ = zero
+       endif
     endif
-    !
-    !pesoBZ = vnorm2/zeta_function
-    !if(finiteT)pesoBZ = vnorm2*exp(-beta*(Ei-Egs))/zeta_function
     !
     !Only the nodes in Mpi_Comm_Group did get the alanc,blanc.
     !However after delete_sectorHv MpiComm returns to be the global one
@@ -340,7 +339,7 @@ contains
     !
     do j=1,nlanc
        de   = diag(j)-Ei
-       peso = pesoBZ*Z(1,j)*Z(1,j)
+       peso = pesoF*pesoBZ*Z(1,j)*Z(1,j)
        !
        impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%weight(j) = peso
        impGmatrix(ispin,ispin,iorb,jorb)%state(istate)%channel(ichan)%poles(j)  = isign*de
@@ -366,9 +365,15 @@ contains
     !
     Nlanc = size(alanc)
     !
-    pesoF  = vnorm2/zeta_function 
-    pesoBZ = 1d0
-    if(finiteT)pesoBZ = exp(-beta*(Ei-Egs))
+    pesoF  = vnorm2/zeta_function
+    pesoBZ = one
+    if(finiteT)then
+       if(beta*(Ei-Egs) < 200)then
+          pesoBZ = one*exp(-beta*(Ei-Egs))
+       else
+          pesoBZ = zero
+       endif
+    endif
     !
 #ifdef _MPI
     if(MpiStatus)then
@@ -414,7 +419,7 @@ contains
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Gimp_normal: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impG_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -502,7 +507,7 @@ contains
     integer                            :: Nexcs,iexc
     real(8)                            :: peso,de
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Gimp_normal: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impD_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -559,6 +564,9 @@ contains
     complex(8),dimension(Norb,Norb)                        :: iGzeta
     character(len=1)                                       :: axis_
     !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_Sigma_normal"
+#endif
     axis_="m";if(present(axis))axis_=str(axis)
     !
     !Get G0^-1

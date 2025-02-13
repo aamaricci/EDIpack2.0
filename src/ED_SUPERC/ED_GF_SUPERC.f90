@@ -362,7 +362,10 @@ contains
     integer                     :: Nups(Ns_Ud)
     integer                     :: Ndws(Ns_Ud)
     !
-    write(LOGfile,"(A)")"Get phonon Green function:"
+#ifdef _DEBUG
+    if(ed_verbose>3)write(Logfile,"(A)")&
+         "DEBUG lanc_build_gf_phonon: build phonon GF"
+#endif
     do istate=1,state_list%size
        !
        call allocate_GFmatrix(impDmatrix,istate=istate,Nchan=1)
@@ -568,7 +571,7 @@ contains
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impG_superc: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impG_superc"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -691,7 +694,7 @@ contains
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impF_superc: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impF_superc"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -820,7 +823,7 @@ contains
     integer                            :: Nexcs,iexc
     real(8)                            :: peso,de
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impG_normal: Get GFs on a input array zeta"
+    write(Logfile,"(A)")"DEBUG get_impD_superc"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -881,6 +884,10 @@ contains
     complex(8),dimension(2*Norb,2*Norb)                    :: M
     character(len=1)                                       :: axis_
     integer                                                :: L,ispin,iorb
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_Sigma_superc"
+#endif
     !
     axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
@@ -959,6 +966,10 @@ contains
     complex(8),dimension(2*Norb,2*Norb)                    :: M
     character(len=1)                                       :: axis_
     integer                                                :: L,ispin,iorb
+    !
+#ifdef _DEBUG
+    write(Logfile,"(A)")"DEBUG get_Self_superc"
+#endif
     !
     axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !

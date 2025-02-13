@@ -1,8 +1,4 @@
-!
-!Rank _nX refers here to the rank of Self WITHOUT the frequency dimension
-!
-
-subroutine ed_get_dimp_site_n2(self,axis,z)
+subroutine ed_get_dimp_site_n1(self,axis,z)
   complex(8),dimension(:),intent(inout)       :: self ! phonon's Green's function matrix
   character(len=*),optional                   :: axis ! Can be :f:var:`"m"` for Matsubara (default), :f:var:`"r"` for real
   complex(8),dimension(:),optional            :: z    ! User provided array of complex frequency where to evaluate Self
@@ -29,7 +25,7 @@ subroutine ed_get_dimp_site_n2(self,axis,z)
   self = get_impD(z_,axis_)
   call deallocate_grids
   !
-end subroutine ed_get_dimp_site_n2
+end subroutine ed_get_dimp_site_n1
 
 
 !##################################################################
