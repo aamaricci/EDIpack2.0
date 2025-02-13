@@ -245,8 +245,16 @@ def get_eimp(self,ilat=None,ikind=None):
             return eimp_vec[ilat,:]
         else:
             return eimp_vec
-            
-#build Sigma
+ 
+########################
+#   SIGMA              #
+########################
+
+#backcompatibility, undocumented
+def build_sigma(self,zeta,ilat=None,ishape=None,typ='n'):
+    return self.get_sigma(zeta=zeta,ilat=ilat,ishape=ishape,typ=typ)
+
+#get Sigma
 def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     """
     This function generates the self-energy for a user-chosen set of frequencies in the complex plane
@@ -293,7 +301,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     :raise ValueError: If :code:`axis` is not in the previous list.
      
     :return: An array of floats that contains the self-energy along the \
-    specific axis, with dimension set by :code:`ishape` and :code:`zeta`.  
+    specific axis, with dimension set by :code:`ishape` and :code:`zeta`, if present.  
     :rtype: np.array(dtype=float) 
     """
    
@@ -317,8 +325,8 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
                                     ]       
     ed_get_sigma_site_n5.restype = None
     
-    ed_get_sigma_lattice_n5 = self.library.get_sigma_lattice_n3
-    ed_get_sigma_lattice_n5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'), #self
+    ed_get_sigma_lattice_n3 = self.library.get_sigma_lattice_n3
+    ed_get_sigma_lattice_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'), #self
                                        c_int,                                                              #nineq
                                        c_int,                                                              #axis
                                        c_int,                                                              #typ
@@ -326,7 +334,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
                                        c_int,                                                              #dz
                                        c_int                                                               #zflag
                                        ]       
-    ed_get_sigma_lattice_n5.restype = None
+    ed_get_sigma_lattice_n3.restype = None
 
     ed_get_sigma_lattice_n4 = self.library.get_sigma_lattice_n4
     ed_get_sigma_lattice_n4.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=4, flags='F_CONTIGUOUS'), #self
@@ -362,7 +370,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
         zeta = np.asarray(zeta,order='F')
         nfreq = np.shape(zeta)[0]
         zflag = 1
-    else
+    else:
         zeta=[0.0]
         nfreq = 1
         zflag = 0
@@ -376,15 +384,15 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
         axisint=0
     elif axis == "r":
         axisint=1
-    else
+    else:
         raise ValueError("axis can only be 'm' or 'r'")
 
     #typ
-    if axis =="n":
+    if typ =="n":
         typint=0
-    elif axis == "a":
+    elif typ == "a":
         typint=1
-    else
+    else:
         raise ValueError("axis can only be 'n' or 'a'")
     
     
@@ -399,16 +407,13 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
             ed_get_sigma_site_n5(Sigma,axisint,typint,zeta,nfreq,zflag)
         else:
             raise ValueError('Shape(array) != 3,5 in build_sigma_site')
-        if typ=="n":
-            return Sigma_normal
-        else:
-            return Sigma_anomalous
+        return Sigma
     else:
         if ishape==3:
             Sigma = np.zeros([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
             ed_get_sigma_site_n3(Sigma,self.Nineq,axisint,typint,zeta,nfreq,zflag)
         elif ishape==4:
-            Sigmal = np.zeros([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            Sigma = np.zeros([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
             ed_get_sigma_site_n4(Sigma,self.Nineq,axisint,typint,zeta,nfreq,zflag)
         elif ishape==6:
             Sigma = np.zeros([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
@@ -416,8 +421,185 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
         else:
             raise ValueError('Shape(array) != 3,4,6 in build_sigma_lattice')
         if ilat is not None and ishape != 3:
-                return Sigma[ilat]
+            return Sigma[ilat]
         else:
-                return Sigma_normal
+            return Sigma
 
+#######################
+#   GIMP              #
+#######################
 
+#backcompatibility, undocumented
+def build_gimp(self,zeta,ilat=None,ishape=None,typ='n'):
+    return self.get_gimp(zeta=zeta,ilat=ilat,ishape=ishape,typ=typ)
+    
+#get gimp
+def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
+    """
+    This function generates the impurity Green's function for a user-chosen set of frequencies in the complex plane
+
+    :type ilat: int
+    :param ilat: if the case of real-space DMFT, if only the self-energy of \
+    a specific inequivalent site is needed, this can be specified.
+        
+    :type ishape: int 
+    :param ishape: this variable determines the shape of the returned array. Possible values:
+   
+     * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
+     * :code:`3`: in the single-impurity case, it will return an array of the shape \
+     [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT case, \
+     it will return an array of the shape \
+     [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` ]. \
+     :code:`Nlat` will be determined from the module by assessing the \
+     shape of Hloc. If :code:`ilat` is set, ValueError is returned.
+     * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
+     [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` `. :code:`Nlat` will \
+     be determined from the module by assessing the shape of Hloc. If :code:`ilat` is \
+     set, the output will have one dimension less.
+     * :code:`5`: in the single-impurity case, it will return an array of the \
+     shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`len(zeta)` ].
+     * :code:`6`: in the real-space DMFT case, it will return an array of the \
+     shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`len(zeta)` ]. \
+     :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
+     If :code:`ilat` is set, the output will have one dimension less.
+
+    :type axis: str 
+    :param axis: if :var:`zeta` is not provided, return the self-energy on the Matsubara or Real axis with parameters set in the input file. 
+    Can be :code:`m` for Matsubara(default) or :code:`r` for real.
+        
+    :type typ: str 
+    :param typ: whether to return the normal or anomalous self-energy \
+    (for the superconducting case). Can be :code:`n` for normal (default) or :code:`a` for anomalous.
+    
+
+    :type zeta: complex **or** [complex] **or** np.array(dtype=complex)
+    :param zeta: user-defined array of frequencies in the whole complex plane. If none is provided, according to :var:`axis` the Matsubara or real axis is chosen
+
+   
+    :raise ValueError: If :code:`ishape` is incompatible woth :code:`ilat` or not in the previous list.
+    :raise ValueError: If :code:`axis` is not in the previous list.
+     
+    :return: An array of floats that contains the impurity Green's function along the \
+    specific axis, with dimension set by :code:`ishape` and :code:`zeta`, if present.  
+    :rtype: np.array(dtype=float) 
+    """
+   
+    ed_get_gimp_site_n3 = self.library.get_gimp_site_n3
+    ed_get_gimp_site_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'), #self
+                                    c_int,                                                              #axis
+                                    c_int,                                                              #typ
+                                    np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'), #zeta
+                                    c_int,                                                              #dz
+                                    c_int                                                               #zflag
+                                    ]       
+    ed_get_gimp_site_n3.restype = None
+
+    ed_get_gimp_site_n5 = self.library.get_gimp_site_n5
+    ed_get_gimp_site_n5.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=5, flags='F_CONTIGUOUS'), #self
+                                    c_int,                                                              #axis
+                                    c_int,                                                              #typ
+                                    np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'), #zeta
+                                    c_int,                                                              #dz
+                                    c_int                                                               #zflag
+                                    ]       
+    ed_get_gimp_site_n5.restype = None
+    
+    ed_get_gimp_lattice_n3 = self.library.get_gimp_lattice_n3
+    ed_get_gimp_lattice_n3.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=3, flags='F_CONTIGUOUS'), #self
+                                       c_int,                                                              #nineq
+                                       c_int,                                                              #axis
+                                       c_int,                                                              #typ
+                                       np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'), #zeta
+                                       c_int,                                                              #dz
+                                       c_int                                                               #zflag
+                                       ]       
+    ed_get_gimp_lattice_n3.restype = None
+
+    ed_get_gimp_lattice_n4 = self.library.get_gimp_lattice_n4
+    ed_get_gimp_lattice_n4.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=4, flags='F_CONTIGUOUS'), #self
+                                       c_int,                                                              #nineq
+                                       c_int,                                                              #axis
+                                       c_int,                                                              #typ
+                                       np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'), #zeta
+                                       c_int,                                                              #dz
+                                       c_int                                                               #zflag
+                                       ]       
+    ed_get_gimp_lattice_n4.restype = None
+    
+    ed_get_gimp_lattice_n6 = self.library.get_gimp_lattice_n6
+    ed_get_gimp_lattice_n6.argtypes =[np.ctypeslib.ndpointer(dtype=complex,ndim=4, flags='F_CONTIGUOUS'), #self
+                                       c_int,                                                              #nineq
+                                       c_int,                                                              #axis
+                                       c_int,                                                              #typ
+                                       np.ctypeslib.ndpointer(dtype=complex,ndim=1, flags='F_CONTIGUOUS'), #zeta
+                                       c_int,                                                              #dz
+                                       c_int                                                               #zflag
+                                       ]       
+    ed_get_gimp_lattice_n6.restype = None
+ 
+ 
+    #Global vars
+    norb_aux = c_int.in_dll(self.library, "Norb").value
+    nspin_aux = c_int.in_dll(self.library, "Nspin").value
+    
+    #zeta
+    if zeta is not None:
+        if np.isscalar(zeta):
+            zeta=[zeta]
+        zeta = np.asarray(zeta,order='F')
+        nfreq = np.shape(zeta)[0]
+        zflag = 1
+    else:
+        zeta=[0.0]
+        nfreq = 1
+        zflag = 0
+    
+    #ishape
+    if ishape is None:
+            ishape = self.dim_hloc + 1
+            
+    #axis
+    if axis =="m":
+        axisint=0
+    elif axis == "r":
+        axisint=1
+    else:
+        raise ValueError("axis can only be 'm' or 'r'")
+
+    #typ
+    if typ =="n":
+        typint=0
+    elif typ == "a":
+        typint=1
+    else:
+        raise ValueError("axis can only be 'n' or 'a'")
+    
+    
+    if self.Nineq == 0:
+        if ilat is not None:
+            raise ValueError("ilat is not defined in single-impurity DMFT")
+        if ishape==3:
+            gimp = np.zeros([nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            ed_get_gimp_site_n3(gimp,axisint,typint,zeta,nfreq,zflag)
+        elif ishape==5:
+            gimp = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+            ed_get_gimp_site_n5(gimp,axisint,typint,zeta,nfreq,zflag)
+        else:
+            raise ValueError('Shape(array) != 3,5 in build_gimp_site')
+        return gimp
+    else:
+        if ishape==3:
+            gimp = np.zeros([self.Nineq*nspin_aux*norb_aux,self.Nineq*nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            ed_get_gimp_site_n3(gimp,self.Nineq,axisint,typint,zeta,nfreq,zflag)
+        elif ishape==4:
+            gimp = np.zeros([self.Nineq,nspin_aux*norb_aux,nspin_aux*norb_aux,nfreq],dtype=complex,order="F")
+            ed_get_gimp_site_n4(gimp,self.Nineq,axisint,typint,zeta,nfreq,zflag)
+        elif ishape==6:
+            gimp = np.zeros([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
+            ed_get_gimp_site_n6(gimp,self.Nineq,axisint,typint,zeta,nfreq,zflag)
+        else:
+            raise ValueError('Shape(array) != 3,4,6 in build_gimp_lattice')
+        if ilat is not None and ishape != 3:
+            return gimp[ilat]
+        else:
+            return gimp
