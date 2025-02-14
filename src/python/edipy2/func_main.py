@@ -86,7 +86,7 @@ def init_solver(self,bath=None,Nb=None,Nlat=None):
     return bath
 
 # `solve`.
-def solve(self,bath,flag_gf=True,flag_rdm=True,flag_mpi=True,mpi_lanc=False):
+def solve(self,bath,flag_gf=True,flag_mpi=True,mpi_lanc=False):
     """
        This function solves the impurity problem and calculates the \
        observables, Green's function and self-energy.
