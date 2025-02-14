@@ -35,10 +35,6 @@ MODULE ED_GF_SUPERC
   complex(8),dimension(:),allocatable   :: v_state
   real(8)                               :: e_state
 
-  !AUX GF
-  !=========================================================
-  complex(8),allocatable,dimension(:,:) :: auxGmats,auxGreal
-
 contains
 
 
@@ -73,8 +69,6 @@ contains
     ! (2,2) -> bar       
     if(MPIMASTER)call start_timer(unit=LOGfile)    
     do iorb=1,Norb
-       auxGmats=zero
-       auxGreal=zero
        call allocate_GFmatrix(impGmatrix(1,1,iorb,iorb),Nstate=state_list%size)
        call allocate_GFmatrix(impGmatrix(2,2,iorb,iorb),Nstate=state_list%size)
        call lanc_build_gf_superc_Gdiag(iorb)
@@ -616,7 +610,7 @@ contains
       auxG(1:2,:)=zero
       !
       write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(iorb)
-      if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state))return
+      if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state))return
       !
       Nstates = size(impGmatrix(1,1,iorb,iorb)%state)
       do istate=1,Nstates
@@ -739,34 +733,34 @@ contains
     subroutine get_superc_Gdiag(iorb) !get auxG(1:2)
       integer,intent(in)                 :: iorb
       integer                            :: Nstates,istate
-      integer                            :: Nchannels,ic,ichan
+      integer                            :: Nchannels,ic,is
       integer                            :: Nexcs,iexc
       real(8)                            :: peso,de
       !
       auxG(1:2,:)=zero
       !
       write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(iorb)
-      if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state))return
+      if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state))return
+      if(.not.allocated(impGmatrix(2,2,iorb,iorb)%state))return
       !
-      Nstates = size(impGmatrix(1,1,iorb,iorb)%state)
-      do istate=1,Nstates
-         Nchannels = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel)     
-         do ic=1,Nchannels        
-            Nexcs  = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles)
-            if(Nexcs==0)cycle
-            select case(ic)
-            case(1,2);ichan=1
-            case(3,4);ichan=2
-            end select
-            associate(G => auxG(ichan,:)) !just an alias 
-              do iexc=1,Nexcs
-                 peso  = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
-                 de    = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
-                 G     = G + peso/(zeta-de)
+      do is=1,2
+         associate(G => auxG(is,:)) !just an alias 
+           Nstates = size(impGmatrix(is,is,iorb,iorb)%state)
+           do istate=1,Nstates
+              Nchannels = size(impGmatrix(is,is,iorb,iorb)%state(istate)%channel)     
+              do ic=1,Nchannels        
+                 Nexcs  = size(impGmatrix(is,is,iorb,iorb)%state(istate)%channel(ic)%poles)
+                 if(Nexcs==0)cycle
+                 do iexc=1,Nexcs
+                    peso  = impGmatrix(is,is,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
+                    de    = impGmatrix(is,is,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
+                    G     = G + peso/(zeta-de)
+                 enddo
               enddo
-            end associate
-         enddo
+           enddo
+         end associate
       enddo
+      !
       return
     end subroutine get_superc_Gdiag
     !
@@ -915,7 +909,7 @@ contains
              detG =  dreal(abs(G(ispin,ispin,iorb,iorb,:))**2 + F(ispin,ispin,iorb,iorb,:)**2)
              invG(ispin,ispin,iorb,iorb,:)  =  conjg(G(ispin,ispin,iorb,iorb,:))/detG
           case("r")
-             detG = -G(ispin,ispin,iorb,iorb,:)*G(ispin,ispin,iorb,iorb,L:1:-1) - F(ispin,ispin,iorb,iorb,:)**2
+             detG = -G(ispin,ispin,iorb,iorb,:)*conjg(G(ispin,ispin,iorb,iorb,L:1:-1)) - F(ispin,ispin,iorb,iorb,:)**2
              invG(ispin,ispin,iorb,iorb,:)  = -conjg(G(ispin,ispin,iorb,iorb,L:1:-1))/detG
           end select
           !
@@ -971,7 +965,7 @@ contains
     write(Logfile,"(A)")"DEBUG get_Self_superc"
 #endif
     !
-    axis_="m";if(present(axis))axis_=str(to_lower(axis))
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     L = size(zeta)
     !
@@ -997,7 +991,7 @@ contains
              detG =  dreal(abs(G(ispin,ispin,iorb,iorb,:))**2 + F(ispin,ispin,iorb,iorb,:)**2)
              invF(ispin,ispin,iorb,iorb,:)  =  F(ispin,ispin,iorb,iorb,:)/detG
           case("r")
-             detG = -G(ispin,ispin,iorb,iorb,:)*G(ispin,ispin,iorb,iorb,L:1:-1) - F(ispin,ispin,iorb,iorb,:)**2
+             detG = -G(ispin,ispin,iorb,iorb,:)*conjg(G(ispin,ispin,iorb,iorb,L:1:-1)) - F(ispin,ispin,iorb,iorb,:)**2
              invF(ispin,ispin,iorb,iorb,:)  = -F(ispin,ispin,iorb,iorb,:)/detG
           end select
           !

@@ -6,12 +6,12 @@ function invg0_bath_array_hyrege(x,dmft_bath_,axis) result(G0and)
   type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
   character(len=*),optional                           :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and    
-  character(len=4)                                    :: axis_
+  character(len=1)                                    :: axis_
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: Delta
   complex(8),dimension(:,:),allocatable               :: fgorb,zeta
   integer                                             :: i,iorb,jorb,ispin,jspin,io,jo,Nso,L
   !
-  axis_="mats";if(present(axis))axis_=str(axis)
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
   !
   G0and = zero
   Nso   = Nspin*Norb
@@ -19,7 +19,7 @@ function invg0_bath_array_hyrege(x,dmft_bath_,axis) result(G0and)
   L=size(x)
   !
   select case(ed_mode)
-  case default; stop "invg0_bath_array error: ed_mode not supported"
+  case default; stop "invg0_bath_array_hyrege error: ed_mode not supported"
   case ("normal")
      Delta = delta_bath_array(x,dmft_bath_)
      do ispin=1,Nspin
@@ -32,8 +32,8 @@ function invg0_bath_array_hyrege(x,dmft_bath_,axis) result(G0and)
      allocate(zeta(Nso,Nso))
      Delta =  delta_bath_array(x,dmft_bath_,axis_)
      select case(axis_)
-     case default;stop "invg0_bath_array error: axis not supported"
-     case ("mats")
+     case default;stop "invg0_bath_array_hyrege error: axis not supported"
+     case ("m")
         do ispin=1,Nspin
            do i=1,L
               zeta = (x(i)+xmu)*zeye(Nso)
@@ -44,7 +44,7 @@ function invg0_bath_array_hyrege(x,dmft_bath_,axis) result(G0and)
               enddo
            enddo
         enddo
-     case("real")
+     case ("r")
         do ispin=1,Nspin
            do i=1,L
               zeta = ((x(i))  + xmu)*zeye(Nso)

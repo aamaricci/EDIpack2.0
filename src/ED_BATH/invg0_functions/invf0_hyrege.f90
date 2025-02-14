@@ -6,11 +6,11 @@ function invf0_bath_array_hyrege(x,dmft_bath_,axis) result(F0and)
   type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
   character(len=*),optional                           :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and
-  character(len=4)                                    :: axis_
+  character(len=1)                                    :: axis_
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: Fdelta
   integer                                             :: iorb,jorb,ispin,L
   !
-  axis_="mats";if(present(axis))axis_=str(axis)
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
   !
   F0and=zero
   !

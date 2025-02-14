@@ -6,14 +6,14 @@ function fdelta_bath_array_hybrid(x,dmft_bath_,axis) result(Fdelta)
   type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
   character(len=*),optional                                         :: axis    !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Fdelta
-  character(len=4)                                                  :: axis_
+  character(len=1)                                                  :: axis_
   integer                                                           :: iorb,ispin,jorb,ibath
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: Vk
   real(8),dimension(Nbath)                                          :: eps,dps
   real(8),dimension(Norb,Nbath)                                     :: vops
   integer                                                           :: i,L
   !
-  axis_="mats";if(present(axis))axis_=str(axis)
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
   !
   Fdelta=zero
   !
@@ -26,12 +26,13 @@ function fdelta_bath_array_hybrid(x,dmft_bath_,axis) result(Fdelta)
      do iorb=1,Norb
         do jorb=1,Norb
            select case(axis_)
-           case default
+           case default ;stop "fdelta_bath_array_hybrid error: axis not supported"         !mats
+           case ("m")
               do i=1,L
                  Fdelta(ispin,ispin,iorb,jorb,i) = &
                       -sum( dps(:)*vops(iorb,:)*vops(jorb,:)/(dimag(x(i))**2+eps(:)**2+dps(:)**2))
               enddo
-           case ("real")
+           case ("r")
               do i=1,L
                  Fdelta(ispin,ispin,iorb,jorb,i) = &
                       -sum( dps(:)*vops(iorb,:)*vops(jorb,:)/(x(i)*(-x(i)) + eps(:)**2 + dps(:)**2) )

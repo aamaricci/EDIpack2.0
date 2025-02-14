@@ -16,9 +16,9 @@ function delta_bath_array_general(x,dmft_bath_,axis) result(Delta)
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: Hk
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
   complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
-  character(len=4)                                                  :: axis_
+  character(len=1)                                                  :: axis_
   !
-  axis_="mats";if(present(axis))axis_=str(axis)
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
   !
   Delta=zero
   !

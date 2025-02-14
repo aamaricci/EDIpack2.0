@@ -194,17 +194,16 @@ contains
           if(ed_verbose>2)write(Logfile,"(A)")"DEBUG observables_superc: get OP"
 #endif
           do ispin=1,Nspin 
-             !GET <(a_up + bdg_dw)(adg_up + b_dw)> = 
-             !<a_up*adg_up> + <bdg_dw*b_dw> + <a_up*b_dw> + <bdg_dw*adg_up> = 
-             !<n_a,up> + < 1 - n_b,dw> + 2*<PHI>_ab
-             !
-             !EVALUATE [adg_up + b_dw]|gs> = [1,1].[C_{+1},C_{-1}].[iorb,jorb].[up,dw]
-             do iorb=1,Norb 
-                do jorb=1,Norb 
+             !GET <(b_up + adg_dw)(bdg_up + a_dw)> = 
+             !<b_up*bdg_up> + <adg_dw*a_dw> + <b_up*a_dw> + <adg_dw*bdg_up> = 
+             !<n_a,dw> + < 1 - n_b,up> + 2*<PHI>_ab
+             !EVALUATE [a_dw + bdg_up]|gs> = [1,1].[C_{-1},C_{+1}].[iorb,jorb].[dw,up]
+             do iorb=1,Norb !A
+                do jorb=1,Norb !B 
                    isz = getsz(isector)
                    if(isz<Ns)then
                       jsector = getsector(isz+1,1)
-                      vvinit  = apply_Cops(v_state,[one,one],[1,-1],[iorb,jorb],[1,2],isector,jsector)
+                      vvinit  = apply_Cops(v_state,[one,one],[-1,1],[iorb,jorb],[2,1],isector,jsector)
                       phiscAB(iorb,jorb) = phiscAB(iorb,jorb) + dot_product(vvinit,vvinit)*peso
                       deallocate(vvinit)
                    endif
@@ -225,7 +224,7 @@ contains
     !
     do iorb=1,Norb
        do jorb=1,Norb
-          phiscAB(iorb,jorb) = 0.5d0*(phiscAB(iorb,jorb) - dens_up(iorb) - (1.d0-dens_dw(jorb)))
+          phiscAB(iorb,jorb) = 0.5d0*(phiscAB(iorb,jorb) - dens_dw(iorb) - (1.d0-dens_up(jorb)))
        enddo
        phisc(iorb)=phiscAB(iorb,iorb)
     enddo

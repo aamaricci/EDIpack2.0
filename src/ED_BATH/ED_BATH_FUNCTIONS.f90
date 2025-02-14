@@ -2,7 +2,7 @@ MODULE ED_BATH_FUNCTIONS
   !A comprehensive set of procedures to evaluate the non-interacting impurity Green's functions :math:`\hat{G}^{\rm And}` and hybridizations :math:`\hat{F}^{\rm And}` in the complex frequency domain given the :f:var:`effective_bath` instance.
   !
   USE SF_CONSTANTS, only: zero
-  USE SF_IOTOOLS, only:free_unit,reg,file_length,txtfy,str
+  USE SF_IOTOOLS, only:free_unit,reg,file_length,txtfy,str,to_lower
   USE SF_LINALG, only: eye,inv,diag,zeye,inv_her,kron,det
   USE SF_SPIN, only: pauli_sigma_z
   USE ED_INPUT_VARS
@@ -153,9 +153,9 @@ contains
     type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
     character(len=*),optional                                         :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Delta
-    character(len=4)                                                  :: axis_
+    character(len=1)                                                  :: axis_
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     Delta=zero
     !
@@ -183,9 +183,9 @@ contains
     type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
     character(len=*),optional                                         :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Fdelta
-    character(len=4)                                                  :: axis_
+    character(len=1)                                                  :: axis_
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     Fdelta=zero
     !    
@@ -229,9 +229,9 @@ contains
     type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     character(len=*),optional                           :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and
-    character(len=4)                                    :: axis_
+    character(len=1)                                    :: axis_
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     G0and = zero
     !
@@ -255,10 +255,10 @@ contains
     complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
     type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
-    character(len=4)                                    :: axis_
+    character(len=1)                                    :: axis_
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     F0and=zero
     !
@@ -301,9 +301,9 @@ contains
     type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     character(len=*),optional                           :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: G0and    
-    character(len=4)                                    :: axis_
+    character(len=1)                                    :: axis_
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     G0and = zero
     select case(bath_type)
@@ -327,9 +327,9 @@ contains
     type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
     character(len=*),optional                           :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and
-    character(len=4)                                    :: axis_
+    character(len=1)                                    :: axis_
     !
-    axis_="mats";if(present(axis))axis_=str(axis)
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     !
     F0and=zero
     !
@@ -377,7 +377,7 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: g0
     integer                                             :: L
     !
-    axis_='m';if(present(axis))axis_=axis
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     type_='n';if(present(type))type_=trim(type)
     check= check_bath_dimension(bath_)
     if(.not.check)stop "g0and_bath_mats_main_ error: wrong bath dimensions"
@@ -410,7 +410,7 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: g0
     integer                                             :: L
     !
-    axis_='m';if(present(axis))axis_=axis
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     type_='n';if(present(type))type_=trim(type)
     check= check_bath_dimension(bath_)
     if(.not.check)stop "g0and_bath_mats_main_ error: wrong bath dimensions"
@@ -454,7 +454,7 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: d0
     integer                                             :: L
     !
-    axis_='mats';if(present(axis))axis_=axis
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     check= check_bath_dimension(bath_)
     if(.not.check)stop "delta_bath_mats_main_ error: wrong bath dimensions"
     call allocate_dmft_bath(dmft_bath_)
@@ -486,7 +486,7 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: d0
     integer                                             :: L
     !
-    axis_='mats';if(present(axis))axis_=axis
+    axis_="m";if(present(axis))axis_=str(to_lower(axis))
     check= check_bath_dimension(bath_)
     if(.not.check)stop "delta_bath_mats_main_ error: wrong bath dimensions"
     call allocate_dmft_bath(dmft_bath_)
