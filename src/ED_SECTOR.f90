@@ -217,7 +217,7 @@ contains
                 ! correctly and reconstruct the exact iImp index as in (1). 
                 iImp    = iImpUp  + iImpDw*(2**Norb)
                 !>>ACTHUNG: modified map:
-                iBath   = iBathUp + iBathDw*(2**Nbath)!bathDw*(2**Ns)
+                iBath   = iBathUp + iBathDw*(2**(Norb*Nbath))!bathDw*(2**Ns)
                 !<<+++++++
                 call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
              endif
@@ -279,7 +279,7 @@ contains
                    ! correctly and reconstruct the exact iImp index as in (1). 
                    iImp    = iImpUp  + iImpDw*(2**Norb)
                    !>>ACTHUNG: modified map:
-                   iBath   = iBathUp + iBathDw*(2**Nbath)!bathDw*(2**Ns)
+                   iBath   = iBathUp + iBathDw*(2**(Norb*Nbath))!bathDw*(2**Ns)
                    !<<+++++++
                    call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
                 endif
@@ -324,7 +324,7 @@ contains
                 ! correctly and reconstruct the exact iImp index as in (1). 
                 iImp    = iImpUp  + iImpDw*(2**Norb)
                 !>>ACTHUNG: modified map:
-                iBath   = iBathUp + iBathDw*(2**Nbath)!bathDw*(2**Ns)
+                iBath   = iBathUp + iBathDw*(2**(Norb*Nbath))!bathDw*(2**Ns)
                 !<<+++++++
                 call sp_insert_state(self%H(1)%sp,iImp,iBath,dim)
              enddo

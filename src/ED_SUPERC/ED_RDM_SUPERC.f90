@@ -180,19 +180,17 @@ contains
 #endif
     !Useful prints to test:
     if(MPIMASTER .and. ed_verbose>2)then
-       if(Norb<=3)then
+       if(Norb==1)then
           write(LOGfile,*)"RDM:"
           do i=1,4**Norb
              write(LOGfile,"(*(F5.2,1x))")(dreal(impurity_density_matrix(i,j)),j=1,4**Norb)
           enddo
 #ifdef _DEBUG
-          if(Norb==1)then
-             write(LOGfile,*)1-ed_dens_up(1)-ed_dens_dw(1)+ed_docc(1),abs(1-ed_dens_up(1)-ed_dens_dw(1)+ed_docc(1)-impurity_density_matrix(1,1))
-             write(LOGfile,*)ed_dens_up(1)-ed_docc(1),abs(ed_dens_up(1)-ed_docc(1)-impurity_density_matrix(2,2))
-             write(LOGfile,*)ed_dens_dw(1)-ed_docc(1),abs(ed_dens_dw(1)-ed_docc(1)-impurity_density_matrix(3,3))
-             write(LOGfile,*)ed_docc(1),abs(ed_docc(1)-impurity_density_matrix(4,4))
-             write(LOGfile,*)ed_phisc(1),-impurity_density_matrix(1,4),abs(ed_phisc(1)+impurity_density_matrix(1,4))
-          endif
+          write(LOGfile,*)1-ed_dens_up(1)-ed_dens_dw(1)+ed_docc(1),abs(1-ed_dens_up(1)-ed_dens_dw(1)+ed_docc(1)-impurity_density_matrix(1,1))
+          write(LOGfile,*)ed_dens_up(1)-ed_docc(1),abs(ed_dens_up(1)-ed_docc(1)-impurity_density_matrix(2,2))
+          write(LOGfile,*)ed_dens_dw(1)-ed_docc(1),abs(ed_dens_dw(1)-ed_docc(1)-impurity_density_matrix(3,3))
+          write(LOGfile,*)ed_docc(1),abs(ed_docc(1)-impurity_density_matrix(4,4))
+          write(LOGfile,*)ed_phisc(1),-impurity_density_matrix(1,4),abs(ed_phisc(1)+impurity_density_matrix(1,4))
 #endif
        endif
     endif
