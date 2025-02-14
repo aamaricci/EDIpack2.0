@@ -524,7 +524,7 @@ contains
        iGzeta =  nn2so_reshape(invG(:,:,:,:,i),Nspin,Norb)
        call inv(iGzeta)
        invG(:,:,:,:,i)=so2nn_reshape(iGzeta,Nspin,Norb)
-       Sigma(:,:,:,:,1) = invG0(:,:,:,:,1) - invG(:,:,:,:,i)
+       Sigma(:,:,:,:,i) = invG0(:,:,:,:,i) - invG(:,:,:,:,i)
     enddo
     !
   end function get_Sigma_nonsu2
