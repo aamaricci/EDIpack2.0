@@ -29,6 +29,7 @@ contains
     ! * :code:`superc` : :f:func:`imp_rdm_superc`
     ! * :code:`nonsu2` : :f:func:`imp_rdm_nonsu2`
     !
+    if(.not.rdm_flag)return
     write(LOGfile,"(A)")"Get RDM:"
     select case(ed_mode)
     case default  ;call imp_rdm_normal()
