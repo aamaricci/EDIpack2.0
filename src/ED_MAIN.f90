@@ -240,17 +240,15 @@ contains
   !PURPOSE: solve the impurity problems for a single or many independent
   ! lattice site using ED. 
   !+-----------------------------------------------------------------------------+!
-  subroutine ed_solve_single(bath,flag_gf,flag_rdm,flag_mpi)
+  subroutine ed_solve_single(bath,flag_gf,flag_mpi)
     real(8),dimension(:),intent(in)     :: bath  !user bath input array
     logical,optional                    :: flag_gf !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) Green's functions and susceptibilities. Default :code:`.true.` . 
-    logical,optional                    :: flag_rdm !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) Green's functions and susceptibilities. Default :code:`.true.` . 
     logical,optional                    :: flag_mpi  !flag to solve the impurity problem parallely ( :code:`.true.` ) or not ( :code:`.false.` ). Default :code:`.true.` . 
-    logical                             :: flag_mpi_, flag_rdm_, flag_gf_
+    logical                             :: flag_mpi_, flag_gf_
     logical                             :: check,iflag
     !
     flag_mpi_=.true.;if(present(flag_mpi))flag_mpi_=flag_mpi
     flag_gf_=.true.;if(present(flag_gf))flag_gf_=flag_gf
-    flag_rdm_=.true.;if(present(flag_rdm))flag_rdm_=flag_rdm
     !
 #ifdef _MPI    
     if(check_MPI().AND.flag_mpi_)call ed_set_MpiComm()
@@ -276,9 +274,7 @@ contains
     endif
     call observables_impurity()
     call local_energy_impurity()
-    if(flag_rdm_)then
-      call rdm_impurity()
-    endif
+    call rdm_impurity()
     !
     call deallocate_dmft_bath(dmft_bath)
     call es_delete_espace(state_list)
@@ -295,7 +291,7 @@ contains
 
 
 
-  subroutine ed_solve_lattice(bath,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,flag_gf,flag_rdm)
+  subroutine ed_solve_lattice(bath,mpi_lanc,Uloc_ii,Ust_ii,Jh_ii,Jp_ii,Jx_ii,flag_gf)
 #if __INTEL_COMPILER
     use ED_INPUT_VARS, only: Nspin,Norb
 #endif
@@ -307,7 +303,6 @@ contains
     real(8),optional,dimension(size(bath,1))        :: Jp_ii   !site-dependent values for :f:var:`jp` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
     real(8),optional,dimension(size(bath,1))        :: Jx_ii   !site-dependent values for :f:var:`jx` , overriding the ones in the input file. It has dimension [ :f:var:`nlat`].
     logical,optional                                :: flag_gf   !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) Green's functions and susceptibilities. Default :code:`.true.` . 
-    logical,optional                                :: flag_rdm  !flag to calculate ( :code:`.true.` ) or not ( :code:`.false.` ) reduced density matrix. Default :code:`.true.` . 
     !
     !MPI  auxiliary vars
     complex(8)                          :: Smats_tmp(size(bath,1),Nspin,Nspin,Norb,Norb,Lmats)
@@ -335,7 +330,7 @@ contains
     ! 
     integer                             :: i,j,ilat,iorb,jorb,ispin,jspin
     integer                             :: Nineq
-    logical                             :: check_dim,mpi_lanc_,flag_gf_,flag_rdm_
+    logical                             :: check_dim,mpi_lanc_,flag_gf_
     character(len=5)                    :: tmp_suffix
     !
     integer                             :: MPI_ID=0
@@ -355,7 +350,6 @@ contains
     mpi_lanc_=.false.;if(present(mpi_lanc))mpi_lanc_=mpi_lanc
     !
     flag_gf_=.true.;if(present(flag_gf))flag_gf=flag_gf_
-    flag_rdm_=.true.;if(present(flag_rdm))flag_rdm=flag_rdm_
     !
     ! Check dimensions
     Nineq=size(bath,1)
@@ -415,7 +409,7 @@ contains
           !
           if(MPI_MASTER)call save_input_file(str(ed_input_file))
           !
-          call ed_solve_single(bath(ilat,:),flag_gf=flag_gf_,flag_rdm=flag_rdm_,flag_mpi=mpi_lanc_)
+          call ed_solve_single(bath(ilat,:),flag_gf=flag_gf_,flag_mpi=mpi_lanc_)
           !
           neigen_sectortmp(ilat,:)   = neigen_sector(:)
           neigen_totaltmp(ilat)      = lanc_nstates_total
@@ -530,7 +524,7 @@ contains
           lanc_nstates_total = neigen_total_ineq(ilat)
           !
           call ed_set_Hloc(Hloc_ineq(ilat,:,:,:,:))
-          call ed_solve_single(bath(ilat,:),flag_gf=flag_gf_,flag_rdm=flag_rdm_,flag_mpi=mpi_lanc_)
+          call ed_solve_single(bath(ilat,:),flag_gf=flag_gf_,flag_mpi=mpi_lanc_)
           !
           neigen_sector_ineq(ilat,:)  = neigen_sector(:)
           neigen_total_ineq(ilat)     = lanc_nstates_total
