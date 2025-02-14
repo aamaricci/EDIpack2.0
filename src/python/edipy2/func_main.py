@@ -86,7 +86,7 @@ def init_solver(self,bath=None,Nb=None,Nlat=None):
     return bath
 
 # `solve`.
-def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):
+def solve(self,bath,flag_gf=True,flag_rdm=True,flag_mpi=True,mpi_lanc=False):
     """
        This function solves the impurity problem and calculates the \
        observables, Green's function and self-energy.
@@ -96,16 +96,16 @@ def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):
        If the bath dimensions are inconsistent with the global properties \
        of the problem, EDIpack2 will exit with an error.
        
-       :type sflag: bool
-       :param sflag: for single-impurity DMFT, if :code:`False`, it disables \
+       :type flag_gf: bool
+       :param flag_gf: for single-impurity DMFT, if :code:`False`, it disables \
        the calculation of the Green's function and susceptibilities
        
-       :type iflag: bool
-       :param iflag: for real-space DMFT, if :code:`False`, it disables the \
-       calculation of the Green's function and susceptibilities
+       :type flag_rdm: bool
+       :param flag_rdm: for single-impurity DMFT, if :code:`False`, it disables \
+       the calculation of the impurity reduced density matrix
        
-       :type fmpi: bool
-       :param fmpi: if :code:`False`, for single-impurity DMFT, it disables \
+       :type flag_mpi: bool
+       :param flag_mpi: if :code:`False`, for single-impurity DMFT, it disables \
        MPI for the ED routine, if the communicator is used elsewhere
        
        :type mpi_lanc: bool
@@ -117,26 +117,28 @@ def solve(self,bath,sflag=True,iflag=True,fmpi=True,mpi_lanc=False):
        :rtype: None
     """
     solve_site = self.library.solve_site
-    solve_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),
-                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
-                           c_int,
-                           c_int]  
+    solve_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),     #bath
+                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),  #dim_bath
+                           c_int,                                                                #flag_gf
+                           c_int,                                                                #flag_rdm
+                           c_int]                                                                #flag_mpi  
     solve_site.restype = None
 
     # Define the function signature for the Fortran function `solve_ineq`.
     solve_ineq = self.library.solve_ineq
-    solve_ineq.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),
-                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),
-                           c_int,
-                           c_int]                      
+    solve_ineq.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),     #bath
+                           np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),  #dim_bath
+                           c_int,                                                                #flag_gf
+                           c_int,                                                                #flag_rdm
+                           c_int]                                                                #flag_mpi                     
     solve_ineq.restype = None  
   
     dim_bath=np.asarray(np.shape(bath),dtype=np.int64,order="F")
     
     if len(dim_bath)<2:
-        solve_site(bath,dim_bath,sflag,fmpi)
+        solve_site(bath,dim_bath,flag_gf,flag_rdm,flag_mpi)
     else:
-        solve_ineq(bath,dim_bath,mpi_lanc,iflag)
+        solve_ineq(bath,dim_bath,flag_gf,flag_rdm,mpi_lanc)
         
 #finalize solver
 def finalize_solver(self):

@@ -14,22 +14,22 @@ subroutine init_solver_ineq_c(bath,dim_bath) bind(c, name='init_solver_ineq')
 end subroutine init_solver_ineq_c
 
 
-subroutine solve_site_c(bath,dim_bath,sflag,fmpi) bind(c, name='solve_site')
+subroutine solve_site_c(bath,dim_bath,flag_gf,flag_rdm,flag_mpi) bind(c, name='solve_site')
   use, intrinsic :: iso_c_binding
   integer(c_int64_t),dimension(1),intent(in)                                             :: dim_bath
-  integer(c_int),value                                                                   :: sflag,fmpi
+  integer(c_int),value                                                                   :: flag_gf,flag_rdm,flag_mpi
   real(c_double),dimension(dim_bath(1)),intent(in)                                       :: bath
-  call ed_solve(bath,sflag=i2l(sflag),fmpi=i2l(fmpi))
+  call ed_solve(bath,flag_gf=i2l(flag_gf),flag_rdm=i2l(flag_rdm),flag_mpi=i2l(flag_mpi))
 end subroutine solve_site_c
 !
-subroutine solve_ineq_c(bath,dim_bath,mpi_lanc,iflag) bind(c, name='solve_ineq')
+subroutine solve_ineq_c(bath,dim_bath,flag_gf,flag_rdm,mpi_lanc) bind(c, name='solve_ineq')
   use, intrinsic :: iso_c_binding
   integer(c_int64_t),dimension(2),intent(in)                                                           :: dim_bath
-  integer(c_int),value                                                                                 :: mpi_lanc,iflag
+  integer(c_int),value                                                                                 :: mpi_lanc,flag_gf,flag_rdm
   real(c_double),dimension(dim_bath(1),dim_bath(2)),intent(in)                                         :: bath
   integer                                                                                              :: Nineq
   Nineq = size(bath,1)
-  call ed_solve(bath,mpi_lanc=i2l(mpi_lanc),iflag=i2l(iflag))
+  call ed_solve(bath,mpi_lanc=i2l(mpi_lanc),flag_gf=i2l(flag_gf),flag_rdm=i2l(flag_rdm))
 end subroutine solve_ineq_c
 
 subroutine finalize_solver_c(Nineq) bind(c, name='finalize_solver')
