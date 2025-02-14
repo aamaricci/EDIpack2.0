@@ -67,12 +67,12 @@ contains
     write(Logfile,"(A)")"DEBUG build_GF: writing results"
 #endif
     if(MPIMASTER)then
-       if(ed_print_Sigma)      call print_Sigma()
-       if(ed_print_G)          call print_impG()
-       if(ed_print_G0)         call print_impG0()
-       if(ed_print_G.AND.Nph>0)call print_impD()
        call print_impGmatrix()
        call print_impDmatrix()
+       if(ed_print_G)          call print_impG()
+       if(ed_print_Sigma)      call print_Sigma()
+       if(ed_print_G0)         call print_impG0()
+       if(ed_print_G.AND.Nph>0)call print_impD()
        !
        call get_szr
        call write_szr()
@@ -251,7 +251,84 @@ contains
 
 
 
+  subroutine print_impG
+    !This subroutine print the impurity Green's function on plain text files in the execution folder.
+    !The files are formatted like :math:`[\omega,\mathrm{Im}G,\mathrm{Re}G]` .
+    !One file per Green'sfunction component, with the name
+    !
+    !  * :code:`"impG_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal G, Matsubara axis
+    !  * :code:`"impG_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal G, real frequency axis
+    !  * :code:`"impF_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous G, Matsubara axis
+    !  * :code:`"impF_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous G, real frequency axis
+    !
+    !The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
+    !
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impGmats
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impFmats
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impGreal
+    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impFreal
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impG"
+#endif
+    call allocate_grids
+    select case(ed_mode)
+    case ("normal");
+       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
+       call Gprint_normal("impG",impGmats,'m')
+       call Gprint_normal("impG",impGreal,'r')
+    case ("superc");
+       impGmats = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impFmats = get_impF(dcmplx(0d0,wm(:)),axis='m')
+       impGreal = get_impG(dcmplx(wr(:),eps),axis='r')
+       impFreal = get_impF(dcmplx(wr(:),eps),axis='r')
+       call Gprint_superc("impG",impGmats,'m')
+       call Gprint_superc("impF",impFmats,'m')
+       call Gprint_superc("impG",impGreal,'r')
+       call Gprint_superc("impF",impFreal,'r')
+    case ("nonsu2");
+       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
+       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
+       call Gprint_nonsu2("impG",impGmats,'m')
+       call Gprint_nonsu2("impG",impGreal,'r')
+    case default;stop "ed_print_impG error: ed_mode not valid"
+    end select
+    call deallocate_grids
+  end subroutine print_impG
 
+
+
+
+  
+
+  subroutine print_impD
+    !This subroutine print the impurity phonon self-energy on the files
+    !  * :code:`"impDph_iw.ed"`  matsubara axis
+    !  * :code:`impDph_realw.ed"` real frequency axis
+    !
+    complex(8),dimension(Lmats) :: impDmats
+    complex(8),dimension(Lreal) :: impDreal
+#ifdef _DEBUG
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impD"
+#endif
+    call allocate_grids()
+    !Print the impurity functions:
+    select case(ed_mode)
+    case ("normal","superc")
+       impDmats  = get_impD(dcmplx(0d0,wm(:)),axis='m')
+       impDreal  = get_impD(dcmplx(wr(:),eps),axis='r')
+       call splot("impDph_iw.ed"   ,vm,impDmats(:))
+       call splot("impDph_realw.ed",vr,impDreal(:))
+    case("nonsu2");
+       write(LOGfile,*)"print_impD WARNING: phonon GF is not available in ed_mode=nonsu2."
+    end select
+    call deallocate_grids()
+  end subroutine Print_ImpD
+
+
+
+
+  
 
   subroutine print_Sigma
     !This subroutine print the impurity self-energy on plain text files in the execution folder.
@@ -303,76 +380,6 @@ contains
 
 
 
-  subroutine print_impG
-    !This subroutine print the impurity Green's function on plain text files in the execution folder.
-    !The files are formatted like :math:`[\omega,\mathrm{Im}G,\mathrm{Re}G]` .
-    !One file per Green'sfunction component, with the name
-    !
-    !  * :code:`"impG_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_iw"//reg(ed_file_suffix)//".ed"` normal G, Matsubara axis
-    !  * :code:`"impG_l"//str(iorb)[str(jorb)]//_s"//str(ispin)[str(jspin)]"_realw"//reg(ed_file_suffix)//".ed"` normal G, real frequency axis
-    !  * :code:`"impF_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_iw"//reg(ed_file_suffix)//".ed"` anomalous G, Matsubara axis
-    !  * :code:`"impF_l"//str(iorb)[str(jorb)]//_s"//str(ispin)"_realw"//reg(ed_file_suffix)//".ed"` anomalous G, real frequency axis
-    !
-    !The variable :f:var:`ed_file_suffix` is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation.
-    !
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impGmats
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lmats) :: impFmats
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impGreal
-    complex(8),dimension(Nspin,Nspin,Norb,Norb,Lreal) :: impFreal
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impG"
-#endif
-    call allocate_grids
-    select case(ed_mode)
-    case ("normal");
-       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
-       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
-       call Gprint_normal("impG",impGmats,'m')
-       call Gprint_normal("impG",impGreal,'r')
-    case ("superc");
-       impGmats = get_impG(dcmplx(0d0,wm(:)),axis='m')
-       impGreal = get_impG(dcmplx(wr(:),eps),axis='r')
-       impFmats = get_impF(dcmplx(0d0,wm(:)),axis='m')
-       impFreal = get_impF(dcmplx(wr(:),eps),axis='r')
-       call Gprint_superc("impG",impGmats,'m')
-       call Gprint_superc("impF",impFmats,'m')
-       call Gprint_superc("impG",impGreal,'r')
-       call Gprint_superc("impF",impFreal,'r')
-    case ("nonsu2");
-       impGmats  = get_impG(dcmplx(0d0,wm(:)),axis='m')
-       impGreal  = get_impG(dcmplx(wr(:),eps),axis='r')
-       call Gprint_nonsu2("impG",impGmats,'m')
-       call Gprint_nonsu2("impG",impGreal,'r')
-    case default;stop "ed_print_impG error: ed_mode not valid"
-    end select
-    call deallocate_grids
-  end subroutine print_impG
-
-
-
-  subroutine print_impD
-    !This subroutine print the impurity phonon self-energy on the files
-    !  * :code:`"impDph_iw.ed"`  matsubara axis
-    !  * :code:`impDph_realw.ed"` real frequency axis
-    !
-    complex(8),dimension(Lmats) :: impDmats
-    complex(8),dimension(Lreal) :: impDreal
-#ifdef _DEBUG
-    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG print_impD"
-#endif
-    call allocate_grids()
-    !Print the impurity functions:
-    select case(ed_mode)
-    case ("normal","superc")
-       impDmats  = get_impD(dcmplx(0d0,wm(:)),axis='m')
-       impDreal  = get_impD(dcmplx(wr(:),eps),axis='r')
-       call splot("impDph_iw.ed"   ,vm,impDmats(:))
-       call splot("impDph_realw.ed",vr,impDreal(:))
-    case("nonsu2");
-       write(LOGfile,*)"print_impD WARNING: phonon GF is not available in ed_mode=nonsu2."
-    end select
-    call deallocate_grids()
-  end subroutine Print_ImpD
 
 
 

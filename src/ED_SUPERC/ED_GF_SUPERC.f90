@@ -561,7 +561,6 @@ contains
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Gf
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
-    complex(8)                                             :: barG(Norb,size(zeta))
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
@@ -573,27 +572,24 @@ contains
     if(.not.allocated(impGmatrix))stop "get_impG_superc ERROR: impGmatrix not allocated!"
     !
     auxG = zero
-    barG = zero
     Gf   = zero
     !
     ispin=1 ! in this channel Nspin=2 is forbidden. check in ED_SETUP.
     !
     do iorb=1,Norb
-       call get_superc_Gdiag(iorb)               !-> auxG(1:,:)
+       call get_superc_Gdiag(iorb)             !-> auxG(1:,:)
        Gf(1,1,iorb,iorb,:) = auxG(1,:)         !this is G_{up,up;iorb,iorb}
     enddo
     !
     select case(bath_type)
     case ("normal")
     case default
-       !
        ! Get G^{ab}_{upup} = <adg_up . b_up>
        do iorb=1,Norb
           do jorb=1,Norb
              if(iorb==jorb)cycle
              call get_superc_Gmix(iorb,jorb)     !-> auxG(3,:)
-             Gf(1,1,iorb,jorb,:) = 0.5d0*(auxG(3,:)-&
-                  (one-xi)*(Gf(1,1,iorb,iorb,:)+Gf(1,1,jorb,jorb,:)))
+             Gf(1,1,iorb,jorb,:) = 0.5d0*( auxG(3,:) - (one-xi)*(Gf(1,1,iorb,iorb,:)+Gf(1,1,jorb,jorb,:)) )
           enddo
        enddo
     end select
@@ -605,59 +601,59 @@ contains
       integer                            :: Nstates,istate
       integer                            :: Nchannels,ic,ichan
       integer                            :: Nexcs,iexc
-      real(8)                            :: peso,de
+      real(8)                            :: de
+      complex(8)                         :: peso
       !
-      auxG(1:2,:)=zero
-      !
-      write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(iorb)
+#ifdef _DEBUG
+      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(iorb)//"_axis: "//str(axis_)
+#endif
       if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state))return
       !
-      Nstates = size(impGmatrix(1,1,iorb,iorb)%state)
-      do istate=1,Nstates
-         Nchannels = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel)     
-         do ic=1,Nchannels        
-            Nexcs  = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles)
-            if(Nexcs==0)cycle
-            select case(ic)
-            case(1,2);ichan=1
-            case(3,4);ichan=2
-            end select
-            if(ichan==2)cycle
-            associate(G => auxG(ichan,:)) !just an alias 
+      associate(G => auxG(1,:)) !just an alias
+        G = zero
+        Nstates = size(impGmatrix(1,1,iorb,iorb)%state)
+        do istate=1,Nstates
+           Nchannels = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel)     
+           do ic=1,Nchannels        
+              Nexcs  = size(impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles)
+              if(Nexcs==0)cycle
               do iexc=1,Nexcs
                  peso  = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%weight(iexc)
                  de    = impGmatrix(1,1,iorb,iorb)%state(istate)%channel(ic)%poles(iexc)
                  G     = G + peso/(zeta-de)
               enddo
-            end associate
-         enddo
-      enddo
+
+           enddo
+        enddo
+      end associate
       return
     end subroutine get_superc_Gdiag
 
     subroutine get_superc_Gmix(iorb,jorb) !get auxG(3,:)
-      integer,intent(in)               :: iorb,jorb
-      integer                          :: Nstates,istate
-      integer                          :: Nchannels,ic,ichan
-      integer                          :: Nexcs,iexc
-      real(8)                          :: peso,de
+      integer,intent(in) :: iorb,jorb
+      integer            :: Nstates,istate
+      integer            :: Nchannels,ic,ichan
+      integer            :: Nexcs,iexc
+      real(8)            :: de
+      complex(8)         :: peso
       !
-      auxG(3,:)=zero
-      !
-      write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)
+#ifdef _DEBUG
+      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(jorb)//"_axis: "//str(axis_)
+#endif
       if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state)) return
       !
-      associate(G => auxG(3,:)) !just an alias 
+      associate(G => auxG(3,:)) !just an alias
+        G = zero
         Nstates = size(impGmatrix(1,1,iorb,jorb)%state)
         do istate=1,Nstates
            Nchannels = size(impGmatrix(1,1,iorb,jorb)%state(istate)%channel)     
-           do ic=1,Nchannels        
+           do ic=1,Nchannels
               Nexcs  = size(impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%poles)
               if(Nexcs==0)cycle
               do iexc=1,Nexcs
-                 peso  = impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%weight(iexc)
-                 de    = impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%poles(iexc)
-                 G     = G + peso/(zeta-de)
+                 peso = impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%weight(iexc)
+                 de   = impGmatrix(1,1,iorb,jorb)%state(istate)%channel(ic)%poles(iexc)
+                 G    = G + peso/(zeta-de)
               enddo
            enddo
         enddo
@@ -731,15 +727,18 @@ contains
   contains
     !
     subroutine get_superc_Gdiag(iorb) !get auxG(1:2)
-      integer,intent(in)                 :: iorb
-      integer                            :: Nstates,istate
-      integer                            :: Nchannels,ic,is
-      integer                            :: Nexcs,iexc
-      real(8)                            :: peso,de
+      integer,intent(in) :: iorb
+      integer            :: Nstates,istate
+      integer            :: Nchannels,ic,is
+      integer            :: Nexcs,iexc
+      real(8)            :: de
+      complex(8)         :: peso
       !
       auxG(1:2,:)=zero
       !
-      write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(iorb)
+#ifdef _DEBUG
+      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(iorb)//"_axis: "//str(axis_)
+#endif
       if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state))return
       if(.not.allocated(impGmatrix(2,2,iorb,iorb)%state))return
       !
@@ -769,12 +768,14 @@ contains
       integer            :: Nstates,istate
       integer            :: Nchannels,ic,ichan
       integer            :: Nexcs,iexc
-      complex(8)         :: peso
       real(8)            :: de
+      complex(8)         :: peso
       !
       auxG(4,:)=zero
       !
-      write(LOGfile,"(A)")"Get F_l"//str(iorb)//"_m"//str(jorb)
+#ifdef _DEBUG
+      write(LOGfile,"(A)")"DEBUG Get F_l"//str(iorb)//"_m"//str(jorb)//"_axis: "//str(axis_)
+#endif
       if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state)) return
       !
       associate(G => auxG(4,:)) !just an alias 
@@ -815,7 +816,9 @@ contains
     integer                            :: Nstates,istate
     integer                            :: Nchannels,ichan,i
     integer                            :: Nexcs,iexc
-    real(8)                            :: peso,de
+    real(8)                            :: de
+    complex(8)                         :: peso
+    !
 #ifdef _DEBUG
     write(Logfile,"(A)")"DEBUG get_impD_superc"
 #endif

@@ -464,11 +464,14 @@ contains
       integer                            :: Nstates,istate
       integer                            :: Nchannels,ichan
       integer                            :: Nexcs,iexc
-      real(8)                            :: peso,de
+      real(8)                            :: de
+      complex(8)                         :: peso
       !
       Gf(ispin,jspin,iorb,jorb,:)=zero
       !
-      write(LOGfile,"(A)")"Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
+#ifdef _DEBUG
+      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
+#endif
       if(.not.allocated(impGmatrix(ispin,jspin,iorb,jorb)%state)) return
       !
       associate(G => Gf(ispin,jspin,iorb,jorb,:)) !just an alias 

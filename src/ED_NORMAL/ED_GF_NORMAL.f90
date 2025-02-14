@@ -469,7 +469,9 @@ contains
       !
       Gf(ispin,ispin,iorb,jorb,:)=zero
       !
-      write(LOGfile,"(A)")"Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
+#ifdef _DEBUG
+      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
+#endif
       if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) return
       !
       Nstates = size(impGmatrix(ispin,ispin,iorb,jorb)%state)
@@ -514,7 +516,6 @@ contains
     !
     G = zero
     !
-    write(LOGfile,"(A)")"Get D"
     if(.not.allocated(impDmatrix%state)) return
     !
     G= zero
