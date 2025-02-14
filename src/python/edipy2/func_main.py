@@ -100,10 +100,6 @@ def solve(self,bath,flag_gf=True,flag_rdm=True,flag_mpi=True,mpi_lanc=False):
        :param flag_gf: for single-impurity DMFT, if :code:`False`, it disables \
        the calculation of the Green's function and susceptibilities
        
-       :type flag_rdm: bool
-       :param flag_rdm: for single-impurity DMFT, if :code:`False`, it disables \
-       the calculation of the impurity reduced density matrix
-       
        :type flag_mpi: bool
        :param flag_mpi: if :code:`False`, for single-impurity DMFT, it disables \
        MPI for the ED routine, if the communicator is used elsewhere
@@ -120,7 +116,6 @@ def solve(self,bath,flag_gf=True,flag_rdm=True,flag_mpi=True,mpi_lanc=False):
     solve_site.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=1, flags='F_CONTIGUOUS'),     #bath
                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),  #dim_bath
                            c_int,                                                                #flag_gf
-                           c_int,                                                                #flag_rdm
                            c_int]                                                                #flag_mpi  
     solve_site.restype = None
 
@@ -129,16 +124,15 @@ def solve(self,bath,flag_gf=True,flag_rdm=True,flag_mpi=True,mpi_lanc=False):
     solve_ineq.argtypes = [np.ctypeslib.ndpointer(dtype=float,ndim=2, flags='F_CONTIGUOUS'),     #bath
                            np.ctypeslib.ndpointer(dtype=np.int64,ndim=1, flags='F_CONTIGUOUS'),  #dim_bath
                            c_int,                                                                #flag_gf
-                           c_int,                                                                #flag_rdm
                            c_int]                                                                #flag_mpi                     
     solve_ineq.restype = None  
   
     dim_bath=np.asarray(np.shape(bath),dtype=np.int64,order="F")
     
     if len(dim_bath)<2:
-        solve_site(bath,dim_bath,flag_gf,flag_rdm,flag_mpi)
+        solve_site(bath,dim_bath,flag_gf,flag_mpi)
     else:
-        solve_ineq(bath,dim_bath,flag_gf,flag_rdm,mpi_lanc)
+        solve_ineq(bath,dim_bath,flag_gf,mpi_lanc)
         
 #finalize solver
 def finalize_solver(self):
