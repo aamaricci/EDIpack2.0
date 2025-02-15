@@ -587,7 +587,7 @@ contains
              if(Jz_basis)then
                 write(LOGfile,"(A,I6,I3,A,I6,I3)")&
                      'From:',sectorI%index,sectorI%twoJz/2.,&
-                     ' -> apply C  :',sectorJ%index,sectorJ%twoJz/2.
+                     ' -> apply C  :',sectorJ%index,sectorJ%twoJz/2
              else
                 write(LOGfile,"(A,I6,I3,A,I6,I3)")&
                      'From:',sectorI%index,sectorI%Ntot,&
@@ -741,7 +741,7 @@ contains
              if(Jz_basis)then
                 write(LOGfile,"(A,I6,I3,A,I6,I3)")&
                      'From:',sectorI%index,sectorI%twoJz/2.,&
-                     ' -> apply C^+:',sectorJ%index,sectorJ%twoJz/2.
+                     ' -> apply C^+:',sectorJ%index,sectorJ%twoJz/2
              else
                 write(LOGfile,"(A,I6,I3,A,I6,I3)")&
                      'From:',sectorI%index,sectorI%Ntot,&
@@ -995,12 +995,12 @@ contains
           case ("nonsu2")
              if(Jz_basis)then                    
                 write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
-                     'From:',sectorI%index,sectorI%Ntot,&
-                     ' -> apply:',Ostr,sectorJ%index,sectorJ%Ntot
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply:',Ostr,sectorJ%index,sectorJ%twoJz/2
              else
                 write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
-                     'From:',sectorI%index,sectorI%twoJz/2.,&
-                     ' -> apply:',Ostr,sectorJ%index,sectorJ%twoJz/2.
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply:',Ostr,sectorJ%index,sectorJ%Ntot
              endif
           end select
        endif
