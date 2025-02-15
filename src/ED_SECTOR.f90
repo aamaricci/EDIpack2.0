@@ -802,7 +802,7 @@ contains
     character(2),dimension(-1:1)           :: Cstr = ["C ","  ","C*"]
     character(:),allocatable               :: a,sg,Ostr
     !
-    if(.not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
+    if(ed_mode == "normal" .and. .not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
     !       
     if(MpiMaster)then
        !
@@ -929,7 +929,7 @@ contains
     character(2),dimension(-1:1)           :: Cstr = ["C ","  ","C*"]
     character(:),allocatable               :: a,sg,Ostr
     !
-    if(.not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
+    if(ed_mode == "normal" .and. .not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
     !
     if(MpiMaster)then
        !
