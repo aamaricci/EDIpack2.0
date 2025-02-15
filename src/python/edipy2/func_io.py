@@ -370,6 +370,8 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
         zeta = np.asarray(zeta,dtype=complex,order='F')
         nfreq = np.shape(zeta)[0]
         zflag = 1
+        if any(abs(np.real(zeta)) > 1e-10):
+            axis="r"
     else:
         zeta=np.asarray([0.0],dtype=complex,order='F')
         if(axis=="m"):
@@ -388,7 +390,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     elif axis == "r":
         axisint=1
     else:
-        raise ValueError("axis can only be 'm' or 'r'")
+        raise ValueError("get_sigma: axis can only be 'm' or 'r'")
 
     #typ
     if typ =="n":
@@ -396,7 +398,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     elif typ == "a":
         typint=1
     else:
-        raise ValueError("axis can only be 'n' or 'a'")
+        raise ValueError("get_sigma: typ can only be 'n' or 'a'")
     
     
     if self.Nineq == 0:
@@ -409,7 +411,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
             Sigma = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
             ed_get_sigma_site_n5(Sigma,axisint,typint,zeta,nfreq,zflag)
         else:
-            raise ValueError('Shape(array) != 3,5 in build_sigma_site')
+            raise ValueError('Shape(array) != 3,5 in get_sigma_site')
         return Sigma
     else:
         if ishape==3:
@@ -422,7 +424,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
             Sigma = np.zeros([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
             ed_get_sigma_site_n6(Sigma,self.Nineq,axisint,typint,zeta,nfreq,zflag)
         else:
-            raise ValueError('Shape(array) != 3,4,6 in build_sigma_lattice')
+            raise ValueError('Shape(array) != 3,4,6 in get_sigma_lattice')
         if ilat is not None and ishape != 3:
             return Sigma[ilat]
         else:
@@ -552,6 +554,8 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
         zeta = np.asarray(zeta,dtype=complex,order='F')
         nfreq = np.shape(zeta)[0]
         zflag = 1
+        if any(abs(np.real(zeta)) > 1e-10):    #if the provided frequency array is not Matsubara, set axis="r"
+            axis="r"
     else:
         zeta=np.asarray([0.0],dtype=complex,order='F')
         if(axis=="m"):
@@ -570,7 +574,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     elif axis == "r":
         axisint=1
     else:
-        raise ValueError("axis can only be 'm' or 'r'")
+        raise ValueError("get_gimp: axis can only be 'm' or 'r'")
 
     #typ
     if typ =="n":
@@ -578,7 +582,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     elif typ == "a":
         typint=1
     else:
-        raise ValueError("axis can only be 'n' or 'a'")
+        raise ValueError("get_gimp: typ can only be 'n' or 'a'")
     
     
     if self.Nineq == 0:
@@ -591,7 +595,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
             gimp = np.zeros([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
             ed_get_gimp_site_n5(gimp,axisint,typint,zeta,nfreq,zflag)
         else:
-            raise ValueError('Shape(array) != 3,5 in build_gimp_site')
+            raise ValueError('Shape(array) != 3,5 in get_gimp_site')
         return gimp
     else:
         if ishape==3:
@@ -604,7 +608,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
             gimp = np.zeros([self.Nineq,nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=complex,order="F")
             ed_get_gimp_site_n6(gimp,self.Nineq,axisint,typint,zeta,nfreq,zflag)
         else:
-            raise ValueError('Shape(array) != 3,4,6 in build_gimp_lattice')
+            raise ValueError('Shape(array) != 3,4,6 in get_gimp_lattice')
         if ilat is not None and ishape != 3:
             return gimp[ilat]
         else:
@@ -678,14 +682,12 @@ def get_g0and(self,zeta,bath,ishape=None,typ="n"):
     nfreq = np.shape(zeta)[0]
     dimbath = np.shape(bath)[0]
     
-    if any(np.real(zeta) != 0):
-        print("Obtaining impurity G0 on real axis")
+    if any(abs(np.real(zeta)) > 1e-10):
         axis = "r"
-    elif any(np.imag(zeta) != 0):
-        print("Obtaining impurity G0 on Matsubara axis")
+    elif any(abs(np.imag(zeta)) > 1e-10):
         axis = "m"
     else:
-        raise ValueError("Frequencies can only be purely real or purely imaginary") 
+        raise ValueError("get_g0and: frequencies can only be purely real or purely imaginary") 
     if ishape is None:
         ishape = self.dim_hloc + 1
     
@@ -698,7 +700,7 @@ def get_g0and(self,zeta,bath,ishape=None,typ="n"):
         DimG0and = np.asarray([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
         ed_get_g0and_n5(zeta,nfreq,bath,dimbath,G0and,DimG0and,c_char_p(axis.encode()),c_char_p(typ.encode()))
     else:
-        raise ValueError('Shape(array) != 3,5 in get_gimp_site')
+        raise ValueError('Shape(array) != 3,5 in get_g0and')
     return G0and
 
 #Delta
@@ -766,14 +768,12 @@ def get_delta(self,zeta,bath,ishape=None,typ="n"):
     nfreq = np.shape(zeta)[0]
     dimbath = np.shape(bath)[0]
     
-    if any(np.real(zeta) != 0):
-        print("Obtaining impurity G0 on real axis")
+    if any(abs(np.real(zeta)) > 1e-10):
         axis = "r"
-    elif any(np.imag(zeta) != 0):
-        print("Obtaining impurity G0 on Matsubara axis")
+    elif any(abs(np.imag(zeta)) > 1e-10):
         axis = "m"
     else:
-        raise ValueError("Frequencies can only be purely real or purely imaginary") 
+        raise ValueError("get_delta: frequencies can only be purely real or purely imaginary") 
     if ishape is None:
         ishape = self.dim_hloc + 1
     
@@ -786,6 +786,6 @@ def get_delta(self,zeta,bath,ishape=None,typ="n"):
         DimDelta = np.asarray([nspin_aux,nspin_aux,norb_aux,norb_aux,nfreq],dtype=np.int64,order="F")
         ed_get_delta_n5(zeta,nfreq,bath,dimbath,Delta,DimDelta,c_char_p(axis.encode()),c_char_p(typ.encode()))
     else:
-        raise ValueError('Shape(array) != 3,5 in get_gimp_site')
+        raise ValueError('Shape(array) != 3,5 in get_delta')
     return Delta
 
