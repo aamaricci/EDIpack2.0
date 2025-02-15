@@ -645,7 +645,7 @@ contains
                 l=l+1
                 getIorb(l)=iorb
                 getIspin(l)=ispin
-                getJorb(l)=iorb
+                getJorb(l)=jorb
                 getJspin(l)=jspin
              enddo
           enddo
@@ -674,15 +674,15 @@ contains
     call allocate_grids
     do l=1,totNso
        iorb=getIorb(l)
-       jorb=getJorb(l)
        ispin=getIspin(l)
+       jorb=getJorb(l)
        jspin=getJspin(l)
        !
        suffix="_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
        select case(to_lower(axis))
        case default;stop "Gprint_Normal error: axis not supported"
-       case("m");call splot(reg(file)//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"   ,wm,Self(ispin,ispin,iorb,jorb,:))
-       case("r");call splot(reg(file)//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,Self(ispin,ispin,iorb,jorb,:))
+       case("m");call splot(reg(file)//reg(suffix)//"_iw"//reg(ed_file_suffix)//".ed"   ,wm,Self(ispin,jspin,iorb,jorb,:))
+       case("r");call splot(reg(file)//reg(suffix)//"_realw"//reg(ed_file_suffix)//".ed",wr,Self(ispin,jspin,iorb,jorb,:))
        end select
     enddo
     call deallocate_grids
