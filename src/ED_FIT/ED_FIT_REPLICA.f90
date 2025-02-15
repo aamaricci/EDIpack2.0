@@ -57,7 +57,7 @@ contains
     if(ed_verbose>2)write(Logfile,"(A)")"DEBUG chi2_fitgf_replica: Fit"
 #endif
     !
-    call assert_shape(fg,[Nspin,Nspin,Norb,Norb],"chi2_fitgf_replica","fg")
+    call assert_shape(fg,[Nspin,Nspin,Norb,Norb,Lmats],"chi2_fitgf_replica","fg")
     !
     check= check_bath_dimension(bath_)
     if(.not.check)stop "chi2_fitgf_replica error: wrong bath dimensions"
