@@ -115,6 +115,34 @@ for ifile in *.html; do
   mv $ifile.new $ifile
 done
 
+#make scifortran links work:
+for ifile in *.html; do
+  awk '
+  {
+      print;
+      if (match($0, /<g id="([^"]+)"/, arr)) {
+          id_value = arr[1];
+      }
+      if (match($0, /<title>(SF_[^<]+)<\/title>/, arr)) {
+          mytitle = arr[1];
+          print "<g id=a_" id_value "><a xlink:href=\"https://scifortran.github.io/SciFortran/modules/" mytitle ".html\" xlink:title=\"" mytitle "\">";
+      }
+  }' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  awk '
+  {
+      print;
+      if (match($0, /<g id="([^"]+)"/, arr)) {
+          id_value = arr[1];
+      }
+      if (match($0, /<title>scifor<\/title>/, arr)) {
+          mytitle = arr[1];
+          print "<g id=a_" id_value "><a xlink:href=\"https://scifortran.github.io/SciFortran/index.html\" xlink:title=\"" mytitle "\">";
+      }
+  }' $ifile > $ifile.new
+  mv $ifile.new $ifile
+done
+
 
 #Generete a list of the actual .html files used in the src images, sorted and uniq-ed
 grep  -ri "../module/" * | awk -F/ '/"/{ print $3 }' | awk '{print $1}' | sed -e "s/\"//g" |sort -u > $MOM/list2
@@ -133,6 +161,9 @@ for file in $(cat list); do
   relativepath=$(find ../../ -type f -name "*${name_upper}.*90" | awk -Fsrc '{print $2}')
   if [ $name == "edi2py_bindings" ]; then
     relativepath=$(find ../../ -type f -name "*edi2py.*90" | awk -Fsrc '{print $2}')  
+  fi
+  if [ $name == "ed_version" ]; then
+    relativepath=$(find ../../ -type f -name "*revision.in" | awk -Fsrc '{print $2}')  
   fi
   githubpath="https://github.com/EDIpack/EDIpack2.0/tree/master/src${relativepath}"
   echo $name_upper > module/$file
