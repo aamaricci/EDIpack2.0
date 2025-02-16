@@ -6,5 +6,5 @@ EDI2PY_BINDINGS
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src>`_ for :f:mod:`edi2py_bindings` on GitHub
+`Open source file <https://github.com/EDIpack/EDIpack2.0/tree/master/src/python/c_bindings/edi2py.f90>`_ for :f:mod:`edi2py_bindings` on GitHub
  

@@ -55,7 +55,7 @@ However, substantial modifications have been introduced in the 2.0
 version to address the *Superconducting* and *non-SU(2)* channels.  
 An updated manuscript will be released soon. 
 
-.. _EDIPACK: https://github.com/aamaricci/EDIpack
+.. _EDIPACK: https://github.com/edipack/EDIpack
 .. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
 
 
@@ -177,7 +177,7 @@ Browse Source Code
 .. toctree::
    :caption: External Links
    
-   EDIpack2.0 on GitHub <https://github.com/aamaricci/EDIpack2.0>
+   EDIpack2.0 on GitHub <https://github.com/edipack/EDIpack2.0>
    SciFortran on GitHub <https://github.com/SciFortran/SciFortran>
 
 

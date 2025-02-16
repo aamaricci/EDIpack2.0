@@ -1,7 +1,7 @@
 # EDIpack2.0: Massively parallel Exact Diagonalization for generic Quantum Impurity problems
 
-[![TestSuite](https://img.shields.io/github/actions/workflow/status/aamaricci/EDIpack2.0/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/aamaricci/EDIpack2.0/actions/workflows/PushWorkflow.yml) 
-[![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://aamaricci.github.io/EDIpack2.0/)
+[![TestSuite](https://img.shields.io/github/actions/workflow/status/edipack/EDIpack2.0/PushWorkflow.yml?label=TestSuite&logo=Fortran&style=flat-square)](https://github.com/edipack/EDIpack2.0/actions/workflows/PushWorkflow.yml) 
+[![api docs](https://img.shields.io/static/v1?label=API&message=documentation&color=734f96&logo=read-the-docs&logoColor=white&style=flat-square)](https://edipack.github.io/EDIpack2.0/)
 
 <!-- TO BE SETUP ASAP
 [![Coverage]()]()
@@ -9,7 +9,7 @@
 -->
 
 
-A suitable extension of [EDIpack](https://github.com/aamaricci/EDIpack): a  Lanczos based method 
+A suitable extension of [EDIpack](https://github.com/edipack/EDIpack): a  Lanczos based method 
 for the solution of generic Quantum Impurity problems,  exploiting distributed memory MPI parallelisation.
 This updated version, aims to solve single-site, multi-orbital models, in either  *normal*, *superconducting* (s-wave) or *Spin-non-conserving* (e.g. with Spin-Orbit Coupling or in-plane magnetization) phases, including electron-phonons coupling. The code works at zero and low temperatures.   
  
@@ -22,7 +22,7 @@ Further informations and a guided proceudre are available in the documentation.
 
 
 ### Documentation
-All the informations about the structure of the library and its use, together with the Python API *EDIpy2*, are documented at [aamaricci.github.io/EDIpack2.0/](https://aamaricci.github.io/EDIpack2.0/)  
+All the informations about the structure of the library and its use, together with the Python API *EDIpy2*, are documented at [edipack.github.io/EDIpack2.0/](https://edipack.github.io/EDIpack2.0/)  
 
 NOTE: The documentation is currently under construction. 
 
@@ -40,4 +40,4 @@ NOTE: The documentation is currently under construction.
 
 
 ### Issues
-If you encounter bugs or difficulties, please [file an issue](https://github.com/aamaricci/EDIpack2.0/issues/new/choose). For any other communication, please reach out any of the developers.          
+If you encounter bugs or difficulties, please [file an issue](https://github.com/edipack/EDIpack2.0/issues/new/choose). For any other communication, please reach out any of the developers.          

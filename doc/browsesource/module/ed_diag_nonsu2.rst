@@ -6,6 +6,5 @@ ED_DIAG_NONSU2
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_DIAG_NONSU2.f90
-/ED_NONSU2/ED_DIAG_NONSU2.f90>`_ for :f:mod:`ed_diag_nonsu2` on GitHub
+`Open source file <https://github.com/EDIpack/EDIpack2.0/tree/master/src/ED_NONSU2/ED_DIAG_NONSU2.f90>`_ for :f:mod:`ed_diag_nonsu2` on GitHub
  

@@ -3,9 +3,9 @@ EDIpy2 Install
 
 The `python` module `EDIpy2` requires:
 
-* `SciFortran <https://github.com/aamaricci/SciFortran>`_
+* `SciFortran <https://github.com/scifortran/SciFortran>`_
 
-* `EDIpack2 <https://github.com/aamaricci/EDIpack2.0>`_
+* `EDIpack2 <https://github.com/edipack/EDIpack2.0>`_
 
 libraries to be installed beforehand, please see related documentation
 to install such Fortran libraries. Once both are set up, the python module can be installed from the EDIpack2 folder via

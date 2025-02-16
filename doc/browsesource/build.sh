@@ -90,6 +90,12 @@ for ifile in *.html; do
   #if there's no link
   awk '/<title>ED/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#2980b9"); flag=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
+  #if there's link
+  awk '/<title>module~edi2py/ {print; next_line=1; next} next_line {gsub(/#c061cb/, "#2980b9"); next_line=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's no link
+  awk '/<title>module~edi2py/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#2980b9"); flag=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
 done
 
 
@@ -100,6 +106,12 @@ for ifile in *.html; do
   mv $ifile.new $ifile
   #if there's no link
   awk '/<title>SF_/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#26a269"); flag=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's link
+  awk '/<title>scifor/ {print; next_line=1; next} next_line {gsub(/#c061cb/, "#26a269"); next_line=0} 1' $ifile > $ifile.new
+  mv $ifile.new $ifile
+  #if there's no link
+  awk '/<title>scifor/ {flag=2; print; next} flag == 2 {flag--; print; next} flag == 1 {gsub(/#c061cb/, "#26a269"); flag=0} 1' $ifile > $ifile.new
   mv $ifile.new $ifile
 done
 
@@ -119,7 +131,10 @@ for file in $(cat list); do
   name=$(echo $file | sed -e "s/\.rst//g")
   name_upper=$(echo $name | tr '[:lower:]' '[:upper:]' | sed -e "s/HXV/HxV/g")
   relativepath=$(find ../../ -type f -name "*${name_upper}.*90" | awk -Fsrc '{print $2}')
-  githubpath="https://github.com/aamaricci/EDIpack2.0/tree/master/src${relativepath}"
+  if [ $name == "edi2py_bindings" ]; then
+    relativepath=$(find ../../ -type f -name "*edi2py.*90" | awk -Fsrc '{print $2}')  
+  fi
+  githubpath="https://github.com/EDIpack/EDIpack2.0/tree/master/src${relativepath}"
   echo $name_upper > module/$file
   echo "=====================================" >> module/$file
   echo " " >> module/$file

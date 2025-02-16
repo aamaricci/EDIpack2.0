@@ -22,7 +22,7 @@ Clone the repo:
 
 .. code-block:: bash
 		
-   git clone https://github.com/aamaricci/EDIpack2.0 EDIpack2
+   git clone https://github.com/edipack/EDIpack2.0 EDIpack2
 
 
 

@@ -6,6 +6,5 @@ ED_VERSION
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_VERSION.f90
-/ED_VERSION.f90>`_ for :f:mod:`ed_version` on GitHub
+`Open source file <https://github.com/EDIpack/EDIpack2.0/tree/master/src/ED_VERSION.f90>`_ for :f:mod:`ed_version` on GitHub
  

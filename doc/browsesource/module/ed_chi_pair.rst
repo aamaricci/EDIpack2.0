@@ -6,6 +6,5 @@ ED_CHI_PAIR
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_CHI_PAIR.f90
-/ED_NORMAL/ED_CHI_PAIR.f90>`_ for :f:mod:`ed_chi_pair` on GitHub
+`Open source file <https://github.com/EDIpack/EDIpack2.0/tree/master/src/ED_NORMAL/ED_CHI_PAIR.f90>`_ for :f:mod:`ed_chi_pair` on GitHub
  

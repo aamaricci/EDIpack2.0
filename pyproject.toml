@@ -5,12 +5,12 @@ requires = ['meson-python']
 
 [project]
 name = 'edipy2'
-version = '2.0.0'
-description = 'Edipack python API'
+version = '2.0.2'
+description = 'Edipack2 python API'
 authors = [
   {name = 'Lorenzo Crippa', email = 'crippa.lorenzo@gmail.com'},
   {name = 'Adriano Amaricci', email = 'amaricci@sissa.it'},
 ]
 
 [project.urls]
-Repository = "https://github.com/aamaricci/EDIpack.git"
+Repository = "https://github.com/edipack/EDIpack2.0.git"

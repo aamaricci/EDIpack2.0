@@ -32,13 +32,13 @@ jobs:
 
 # Build SciFortran
       - name: Cloning SciFortran
-        run: git clone https://github.com/aamaricci/SciFortran.git scifor
+        run: git clone https://github.com/scifortran/SciFortran.git scifor
       - name: Install SciFortran
         run: scifor/bin/ci_setup_scifor.sh
 
 # Build EDIpack2
       - name: Cloning EDIpack2
-        run: git clone https://github.com/aamaricci/EDIpack2.0.git edipack2
+        run: git clone https://github.com/edipack/EDIpack2.0.git edipack2
       - name: Install EDIpack2
         run: |
           source ~/.scifor_config_user
