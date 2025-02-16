@@ -6,5 +6,6 @@ ED_SECTOR
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SECTOR.f90>`_ for :f:mod:`ed_sector` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SECTOR.f90
+/ED_SECTOR.f90>`_ for :f:mod:`ed_sector` on GitHub
  

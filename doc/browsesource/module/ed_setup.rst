@@ -6,5 +6,6 @@ ED_SETUP
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SETUP.f90>`_ for :f:mod:`ed_setup` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SETUP.f90
+/ED_SETUP.f90>`_ for :f:mod:`ed_setup` on GitHub
  

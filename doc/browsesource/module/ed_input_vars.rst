@@ -6,5 +6,6 @@ ED_INPUT_VARS
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_INPUT_VARS.f90>`_ for :f:mod:`ed_input_vars` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_INPUT_VARS.f90
+/ED_INPUT_VARS.f90>`_ for :f:mod:`ed_input_vars` on GitHub
  

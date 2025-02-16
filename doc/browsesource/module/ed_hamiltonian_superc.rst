@@ -6,5 +6,6 @@ ED_HAMILTONIAN_SUPERC
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SUPERC/ED_HAMILTONIAN_SUPERC.f90>`_ for :f:mod:`ed_hamiltonian_superc` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_HAMILTONIAN_SUPERC.f90
+/ED_SUPERC/ED_HAMILTONIAN_SUPERC.f90>`_ for :f:mod:`ed_hamiltonian_superc` on GitHub
  

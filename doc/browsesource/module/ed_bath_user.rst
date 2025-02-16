@@ -6,5 +6,6 @@ ED_BATH_USER
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_BATH/ED_BATH_USER.f90>`_ for :f:mod:`ed_bath_user` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_BATH_USER.f90
+/ED_BATH/ED_BATH_USER.f90>`_ for :f:mod:`ed_bath_user` on GitHub
  

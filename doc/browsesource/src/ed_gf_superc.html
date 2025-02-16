@@ -6,17 +6,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta name="description" content="Documentation for EDIpack2">
+      <meta name="description" content="Documentation for EDIpack 2.0">
     <meta name="author" content="" >
     <link rel="icon" href="../favicon.png">
 
-    <title>ED_GF_SUPERC &ndash; EDIpack2</title>
+    <title>ED_GF_SUPERC &ndash; EDIpack 2.0</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="../js/svg-pan-zoom.min.js"></script>
@@ -28,7 +29,7 @@
     <div class="container-fluid mb-sm-4 mb-xl-2">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-          <a class="navbar-brand" href="../index.html">EDIpack2 </a>
+          <a class="navbar-brand" href="../index.html">EDIpack 2.0 </a>
           <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
                   aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
                   <span class="navbar-toggler-icon">
@@ -46,6 +47,11 @@
                   <a class="nav-link" href="../lists/procedures.html">Procedures</a>
                 </li>
             </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
           </div><!--/.nav-collapse -->
         </div>
       </nav>
@@ -64,7 +70,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 3.0% of total for modules and submodules.">830 statements</a>
+                 title=" 2.4% of total for modules and submodules.">684 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -130,25 +136,25 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='ed_sector.html'>ED_SECTOR</a></li>
-                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_TIMER.html'>SF_TIMER</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
+                  <li class="list-inline-item">SF_CONSTANTS</li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
                   <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_LINALG.html'>SF_LINALG</a></li>
+                  <li class="list-inline-item"><a href='ed_sector.html'>ED_SECTOR</a></li>
+                  <li class="list-inline-item"><a href='ed_hamiltonian_superc.html'>ED_HAMILTONIAN_SUPERC</a></li>
+                  <li class="list-inline-item">SF_IOTOOLS</li>
+                  <li class="list-inline-item">SF_TIMER</li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
                   <li class="list-inline-item"><a href='ed_bath.html'>ED_BATH</a></li>
                   <li class="list-inline-item"><a href='ed_setup.html'>ED_SETUP</a></li>
                   <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
-                  <li class="list-inline-item"><a href='ed_hamiltonian_superc.html'>ED_HAMILTONIAN_SUPERC</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
-                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
+                  <li class="list-inline-item">SF_LINALG</li>
               </ul>
             </li>
             <li class="list-group-item">
               <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: module~~ed_gf_superc~~UsesGraph Pages: 1 -->
 <svg id="moduleed_gf_supercUsesGraph" width="291pt" height="482pt"
@@ -165,11 +171,8 @@
 <!-- SF_CONSTANTS -->
 <g id="module~~ed_gf_superc~~UsesGraph_node2" class="node">
 <title>SF_CONSTANTS</title>
-<g id="a_module~~ed_gf_superc~~UsesGraph_node2"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html" xlink:title="SF_CONSTANTS">
 <polygon fill="#337ab7" stroke="#337ab7" points="122.9,-473.77 28.13,-473.77 28.13,-451 122.9,-451 122.9,-473.77"/>
 <text text-anchor="middle" x="75.51" y="-458.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
-</a>
-</g>
 </g>
 <!-- module~ed_gf_superc&#45;&gt;SF_CONSTANTS -->
 <g id="module~~ed_gf_superc~~UsesGraph_edge1" class="edge">
@@ -180,11 +183,8 @@
 <!-- SF_IOTOOLS -->
 <g id="module~~ed_gf_superc~~UsesGraph_node3" class="node">
 <title>SF_IOTOOLS</title>
-<g id="a_module~~ed_gf_superc~~UsesGraph_node3"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html" xlink:title="SF_IOTOOLS">
 <polygon fill="#337ab7" stroke="#337ab7" points="114.27,-432.77 36.75,-432.77 36.75,-410 114.27,-410 114.27,-432.77"/>
 <text text-anchor="middle" x="75.51" y="-417.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
-</a>
-</g>
 </g>
 <!-- module~ed_gf_superc&#45;&gt;SF_IOTOOLS -->
 <g id="module~~ed_gf_superc~~UsesGraph_edge2" class="edge">
@@ -195,11 +195,8 @@
 <!-- SF_LINALG -->
 <g id="module~~ed_gf_superc~~UsesGraph_node4" class="node">
 <title>SF_LINALG</title>
-<g id="a_module~~ed_gf_superc~~UsesGraph_node4"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_LINALG.html" xlink:title="SF_LINALG">
 <polygon fill="#337ab7" stroke="#337ab7" points="109.77,-391.77 41.25,-391.77 41.25,-369 109.77,-369 109.77,-391.77"/>
 <text text-anchor="middle" x="75.51" y="-376.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_LINALG</text>
-</a>
-</g>
 </g>
 <!-- module~ed_gf_superc&#45;&gt;SF_LINALG -->
 <g id="module~~ed_gf_superc~~UsesGraph_edge3" class="edge">
@@ -210,11 +207,8 @@
 <!-- SF_TIMER -->
 <g id="module~~ed_gf_superc~~UsesGraph_node5" class="node">
 <title>SF_TIMER</title>
-<g id="a_module~~ed_gf_superc~~UsesGraph_node5"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_TIMER.html" xlink:title="SF_TIMER">
 <polygon fill="#337ab7" stroke="#337ab7" points="107.52,-350.77 43.5,-350.77 43.5,-328 107.52,-328 107.52,-350.77"/>
 <text text-anchor="middle" x="75.51" y="-335.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_TIMER</text>
-</a>
-</g>
 </g>
 <!-- module~ed_gf_superc&#45;&gt;SF_TIMER -->
 <g id="module~~ed_gf_superc~~UsesGraph_edge4" class="edge">
@@ -359,7 +353,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="485pt" height="31pt"
@@ -427,68 +421,114 @@ modules which it uses.
               <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: module~~ed_gf_superc~~UsedByGraph Pages: 1 -->
-<svg id="moduleed_gf_supercUsedByGraph" width="475pt" height="31pt"
- viewBox="0.00 0.00 474.83 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="module~~ed_gf_superc~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<svg id="moduleed_gf_supercUsedByGraph" width="641pt" height="65pt"
+ viewBox="0.00 0.00 641.00 64.85" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_gf_superc~~UsedByGraph" class="graph" transform="scale(0.929524 0.929524) rotate(0) translate(4 65.77)">
 <title>module~~ed_gf_superc~~UsedByGraph</title>
-<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 470.83,-26.77 470.83,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-65.77 685.6,-65.77 685.6,4 -4,4"/>
 <!-- module~ed_gf_superc -->
 <g id="module~~ed_gf_superc~~UsedByGraph_node1" class="node">
 <title>module~ed_gf_superc</title>
-<polygon fill="none" stroke="black" points="95.52,-22.77 0,-22.77 0,0 95.52,0 95.52,-22.77"/>
-<text text-anchor="middle" x="47.76" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_GF_SUPERC</text>
+<polygon fill="none" stroke="black" points="95.52,-41.77 0,-41.77 0,-19 95.52,-19 95.52,-41.77"/>
+<text text-anchor="middle" x="47.76" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_GF_SUPERC</text>
 </g>
 <!-- module~ed_greens_functions -->
 <g id="module~~ed_gf_superc~~UsedByGraph_node2" class="node">
 <title>module~ed_greens_functions</title>
 <g id="a_module~~ed_gf_superc~~UsedByGraph_node2"><a xlink:href="../module/ed_greens_functions.html" xlink:title="ED_GREENS_FUNCTIONS">
-<polygon fill="#337ab7" stroke="#337ab7" points="274.29,-22.77 131.52,-22.77 131.52,0 274.29,0 274.29,-22.77"/>
-<text text-anchor="middle" x="202.91" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GREENS_FUNCTIONS</text>
+<polygon fill="#337ab7" stroke="#337ab7" points="274.29,-41.77 131.52,-41.77 131.52,-19 274.29,-19 274.29,-41.77"/>
+<text text-anchor="middle" x="202.91" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GREENS_FUNCTIONS</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_gf_superc -->
 <g id="module~~ed_gf_superc~~UsedByGraph_edge1" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_gf_superc</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M131.16,-11.39C123.25,-11.39 115.26,-11.39 107.52,-11.39"/>
-<polygon fill="#000000" stroke="#000000" points="107.53,-7.89 97.53,-11.39 107.53,-14.89 107.53,-7.89"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M131.16,-30.39C123.25,-30.39 115.26,-30.39 107.52,-30.39"/>
+<polygon fill="#000000" stroke="#000000" points="107.53,-26.89 97.53,-30.39 107.53,-33.89 107.53,-26.89"/>
+</g>
+<!-- module~ed_io -->
+<g id="module~~ed_gf_superc~~UsedByGraph_node3" class="node">
+<title>module~ed_io</title>
+<g id="a_module~~ed_gf_superc~~UsedByGraph_node3"><a xlink:href="../module/ed_io.html" xlink:title="ED_IO">
+<polygon fill="#337ab7" stroke="#337ab7" points="364.29,-61.77 310.29,-61.77 310.29,-39 364.29,-39 364.29,-61.77"/>
+<text text-anchor="middle" x="337.29" y="-46.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_IO</text>
+</a>
+</g>
+</g>
+<!-- module~ed_io&#45;&gt;module~ed_greens_functions -->
+<g id="module~~ed_gf_superc~~UsedByGraph_edge2" class="edge">
+<title>module~ed_io&#45;&gt;module~ed_greens_functions</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M309.82,-46.39C302.68,-45.31 294.57,-44.08 286.09,-42.8"/>
+<polygon fill="#000000" stroke="#000000" points="286.67,-39.35 276.26,-41.32 285.63,-46.27 286.67,-39.35"/>
 </g>
 <!-- module~ed_main -->
-<g id="module~~ed_gf_superc~~UsedByGraph_node3" class="node">
+<g id="module~~ed_gf_superc~~UsedByGraph_node4" class="node">
 <title>module~ed_main</title>
-<g id="a_module~~ed_gf_superc~~UsedByGraph_node3"><a xlink:href="../module/ed_main.html" xlink:title="ED_MAIN">
-<polygon fill="#337ab7" stroke="#337ab7" points="368.31,-22.77 310.29,-22.77 310.29,0 368.31,0 368.31,-22.77"/>
-<text text-anchor="middle" x="339.3" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_MAIN</text>
+<g id="a_module~~ed_gf_superc~~UsedByGraph_node4"><a xlink:href="../module/ed_main.html" xlink:title="ED_MAIN">
+<polygon fill="#337ab7" stroke="#337ab7" points="458.31,-22.77 400.29,-22.77 400.29,0 458.31,0 458.31,-22.77"/>
+<text text-anchor="middle" x="429.3" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_MAIN</text>
 </a>
 </g>
 </g>
 <!-- module~ed_main&#45;&gt;module~ed_greens_functions -->
-<g id="module~~ed_gf_superc~~UsedByGraph_edge2" class="edge">
+<g id="module~~ed_gf_superc~~UsedByGraph_edge3" class="edge">
 <title>module~ed_main&#45;&gt;module~ed_greens_functions</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M309.8,-11.39C302.57,-11.39 294.43,-11.39 285.95,-11.39"/>
-<polygon fill="#000000" stroke="#000000" points="286.19,-7.89 276.19,-11.39 286.19,-14.89 286.19,-7.89"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M399.88,-13.79C371.27,-16.21 325.77,-20.07 285.81,-23.45"/>
+<polygon fill="#000000" stroke="#000000" points="285.61,-19.95 275.94,-24.29 286.2,-26.93 285.61,-19.95"/>
+</g>
+<!-- module~ed_main&#45;&gt;module~ed_io -->
+<g id="module~~ed_gf_superc~~UsedByGraph_edge4" class="edge">
+<title>module~ed_main&#45;&gt;module~ed_io</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M401.29,-23.09C393.05,-26.66 383.84,-30.65 375.06,-34.45"/>
+<polygon fill="#000000" stroke="#000000" points="373.83,-31.17 366.05,-38.36 376.61,-37.59 373.83,-31.17"/>
 </g>
 <!-- module~edipack2 -->
-<g id="module~~ed_gf_superc~~UsedByGraph_node4" class="node">
+<g id="module~~ed_gf_superc~~UsedByGraph_node5" class="node">
 <title>module~edipack2</title>
-<g id="a_module~~ed_gf_superc~~UsedByGraph_node4"><a xlink:href="../module/edipack2.html" xlink:title="EDIPACK2">
-<polygon fill="#337ab7" stroke="#337ab7" points="466.83,-22.77 404.31,-22.77 404.31,0 466.83,0 466.83,-22.77"/>
-<text text-anchor="middle" x="435.57" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EDIPACK2</text>
+<g id="a_module~~ed_gf_superc~~UsedByGraph_node5"><a xlink:href="../module/edipack2.html" xlink:title="EDIPACK2">
+<polygon fill="#337ab7" stroke="#337ab7" points="556.83,-41.77 494.31,-41.77 494.31,-19 556.83,-19 556.83,-41.77"/>
+<text text-anchor="middle" x="525.57" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EDIPACK2</text>
 </a>
 </g>
 </g>
+<!-- module~edipack2&#45;&gt;module~ed_io -->
+<g id="module~~ed_gf_superc~~UsedByGraph_edge5" class="edge">
+<title>module~edipack2&#45;&gt;module~ed_io</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M494.23,-33.64C461.9,-37.11 410.68,-42.61 375.84,-46.35"/>
+<polygon fill="#000000" stroke="#000000" points="375.77,-42.84 366.21,-47.39 376.52,-49.8 375.77,-42.84"/>
+</g>
 <!-- module~edipack2&#45;&gt;module~ed_main -->
-<g id="module~~ed_gf_superc~~UsedByGraph_edge3" class="edge">
+<g id="module~~ed_gf_superc~~UsedByGraph_edge6" class="edge">
 <title>module~edipack2&#45;&gt;module~ed_main</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M403.96,-11.39C396.31,-11.39 387.98,-11.39 379.95,-11.39"/>
-<polygon fill="#000000" stroke="#000000" points="380.03,-7.89 370.03,-11.39 380.03,-14.89 380.03,-7.89"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M493.96,-24.22C486.22,-22.65 477.79,-20.96 469.67,-19.32"/>
+<polygon fill="#000000" stroke="#000000" points="470.5,-15.92 460,-17.37 469.11,-22.78 470.5,-15.92"/>
+</g>
+<!-- module~edi2py_bindings -->
+<g id="module~~ed_gf_superc~~UsedByGraph_node6" class="node">
+<title>module~edi2py_bindings</title>
+<g id="a_module~~ed_gf_superc~~UsedByGraph_node6"><a xlink:href="../module/edi2py_bindings.html" xlink:title="edi2py_bindings">
+<polygon fill="#337ab7" stroke="#337ab7" points="681.6,-41.77 592.83,-41.77 592.83,-19 681.6,-19 681.6,-41.77"/>
+<text text-anchor="middle" x="637.21" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">edi2py_bindings</text>
+</a>
+</g>
+</g>
+<!-- module~edi2py_bindings&#45;&gt;module~edipack2 -->
+<g id="module~~ed_gf_superc~~UsedByGraph_edge7" class="edge">
+<title>module~edi2py_bindings&#45;&gt;module~edipack2</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M592.57,-30.39C584.71,-30.39 576.54,-30.39 568.73,-30.39"/>
+<polygon fill="#000000" stroke="#000000" points="568.76,-26.89 558.76,-30.39 568.76,-33.89 568.76,-26.89"/>
 </g>
 </g>
 </svg>
-</div>          <div>
+</div>                <script>
+                  var panmoduleed_gf_supercUsedByGraph = svgPanZoom('#moduleed_gf_supercUsedByGraph',
+                    {zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true,}
+                  );
+                </script>          <div>
             <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsedByGraph-help-text">Help</a>
           </div>
           <div class="modal fade" id="UsedByGraph-help-text" tabindex="-1" role="dialog">
@@ -503,7 +543,7 @@ modules which it uses.
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="485pt" height="31pt"
@@ -585,15 +625,15 @@ modules which it uses.
         <div class="row justify-content-between">
           <div class="col">
             <p>
-              EDIpack2
-              &copy; 2024 
+              EDIpack 2.0
+              &copy; 2025 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-            </p>
+ on 2025-02-16T13:09:24.164505+0100             </p>
           </div>
         </div>
         <br>
@@ -617,6 +657,9 @@ modules which it uses.
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
 
   </body>
 </html>

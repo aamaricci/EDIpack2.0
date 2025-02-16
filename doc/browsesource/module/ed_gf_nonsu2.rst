@@ -6,5 +6,6 @@ ED_GF_NONSU2
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_NONSU2/ED_GF_NONSU2.f90>`_ for :f:mod:`ed_gf_nonsu2` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_GF_NONSU2.f90
+/ED_NONSU2/ED_GF_NONSU2.f90>`_ for :f:mod:`ed_gf_nonsu2` on GitHub
  

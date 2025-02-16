@@ -6,17 +6,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta name="description" content="Documentation for EDIpack2">
+      <meta name="description" content="Documentation for EDIpack 2.0">
     <meta name="author" content="" >
     <link rel="icon" href="../favicon.png">
 
-    <title>ED_GREENS_FUNCTIONS &ndash; EDIpack2</title>
+    <title>ED_GREENS_FUNCTIONS &ndash; EDIpack 2.0</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="../js/svg-pan-zoom.min.js"></script>
@@ -28,7 +29,7 @@
     <div class="container-fluid mb-sm-4 mb-xl-2">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-          <a class="navbar-brand" href="../index.html">EDIpack2 </a>
+          <a class="navbar-brand" href="../index.html">EDIpack 2.0 </a>
           <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
                   aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
                   <span class="navbar-toggler-icon">
@@ -46,6 +47,11 @@
                   <a class="nav-link" href="../lists/procedures.html">Procedures</a>
                 </li>
             </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
           </div><!--/.nav-collapse -->
         </div>
       </nav>
@@ -64,7 +70,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 0.5% of total for modules and submodules.">125 statements</a>
+                 title=" 1.7% of total for modules and submodules.">503 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -130,28 +136,28 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='ed_io.html'>ED_IO</a></li>
-                  <li class="list-inline-item"><a href='ed_hamiltonian.html'>ED_HAMILTONIAN</a></li>
+                  <li class="list-inline-item">SF_CONSTANTS</li>
                   <li class="list-inline-item"><a href='ed_gf_normal.html'>ED_GF_NORMAL</a></li>
-                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_TIMER.html'>SF_TIMER</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
-                  <li class="list-inline-item"><a href='ed_gf_superc.html'>ED_GF_SUPERC</a></li>
                   <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_LINALG.html'>SF_LINALG</a></li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
+                  <li class="list-inline-item">SF_IOTOOLS</li>
+                  <li class="list-inline-item">SF_ARRAYS</li>
+                  <li class="list-inline-item">SF_TIMER</li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
+                  <li class="list-inline-item"><a href='ed_gf_superc.html'>ED_GF_SUPERC</a></li>
                   <li class="list-inline-item"><a href='ed_bath.html'>ED_BATH</a></li>
                   <li class="list-inline-item"><a href='ed_setup.html'>ED_SETUP</a></li>
+                  <li class="list-inline-item"><a href='ed_hamiltonian.html'>ED_HAMILTONIAN</a></li>
                   <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
+                  <li class="list-inline-item">SF_LINALG</li>
                   <li class="list-inline-item"><a href='ed_gf_nonsu2.html'>ED_GF_NONSU2</a></li>
-                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
               </ul>
             </li>
             <li class="list-group-item">
               <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: module~~ed_greens_functions~~UsesGraph Pages: 1 -->
 <svg id="moduleed_greens_functionsUsesGraph" width="294pt" height="605pt"
@@ -165,200 +171,185 @@
 <polygon fill="none" stroke="black" points="286.29,-309.77 143.52,-309.77 143.52,-287 286.29,-287 286.29,-309.77"/>
 <text text-anchor="middle" x="214.9" y="-294.03" font-family="Helvetica,sans-Serif" font-size="10.50">ED_GREENS_FUNCTIONS</text>
 </g>
-<!-- SF_CONSTANTS -->
+<!-- SF_ARRAYS -->
 <g id="module~~ed_greens_functions~~UsesGraph_node2" class="node">
-<title>SF_CONSTANTS</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node2"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html" xlink:title="SF_CONSTANTS">
-<polygon fill="#337ab7" stroke="#337ab7" points="101.14,-596.77 6.37,-596.77 6.37,-574 101.14,-574 101.14,-596.77"/>
-<text text-anchor="middle" x="53.76" y="-581.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
-</a>
+<title>SF_ARRAYS</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="90.27,-596.77 17.25,-596.77 17.25,-574 90.27,-574 90.27,-596.77"/>
+<text text-anchor="middle" x="53.76" y="-581.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_ARRAYS</text>
 </g>
+<!-- module~ed_greens_functions&#45;&gt;SF_ARRAYS -->
+<g id="module~~ed_greens_functions~~UsesGraph_edge1" class="edge">
+<title>module~ed_greens_functions&#45;&gt;SF_ARRAYS</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M212.53,-310C207.12,-350.66 183.72,-488.31 107.52,-564.38 105.37,-566.53 102.97,-568.46 100.42,-570.21"/>
+<polygon fill="#000000" stroke="#000000" points="98.97,-567.01 91.97,-574.96 102.4,-573.11 98.97,-567.01"/>
+</g>
+<!-- SF_CONSTANTS -->
+<g id="module~~ed_greens_functions~~UsesGraph_node3" class="node">
+<title>SF_CONSTANTS</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="101.14,-555.77 6.37,-555.77 6.37,-533 101.14,-533 101.14,-555.77"/>
+<text text-anchor="middle" x="53.76" y="-540.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;SF_CONSTANTS -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge1" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge2" class="edge">
 <title>module~ed_greens_functions&#45;&gt;SF_CONSTANTS</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M212.53,-310C207.12,-350.66 183.72,-488.31 107.52,-564.38 106.5,-565.4 105.42,-566.37 104.3,-567.3"/>
-<polygon fill="#000000" stroke="#000000" points="102.6,-564.23 96.22,-572.69 106.48,-570.05 102.6,-564.23"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M211.53,-310.22C203.57,-346.99 174.45,-460.53 107.52,-523.38 106.31,-524.52 105.03,-525.6 103.69,-526.63"/>
+<polygon fill="#000000" stroke="#000000" points="102.09,-523.5 95.5,-531.79 105.82,-529.42 102.09,-523.5"/>
 </g>
 <!-- SF_IOTOOLS -->
-<g id="module~~ed_greens_functions~~UsesGraph_node3" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node4" class="node">
 <title>SF_IOTOOLS</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node3"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html" xlink:title="SF_IOTOOLS">
-<polygon fill="#337ab7" stroke="#337ab7" points="92.52,-555.77 15,-555.77 15,-533 92.52,-533 92.52,-555.77"/>
-<text text-anchor="middle" x="53.76" y="-540.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
-</a>
-</g>
+<polygon fill="#337ab7" stroke="#337ab7" points="92.52,-514.77 15,-514.77 15,-492 92.52,-492 92.52,-514.77"/>
+<text text-anchor="middle" x="53.76" y="-499.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;SF_IOTOOLS -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge2" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge3" class="edge">
 <title>module~ed_greens_functions&#45;&gt;SF_IOTOOLS</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M211.53,-310.22C203.57,-346.99 174.45,-460.53 107.52,-523.38 105.93,-524.88 104.22,-526.27 102.42,-527.57"/>
-<polygon fill="#000000" stroke="#000000" points="100.95,-524.37 94.17,-532.51 104.55,-530.38 100.95,-524.37"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M210.21,-310.07C199.53,-342.1 165.59,-432.2 107.52,-482.38 105.9,-483.79 104.17,-485.1 102.37,-486.34"/>
+<polygon fill="#000000" stroke="#000000" points="101.07,-483.04 94.17,-491.08 104.58,-489.1 101.07,-483.04"/>
 </g>
 <!-- SF_LINALG -->
-<g id="module~~ed_greens_functions~~UsesGraph_node4" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node5" class="node">
 <title>SF_LINALG</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node4"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_LINALG.html" xlink:title="SF_LINALG">
-<polygon fill="#337ab7" stroke="#337ab7" points="88.02,-514.77 19.5,-514.77 19.5,-492 88.02,-492 88.02,-514.77"/>
-<text text-anchor="middle" x="53.76" y="-499.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_LINALG</text>
-</a>
-</g>
+<polygon fill="#337ab7" stroke="#337ab7" points="88.02,-473.77 19.5,-473.77 19.5,-451 88.02,-451 88.02,-473.77"/>
+<text text-anchor="middle" x="53.76" y="-458.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_LINALG</text>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;SF_LINALG -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge3" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge4" class="edge">
 <title>module~ed_greens_functions&#45;&gt;SF_LINALG</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M210.21,-310.07C199.53,-342.1 165.59,-432.2 107.52,-482.38 104.76,-484.77 101.7,-486.9 98.47,-488.81"/>
-<polygon fill="#000000" stroke="#000000" points="97.17,-485.55 89.82,-493.18 100.33,-491.79 97.17,-485.55"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M208.11,-310.1C194.3,-336.95 156.84,-403.5 107.52,-441.38 104.76,-443.51 101.75,-445.45 98.62,-447.21"/>
+<polygon fill="#000000" stroke="#000000" points="97.14,-444.04 89.71,-451.59 100.22,-450.32 97.14,-444.04"/>
 </g>
 <!-- SF_TIMER -->
-<g id="module~~ed_greens_functions~~UsesGraph_node5" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node6" class="node">
 <title>SF_TIMER</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node5"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_TIMER.html" xlink:title="SF_TIMER">
-<polygon fill="#337ab7" stroke="#337ab7" points="85.77,-473.77 21.75,-473.77 21.75,-451 85.77,-451 85.77,-473.77"/>
-<text text-anchor="middle" x="53.76" y="-458.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_TIMER</text>
-</a>
-</g>
+<polygon fill="#337ab7" stroke="#337ab7" points="85.77,-432.77 21.75,-432.77 21.75,-410 85.77,-410 85.77,-432.77"/>
+<text text-anchor="middle" x="53.76" y="-417.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_TIMER</text>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;SF_TIMER -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge4" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge5" class="edge">
 <title>module~ed_greens_functions&#45;&gt;SF_TIMER</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M208.11,-310.1C194.3,-336.95 156.84,-403.5 107.52,-441.38 104.16,-443.97 100.43,-446.28 96.56,-448.33"/>
-<polygon fill="#000000" stroke="#000000" points="95.1,-445.15 87.51,-452.54 98.05,-451.5 95.1,-445.15"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M204.49,-309.98C187.2,-330.64 148.41,-374.09 107.52,-400.38 104.04,-402.62 100.28,-404.69 96.43,-406.59"/>
+<polygon fill="#000000" stroke="#000000" points="95.23,-403.29 87.54,-410.57 98.09,-409.68 95.23,-403.29"/>
 </g>
 <!-- module~ed_aux_funx -->
-<g id="module~~ed_greens_functions~~UsesGraph_node6" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node7" class="node">
 <title>module~ed_aux_funx</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node6"><a xlink:href="../module/ed_aux_funx.html" xlink:title="ED_AUX_FUNX">
-<polygon fill="#337ab7" stroke="#337ab7" points="97.39,-432.77 10.12,-432.77 10.12,-410 97.39,-410 97.39,-432.77"/>
-<text text-anchor="middle" x="53.76" y="-417.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_AUX_FUNX</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node7"><a xlink:href="../module/ed_aux_funx.html" xlink:title="ED_AUX_FUNX">
+<polygon fill="#337ab7" stroke="#337ab7" points="97.39,-391.77 10.12,-391.77 10.12,-369 97.39,-369 97.39,-391.77"/>
+<text text-anchor="middle" x="53.76" y="-376.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_AUX_FUNX</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_aux_funx -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge5" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge6" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_aux_funx</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M204.49,-309.98C187.2,-330.64 148.41,-374.09 107.52,-400.38 105.25,-401.85 102.85,-403.24 100.4,-404.55"/>
-<polygon fill="#000000" stroke="#000000" points="98.89,-401.39 91.41,-408.89 101.93,-407.7 98.89,-401.39"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M195.13,-310.24C174.21,-323.19 139.16,-344.11 107.52,-359.38 104.19,-360.99 100.7,-362.58 97.18,-364.12"/>
+<polygon fill="#000000" stroke="#000000" points="95.86,-360.87 88,-367.97 98.57,-367.33 95.86,-360.87"/>
 </g>
 <!-- module~ed_bath -->
-<g id="module~~ed_greens_functions~~UsesGraph_node7" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node8" class="node">
 <title>module~ed_bath</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node7"><a xlink:href="../module/ed_bath.html" xlink:title="ED_BATH">
-<polygon fill="#337ab7" stroke="#337ab7" points="83.14,-391.77 24.37,-391.77 24.37,-369 83.14,-369 83.14,-391.77"/>
-<text text-anchor="middle" x="53.76" y="-376.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node8"><a xlink:href="../module/ed_bath.html" xlink:title="ED_BATH">
+<polygon fill="#337ab7" stroke="#337ab7" points="83.14,-350.77 24.37,-350.77 24.37,-328 83.14,-328 83.14,-350.77"/>
+<text text-anchor="middle" x="53.76" y="-335.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_BATH</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_bath -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge6" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge7" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_bath</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M195.13,-310.24C174.21,-323.19 139.16,-344.11 107.52,-359.38 103.23,-361.46 98.67,-363.5 94.1,-365.44"/>
-<polygon fill="#000000" stroke="#000000" points="92.87,-362.16 84.96,-369.2 95.54,-368.64 92.87,-362.16"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M167.87,-310.24C144.58,-316.25 116.59,-323.46 94.28,-329.2"/>
+<polygon fill="#000000" stroke="#000000" points="93.46,-325.8 84.65,-331.68 95.21,-332.58 93.46,-325.8"/>
 </g>
 <!-- module~ed_eigenspace -->
-<g id="module~~ed_greens_functions~~UsesGraph_node8" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node9" class="node">
 <title>module~ed_eigenspace</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node8"><a xlink:href="../module/ed_eigenspace.html" xlink:title="ED_EIGENSPACE">
-<polygon fill="#337ab7" stroke="#337ab7" points="103.02,-350.77 4.5,-350.77 4.5,-328 103.02,-328 103.02,-350.77"/>
-<text text-anchor="middle" x="53.76" y="-335.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_EIGENSPACE</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node9"><a xlink:href="../module/ed_eigenspace.html" xlink:title="ED_EIGENSPACE">
+<polygon fill="#337ab7" stroke="#337ab7" points="103.02,-309.77 4.5,-309.77 4.5,-287 103.02,-287 103.02,-309.77"/>
+<text text-anchor="middle" x="53.76" y="-294.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_EIGENSPACE</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_eigenspace -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge7" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge8" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_eigenspace</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M167.87,-310.24C150.31,-314.77 130.07,-319.98 111.61,-324.74"/>
-<polygon fill="#000000" stroke="#000000" points="110.96,-321.29 102.15,-327.18 112.71,-328.07 110.96,-321.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M143.17,-298.38C133.72,-298.38 124.09,-298.38 114.84,-298.38"/>
+<polygon fill="#000000" stroke="#000000" points="114.88,-294.89 104.88,-298.39 114.88,-301.89 114.88,-294.89"/>
 </g>
 <!-- module~ed_gf_nonsu2 -->
-<g id="module~~ed_greens_functions~~UsesGraph_node9" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node10" class="node">
 <title>module~ed_gf_nonsu2</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node9"><a xlink:href="../module/ed_gf_nonsu2.html" xlink:title="ED_GF_NONSU2">
-<polygon fill="#337ab7" stroke="#337ab7" points="101.89,-309.77 5.62,-309.77 5.62,-287 101.89,-287 101.89,-309.77"/>
-<text text-anchor="middle" x="53.76" y="-294.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GF_NONSU2</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node10"><a xlink:href="../module/ed_gf_nonsu2.html" xlink:title="ED_GF_NONSU2">
+<polygon fill="#337ab7" stroke="#337ab7" points="101.89,-268.77 5.62,-268.77 5.62,-246 101.89,-246 101.89,-268.77"/>
+<text text-anchor="middle" x="53.76" y="-253.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GF_NONSU2</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_gf_nonsu2 -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge8" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge9" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_gf_nonsu2</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M143.17,-298.38C133.15,-298.38 122.94,-298.38 113.18,-298.38"/>
-<polygon fill="#000000" stroke="#000000" points="113.49,-294.89 103.49,-298.39 113.49,-301.89 113.49,-294.89"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M167.87,-286.53C150.31,-282 130.07,-276.79 111.61,-272.03"/>
+<polygon fill="#000000" stroke="#000000" points="112.71,-268.7 102.15,-269.59 110.96,-275.48 112.71,-268.7"/>
 </g>
 <!-- module~ed_gf_normal -->
-<g id="module~~ed_greens_functions~~UsesGraph_node10" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node11" class="node">
 <title>module~ed_gf_normal</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node10"><a xlink:href="../module/ed_gf_normal.html" xlink:title="ED_GF_NORMAL">
-<polygon fill="#337ab7" stroke="#337ab7" points="102.64,-268.77 4.87,-268.77 4.87,-246 102.64,-246 102.64,-268.77"/>
-<text text-anchor="middle" x="53.76" y="-253.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GF_NORMAL</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node11"><a xlink:href="../module/ed_gf_normal.html" xlink:title="ED_GF_NORMAL">
+<polygon fill="#337ab7" stroke="#337ab7" points="102.64,-227.77 4.87,-227.77 4.87,-205 102.64,-205 102.64,-227.77"/>
+<text text-anchor="middle" x="53.76" y="-212.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GF_NORMAL</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_gf_normal -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge9" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge10" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_gf_normal</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M167.87,-286.53C150.31,-282 130.07,-276.79 111.61,-272.03"/>
-<polygon fill="#000000" stroke="#000000" points="112.71,-268.7 102.15,-269.59 110.96,-275.48 112.71,-268.7"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M195.13,-286.53C174.21,-273.58 139.16,-252.66 107.52,-237.38 104.19,-235.78 100.7,-234.19 97.18,-232.65"/>
+<polygon fill="#000000" stroke="#000000" points="98.57,-229.44 88,-228.8 95.86,-235.9 98.57,-229.44"/>
 </g>
 <!-- module~ed_gf_superc -->
-<g id="module~~ed_greens_functions~~UsesGraph_node11" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node12" class="node">
 <title>module~ed_gf_superc</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node11"><a xlink:href="../module/ed_gf_superc.html" xlink:title="ED_GF_SUPERC">
-<polygon fill="#337ab7" stroke="#337ab7" points="101.52,-227.77 6,-227.77 6,-205 101.52,-205 101.52,-227.77"/>
-<text text-anchor="middle" x="53.76" y="-212.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GF_SUPERC</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node12"><a xlink:href="../module/ed_gf_superc.html" xlink:title="ED_GF_SUPERC">
+<polygon fill="#337ab7" stroke="#337ab7" points="101.52,-186.77 6,-186.77 6,-164 101.52,-164 101.52,-186.77"/>
+<text text-anchor="middle" x="53.76" y="-171.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_GF_SUPERC</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_gf_superc -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge10" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge11" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_gf_superc</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M195.13,-286.53C174.21,-273.58 139.16,-252.66 107.52,-237.38 104.19,-235.78 100.7,-234.19 97.18,-232.65"/>
-<polygon fill="#000000" stroke="#000000" points="98.57,-229.44 88,-228.8 95.86,-235.9 98.57,-229.44"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M204.49,-286.79C187.2,-266.13 148.41,-222.68 107.52,-196.38 105.25,-194.92 102.85,-193.53 100.4,-192.22"/>
+<polygon fill="#000000" stroke="#000000" points="101.93,-189.07 91.41,-187.88 98.89,-195.38 101.93,-189.07"/>
 </g>
 <!-- module~ed_hamiltonian -->
-<g id="module~~ed_greens_functions~~UsesGraph_node12" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node13" class="node">
 <title>module~ed_hamiltonian</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node12"><a xlink:href="../module/ed_hamiltonian.html" xlink:title="ED_HAMILTONIAN">
-<polygon fill="#337ab7" stroke="#337ab7" points="104.89,-186.77 2.62,-186.77 2.62,-164 104.89,-164 104.89,-186.77"/>
-<text text-anchor="middle" x="53.76" y="-171.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_HAMILTONIAN</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node13"><a xlink:href="../module/ed_hamiltonian.html" xlink:title="ED_HAMILTONIAN">
+<polygon fill="#337ab7" stroke="#337ab7" points="104.89,-145.77 2.62,-145.77 2.62,-123 104.89,-123 104.89,-145.77"/>
+<text text-anchor="middle" x="53.76" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_HAMILTONIAN</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_hamiltonian -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge11" class="edge">
+<g id="module~~ed_greens_functions~~UsesGraph_edge12" class="edge">
 <title>module~ed_greens_functions&#45;&gt;module~ed_hamiltonian</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M204.49,-286.79C187.2,-266.13 148.41,-222.68 107.52,-196.38 105.25,-194.92 102.85,-193.53 100.4,-192.22"/>
-<polygon fill="#000000" stroke="#000000" points="101.93,-189.07 91.41,-187.88 98.89,-195.38 101.93,-189.07"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M208.11,-286.67C194.3,-259.82 156.84,-193.27 107.52,-155.38 105.79,-154.06 103.97,-152.8 102.07,-151.61"/>
+<polygon fill="#000000" stroke="#000000" points="104,-148.68 93.54,-146.98 100.66,-154.83 104,-148.68"/>
 </g>
 <!-- module~ed_input_vars -->
-<g id="module~~ed_greens_functions~~UsesGraph_node13" class="node">
+<g id="module~~ed_greens_functions~~UsesGraph_node14" class="node">
 <title>module~ed_input_vars</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node13"><a xlink:href="../module/ed_input_vars.html" xlink:title="ED_INPUT_VARS">
-<polygon fill="#337ab7" stroke="#337ab7" points="102.27,-145.77 5.25,-145.77 5.25,-123 102.27,-123 102.27,-145.77"/>
-<text text-anchor="middle" x="53.76" y="-130.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_INPUT_VARS</text>
+<g id="a_module~~ed_greens_functions~~UsesGraph_node14"><a xlink:href="../module/ed_input_vars.html" xlink:title="ED_INPUT_VARS">
+<polygon fill="#337ab7" stroke="#337ab7" points="102.27,-104.77 5.25,-104.77 5.25,-82 102.27,-82 102.27,-104.77"/>
+<text text-anchor="middle" x="53.76" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_INPUT_VARS</text>
 </a>
 </g>
 </g>
 <!-- module~ed_greens_functions&#45;&gt;module~ed_input_vars -->
-<g id="module~~ed_greens_functions~~UsesGraph_edge12" class="edge">
-<title>module~ed_greens_functions&#45;&gt;module~ed_input_vars</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M208.11,-286.67C194.3,-259.82 156.84,-193.27 107.52,-155.38 105.79,-154.06 103.97,-152.8 102.07,-151.61"/>
-<polygon fill="#000000" stroke="#000000" points="104,-148.68 93.54,-146.98 100.66,-154.83 104,-148.68"/>
-</g>
-<!-- module~ed_io -->
-<g id="module~~ed_greens_functions~~UsesGraph_node14" class="node">
-<title>module~ed_io</title>
-<g id="a_module~~ed_greens_functions~~UsesGraph_node14"><a xlink:href="../module/ed_io.html" xlink:title="ED_IO">
-<polygon fill="#337ab7" stroke="#337ab7" points="80.76,-104.77 26.76,-104.77 26.76,-82 80.76,-82 80.76,-104.77"/>
-<text text-anchor="middle" x="53.76" y="-89.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_IO</text>
-</a>
-</g>
-</g>
-<!-- module~ed_greens_functions&#45;&gt;module~ed_io -->
 <g id="module~~ed_greens_functions~~UsesGraph_edge13" class="edge">
-<title>module~ed_greens_functions&#45;&gt;module~ed_io</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M210.21,-286.7C199.53,-254.67 165.59,-164.57 107.52,-114.39 102.81,-110.32 97.22,-106.98 91.46,-104.25"/>
-<polygon fill="#000000" stroke="#000000" points="93.06,-101.13 82.48,-100.57 90.4,-107.6 93.06,-101.13"/>
+<title>module~ed_greens_functions&#45;&gt;module~ed_input_vars</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M210.21,-286.7C199.53,-254.67 165.59,-164.57 107.52,-114.39 106.08,-113.14 104.57,-111.97 102.99,-110.86"/>
+<polygon fill="#000000" stroke="#000000" points="105.1,-108.04 94.71,-105.97 101.53,-114.07 105.1,-108.04"/>
 </g>
 <!-- module~ed_setup -->
 <g id="module~~ed_greens_functions~~UsesGraph_node15" class="node">
@@ -407,7 +398,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="485pt" height="31pt"
@@ -475,49 +466,91 @@ modules which it uses.
               <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: module~~ed_greens_functions~~UsedByGraph Pages: 1 -->
-<svg id="moduleed_greens_functionsUsedByGraph" width="343pt" height="31pt"
- viewBox="0.00 0.00 343.31 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="module~~ed_greens_functions~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
+<svg id="moduleed_greens_functionsUsedByGraph" width="558pt" height="70pt"
+ viewBox="0.00 0.00 558.08 69.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~ed_greens_functions~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 65.77)">
 <title>module~~ed_greens_functions~~UsedByGraph</title>
-<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 339.31,-26.77 339.31,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-65.77 554.08,-65.77 554.08,4 -4,4"/>
 <!-- module~ed_greens_functions -->
 <g id="module~~ed_greens_functions~~UsedByGraph_node1" class="node">
 <title>module~ed_greens_functions</title>
-<polygon fill="none" stroke="black" points="142.77,-22.77 0,-22.77 0,0 142.77,0 142.77,-22.77"/>
-<text text-anchor="middle" x="71.39" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_GREENS_FUNCTIONS</text>
+<polygon fill="none" stroke="black" points="142.77,-41.77 0,-41.77 0,-19 142.77,-19 142.77,-41.77"/>
+<text text-anchor="middle" x="71.39" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50">ED_GREENS_FUNCTIONS</text>
+</g>
+<!-- module~ed_io -->
+<g id="module~~ed_greens_functions~~UsedByGraph_node2" class="node">
+<title>module~ed_io</title>
+<g id="a_module~~ed_greens_functions~~UsedByGraph_node2"><a xlink:href="../module/ed_io.html" xlink:title="ED_IO">
+<polygon fill="#337ab7" stroke="#337ab7" points="232.77,-61.77 178.77,-61.77 178.77,-39 232.77,-39 232.77,-61.77"/>
+<text text-anchor="middle" x="205.77" y="-46.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_IO</text>
+</a>
+</g>
+</g>
+<!-- module~ed_io&#45;&gt;module~ed_greens_functions -->
+<g id="module~~ed_greens_functions~~UsedByGraph_edge1" class="edge">
+<title>module~ed_io&#45;&gt;module~ed_greens_functions</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M178.3,-46.39C171.16,-45.31 163.05,-44.08 154.57,-42.8"/>
+<polygon fill="#000000" stroke="#000000" points="155.15,-39.35 144.74,-41.32 154.11,-46.27 155.15,-39.35"/>
 </g>
 <!-- module~ed_main -->
-<g id="module~~ed_greens_functions~~UsedByGraph_node2" class="node">
+<g id="module~~ed_greens_functions~~UsedByGraph_node3" class="node">
 <title>module~ed_main</title>
-<g id="a_module~~ed_greens_functions~~UsedByGraph_node2"><a xlink:href="../module/ed_main.html" xlink:title="ED_MAIN">
-<polygon fill="#337ab7" stroke="#337ab7" points="236.79,-22.77 178.77,-22.77 178.77,0 236.79,0 236.79,-22.77"/>
-<text text-anchor="middle" x="207.78" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_MAIN</text>
+<g id="a_module~~ed_greens_functions~~UsedByGraph_node3"><a xlink:href="../module/ed_main.html" xlink:title="ED_MAIN">
+<polygon fill="#337ab7" stroke="#337ab7" points="326.79,-22.77 268.77,-22.77 268.77,0 326.79,0 326.79,-22.77"/>
+<text text-anchor="middle" x="297.78" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ED_MAIN</text>
 </a>
 </g>
 </g>
 <!-- module~ed_main&#45;&gt;module~ed_greens_functions -->
-<g id="module~~ed_greens_functions~~UsedByGraph_edge1" class="edge">
+<g id="module~~ed_greens_functions~~UsedByGraph_edge2" class="edge">
 <title>module~ed_main&#45;&gt;module~ed_greens_functions</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M178.28,-11.39C171.05,-11.39 162.91,-11.39 154.43,-11.39"/>
-<polygon fill="#000000" stroke="#000000" points="154.67,-7.89 144.67,-11.39 154.67,-14.89 154.67,-7.89"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M268.36,-13.79C239.75,-16.21 194.25,-20.07 154.29,-23.45"/>
+<polygon fill="#000000" stroke="#000000" points="154.09,-19.95 144.42,-24.29 154.68,-26.93 154.09,-19.95"/>
+</g>
+<!-- module~ed_main&#45;&gt;module~ed_io -->
+<g id="module~~ed_greens_functions~~UsedByGraph_edge3" class="edge">
+<title>module~ed_main&#45;&gt;module~ed_io</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M269.77,-23.09C261.53,-26.66 252.32,-30.65 243.54,-34.45"/>
+<polygon fill="#000000" stroke="#000000" points="242.31,-31.17 234.53,-38.36 245.09,-37.59 242.31,-31.17"/>
 </g>
 <!-- module~edipack2 -->
-<g id="module~~ed_greens_functions~~UsedByGraph_node3" class="node">
+<g id="module~~ed_greens_functions~~UsedByGraph_node4" class="node">
 <title>module~edipack2</title>
-<g id="a_module~~ed_greens_functions~~UsedByGraph_node3"><a xlink:href="../module/edipack2.html" xlink:title="EDIPACK2">
-<polygon fill="#337ab7" stroke="#337ab7" points="335.31,-22.77 272.79,-22.77 272.79,0 335.31,0 335.31,-22.77"/>
-<text text-anchor="middle" x="304.05" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EDIPACK2</text>
+<g id="a_module~~ed_greens_functions~~UsedByGraph_node4"><a xlink:href="../module/edipack2.html" xlink:title="EDIPACK2">
+<polygon fill="#337ab7" stroke="#337ab7" points="425.31,-41.77 362.79,-41.77 362.79,-19 425.31,-19 425.31,-41.77"/>
+<text text-anchor="middle" x="394.05" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EDIPACK2</text>
 </a>
 </g>
 </g>
+<!-- module~edipack2&#45;&gt;module~ed_io -->
+<g id="module~~ed_greens_functions~~UsedByGraph_edge4" class="edge">
+<title>module~edipack2&#45;&gt;module~ed_io</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M362.71,-33.64C330.38,-37.11 279.16,-42.61 244.32,-46.35"/>
+<polygon fill="#000000" stroke="#000000" points="244.25,-42.84 234.69,-47.39 245,-49.8 244.25,-42.84"/>
+</g>
 <!-- module~edipack2&#45;&gt;module~ed_main -->
-<g id="module~~ed_greens_functions~~UsedByGraph_edge2" class="edge">
+<g id="module~~ed_greens_functions~~UsedByGraph_edge5" class="edge">
 <title>module~edipack2&#45;&gt;module~ed_main</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M272.44,-11.39C264.79,-11.39 256.46,-11.39 248.43,-11.39"/>
-<polygon fill="#000000" stroke="#000000" points="248.51,-7.89 238.51,-11.39 248.51,-14.89 248.51,-7.89"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M362.44,-24.22C354.7,-22.65 346.27,-20.96 338.15,-19.32"/>
+<polygon fill="#000000" stroke="#000000" points="338.98,-15.92 328.48,-17.37 337.59,-22.78 338.98,-15.92"/>
+</g>
+<!-- module~edi2py_bindings -->
+<g id="module~~ed_greens_functions~~UsedByGraph_node5" class="node">
+<title>module~edi2py_bindings</title>
+<g id="a_module~~ed_greens_functions~~UsedByGraph_node5"><a xlink:href="../module/edi2py_bindings.html" xlink:title="edi2py_bindings">
+<polygon fill="#337ab7" stroke="#337ab7" points="550.08,-41.77 461.31,-41.77 461.31,-19 550.08,-19 550.08,-41.77"/>
+<text text-anchor="middle" x="505.69" y="-26.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">edi2py_bindings</text>
+</a>
+</g>
+</g>
+<!-- module~edi2py_bindings&#45;&gt;module~edipack2 -->
+<g id="module~~ed_greens_functions~~UsedByGraph_edge6" class="edge">
+<title>module~edi2py_bindings&#45;&gt;module~edipack2</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M461.05,-30.39C453.19,-30.39 445.02,-30.39 437.21,-30.39"/>
+<polygon fill="#000000" stroke="#000000" points="437.24,-26.89 427.24,-30.39 437.24,-33.89 437.24,-26.89"/>
 </g>
 </g>
 </svg>
@@ -536,7 +569,7 @@ modules which it uses.
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="485pt" height="31pt"
@@ -618,15 +651,15 @@ modules which it uses.
         <div class="row justify-content-between">
           <div class="col">
             <p>
-              EDIpack2
-              &copy; 2024 
+              EDIpack 2.0
+              &copy; 2025 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-            </p>
+ on 2025-02-16T13:09:24.164505+0100             </p>
           </div>
         </div>
         <br>
@@ -650,6 +683,9 @@ modules which it uses.
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
 
   </body>
 </html>

@@ -6,5 +6,6 @@ ED_DIAG
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_DIAG.f90>`_ for :f:mod:`ed_diag` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_DIAG.f90
+/ED_DIAG.f90>`_ for :f:mod:`ed_diag` on GitHub
  

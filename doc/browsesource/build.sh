@@ -1,4 +1,40 @@
 #!/bin/bash
+
+
+# #-----------------------------
+# #UNCOMMENT THIS PART IF YOU
+# #NEED TO SETUP AND RUN FORD
+# #-----------------------------
+# cat <<EOF > ford_doc.md
+# ---
+# project: EDIpack2.0
+# preprocess:false
+# display:none
+# hide_undoc:true
+# print_creation_date:true
+# src_dir:../../src
+# output_dir:./ford_doc
+# extensions: f90
+# quiet:false
+# parallel:0
+# graph:true
+# graph_maxdepth:5
+# graph_maxnodes:20
+# ---
+# This is my Fortran project!
+
+# EOF
+
+# #Run FORD (not checking actual presence)
+# ford ford_doc.md
+# #Sync module/*.html files in local src
+# rsync -avPhHO --del ford_doc/module/*.html src/
+#-----------------------------
+#-----------------------------
+
+
+
+
 SRC=src
 GRAPH=graphs
 MOD=module
@@ -8,6 +44,7 @@ mkdir -p $GRAPH
 mkdir -p $MOD
 rm $GRAPH/*
 rm $MOD/*
+
 
 #Generate the  .html images by stripping the svg part from the src files
 cd $SRC

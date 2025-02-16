@@ -6,5 +6,6 @@ ED_SPARSE_MATRIX
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SPARSE_MATRIX.f90>`_ for :f:mod:`ed_sparse_matrix` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_SPARSE_MATRIX.f90
+/ED_SPARSE_MATRIX.f90>`_ for :f:mod:`ed_sparse_matrix` on GitHub
  

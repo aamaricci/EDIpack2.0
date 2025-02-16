@@ -6,5 +6,6 @@ ED_BATH_DMFT
  
 |
  
-`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_BATH/ED_BATH_DMFT.f90>`_ for :f:mod:`ed_bath_dmft` on GitHub
+`Open source file <https://github.com/aamaricci/EDIpack2.0/tree/master/src/ED_BATH_DMFT.f90
+/ED_BATH/ED_BATH_DMFT.f90>`_ for :f:mod:`ed_bath_dmft` on GitHub
  

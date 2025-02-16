@@ -6,17 +6,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta name="description" content="Documentation for EDIpack2">
+      <meta name="description" content="Documentation for EDIpack 2.0">
     <meta name="author" content="" >
     <link rel="icon" href="../favicon.png">
 
-    <title>ED_DIAG_NONSU2 &ndash; EDIpack2</title>
+    <title>ED_DIAG_NONSU2 &ndash; EDIpack 2.0</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="../js/svg-pan-zoom.min.js"></script>
@@ -28,7 +29,7 @@
     <div class="container-fluid mb-sm-4 mb-xl-2">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-          <a class="navbar-brand" href="../index.html">EDIpack2 </a>
+          <a class="navbar-brand" href="../index.html">EDIpack 2.0 </a>
           <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
                   aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
                   <span class="navbar-toggler-icon">
@@ -46,6 +47,11 @@
                   <a class="nav-link" href="../lists/procedures.html">Procedures</a>
                 </li>
             </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
           </div><!--/.nav-collapse -->
         </div>
       </nav>
@@ -64,7 +70,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 1.5% of total for modules and submodules.">417 statements</a>
+                 title=" 1.5% of total for modules and submodules.">430 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -131,26 +137,26 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='ed_sector.html'>ED_SECTOR</a></li>
-                  <li class="list-inline-item"><a href='https://github.com/SciFortran/SciFortran/blob/master/src/SF_SP_LINALG/SF_SP_LINALG.f90'>SF_SP_LINALG</a></li>
-                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_TIMER.html'>SF_TIMER</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html'>SF_CONSTANTS</a></li>
+                  <li class="list-inline-item">SF_CONSTANTS</li>
                   <li class="list-inline-item"><a href='ed_eigenspace.html'>ED_EIGENSPACE</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_LINALG.html'>SF_LINALG</a></li>
+                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
+                  <li class="list-inline-item"><a href='ed_sector.html'>ED_SECTOR</a></li>
+                  <li class="list-inline-item">SF_IOTOOLS</li>
                   <li class="list-inline-item"><a href='ed_hamiltonian_nonsu2.html'>ED_HAMILTONIAN_NONSU2</a></li>
-                  <li class="list-inline-item"><a href='https://github.com/SciFortran/SciFortran/blob/master/src/SF_MISC/SF_STAT.f90'>SF_STAT</a></li>
+                  <li class="list-inline-item">SF_TIMER</li>
+                  <li class="list-inline-item"><a href='ed_input_vars.html'>ED_INPUT_VARS</a></li>
+                  <li class="list-inline-item">SF_STAT</li>
                   <li class="list-inline-item"><a href='ed_setup.html'>ED_SETUP</a></li>
                   <li class="list-inline-item"><a href='ed_vars_global.html'>ED_VARS_GLOBAL</a></li>
-                  <li class="list-inline-item"><a href='http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html'>SF_IOTOOLS</a></li>
-                  <li class="list-inline-item"><a href='ed_aux_funx.html'>ED_AUX_FUNX</a></li>
+                  <li class="list-inline-item">SF_LINALG</li>
+                  <li class="list-inline-item">SF_SP_LINALG</li>
               </ul>
             </li>
             <li class="list-group-item">
               <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: module~~ed_diag_nonsu2~~UsesGraph Pages: 1 -->
 <svg id="moduleed_diag_nonsu2UsesGraph" width="303pt" height="523pt"
@@ -167,11 +173,8 @@
 <!-- SF_CONSTANTS -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_node2" class="node">
 <title>SF_CONSTANTS</title>
-<g id="a_module~~ed_diag_nonsu2~~UsesGraph_node2"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_CONSTANTS.html" xlink:title="SF_CONSTANTS">
 <polygon fill="#337ab7" stroke="#337ab7" points="123.27,-514.77 28.5,-514.77 28.5,-492 123.27,-492 123.27,-514.77"/>
 <text text-anchor="middle" x="75.89" y="-499.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_CONSTANTS</text>
-</a>
-</g>
 </g>
 <!-- module~ed_diag_nonsu2&#45;&gt;SF_CONSTANTS -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_edge1" class="edge">
@@ -182,11 +185,8 @@
 <!-- SF_IOTOOLS -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_node3" class="node">
 <title>SF_IOTOOLS</title>
-<g id="a_module~~ed_diag_nonsu2~~UsesGraph_node3"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_IOTOOLS.html" xlink:title="SF_IOTOOLS">
 <polygon fill="#337ab7" stroke="#337ab7" points="114.65,-473.77 37.13,-473.77 37.13,-451 114.65,-451 114.65,-473.77"/>
 <text text-anchor="middle" x="75.89" y="-458.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_IOTOOLS</text>
-</a>
-</g>
 </g>
 <!-- module~ed_diag_nonsu2&#45;&gt;SF_IOTOOLS -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_edge2" class="edge">
@@ -197,11 +197,8 @@
 <!-- SF_LINALG -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_node4" class="node">
 <title>SF_LINALG</title>
-<g id="a_module~~ed_diag_nonsu2~~UsesGraph_node4"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_LINALG.html" xlink:title="SF_LINALG">
 <polygon fill="#337ab7" stroke="#337ab7" points="110.15,-432.77 41.63,-432.77 41.63,-410 110.15,-410 110.15,-432.77"/>
 <text text-anchor="middle" x="75.89" y="-417.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_LINALG</text>
-</a>
-</g>
 </g>
 <!-- module~ed_diag_nonsu2&#45;&gt;SF_LINALG -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_edge3" class="edge">
@@ -212,11 +209,8 @@
 <!-- SF_SP_LINALG -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_node5" class="node">
 <title>SF_SP_LINALG</title>
-<g id="a_module~~ed_diag_nonsu2~~UsesGraph_node5"><a xlink:href="https://github.com/SciFortran/SciFortran/blob/master/src/SF_SP_LINALG/SF_SP_LINALG.f90" xlink:title="SF_SP_LINALG">
 <polygon fill="#337ab7" stroke="#337ab7" points="119.9,-391.77 31.88,-391.77 31.88,-369 119.9,-369 119.9,-391.77"/>
 <text text-anchor="middle" x="75.89" y="-376.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_SP_LINALG</text>
-</a>
-</g>
 </g>
 <!-- module~ed_diag_nonsu2&#45;&gt;SF_SP_LINALG -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_edge4" class="edge">
@@ -227,11 +221,8 @@
 <!-- SF_STAT -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_node6" class="node">
 <title>SF_STAT</title>
-<g id="a_module~~ed_diag_nonsu2~~UsesGraph_node6"><a xlink:href="https://github.com/SciFortran/SciFortran/blob/master/src/SF_MISC/SF_STAT.f90" xlink:title="SF_STAT">
 <polygon fill="#337ab7" stroke="#337ab7" points="103.77,-350.77 48,-350.77 48,-328 103.77,-328 103.77,-350.77"/>
 <text text-anchor="middle" x="75.89" y="-335.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_STAT</text>
-</a>
-</g>
 </g>
 <!-- module~ed_diag_nonsu2&#45;&gt;SF_STAT -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_edge5" class="edge">
@@ -242,11 +233,8 @@
 <!-- SF_TIMER -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_node7" class="node">
 <title>SF_TIMER</title>
-<g id="a_module~~ed_diag_nonsu2~~UsesGraph_node7"><a xlink:href="http://scifortran.github.io/SciFortran/modules/SF_TIMER.html" xlink:title="SF_TIMER">
 <polygon fill="#337ab7" stroke="#337ab7" points="107.9,-309.77 43.88,-309.77 43.88,-287 107.9,-287 107.9,-309.77"/>
 <text text-anchor="middle" x="75.89" y="-294.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SF_TIMER</text>
-</a>
-</g>
 </g>
 <!-- module~ed_diag_nonsu2&#45;&gt;SF_TIMER -->
 <g id="module~~ed_diag_nonsu2~~UsesGraph_edge6" class="edge">
@@ -376,7 +364,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="485pt" height="31pt"
@@ -444,14 +432,14 @@ modules which it uses.
               <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: module~~ed_diag_nonsu2~~UsedByGraph Pages: 1 -->
-<svg id="moduleed_diag_nonsu2UsedByGraph" width="401pt" height="31pt"
- viewBox="0.00 0.00 400.58 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg id="moduleed_diag_nonsu2UsedByGraph" width="525pt" height="31pt"
+ viewBox="0.00 0.00 525.35 30.77" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="module~~ed_diag_nonsu2~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 26.77)">
 <title>module~~ed_diag_nonsu2~~UsedByGraph</title>
-<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 396.58,-26.77 396.58,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-26.77 521.35,-26.77 521.35,4 -4,4"/>
 <!-- module~ed_diag_nonsu2 -->
 <g id="module~~ed_diag_nonsu2~~UsedByGraph_node1" class="node">
 <title>module~ed_diag_nonsu2</title>
@@ -503,6 +491,21 @@ modules which it uses.
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M329.71,-11.39C322.06,-11.39 313.73,-11.39 305.7,-11.39"/>
 <polygon fill="#000000" stroke="#000000" points="305.78,-7.89 295.78,-11.39 305.78,-14.89 305.78,-7.89"/>
 </g>
+<!-- module~edi2py_bindings -->
+<g id="module~~ed_diag_nonsu2~~UsedByGraph_node5" class="node">
+<title>module~edi2py_bindings</title>
+<g id="a_module~~ed_diag_nonsu2~~UsedByGraph_node5"><a xlink:href="../module/edi2py_bindings.html" xlink:title="edi2py_bindings">
+<polygon fill="#337ab7" stroke="#337ab7" points="517.35,-22.77 428.58,-22.77 428.58,0 517.35,0 517.35,-22.77"/>
+<text text-anchor="middle" x="472.96" y="-7.04" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">edi2py_bindings</text>
+</a>
+</g>
+</g>
+<!-- module~edi2py_bindings&#45;&gt;module~edipack2 -->
+<g id="module~~ed_diag_nonsu2~~UsedByGraph_edge4" class="edge">
+<title>module~edi2py_bindings&#45;&gt;module~edipack2</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M428.32,-11.39C420.46,-11.39 412.29,-11.39 404.48,-11.39"/>
+<polygon fill="#000000" stroke="#000000" points="404.51,-7.89 394.51,-11.39 404.51,-14.89 404.51,-7.89"/>
+</g>
 </g>
 </svg>
 </div>          <div>
@@ -520,7 +523,7 @@ modules which it uses.
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 12.1.1 (20240910.0053)
+<!-- Generated by graphviz version 12.2.1 (20241206.2353)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="485pt" height="31pt"
@@ -602,15 +605,15 @@ modules which it uses.
         <div class="row justify-content-between">
           <div class="col">
             <p>
-              EDIpack2
-              &copy; 2024 
+              EDIpack 2.0
+              &copy; 2025 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-            </p>
+ on 2025-02-16T13:09:24.164505+0100             </p>
           </div>
         </div>
         <br>
@@ -634,6 +637,9 @@ modules which it uses.
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
 
   </body>
 </html>
