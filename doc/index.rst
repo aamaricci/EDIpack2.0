@@ -1,11 +1,12 @@
 EDIpack2.0
 ################
 
-A massively parallel Exact Diagonalization solver for quantum Impurity problems.
+A massively parallel Exact Diagonalization solver for Quantum Impurity problems.
 ***************************************************************************************************************
 
-.. warning::
-    The documentation is under construction
+..
+   .. warning::
+       The documentation is under construction
 
 
 EDIpack2.0 is a Lanczos based Exact Diagonalization method 
