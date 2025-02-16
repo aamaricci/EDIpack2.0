@@ -50,7 +50,7 @@ Dyson equation :math:`\hat{\Sigma}(z) = \hat{G}^{-1}_0(z) - \hat{G}^{-1}(z)`.
 
 
 .. f:automodule::  ed_gf_normal
-   :members: build_gf_normal, build_sigma_normal, rebuild_gf_normal, add_to_lanczos
+   :forceadd-members: build_impG_normal, get_impG_normal, get_impD_normal, get_Sigma_normal
 
 .. _j.cpc.2021.108261: https://doi.org/10.1016/j.cpc.2021.108261
 .. |Nbath| replace:: :f:var:`nbath`

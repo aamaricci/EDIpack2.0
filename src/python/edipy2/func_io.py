@@ -285,7 +285,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
      If :code:`ilat` is set, the output will have one dimension less.
 
     :type axis: str 
-    :param axis: if :var:`zeta` is not provided, return the self-energy on the Matsubara or Real axis with parameters set in the input file. 
+    :param axis: if :code:`zeta` is not provided, return the self-energy on the Matsubara or Real axis with parameters set in the input file. \
     Can be :code:`m` for Matsubara(default) or :code:`r` for real.
         
     :type typ: str 
@@ -294,7 +294,7 @@ def get_sigma(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     
 
     :type zeta: complex **or** [complex] **or** np.array(dtype=complex)
-    :param zeta: user-defined array of frequencies in the whole complex plane. If none is provided, according to :var:`axis` the Matsubara or real axis is chosen
+    :param zeta: user-defined array of frequencies in the whole complex plane. If none is provided, according to :code:`axis` the Matsubara or real axis is chosen
 
    
     :raise ValueError: If :code:`ishape` is incompatible woth :code:`ilat` or not in the previous list.
@@ -469,7 +469,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
      If :code:`ilat` is set, the output will have one dimension less.
 
     :type axis: str 
-    :param axis: if :var:`zeta` is not provided, return the self-energy on the Matsubara or Real axis with parameters set in the input file. 
+    :param axis: if :code:`zeta` is not provided, return the self-energy on the Matsubara or Real axis with parameters set in the input file. \
     Can be :code:`m` for Matsubara(default) or :code:`r` for real.
         
     :type typ: str 
@@ -478,7 +478,7 @@ def get_gimp(self,ilat=None,ishape=None,axis="m",typ="n",zeta=None):
     
 
     :type zeta: complex **or** [complex] **or** np.array(dtype=complex)
-    :param zeta: user-defined array of frequencies in the whole complex plane. If none is provided, according to :var:`axis` the Matsubara or real axis is chosen
+    :param zeta: user-defined array of frequencies in the whole complex plane. If none is provided, according to :code:`axis` the Matsubara or real axis is chosen
 
    
     :raise ValueError: If :code:`ishape` is incompatible woth :code:`ilat` or not in the previous list.

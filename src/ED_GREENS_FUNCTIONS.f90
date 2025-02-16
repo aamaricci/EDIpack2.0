@@ -41,12 +41,12 @@ contains
 
   subroutine buildGF_impurity()
     ! 
-    ! Build the quantum impurity electrons Green's functions :math:`\hat{G}` , the self-energy :math:`\hat{\Sigma}` and the phonons Green's function :math:`\hat{D}` , calling the correct procedure according to the value of :f:var:`ed_mode` .
-    ! Write the results on file according to the values of input variables :f:var:`ed_print_g` , :f:var:`ed_print_sigma` and :f:var:`ed_print_g0` .
+    ! Build the quantum impurity electrons Green's functions :math:`\hat{G}` and the phonons Green's function :math:`\hat{D}` , calling the correct procedure according to the value of :f:var:`ed_mode` .
+    ! Write the results on file according to the values of input variables :f:var:`ed_print_g` , :f:var:`ed_print_sigma`, :f:var:`ed_print_impD`  and :f:var:`ed_print_g0` .
     !
-    ! * :code:`normal` : :f:func:`build_gf_normal` and :f:func:`build_sigma_normal`
-    ! * :code:`superc` : :f:func:`build_gf_superc` and :f:func:`build_sigma_superc`
-    ! * :code:`nonsu2` : :f:func:`build_gf_nonsu2` and :f:func:`build_sigma_nonsu2`
+    ! * :code:`normal` : :f:func:`build_impg_normal`
+    ! * :code:`superc` : :f:func:`build_impg_superc`
+    ! * :code:`nonsu2` : :f:func:`build_impg_nonsu2`
     !
     !
 #ifdef _DEBUG

@@ -413,8 +413,8 @@ contains
     !
     ! Reconstructs the system impurity electrons Green's functions using :f:var:`impgmatrix` to retrieve weights and poles.
     !
-    complex(8),dimension(:),intent(in)                     :: zeta
-    character(len=*),optional                              :: axis
+    complex(8),dimension(:),intent(in)                     :: zeta   !array of frequencies
+    character(len=*),optional                              :: axis   !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Gf
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
@@ -499,8 +499,8 @@ contains
     !
     ! Reconstructs the phonon Green's functions using :f:var:`impdmatrix` to retrieve weights and poles.
     !
-    complex(8),dimension(:),intent(in) :: zeta
-    character(len=*),optional          :: axis
+    complex(8),dimension(:),intent(in) :: zeta !array of frequencies
+    character(len=*),optional          :: axis !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(size(zeta))   :: G
     character(len=1)                   :: axis_
     !
@@ -559,8 +559,8 @@ contains
 
 
   function get_Sigma_normal(zeta,axis) result(Sigma)
-    complex(8),dimension(:),intent(in)                     :: zeta
-    character(len=*),optional                              :: axis       !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
+    complex(8),dimension(:),intent(in)                     :: zeta      !array of frequencies
+    character(len=*),optional                              :: axis      !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
     complex(8),dimension(Nspin,Nspin,Norb,Norb,size(zeta)) :: Sigma,invG0,invG
     complex(8),dimension(Norb,Norb)                        :: iGzeta
     character(len=1)                                       :: axis_
