@@ -278,19 +278,19 @@ contains
              do ibath=1,Nbath
                 dmft_bath_%item(ibath)%lambda(isym) =  Hreplica_lambda(ibath,isym) + offset(ibath)
              enddo
-             write(*,*) "                                                                    "
-             write(*,*) "WARNING: some of your lambdasym values have been internally changed "
-             write(*,*) "         while calling ed_init_solver. This happens whenever the    "
-             write(*,*) "         corresponding Hsym is diagonal and all the replicas receive"
-             write(*,*) "         the same initial lambda value, due to the deprecated legacy"
-             write(*,*) "         practice of defining a unique lambda vector forall replicas"
-             write(*,*) "         and let the solver decide how to handle these degeneracies."
-             write(*,*) "         >>> If you really intend to have a degenerate diagonal term"
-             write(*,*) "             in the bath you can define a suitable restart file.    "
-             write(*,*) "         >>> If instead this is what you expected please consider to"
-             write(*,*) "             move the desired rescaling in your driver, since this  "
-             write(*,*) "             funcionality might be removed in a future update.      "
-             write(*,*) "                                                                    "
+             write(LOGfile,*) "                                                                    "
+             write(LOGfile,*) "WARNING: some of your lambdasym values have been internally changed "
+             write(LOGfile,*) "         while calling ed_init_solver. This happens whenever the    "
+             write(LOGfile,*) "         corresponding Hsym is diagonal and all the replicas receive"
+             write(LOGfile,*) "         the same initial lambda value, due to the deprecated legacy"
+             write(LOGfile,*) "         practice of defining a unique lambda vector forall replicas"
+             write(LOGfile,*) "         and let the solver decide how to handle these degeneracies."
+             write(LOGfile,*) "         >>> If you really intend to have a degenerate diagonal term"
+             write(LOGfile,*) "             in the bath you can define a suitable restart file.    "
+             write(LOGfile,*) "         >>> If instead this is what you expected please consider to"
+             write(LOGfile,*) "             move the desired rescaling in your driver, since this  "
+             write(LOGfile,*) "             funcionality might be removed in a future update.      "
+             write(LOGfile,*) "                                                                    "
           endif
        enddo
        !
@@ -324,19 +324,19 @@ contains
              do ibath=1,Nbath
                 dmft_bath_%item(ibath)%lambda(isym) =  Hgeneral_lambda(ibath,isym) + offset(ibath)
              enddo
-             write(*,*) "                                                                    "
-             write(*,*) "WARNING: some of your lambdasym values have been internally changed "
-             write(*,*) "         while calling ed_init_solver. This happens whenever the    "
-             write(*,*) "         corresponding Hsym is diagonal and all the generals receive"
-             write(*,*) "         the same initial lambda value, due to the deprecated legacy"
-             write(*,*) "         practice of defining a unique lambda vector forall generals"
-             write(*,*) "         and let the solver decide how to handle these degeneracies."
-             write(*,*) "         >>> If you really intend to have a degenerate diagonal term"
-             write(*,*) "             in the bath you can define a suitable restart file.    "
-             write(*,*) "         >>> If instead this is what you expected please consider to"
-             write(*,*) "             move the desired rescaling in your driver, since this  "
-             write(*,*) "             funcionality might be removed in a future update.      "
-             write(*,*) "                                                                    "
+             write(LOGfile,*) "                                                                    "
+             write(LOGfile,*) "WARNING: some of your lambdasym values have been internally changed "
+             write(LOGfile,*) "         while calling ed_init_solver. This happens whenever the    "
+             write(LOGfile,*) "         corresponding Hsym is diagonal and all the generals receive"
+             write(LOGfile,*) "         the same initial lambda value, due to the deprecated legacy"
+             write(LOGfile,*) "         practice of defining a unique lambda vector forall generals"
+             write(LOGfile,*) "         and let the solver decide how to handle these degeneracies."
+             write(LOGfile,*) "         >>> If you really intend to have a degenerate diagonal term"
+             write(LOGfile,*) "             in the bath you can define a suitable restart file.    "
+             write(LOGfile,*) "         >>> If instead this is what you expected please consider to"
+             write(LOGfile,*) "             move the desired rescaling in your driver, since this  "
+             write(LOGfile,*) "             funcionality might be removed in a future update.      "
+             write(LOGfile,*) "                                                                    "
           endif
        enddo
        !

@@ -266,3 +266,71 @@ subroutine get_gimp_lattice_n6_c(gimp,Nineq,axis,typ,zeta,dz,zflag) bind(c,name=
     call ed_get_gimp(gimp,Nineq,axis_,typ_)
   endif
 end subroutine get_gimp_lattice_n6_c
+
+!Get G0and given a bath array
+subroutine ed_get_g0and_d3_c(warray,dim_warray,bath,dim_bath,G0and,dim_g0and,axis,typ) bind(c, name='get_g0and_n3')
+  use, intrinsic :: iso_c_binding
+  integer(c_int),value                                                        :: dim_warray, dim_bath
+  integer(c_int64_t)                                                          :: dim_G0and(3)
+  complex(c_double_complex),dimension(dim_warray)                             :: warray
+  real(c_double),dimension(dim_bath)                                          :: bath
+  complex(c_double_complex),dimension(dim_g0and(1),dim_g0and(2),dim_g0and(3)) :: g0and
+  character(kind=c_char), dimension(1),optional                               :: axis,typ
+  character(len=1)                                                            :: axis_,typ_
+  typ_(1:1)=typ(1)
+  axis_(1:1)=axis(1)
+  
+  call ed_get_g0and(warray,bath,G0and,axis_,typ_)
+  
+end subroutine ed_get_g0and_d3_c
+
+subroutine ed_get_g0and_d5_c(warray,dim_warray,bath,dim_bath,G0and,dim_g0and,axis,typ) bind(c, name='get_g0and_n5')
+  use, intrinsic :: iso_c_binding
+  integer(c_int),value                                                        :: dim_warray, dim_bath
+  integer(c_int64_t)                                                          :: dim_G0and(5)
+  complex(c_double_complex),dimension(dim_warray)                             :: warray
+  real(c_double),dimension(dim_bath)                                          :: bath
+  complex(c_double_complex),dimension(dim_g0and(1),dim_g0and(2),dim_g0and(3),dim_g0and(4),dim_g0and(5)) :: g0and
+  character(kind=c_char), dimension(1),optional                               :: axis,typ
+  character(len=1)                                                            :: axis_,typ_
+  typ_(1:1)=typ(1)
+  axis_(1:1)=axis(1)
+  
+  call ed_get_g0and(warray,bath,G0and,axis_,typ_)
+  
+end subroutine ed_get_g0and_d5_c
+
+!Get Delta given a bath array
+subroutine ed_get_delta_d3_c(warray,dim_warray,bath,dim_bath,Delta,dim_Delta,axis,typ) bind(c, name='get_delta_n3')
+  use, intrinsic :: iso_c_binding
+  integer(c_int),value                                                        :: dim_warray, dim_bath
+  integer(c_int64_t)                                                          :: dim_Delta(3)
+  complex(c_double_complex),dimension(dim_warray)                             :: warray
+  real(c_double),dimension(dim_bath)                                          :: bath
+  complex(c_double_complex),dimension(dim_Delta(1),dim_Delta(2),dim_Delta(3)) :: Delta
+  character(kind=c_char), dimension(1),optional                               :: axis,typ
+  character(len=1)                                                            :: axis_,typ_
+  typ_(1:1)=typ(1)
+  axis_(1:1)=axis(1)
+  
+  call ed_get_Delta(warray,bath,Delta,axis_,typ_)
+  
+end subroutine ed_get_delta_d3_c
+
+subroutine ed_get_delta_d5_c(warray,dim_warray,bath,dim_bath,Delta,dim_Delta,axis,typ) bind(c, name='get_delta_n5')
+  use, intrinsic :: iso_c_binding
+  integer(c_int),value                                                        :: dim_warray, dim_bath
+  integer(c_int64_t)                                                          :: dim_Delta(5)
+  complex(c_double_complex),dimension(dim_warray)                             :: warray
+  real(c_double),dimension(dim_bath)                                          :: bath
+  complex(c_double_complex),dimension(dim_Delta(1),dim_Delta(2),dim_Delta(3),dim_Delta(4),dim_Delta(5)) :: Delta
+  character(kind=c_char), dimension(1),optional                               :: axis,typ
+  character(len=1)                                                            :: axis_,typ_
+  typ_(1:1)=typ(1)
+  axis_(1:1)=axis(1)
+  
+  call ed_get_Delta(warray,bath,Delta,axis_,typ_)
+  
+  
+end subroutine ed_get_delta_d5_c
+  

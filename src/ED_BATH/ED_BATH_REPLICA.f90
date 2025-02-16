@@ -128,12 +128,12 @@ contains
     if(ed_mode=="superc")Nnambu=2
     Nsym=size(lambdavec,2)
     if(size(lambdavec,1)/=Nbath)then
-       write(*,*) "                                                                               "
-       write(*,*) "ERROR: if you are trying to init Hreplica for inequivalent sites please note   "
-       write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
-       write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
-       write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
-       write(*,*) "                                                                               "
+       write(LOGfile,*) "                                                                               "
+       write(LOGfile,*) "ERROR: if you are trying to init Hreplica for inequivalent sites please note   "
+       write(LOGfile,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
+       write(LOGfile,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
+       write(LOGfile,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+       write(LOGfile,*) "                                                                               "
        stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
     endif
     !
@@ -163,7 +163,7 @@ contains
     !
     if(ed_verbose>2)then
        do ibath=1,Nbath
-          write(*,*) "Hreplica #"//str(ibath)//":"
+          write(LOGfile,*) "Hreplica #"//str(ibath)//":"
           call print_Hbuild(Hreplica_build(Hreplica_lambda(ibath,:)))
        enddo
     endif
@@ -182,12 +182,12 @@ contains
     if(ed_mode=="superc")Nnambu=2
     Nsym=size(lambdavec,2)
     if(size(lambdavec,1)/=Nbath)then
-       write(*,*) "                                                                               "
-       write(*,*) "ERROR: if you are trying to init Hreplica for inequivalent sites please note   "
-       write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
-       write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
-       write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
-       write(*,*) "                                                                               "
+       write(LOGfile,*) "                                                                               "
+       write(LOGfile,*) "ERROR: if you are trying to init Hreplica for inequivalent sites please note   "
+       write(LOGfile,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
+       write(LOGfile,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
+       write(LOGfile,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+       write(LOGfile,*) "                                                                               "
        stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
     endif
     !
@@ -367,18 +367,18 @@ contains
     enddo
     !
     ! PRINT DEPRECATION MESSAGE TO LOG
-    write(*,*) "                                                                               "
-    write(*,*) "WARNING: Passing a single lambdasym vector to ed_set_Hreplica is /deprecated/. "
-    write(*,*) "         You should instead define a different lambda for each bath component, "
-    write(*,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
-    write(*,*) "         Your single lambda vector has been internally copied into the required"
-    write(*,*) "         higher-rank array, so giving each replica the same set of lambdas.    "
-    write(*,*) "         >>> This back-compatibility patch might be removed in a future update."
-    write(*,*) "                                                                               "
+    write(LOGfile,*) "                                                                               "
+    write(LOGfile,*) "WARNING: Passing a single lambdasym vector to ed_set_Hreplica is /deprecated/. "
+    write(LOGfile,*) "         You should instead define a different lambda for each bath component, "
+    write(LOGfile,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
+    write(LOGfile,*) "         Your single lambda vector has been internally copied into the required"
+    write(LOGfile,*) "         higher-rank array, so giving each replica the same set of lambdas.    "
+    write(LOGfile,*) "         >>> This back-compatibility patch might be removed in a future update."
+    write(LOGfile,*) "                                                                               "
     !
     if(ed_verbose>2)then
        do ibath=1,Nbath
-          write(*,*) "Hreplica #"//str(ibath)//":"
+          write(LOGfile,*) "Hreplica #"//str(ibath)//":"
           call print_Hbuild(Hreplica_build(Hreplica_lambda(ibath,:)))
        enddo
     endif
@@ -461,12 +461,12 @@ contains
 #endif
     !
     if(size(lambdavec,1)/=Nbath)then
-       write(*,*) "                                                                               "
-       write(*,*) "ERROR: if you are trying to init Hgeneral for inequivalent sites please note   "
-       write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
-       write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
-       write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
-       write(*,*) "                                                                               "
+       write(LOGfile,*) "                                                                               "
+       write(LOGfile,*) "ERROR: if you are trying to init Hgeneral for inequivalent sites please note   "
+       write(LOGfile,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
+       write(LOGfile,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
+       write(LOGfile,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+       write(LOGfile,*) "                                                                               "
        stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
     else
        Nsym=size(lambdavec,2)
@@ -519,12 +519,12 @@ contains
     if(ed_mode=="superc")Nnambu=2
     Nsym=size(lambdavec,2)
     if(size(lambdavec,1)/=Nbath)then
-       write(*,*) "                                                                               "
-       write(*,*) "ERROR: if you are trying to init Hgeneral for inequivalent sites please note   "
-       write(*,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
-       write(*,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
-       write(*,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
-       write(*,*) "                                                                               "
+       write(LOGfile,*) "                                                                               "
+       write(LOGfile,*) "ERROR: if you are trying to init Hgeneral for inequivalent sites please note   "
+       write(LOGfile,*) "       that the lambdasym array /MUST/ have [Nineq]x[Nbath]x[Nsym] shape.      "
+       write(LOGfile,*) "       The legacy [Nineq]x[Nsym] is not supported anymore, for it would shadow "
+       write(LOGfile,*) "       the new recommended [Nbath]x[Nsym] shape for the single impurity case.  "
+       write(LOGfile,*) "                                                                               "
        stop ! This unfortunately still leaves room for nasty problems if Nbath==Nineq, but that's it...
     endif
     !
@@ -701,18 +701,18 @@ contains
     enddo
     !
     ! PRINT DEPRECATION MESSAGE TO LOG
-    write(*,*) "                                                                               "
-    write(*,*) "WARNING: Passing a single lambdasym vector to ed_set_Hgeneral is /deprecated/. "
-    write(*,*) "         You should instead define a different lambda for each bath component, "
-    write(*,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
-    write(*,*) "         Your single lambda vector has been internally copied into the required"
-    write(*,*) "         higher-rank array, so giving each general the same set of lambdas.    "
-    write(*,*) "         >>> This back-compatibility patch might be removed in a future update."
-    write(*,*) "                                                                               "
+    write(LOGfile,*) "                                                                               "
+    write(LOGfile,*) "WARNING: Passing a single lambdasym vector to ed_set_Hgeneral is /deprecated/. "
+    write(LOGfile,*) "         You should instead define a different lambda for each bath component, "
+    write(LOGfile,*) "         namely passing a [Nbath]x[Nsym] array instead of a [Nsym] vector.     "
+    write(LOGfile,*) "         Your single lambda vector has been internally copied into the required"
+    write(LOGfile,*) "         higher-rank array, so giving each general the same set of lambdas.    "
+    write(LOGfile,*) "         >>> This back-compatibility patch might be removed in a future update."
+    write(LOGfile,*) "                                                                               "
     !
     if(ed_verbose>2)then
        do ibath=1,Nbath
-          write(*,*) "Hgeneral #"//str(ibath)//":"
+          write(LOGfile,*) "Hgeneral #"//str(ibath)//":"
           call print_Hbuild(Hgeneral_build(Hgeneral_lambda(ibath,:)))
        enddo
     endif

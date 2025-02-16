@@ -363,7 +363,7 @@ contains
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impG_nonsu2"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impG_nonsu2"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1)
@@ -470,7 +470,7 @@ contains
       Gf(ispin,jspin,iorb,jorb,:)=zero
       !
 #ifdef _DEBUG
-      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
+      if(ed_verbose>2)write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//str(jorb)//"_s"//str(ispin)//str(jspin)
 #endif
       if(.not.allocated(impGmatrix(ispin,jspin,iorb,jorb)%state)) return
       !
@@ -508,7 +508,7 @@ contains
     complex(8),dimension(Nspin*Norb,Nspin*Norb)            :: iGzeta
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Sigma_nonsu2"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_nonsu2"
 #endif
     !
     axis_="m";if(present(axis))axis_=str(axis)

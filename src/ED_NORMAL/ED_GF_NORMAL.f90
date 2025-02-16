@@ -211,7 +211,7 @@ contains
     integer                     :: Ndws(Ns_Ud)
     !
 #ifdef _DEBUG
-    if(ed_verbose>3)write(Logfile,"(A)")&
+    if(ed_verbose>1)write(Logfile,"(A)")&
          "DEBUG lanc_build_gf_phonon: build phonon GF"
 #endif
     do istate=1,state_list%size
@@ -419,7 +419,7 @@ contains
     integer                                                :: iorb,jorb,ispin,jspin,i
     character(len=1)                                       :: axis_
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impG_normal"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impG_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -470,7 +470,7 @@ contains
       Gf(ispin,ispin,iorb,jorb,:)=zero
       !
 #ifdef _DEBUG
-      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
+      if(ed_verbose>2)write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(jorb)//"_s"//str(ispin)
 #endif
       if(.not.allocated(impGmatrix(ispin,ispin,iorb,jorb)%state)) return
       !
@@ -509,7 +509,7 @@ contains
     integer                            :: Nexcs,iexc
     real(8)                            :: peso,de
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impD_normal"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impD_normal"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -566,7 +566,7 @@ contains
     character(len=1)                                       :: axis_
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Sigma_normal"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_normal"
 #endif
     axis_="m";if(present(axis))axis_=str(axis)
     !

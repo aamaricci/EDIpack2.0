@@ -447,7 +447,7 @@ contains
   subroutine map_deallocate_scalar(H)
     type(sector_map) :: H
     if(.not.H%status)then
-       write(*,*) "WARNING map_deallocate_scalar: H is not allocated"
+       write(LOGfile,*) "WARNING map_deallocate_scalar: H is not allocated"
        return
     endif
     if(allocated(H%map))deallocate(H%map)
@@ -655,7 +655,6 @@ contains
           ialfa = iorb
           ipos  = 1
        endif
-       print*,ialfa,ipos
        !
        call build_sector(isector,sectorI)
        !
@@ -802,7 +801,7 @@ contains
     character(2),dimension(-1:1)           :: Cstr = ["C ","  ","C*"]
     character(:),allocatable               :: a,sg,Ostr
     !
-    if(.not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
+    if(ed_mode == "normal" .and. .not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
     !       
     if(MpiMaster)then
        !
@@ -929,7 +928,7 @@ contains
     character(2),dimension(-1:1)           :: Cstr = ["C ","  ","C*"]
     character(:),allocatable               :: a,sg,Ostr
     !
-    if(.not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
+    if(ed_mode == "normal" .and. .not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
     !
     if(MpiMaster)then
        !

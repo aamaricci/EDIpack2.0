@@ -24,8 +24,10 @@ while read DIR; do
 	    for exe in *.x
 	    do
 		echo "Running $exe:"
-		./$exe ED_VERBOSE=1
+		./$exe ED_VERBOSE=1 LOGFILE=6 2>/dev/null
 		echo ""
+		echo ""
+		sleep 1
 	    done
 	    cd $HERE
 	fi

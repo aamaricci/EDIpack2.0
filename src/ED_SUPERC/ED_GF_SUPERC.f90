@@ -564,7 +564,7 @@ contains
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impG_superc"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impG_superc"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -605,7 +605,7 @@ contains
       complex(8)                         :: peso
       !
 #ifdef _DEBUG
-      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(iorb)//"_axis: "//str(axis_)
+      if(ed_verbose>2)write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(iorb)//"_axis: "//str(axis_)
 #endif
       if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state))return
       !
@@ -638,7 +638,7 @@ contains
       complex(8)         :: peso
       !
 #ifdef _DEBUG
-      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(jorb)//"_axis: "//str(axis_)
+      if(ed_verbose>2)write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(jorb)//"_axis: "//str(axis_)
 #endif
       if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state)) return
       !
@@ -684,7 +684,7 @@ contains
     complex(8)                                             :: auxG(4,size(zeta))
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impF_superc"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impF_superc"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -737,7 +737,7 @@ contains
       auxG(1:2,:)=zero
       !
 #ifdef _DEBUG
-      write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(iorb)//"_axis: "//str(axis_)
+      if(ed_verbose>2)write(LOGfile,"(A)")"DEBUG Get G_l"//str(iorb)//"_m"//str(iorb)//"_axis: "//str(axis_)
 #endif
       if(.not.allocated(impGmatrix(1,1,iorb,iorb)%state))return
       if(.not.allocated(impGmatrix(2,2,iorb,iorb)%state))return
@@ -774,7 +774,7 @@ contains
       auxG(4,:)=zero
       !
 #ifdef _DEBUG
-      write(LOGfile,"(A)")"DEBUG Get F_l"//str(iorb)//"_m"//str(jorb)//"_axis: "//str(axis_)
+      if(ed_verbose>2)write(LOGfile,"(A)")"DEBUG Get F_l"//str(iorb)//"_m"//str(jorb)//"_axis: "//str(axis_)
 #endif
       if(.not.allocated(impGmatrix(1,1,iorb,jorb)%state)) return
       !
@@ -820,7 +820,7 @@ contains
     complex(8)                         :: peso
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_impD_superc"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_impD_superc"
 #endif
     !
     axis_ = 'm' ; if(present(axis))axis_ = axis(1:1) !only for self-consistency, not used here
@@ -883,7 +883,7 @@ contains
     integer                                                :: L,ispin,iorb
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Sigma_superc"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Sigma_superc"
 #endif
     !
     axis_="m";if(present(axis))axis_=str(to_lower(axis))
@@ -965,7 +965,7 @@ contains
     integer                                                :: L,ispin,iorb
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG get_Self_superc"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Self_superc"
 #endif
     !
   axis_="m";if(present(axis))axis_=str(to_lower(axis))

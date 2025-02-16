@@ -50,7 +50,7 @@ contains
     !
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG build_GF: build GFs"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG build_GF: build GFs"
 #endif
     !
     call deallocate_GFmatrix(impGmatrix)
@@ -64,7 +64,7 @@ contains
     end select
     !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG build_GF: writing results"
+    if(ed_verbose>2)write(Logfile,"(A)")"DEBUG build_GF: writing results"
 #endif
     if(MPIMASTER)then
        call print_impGmatrix()
@@ -635,17 +635,17 @@ contains
     select case(bath_type)
     case default
        totNorb =Norb
-       totNspin=Nspin*(Nspin+1)/2
+       totNspin=Nspin*Nspin
        totNso  =totNorb*totNspin
        allocate(getIorb(totNso),getJorb(totNso),getIspin(totNso),getJspin(totNso))
        l=0
        do iorb=1,Norb
           do ispin=1,Nspin
-             do jspin=ispin,Nspin
+             do jspin=1,Nspin
                 l=l+1
                 getIorb(l)=iorb
                 getIspin(l)=ispin
-                getJorb(l)=jorb
+                getJorb(l)=iorb
                 getJspin(l)=jspin
              enddo
           enddo
