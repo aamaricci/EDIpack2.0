@@ -6,7 +6,7 @@ function fdelta_bath_array_replica(x,dmft_bath_,axis) result(Fdelta)
   type(effective_bath)                                              :: dmft_bath_ !the current :f:var:`effective_bath` instance
   character(len=*),optional                                         :: axis    !string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x))               :: Fdelta
-  character(len=4)                                                  :: axis_
+  character(len=1)                                                  :: axis_
   integer                                                           :: ibath
   integer                                                           :: i,L
   real(8),dimension(Nspin*Norb)                                     :: V
@@ -16,7 +16,7 @@ function fdelta_bath_array_replica(x,dmft_bath_,axis) result(Fdelta)
   complex(8),dimension(Nnambu*Nspin*Norb,Nnambu*Nspin*Norb)         :: invH_k
   complex(8),dimension(Nnambu*Nspin,Nnambu*Nspin,Norb,Norb)         :: invH_knn
   !
-  axis_="mats";if(present(axis))axis_=str(axis)
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
   !
   Fdelta=zero
   !

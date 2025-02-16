@@ -67,17 +67,12 @@ contains
        if(mpiSIZE>1)stop "ED ERROR: lanc_method=Dvdson + MPIsize>1: not possible at the moment"       
     endif
     !
-    if(ed_diag_type=="full".AND.MpiStatus)then
-       if(mpiSIZE>1)stop "ED ERROR: ed_diag_type=FULL + MPIsize>1: not possible at the moment"
-    end if
     !
-    if(ed_diag_type=="lanc")then
-       if(ed_finite_temp)then
-          if(lanc_nstates_total==1)stop "ED ERROR: ed_diag_type==lanc + ed_finite_temp=T *but* lanc_nstates_total==1 => T=0. Increase lanc_nstates_total"
-       else
-          if(lanc_nstates_total>1)print*, "ED WARNING: ed_diag_type==lanc + ed_finite_temp=F, T=0 *AND* lanc_nstates_total>1. re-Set lanc_nstates_total=1"
-          lanc_nstates_total=1
-       endif
+    if(ed_finite_temp)then
+       if(lanc_nstates_total==1)stop "ED ERROR: ed_finite_temp=T *but* lanc_nstates_total==1 => T=0. Increase lanc_nstates_total"
+    else
+       if(lanc_nstates_total>1)print*, "ED WARNING: ed_finite_temp=F, T=0 *AND* lanc_nstates_total>1. re-Set lanc_nstates_total=1"
+       lanc_nstates_total=1
     endif
     !
     if(ed_sectors.AND.ed_mode/="normal")then
@@ -88,7 +83,12 @@ contains
     !    write(LOGfile,*)"ED_WARNING: chi2_figgf_*_superc: revert to cg_grad=1(numeric)"
     !    cg_grad=1
     ! endif
-
+    !
+    if(Norb==1)then
+       chiexct_flag    =.false.
+       ed_print_chiexct=.false.
+    endif
+    !    
   end subroutine ed_checks_global
 
 
@@ -265,33 +265,21 @@ contains
     !
     finiteT = ed_finite_temp
     !
-    if(ed_diag_type=="lanc")then
-       if(finiteT)then
-          if(mod(lanc_nstates_sector,2)/=0)then
-             lanc_nstates_sector=lanc_nstates_sector+1
-             write(LOGfile,"(A,I10)")"Increased Lanc_nstates_sector:",lanc_nstates_sector
-          endif
-          if(mod(lanc_nstates_total,2)/=0)then
-             lanc_nstates_total=lanc_nstates_total+1
-             write(LOGfile,"(A,I10)")"Increased Lanc_nstates_total:",lanc_nstates_total
-          endif
-          write(LOGfile,"(A,I3)")"Nstates x Sector = ", lanc_nstates_sector
-          write(LOGfile,"(A,I3)")"Nstates   Total  = ", lanc_nstates_total
-          !
-          write(LOGfile,"(A)")"Lanczos FINITE temperature calculation:"
-       else
-          write(LOGfile,"(A)")"Lanczos ZERO temperature calculation:"
+    if(finiteT)then
+       if(mod(lanc_nstates_sector,2)/=0)then
+          lanc_nstates_sector=lanc_nstates_sector+1
+          write(LOGfile,"(A,I10)")"Increased Lanc_nstates_sector:",lanc_nstates_sector
        endif
+       if(mod(lanc_nstates_total,2)/=0)then
+          lanc_nstates_total=lanc_nstates_total+1
+          write(LOGfile,"(A,I10)")"Increased Lanc_nstates_total:",lanc_nstates_total
+       endif
+       write(LOGfile,"(A,I3)")"Nstates x Sector = ", lanc_nstates_sector
+       write(LOGfile,"(A,I3)")"Nstates   Total  = ", lanc_nstates_total
+       !
+       write(LOGfile,"(A)")"Lanczos FINITE temperature calculation:"
     else
-       if(finiteT)then
-          write(LOGfile,"(A)")"Full ED finite T calculation"
-       else
-          ed_diag_type='lanc'
-          lanc_nstates_total=1
-          lanc_dim_threshold=product(DimUps)*product(DimDws)*Dimph
-          write(LOGfile,"(A)")"Full ED T=0 calculation. Set LANC_DIM_THRESHOLD to "//str(lanc_dim_threshold)
-          if(lanc_dim_threshold>2**13)stop "Full ED T=0: LANC_DIM_THRESHOLD > 2**13=8192!"
-       endif
+       write(LOGfile,"(A)")"Lanczos ZERO temperature calculation:"
     endif
     !
     !Jhflag=.FALSE.
@@ -319,53 +307,16 @@ contains
        call assert_shape(impHloc,[Nspin,Nspin,Norb,Norb],"init_ed_structure","impHloc")
     endif
     !
-    !allocate functions
-    allocate(impSmats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impSreal(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impSAmats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impSAreal(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impSmats=zero
-    impSreal=zero
-    impSAmats=zero
-    impSAreal=zero
-    !
-    allocate(impGmats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impGreal(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impFmats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impFreal(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impGmats=zero
-    impGreal=zero
-    impFmats=zero
-    impFreal=zero
-    !
-    allocate(impG0mats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impG0real(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impF0mats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impF0real(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impG0mats=zero
-    impG0real=zero
-    impF0mats=zero
-    impF0real=zero
-    !
-    allocate(impD0mats(Nspin,Nspin,Norb,Norb,Lmats))
-    allocate(impD0real(Nspin,Nspin,Norb,Norb,Lreal))
-    allocate(impT0mats(Nspin,Nspin,Norb,Norb,Lmats)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    allocate(impT0real(Nspin,Nspin,Norb,Norb,Lreal)) !THIS SHOULD NOT DEPEND ON SPIN: NSPIN=>1
-    impD0mats=zero
-    impD0real=zero
-    impT0mats=zero
-    impT0real=zero
-    !
-    allocate(impDmats_ph(0:Lmats))
-    allocate(impDreal_ph(Lreal))
-    impDmats_ph=zero
-    impDreal_ph=zero
-    !
     if(ed_mode=="superc")then
-      allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
+       allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
     else
-      allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+       allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
     endif
+    !
+    allocate(spinChiMatrix(Norb,Norb))
+    allocate(densChiMatrix(Norb,Norb))
+    allocate(pairChiMatrix(Norb,Norb))
+    allocate(exctChiMatrix(0:2,Norb,Norb))    
     !
     !allocate observables
     allocate(ed_dens(Norb),ed_docc(Norb),ed_dens_up(Norb),ed_dens_dw(Norb))
@@ -377,26 +328,6 @@ contains
     ed_dens_dw=0d0
     ed_mag=0d0
     ed_imp_info=0d0
-    !
-    allocate(spinChi_tau(Norb,Norb,0:Ltau))
-    allocate(spinChi_w(Norb,Norb,Lreal))
-    allocate(spinChi_iv(Norb,Norb,0:Lmats))
-    allocate(spinChiMatrix(Norb,Norb))
-    !
-    allocate(densChi_tau(Norb,Norb,0:Ltau))
-    allocate(densChi_w(Norb,Norb,Lreal))
-    allocate(densChi_iv(Norb,Norb,0:Lmats))
-    allocate(densChiMatrix(Norb,Norb))
-    !
-    allocate(pairChi_tau(Norb,Norb,0:Ltau))
-    allocate(pairChi_w(Norb,Norb,Lreal))
-    allocate(pairChi_iv(Norb,Norb,0:Lmats))
-    allocate(pairChiMatrix(Norb,Norb))
-    !
-    allocate(exctChi_tau(0:2,Norb,Norb,0:Ltau))
-    allocate(exctChi_w(0:2,Norb,Norb,Lreal))
-    allocate(exctChi_iv(0:2,Norb,Norb,0:Lmats))
-    allocate(exctChiMatrix(0:2,Norb,Norb))
     !
     allocate(spin_field(Norb,3))
     spin_field(:,1) = spin_field_x(1:Norb)
@@ -431,6 +362,19 @@ contains
     !
     !
     if(MpiMaster)write(LOGfile,"(A)")"Cleaning ED structure"
+    !
+    call deallocate_GFmatrix(impGmatrix)
+    call deallocate_GFmatrix(impDmatrix)
+    call deallocate_GFmatrix(spinChimatrix)
+    call deallocate_GFmatrix(densChimatrix)
+    call deallocate_GFmatrix(pairChimatrix)
+    call deallocate_GFmatrix(exctChimatrix)
+    if(allocated(impGmatrix))deallocate(impGmatrix)
+    if(allocated(spinChiMatrix))deallocate(spinChiMatrix)
+    if(allocated(densChiMatrix))deallocate(densChiMatrix)
+    if(allocated(pairChiMatrix))deallocate(pairChiMatrix)
+    if(allocated(exctChiMatrix))deallocate(exctChiMatrix)
+    !
     if(allocated(spH0ups))deallocate(spH0ups)
     if(allocated(spH0dws))deallocate(spH0dws)
     if(allocated(getCsector))deallocate(getCsector)
@@ -446,25 +390,7 @@ contains
     if(allocated(sectors_mask))deallocate(sectors_mask)
     if(allocated(neigen_sector))deallocate(neigen_sector)
     if(allocated(impHloc))deallocate(impHloc)
-    if(allocated(impSmats))deallocate(impSmats)
-    if(allocated(impSreal))deallocate(impSreal)
-    if(allocated(impSAmats))deallocate(impSAmats)
-    if(allocated(impSAreal))deallocate(impSAreal)
-    if(allocated(impGmats))deallocate(impGmats)
-    if(allocated(impGreal))deallocate(impGreal)
-    if(allocated(impFmats))deallocate(impFmats)
-    if(allocated(impFreal))deallocate(impFreal)
-    if(allocated(impG0mats))deallocate(impG0mats)
-    if(allocated(impG0real))deallocate(impG0real)
-    if(allocated(impF0mats))deallocate(impF0mats)
-    if(allocated(impF0real))deallocate(impF0real)
-    if(allocated(impD0mats))deallocate(impD0mats)
-    if(allocated(impD0real))deallocate(impD0real)
-    if(allocated(impT0mats))deallocate(impT0mats)
-    if(allocated(impT0real))deallocate(impT0real)
-    if(allocated(impDmats_ph))deallocate(impDmats_ph)
-    if(allocated(impDreal_ph))deallocate(impDreal_ph)
-    if(allocated(impGmatrix))deallocate(impGmatrix)
+
     if(allocated(ed_dens))deallocate(ed_dens)
     if(allocated(ed_docc))deallocate(ed_docc)
     if(allocated(ed_phisc))deallocate(ed_phisc)
@@ -472,22 +398,6 @@ contains
     if(allocated(ed_dens_up))deallocate(ed_dens_up)
     if(allocated(ed_dens_dw))deallocate(ed_dens_dw)
     if(allocated(ed_mag))deallocate(ed_mag)
-    if(allocated(spinChi_tau))deallocate(spinChi_tau)
-    if(allocated(spinChi_w))deallocate(spinChi_w)
-    if(allocated(spinChi_iv))deallocate(spinChi_iv)
-    if(allocated(spinChiMatrix))deallocate(spinChiMatrix)
-    if(allocated(densChi_tau))deallocate(densChi_tau)
-    if(allocated(densChi_w))deallocate(densChi_w)
-    if(allocated(densChi_iv))deallocate(densChi_iv)
-    if(allocated(densChiMatrix))deallocate(densChiMatrix)
-    if(allocated(pairChi_tau))deallocate(pairChi_tau)
-    if(allocated(pairChi_w))deallocate(pairChi_w)
-    if(allocated(pairChi_iv))deallocate(pairChi_iv)
-    if(allocated(pairChiMatrix))deallocate(pairChiMatrix)
-    if(allocated(exctChi_tau))deallocate(exctChi_tau)
-    if(allocated(exctChi_w))deallocate(exctChi_w)
-    if(allocated(exctChi_iv))deallocate(exctChi_iv)
-    if(allocated(exctChiMatrix))deallocate(exctChiMatrix)
     if(allocated(spin_field))deallocate(spin_field)
   end subroutine delete_ed_structure
 

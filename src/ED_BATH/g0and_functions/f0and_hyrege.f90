@@ -5,7 +5,7 @@ function f0and_bath_array_hyrege(x,dmft_bath_,axis) result(F0and)
   complex(8),dimension(:),intent(in)                  :: x !complex  array for the frequency
   type(effective_bath)                                :: dmft_bath_ !the current :f:var:`effective_bath` instance
   character(len=*),optional                           :: axis!string indicating the desired axis, :code:`'m'` for Matsubara (default), :code:`'r'` for Real-axis    
-  character(len=4)                                    :: axis_
+  character(len=1)                                    :: axis_
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: F0and
   !
   complex(8),dimension(Nspin,Nspin,Norb,Norb,size(x)) :: Delta,Fdelta
@@ -13,7 +13,7 @@ function f0and_bath_array_hyrege(x,dmft_bath_,axis) result(F0and)
   complex(8),dimension(2*Nspin*Norb,size(x))          :: z
   complex(8),dimension(:,:),allocatable               :: fgorb,zeta
   !
-  axis_="mats";if(present(axis))axis_=str(axis)
+  axis_="m";if(present(axis))axis_=str(to_lower(axis))
   !
   F0and=zero
   !
@@ -25,8 +25,8 @@ function f0and_bath_array_hyrege(x,dmft_bath_,axis) result(F0and)
   z     = zeta_superc(x,xmu,axis_)
   !
   select case(axis_)
-  case default;stop "f0and_bath_array error: axis_ not support"
-  case ("mats")
+  case default;stop "f0and_bath_array_hyrege error: axis_ not support"
+  case ("m")
      do ispin=1,Nspin   !==1
         do i=1,L
            zeta = diag(z(:,i))
@@ -43,7 +43,7 @@ function f0and_bath_array_hyrege(x,dmft_bath_,axis) result(F0and)
            F0and(ispin,ispin,:,:,i) = fgorb(1:Norb,1+Norb:Norb+Norb)
         enddo
      enddo
-  case("real")
+  case ("r")
      do ispin=1,Nspin   !==1
         do i=1,L
            zeta = diag(z(:,i))

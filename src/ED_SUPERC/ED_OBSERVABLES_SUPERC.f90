@@ -25,7 +25,6 @@ MODULE ED_OBSERVABLES_SUPERC
   real(8),dimension(:,:),allocatable  :: phiscAB
   real(8),dimension(:),allocatable    :: phisc
   real(8),dimension(:,:),allocatable  :: sz2,n2
-  real(8),dimensioN(:,:),allocatable  :: zimp,simp
   real(8)                             :: s2tot
   real(8)                             :: Egs
   real(8)                             :: Ei
@@ -35,7 +34,7 @@ MODULE ED_OBSERVABLES_SUPERC
   real(8),dimension(:,:),allocatable  :: pdf_part
   real(8)                             :: dens_ph
   real(8)                             :: X_ph, X2_ph
-  real(8)                             :: w_ph
+
   !
   integer                             :: iorb,jorb,istate
   integer                             :: ispin,jspin
@@ -55,7 +54,7 @@ MODULE ED_OBSERVABLES_SUPERC
   integer                             :: isector,jsector
   !
   complex(8),dimension(:),allocatable :: vvinit
-  complex(8),dimension(:),allocatable :: state_cvec
+  complex(8),dimension(:),allocatable :: v_state
   logical                             :: Jcondition
   !
   type(sector)                        :: sectorI,sectorJ
@@ -84,7 +83,6 @@ contains
     allocate(docc(Norb))
     allocate(magz(Norb),sz2(Norb,Norb),n2(Norb,Norb))
     allocate(phisc(Norb),phiscAB(Norb,Norb))
-    allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
     allocate(Prob(3**Norb))
     allocate(prob_ph(DimPh))
     allocate(pdf_ph(Lpos))
@@ -108,7 +106,6 @@ contains
     dens_ph = 0.d0
     pdf_ph  = 0.d0
     pdf_part= 0.d0
-    w_ph    = w0_ph
     !
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")&
@@ -117,19 +114,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
-       !
+       v_state    =  es_return_cvec(state_list,istate)       
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_superc: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -138,7 +126,7 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             gs_weight=peso*abs(state_cvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              i_el = mod(i-1,sectorI%DimEl)+1
              m    = sectorI%H(1)%map(i_el)
              ib   = bdecomp(m,2*Ns)
@@ -182,12 +170,12 @@ contains
              !<X> and <X^2> with X=(b+bdg)/sqrt(2)
              if(iph<DimPh)then
                 j= i_el + (iph)*sectorI%DimEl
-                X_ph = X_ph + sqrt(2.d0*dble(iph))*real(state_cvec(i)*conjg(state_cvec(j)))*peso
+                X_ph = X_ph + sqrt(2.d0*dble(iph))*real(v_state(i)*conjg(v_state(j)))*peso
              end if
              X2_ph = X2_ph + 0.5d0*(1+2*(iph-1))*gs_weight
              if(iph<DimPh-1)then
                 j= i_el + (iph+1)*sectorI%DimEl
-                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*real(state_cvec(i)*conjg(state_cvec(j)))*peso
+                X2_ph = X2_ph + sqrt(dble((iph)*(iph+1)))*real(v_state(i)*conjg(v_state(j)))*peso
              end if
              !compute the lattice probability distribution function
              if(Dimph>1 .AND. iph==1) then
@@ -196,7 +184,7 @@ contains
                 do iorb=1,Norb
                    val = val + abs(nint(sign((nt(iorb) - 1.d0),real(g_ph(iorb,iorb)))))
                 enddo
-                call prob_distr_ph(state_cvec,val)
+                call prob_distr_ph(v_state,val)
              end if
           enddo
           !
@@ -209,27 +197,16 @@ contains
              !GET <(b_up + adg_dw)(bdg_up + a_dw)> = 
              !<b_up*bdg_up> + <adg_dw*a_dw> + <b_up*a_dw> + <adg_dw*bdg_up> = 
              !<n_a,dw> + < 1 - n_b,up> + 2*<PHI>_ab
+             !EVALUATE [a_dw + bdg_up]|gs> = [1,1].[C_{-1},C_{+1}].[iorb,jorb].[dw,up]
              do iorb=1,Norb !A
-                do jorb=1,Norb !B
+                do jorb=1,Norb !B 
                    isz = getsz(isector)
                    if(isz<Ns)then
                       jsector = getsector(isz+1,1)
-                      call build_sector(jsector,sectorJ)
-                      allocate(vvinit(sectorJ%Dim));vvinit=zero
-                      do i=1,sectorI%Dim
-                         call apply_op_CDG(i,j,sgn,jorb,1,1,sectorI,sectorJ)!bdg_up
-                         if(sgn==0d0.OR.j==0)cycle
-                         vvinit(j) = sgn*state_cvec(i)
-                      enddo
-                      do i=1,sectorI%Dim
-                         call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !a_dw
-                         if(sgn==0d0.OR.j==0)cycle
-                         vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                      enddo
-                      call delete_sector(sectorJ)
+                      vvinit  = apply_Cops(v_state,[one,one],[-1,1],[iorb,jorb],[2,1],isector,jsector)
                       phiscAB(iorb,jorb) = phiscAB(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                      deallocate(vvinit)
                    endif
-                   if(allocated(vvinit))deallocate(vvinit)
                 enddo
              enddo
           enddo
@@ -238,16 +215,20 @@ contains
           !
        endif
        !
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
     !
-
-
-
+    do iorb=1,Norb
+       do jorb=1,Norb
+          phiscAB(iorb,jorb) = 0.5d0*(phiscAB(iorb,jorb) - dens_dw(iorb) - (1.d0-dens_up(jorb)))
+       enddo
+       phisc(iorb)=phiscAB(iorb,iorb)
+    enddo
+    !
     !STATUS: IMPORTED FROM NORMAL, TO BE UPDATE TO NAMBU BASIS <\psi^+_a Psi_a>
     !     !
     !     !SINGLE PARTICLE IMPURITY DENSITY MATRIX
@@ -336,20 +317,6 @@ contains
     !     if(ed_verbose>2)write(Logfile,"(A)")""
     ! #endif
     !     !
-
-    do iorb=1,Norb
-       do jorb=1,Norb
-          phiscAB(iorb,jorb) = 0.5d0*(phiscAB(iorb,jorb) - dens_dw(iorb) - (1.d0-dens_up(jorb)))
-       enddo
-       phisc(iorb)=phiscAB(iorb,iorb)
-    enddo
-    !
-    !
-    if(MPIMASTER)then
-       call get_szr
-       if(DimPh>1) w_ph = sqrt(-2.d0*w0_ph/impDmats_ph(0)) !renormalized phonon frequency
-       call write_observables()
-    endif
     write(LOGfile,"(A,10f18.12,f18.12,A)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
     write(LOGfile,"(A,10f18.12,A)")    "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
     write(LOGfile,"(A,20f18.12,A)")    "phiAB "//reg(ed_file_suffix)//"=",((phiscAB(iorb,jorb),iorb=1,Norb),jorb=1,Norb)
@@ -358,7 +325,10 @@ contains
        write(LOGfile,"(A,10f18.12,A)")    "magZ"//reg(ed_file_suffix)//"=",(magz(iorb),iorb=1,Norb)
     endif
     !
-    if(DimPh>1)call write_pdf()
+    if(DimPh>1)then
+       call write_pdf()
+    endif
+    !
     !
     do iorb=1,Norb
        ed_dens_up(iorb)=dens_up(iorb)
@@ -385,8 +355,12 @@ contains
     endif
 #endif
     !
+    if(MPIMASTER)then
+       call write_observables()
+    endif
+    !
     deallocate(dens,docc,phiscAB,phisc,dens_up,dens_dw,magz,sz2,n2,Prob)
-    deallocate(simp,zimp,prob_ph,pdf_ph,pdf_part)
+    deallocate(prob_ph,pdf_ph,pdf_part)
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
@@ -431,18 +405,10 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state    =  es_return_cvec(state_list,istate)
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG local_energy_superc: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -461,7 +427,7 @@ contains
                 ndw(iorb)=dble(ib(iorb+Ns))
              enddo
              !
-             gs_weight=peso*abs(state_cvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              !
              !start evaluating the Tr(H_loc) to estimate potential energy
              !> H_Imp: Diagonal Elements, i.e. local part
@@ -482,7 +448,7 @@ contains
                       call cdg(iorb,k1,k2,sg2)
                       j_el=binary_search(sectorI%H(1)%map,k2)
                       j   = j_el + (iph-1)*sectorI%DimEl
-                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
+                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
                    endif
                    !SPIN DW
                    Jcondition = &
@@ -494,7 +460,7 @@ contains
                       call cdg(iorb+Ns,k1,k2,sg2)
                       j_el=binary_search(sectorI%H(1)%map,k2)
                       j   = j_el + (iph-1)*sectorI%DimEl
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
+                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
                    endif
                 enddo
              enddo
@@ -548,8 +514,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j_el=binary_search(sectorI%H(1)%map,k4)
                          j   = j_el + (iph-1)*sectorI%DimEl
-                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
                       endif
                    enddo
                 enddo
@@ -574,8 +540,8 @@ contains
                          call cdg(iorb,k3,k4,sg4)
                          j_el=binary_search(sectorI%H(1)%map,k4)
                          j   = j_el + (iph-1)*sectorI%DimEl
-                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
+                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
                       endif
                    enddo
                 enddo
@@ -600,7 +566,7 @@ contains
           call delete_sector(sectorI)
        endif
        !
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     !
@@ -645,23 +611,6 @@ contains
   !####################################################################
   !                    COMPUTATIONAL ROUTINES
   !####################################################################
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : get scattering rate and renormalization constant Z
-  !+-------------------------------------------------------------------+
-  subroutine get_szr()
-    integer                  :: ispin,iorb
-    real(8)                  :: wm1,wm2
-    wm1 = pi/beta ; wm2=3d0*pi/beta
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          simp(iorb,ispin) = dimag(impSmats(ispin,ispin,iorb,iorb,1)) - &
-               wm1*(dimag(impSmats(ispin,ispin,iorb,iorb,2))-dimag(impSmats(ispin,ispin,iorb,iorb,1)))/(wm2-wm1)
-          zimp(iorb,ispin)   = 1.d0/( 1.d0 + abs( dimag(impSmats(ispin,ispin,iorb,iorb,1))/wm1 ))
-       enddo
-    enddo
-  end subroutine get_szr
-
-
 
 
   !+-------------------------------------------------------------------+
@@ -700,20 +649,6 @@ contains
          str(5*Norb+1)//"s2tot",str(5*Norb+2)//"egs"
     close(unit)
     !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_info.ed")
-    write(unit,"(A1,*(A10,6X))") "# ",&
-         ((str(iorb+(ispin-1)*Norb)//"z_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_info.ed")
-    write(unit,"(A1,*(A10,6X))") "#",&
-         ((str(iorb+(ispin-1)*Norb)//"sig_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
     !Spin-Spin correlation
     unit = free_unit()
     open(unit,file="Sz2_info.ed")
@@ -736,7 +671,7 @@ contains
     if(Nph>0)then
        unit = free_unit()
        open(unit,file="nph_info.ed")
-       write(unit,"(A1,*(A10,6X))") "#","1nph", "2w_ph","3X_ph", "4X2_ph"
+       write(unit,"(A1,*(A10,6X))") "#","1nph", "2X_ph", "3X2_ph"
        close(unit)
        !
        !N_ph probability:
@@ -777,18 +712,6 @@ contains
          s2tot,egs
     close(unit)
     !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
     !Spin-Spin correlation
     unit = free_unit()
     open(unit,file="Sz2_last"//reg(ed_file_suffix)//".ed")
@@ -819,7 +742,7 @@ contains
     if(Nph>0)then
        unit = free_unit()
        open(unit,file="nph_last"//reg(ed_file_suffix)//".ed")
-       write(unit,"(90(F15.9,1X))") dens_ph, w_ph, X_ph, X2_ph
+       write(unit,"(90(F15.9,1X))") dens_ph,X_ph, X2_ph
        close(unit)
        !
        !
@@ -856,18 +779,6 @@ contains
          s2tot,egs
     close(unit)
     !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
     !Spin-Spin correlation
     unit = free_unit()
     open(unit,file="Sz2_all"//reg(ed_file_suffix)//".ed",position='append')
@@ -898,13 +809,13 @@ contains
     if(Nph>0)then
        unit = free_unit()
        open(unit,file="nph_all"//reg(ed_file_suffix)//".ed",position='append')
-       write(unit,"(*(F15.9,1X))") dens_ph, w_ph, X_ph, X2_ph
+       write(unit,"(*(F15.9,1X))") dens_ph, X_ph, X2_ph
        close(unit)
     endif
   end subroutine write_obs_all
 
 
-  
+
 
 
   subroutine write_energy()

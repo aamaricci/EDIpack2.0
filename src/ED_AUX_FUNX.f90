@@ -110,12 +110,25 @@ MODULE ED_AUX_FUNX
   public :: bjoin
   !BINARY SEARCH
   public :: binary_search
+
+  !Read GFmatrix arraus (internal use)
+  public :: read_ImpGMatrix
+  public :: read_ImpDMatrix
+  public :: read_spinChimatrix
+  public :: read_densChimatrix
+  public :: read_pairChimatrix
+  public :: read_exctChimatrix
+
+
+
   !AUX RESHAPE FUNCTIONS (internal use)
   public :: index_stride_so
   public :: lso2nnn_reshape
   public :: so2nn_reshape
   public :: nnn2lso_reshape
   public :: nn2so_reshape
+
+
 
   !SEARCH CHEMICAL POTENTIAL, this should go into DMFT_TOOLS I GUESS
   public :: ed_search_variable
@@ -419,8 +432,100 @@ contains
 
 
 
+  !##################################################################
+  !##################################################################
+  ! READ GFMATRIX ARRAYS
+  !##################################################################
+  !##################################################################
+  !+------------------------------------------------------------------+
+  !                    READ IMP G and D matrix
+  !+------------------------------------------------------------------+
+  subroutine read_ImpGmatrix(file)
+    !This subroutine reads weights and poles of the impurity Green's function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    
+    !
+    if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
+    if(allocated(impGmatrix))deallocate(impGmatrix)
+    if(ed_mode=="superc")then
+       allocate(impGmatrix(2*Nspin,2*Nspin,Norb,Norb))
+    else
+       allocate(impGmatrix(Nspin,Nspin,Norb,Norb))
+    endif
+    file_="gfmatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(impGmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_impGmatrix
 
+  subroutine read_impDmatrix(file)
+    !This subroutine reads weights and poles of the phonons Green's function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    call deallocate_GFmatrix(impDmatrix)
+    file_="dfmatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(impDmatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_impDmatrix
 
+  subroutine read_spinChimatrix(file)
+    !This subroutine reads weights and poles of the impurity spin susceptibility function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(spinChimatrix))call deallocate_GFmatrix(spinChimatrix)
+    if(allocated(spinChimatrix))deallocate(spinChimatrix)
+    allocate(spinChimatrix(Norb,Norb))
+    file_="spinchimatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(spinChimatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_spinChimatrix
+
+  subroutine read_densChimatrix(file)
+    !This subroutine reads weights and poles of the impurity charge density susceptibility function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(densChimatrix))call deallocate_GFmatrix(densChimatrix)
+    if(allocated(densChimatrix))deallocate(densChimatrix)
+    allocate(densChimatrix(Norb,Norb))
+    file_="denschimatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(densChimatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_densChimatrix
+
+  subroutine read_pairChimatrix(file)
+    !This subroutine reads weights and poles of the impurity pair susceptibility function by calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(pairChimatrix))call deallocate_GFmatrix(pairChimatrix)
+    if(allocated(pairChimatrix))deallocate(pairChimatrix)
+    allocate(pairChimatrix(Norb,Norb))
+    file_="pairchimatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(pairChimatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_pairChimatrix
+
+  subroutine read_exctChimatrix(file)
+    !This subroutine reads weights and poles of the impurity exciton susceptibilities calling :f:func:`read_GFmatrix`. These are read 
+    !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
+    !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
+    character(len=*),optional :: file
+    character(len=256)        :: file_
+    !
+    if(allocated(exctChimatrix))call deallocate_GFmatrix(exctChimatrix)
+    if(allocated(exctChimatrix))deallocate(exctChimatrix)
+    allocate(exctChimatrix(0:2,Norb,Norb))
+    file_="exctchimatrix";if(present(file))file_=str(file)
+    call read_GFmatrix(exctChimatrix,str(file_)//str(ed_file_suffix)//".restart")
+  end subroutine read_exctChimatrix
 
 
 
@@ -1186,19 +1291,16 @@ contains
   !PURPOSE  : Allocate arrays and setup frequencies and times
   !+------------------------------------------------------------------+
   subroutine allocate_grids
-    integer :: i
     if(.not.allocated(wm))allocate(wm(Lmats))
-    if(.not.allocated(vm))allocate(vm(0:Lmats))          !bosonic frequencies
+    if(.not.allocated(vm))allocate(vm(Lmats))          !bosonic frequencies
     if(.not.allocated(wr))allocate(wr(Lreal))
     if(.not.allocated(vr))allocate(vr(Lreal))
-    if(.not.allocated(tau))allocate(tau(0:Ltau))
-    wm     = pi/beta*real(2*arange(1,Lmats)-1,8)
-    do i=0,Lmats
-       vm(i) = pi/beta*2*i
-    enddo
-    wr     = linspace(wini,wfin,Lreal)
-    vr     = linspace(0d0,wfin,Lreal)
-    tau(0:)= linspace(0d0,beta,Ltau+1)
+    if(.not.allocated(tau))allocate(tau(Ltau))
+    wm  = pi/beta*(2*arange(1,Lmats)-1)
+    vm  = pi/beta*(2*arange(1,Lmats)-2)
+    wr  = linspace(wini,wfin,Lreal)
+    vr  = linspace(0d0,wfin,Lreal)
+    tau = linspace(0d0,beta,Ltau)
   end subroutine allocate_grids
 
 

@@ -9,7 +9,6 @@ MODULE ED_SPARSE_MAP
   private
 
 
-
   !SPARSE IMP-BATH MAP AS AN OBJECT
   type sparse_row
      integer                               :: size
@@ -252,13 +251,13 @@ contains
     if(imp_state < 0) stop "sp_insert_state error: imp_state < 0 "
     if(imp_state > sparse%Nimp_state-1) stop "sp_insert_state error: imp_state > map%Nimp_state 2^Nimp-1"
     row => sparse%imp_state(imp_state)
-    write(*,"(A10,I5)")"Imp State:",imp_state
-    write(*,"(A10,I5)")"     size:",row%size
-    write(*,"(A10,2I5)")"  min,max:",row%bath_state_min,row%bath_state_max
-    write(*,"(A10,"//str(row%size)//"I5)")"bath state",(row%bath_state(i),i=1,row%size)
-    write(*,"(A10,"//str(row%size)//"I5)")"sect indxs",(row%sector_indx(i),i=1,row%size)
-    write(*,"(A1)")""
-    write(*,"(A1)")""
+    write(LOGfile,"(A10,I5)")"Imp State:",imp_state
+    write(LOGfile,"(A10,I5)")"     size:",row%size
+    write(LOGfile,"(A10,2I5)")"  min,max:",row%bath_state_min,row%bath_state_max
+    write(LOGfile,"(A10,"//str(row%size)//"I5)")"bath state",(row%bath_state(i),i=1,row%size)
+    write(LOGfile,"(A10,"//str(row%size)//"I5)")"sect indxs",(row%sector_indx(i),i=1,row%size)
+    write(LOGfile,"(A1)")""
+    write(LOGfile,"(A1)")""
     !
   end subroutine sp_print_imp_state
 

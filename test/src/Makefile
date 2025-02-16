@@ -15,7 +15,7 @@ all: $(OBJS) NORMAL REPLICA GENERAL # HYBRID
 
 
 NORMAL REPLICA GENERAL: #HYBRID
-	make -C ./ED_$@
+	make -C ./BATH_$@
 
 .f90.o:
 	$(FC) $(FFLAGS) -c $< ${GLOB_INC}

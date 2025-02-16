@@ -13,6 +13,7 @@ MODULE ED_OBSERVABLES_NONSU2
   USE ED_BATH
   USE ED_HAMILTONIAN_NONSU2
   !
+  !
   implicit none
   private
   !
@@ -34,8 +35,6 @@ MODULE ED_OBSERVABLES_NONSU2
   real(8),dimension(:,:),allocatable    :: exct_tx ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{x}c_{js^{'}} \rangle`
   real(8),dimension(:,:),allocatable    :: exct_ty ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{y}c_{js^{'}} \rangle`
   real(8),dimension(:,:),allocatable    :: exct_tz ! excitonic order parameter :math:`\langle c^{\dagger}_{is}\sigma^{z}c_{js^{'}} \rangle`
-  real(8),dimension(:,:),allocatable    :: zimp ! quasiparticle weight
-  real(8),dimension(:,:),allocatable    :: simp ! scattering rate
   real(8)                               :: s2tot ! :math:`\langle S_{z}^{2} \rangle`
   real(8)                               :: Egs ! Ground-state energy
   real(8)                               :: Ei
@@ -59,7 +58,7 @@ MODULE ED_OBSERVABLES_NONSU2
   integer                               :: isector,jsector
   !
   complex(8),dimension(:),allocatable   :: vvinit
-  complex(8),dimension(:),allocatable   :: state_cvec
+  complex(8),dimension(:),allocatable   :: v_state
   logical                               :: Jcondition
   !
   type(sector)                          :: sectorI,sectorJ
@@ -99,7 +98,6 @@ contains
     allocate(magX(Norb),magY(Norb))
     allocate(exct_S0(Norb,Norb),exct_Tz(Norb,Norb))
     allocate(exct_Tx(Norb,Norb),exct_Ty(Norb,Norb))
-    allocate(simp(Norb,Nspin),zimp(Norb,Nspin))
     !
     Egs     = state_list%emin
     dens    = 0.d0
@@ -130,19 +128,11 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state    =  es_return_cvec(state_list,istate)
        !
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -151,7 +141,7 @@ contains
        if(Mpimaster)then
           call build_sector(isector,sectorI)
           do i = 1,sectorI%Dim
-             gs_weight=peso*abs(state_cvec(i))**2
+             gs_weight=peso*abs(v_state(i))**2
              !
              m  = sectorI%H(1)%map(i)
              ib = bdecomp(m,2*Ns)
@@ -181,16 +171,14 @@ contains
              s2tot = s2tot  + (sum(sz))**2*gs_weight
           enddo
        endif
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
-
-
-
-
+    !
+    !
     !EVALUATE <SX> AND <SY>
     do iorb=1,Norb
        !
@@ -201,19 +189,11 @@ contains
        do istate=1,state_list%size
           isector = es_return_sector(state_list,istate)
           Ei      = es_return_energy(state_list,istate)
+          v_state    =  es_return_cvec(state_list,istate)
           !
 #ifdef _DEBUG
           if(ed_verbose>3)write(Logfile,"(A)")&
                "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-          if(MpiStatus)then
-             call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-          else
-             call es_return_cvector(state_list,istate,state_cvec) 
-          endif
-#else
-          call es_return_cvector(state_list,istate,state_cvec) 
 #endif
           !
           peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -222,64 +202,40 @@ contains
           !GET <(CDG_UP + CDG_DW)(C_UP + C_DW)> = 
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> + <CDG_UP*C_DW + CDG_DW*C_UP> = 
           !<N_UP> + <N_DW> + <Sx> 
-          !since <Sx> = <CDG_UP*C_DW + CDG_DW*C_UP> 
+          !since <Sx> = <CDG_UP*C_DW + CDG_DW*C_UP>
+          !
+          !APPLY (c_{iorb,up} + c_{iorb,dw})|gs> =  [1,1].[C_{-1},C_{-1}].[iorb,iorb].[1,2]
           jsector = getCsector(1,1,isector)
           if(jsector/=0)then
-             if(Mpimaster)then
-                call build_sector(isector,sectorI)
-                call build_sector(jsector,sectorJ)
-                allocate(vvinit(sectorJ%Dim));vvinit=zero
-                do i=1,sectorI%Dim
-                   call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !c_a,up
-                   if(sgn==0d0.OR.j==0)cycle
-                   vvinit(j) = sgn*state_cvec(i)
-                enddo
-                do i=1,sectorI%Dim
-                   call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !c_a,dw
-                   if(sgn==0d0.OR.j==0)cycle
-                   vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                enddo
-                call delete_sector(sectorI)
-                call delete_sector(sectorJ)
-                magx(iorb) = magx(iorb) + dot_product(vvinit,vvinit)*peso
-                if(allocated(vvinit))deallocate(vvinit)
-             endif
+             vvinit = apply_Cops(v_state,[one,one],[-1,-1],[iorb,iorb],[1,2],isector,jsector)                
+             magx(iorb) = magx(iorb) + dot_product(vvinit,vvinit)*peso
+             deallocate(vvinit)
           endif
           !
           !GET <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> = 
           !<CDG_UP*C_UP> + <CDG_DW*C_DW> - i<CDG_UP*C_DW - CDG_DW*C_UP> = 
           !<N_UP> + <N_DW> + <Sy>
-          !since <Sy> = -i<CDG_UP*C_DW - CDG_DW*C_UP>         
+          !since <Sy> = -i<CDG_UP*C_DW - CDG_DW*C_UP>
+          !
+          !APPLY (C_DW + i*C_UP)|gs> =  [1,xi].[C_{-1},C_{-1}].[iorb,iorb].[2,1]
           jsector = getCsector(1,1,isector)
           if(jsector/=0)then
-             if(Mpimaster)then
-                call build_sector(isector,sectorI)
-                call build_sector(jsector,sectorJ)
-                allocate(vvinit(sectorJ%Dim));vvinit=zero
-                do i=1,sectorI%Dim
-                   call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !i*c_a,up
-                   if(sgn==0d0.OR.j==0)cycle
-                   vvinit(j) = xi*sgn*state_cvec(i)
-                enddo
-                do i=1,sectorI%Dim
-                   call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !c_a,dw
-                   if(sgn==0d0.OR.j==0)cycle
-                   vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                enddo
-                call delete_sector(sectorI)
-                call delete_sector(sectorJ)
-                magy(iorb) = magy(iorb) + dot_product(vvinit,vvinit)*peso
-                if(allocated(vvinit))deallocate(vvinit)
-             endif
+             vvinit = apply_Cops(v_state,[one,xi],[-1,-1],[iorb,iorb],[2,1],isector,jsector)                
+             if(Mpimaster)magy(iorb) = magy(iorb) + dot_product(vvinit,vvinit)*peso
+             deallocate(vvinit)
           endif
-          if(allocated(state_cvec))deallocate(state_cvec)
+          !
+          if(allocated(v_state))deallocate(v_state)
        enddo
-       !So we have:
-       !<Sx> = <(CDG_UP + CDG_DW)(C_UP + C_DW)> - <N_UP> - <N_DW>
-       magx(iorb) = magx(iorb) - dens_up(iorb) - dens_dw(iorb)
-       !<Sy> = <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> - <N_UP> - <N_DW 
-       magy(iorb) = magy(iorb) - dens_up(iorb) - dens_dw(iorb)
     enddo
+    !So we have:
+    if(MpiMaster)then
+       !<Sx> = <(CDG_UP + CDG_DW)(C_UP + C_DW)> - <N_UP> - <N_DW>
+       magx = magx - dens_up - dens_dw
+       !<Sy> = <(-i*CDG_UP + CDG_DW)(i*C_UP + C_DW)> - <N_UP> - <N_DW 
+       magy = magy - dens_up - dens_dw
+    endif
+
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
@@ -294,19 +250,11 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state    =  es_return_cvec(state_list,istate)
        !
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -328,47 +276,17 @@ contains
              !|v_up> = (C_aup + C_bup)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
-                if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !c_b,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !
-                   theta_upup(iorb,jorb) = theta_upup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
-                endif
+                vvinit = apply_Cops(v_state,[one,one],[-1,-1],[iorb,jorb],[1,1],isector,jsector)
+                theta_upup(iorb,jorb) = theta_upup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                deallocate(vvinit)
              endif
              !
              !|v_dw> = (C_adw + C_bdw)|>
              jsector = getCsector(1,2,isector)
              if(jsector/=0)then
-                if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !c_b,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !
-                   theta_dwdw(iorb,jorb) = theta_dwdw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
-                endif
+                vvinit = apply_Cops(v_state,[one,one],[-1,-1],[iorb,jorb],[2,2],isector,jsector)
+                theta_dwdw(iorb,jorb) = theta_dwdw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                deallocate(vvinit)
              endif
           enddo
        enddo
@@ -386,47 +304,17 @@ contains
              !|v_ud> = (C_aup + C_bdw)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
-                if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !c_b,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !Theta_ud = <v_ud|v_ud>
-                   theta_updw(iorb,jorb) = theta_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
-                endif
+                vvinit = apply_Cops(v_state,[one,one],[-1,-1],[iorb,jorb],[1,2],isector,jsector)
+                theta_updw(iorb,jorb) = theta_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                deallocate(vvinit)
              endif
              !
              !|v_du> = (C_adw + C_bup)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
-                if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !c_b,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !Theta_du = <v_du|v_du>
-                   theta_dwup(iorb,jorb) = theta_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
-                endif
+                vvinit = apply_Cops(v_state,[one,one],[-1,-1],[iorb,jorb],[2,1],isector,jsector)
+                theta_dwup(iorb,jorb) = theta_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                deallocate(vvinit)
              endif
           enddo
        enddo
@@ -443,69 +331,39 @@ contains
              !|w_ud> = (C_aup - xi*C_bdw)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
-                if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,2,sectorI,sectorJ) !-i*c_b,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = -xi*sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,1,sectorI,sectorJ) !+c_a,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !Omega_ud = <w_ud|w_ud>
-                   omega_updw(iorb,jorb) = omega_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
-                endif
+                vvinit = apply_Cops(v_state,[one,-xi],[-1,-1],[iorb,jorb],[1,2],isector,jsector)
+                omega_updw(iorb,jorb) = omega_updw(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                if(allocated(vvinit))deallocate(vvinit)
              endif
              !
              !|w_du> = (C_adw - i*C_bup)|>
              jsector = getCsector(1,1,isector)
              if(jsector/=0)then
-                if(Mpimaster)then
-                   call build_sector(jsector,sectorJ)
-                   allocate(vvinit(sectorJ%Dim));vvinit=zero
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,jorb,1,1,sectorI,sectorJ) !-i*c_b,up
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = -xi*sgn*state_cvec(i)
-                   enddo
-                   do i=1,sectorI%Dim
-                      call apply_op_C(i,j,sgn,iorb,1,2,sectorI,sectorJ) !+c_a,dw
-                      if(sgn==0d0.OR.j==0)cycle
-                      vvinit(j) = vvinit(j) + sgn*state_cvec(i)
-                   enddo
-                   call delete_sector(sectorJ)
-                   !Omega_du = <w_du|w_du>
-                   omega_dwup(iorb,jorb) = omega_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
-                   if(allocated(vvinit))deallocate(vvinit)
-                endif
+                vvinit = apply_Cops(v_state,[one,-xi],[-1,-1],[iorb,jorb],[2,1],isector,jsector)
+                omega_dwup(iorb,jorb) = omega_dwup(iorb,jorb) + dot_product(vvinit,vvinit)*peso
+                if(allocated(vvinit))deallocate(vvinit)
              endif
              !
           enddo
        enddo
        !
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
        !
     enddo
     ! <S_ab>  = Theta_uu + Theta_dd - n_a - n_b
     ! <T^z_ab>= Theta_uu - Theta_dd - m_a - m_b
     ! <T^x_ab>= Theta_ud + Theta_du - n_a - n_b
     ! <T^y_ab>= Omega_ud - Omega_du - m_a - m_b
-    do iorb=1,Norb
-       do jorb=iorb+1,Norb
-          exct_s0(iorb,jorb) = theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb)
-          exct_tz(iorb,jorb) = theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb)
-          exct_tx(iorb,jorb) = theta_updw(iorb,jorb) + theta_dwup(iorb,jorb) - dens(iorb) - dens(jorb)
-          exct_ty(iorb,jorb) = omega_updw(iorb,jorb) - omega_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb)
+    if(MpiMaster)then
+       do iorb=1,Norb
+          do jorb=iorb+1,Norb
+             exct_s0(iorb,jorb) = theta_upup(iorb,jorb) + theta_dwdw(iorb,jorb) - dens(iorb) - dens(jorb)
+             exct_tz(iorb,jorb) = theta_upup(iorb,jorb) - theta_dwdw(iorb,jorb) - magZ(iorb) - magZ(jorb)
+             exct_tx(iorb,jorb) = theta_updw(iorb,jorb) + theta_dwup(iorb,jorb) - dens(iorb) - dens(jorb)
+             exct_ty(iorb,jorb) = omega_updw(iorb,jorb) - omega_dwup(iorb,jorb) - magZ(iorb) + magZ(jorb)
+          enddo
        enddo
-    enddo
-
-
+    endif
 
     !SINGLE PARTICLE IMPURITY DENSITY MATRIX
 #ifdef _DEBUG
@@ -517,19 +375,11 @@ contains
     do istate=1,state_list%size
        isector = es_return_sector(state_list,istate)
        Ei      = es_return_energy(state_list,istate)
+       v_state    =  es_return_cvec(state_list,istate)
        !
 #ifdef _DEBUG
        if(ed_verbose>3)write(Logfile,"(A)")&
             "DEBUG observables_nonsu2: get contribution from state:"//str(istate)
-#endif
-#ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
 #endif
        !
        peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
@@ -546,7 +396,7 @@ contains
                    ib = bdecomp(i,2*Ns)
                    single_particle_density_matrix(ispin,ispin,iorb,iorb) = &
                         single_particle_density_matrix(ispin,ispin,iorb,iorb) + &
-                        peso*ib(isite)*conjg(state_cvec(m))*state_cvec(m)
+                        peso*ib(isite)*conjg(v_state(m))*v_state(m)
                 enddo
              enddo
           enddo
@@ -571,7 +421,7 @@ contains
                             j=binary_search(sectorI%H(1)%map,k)
                             single_particle_density_matrix(ispin,jspin,iorb,jorb) = &
                                  single_particle_density_matrix(ispin,jspin,iorb,jorb) + &
-                                 peso*sgn1*state_cvec(m)*sgn2*conjg(state_cvec(j))
+                                 peso*sgn1*v_state(m)*sgn2*conjg(v_state(j))
                          endif
                       enddo
                    enddo
@@ -580,18 +430,12 @@ contains
           enddo
           call delete_sector(sectorI)
        endif
-       if(allocated(state_cvec))deallocate(state_cvec)
+       if(allocated(v_state))deallocate(v_state)
     enddo
 #ifdef _DEBUG
     if(ed_verbose>2)write(Logfile,"(A)")""
 #endif
-
     !
-    !
-    if(MPIMASTER)then
-       call get_szr
-       call write_observables()
-    endif
     write(LOGfile,"(A,10f18.12,f18.12)")"dens"//reg(ed_file_suffix)//"=",(dens(iorb),iorb=1,Norb),sum(dens)
     write(LOGfile,"(A,10f18.12)")    "docc"//reg(ed_file_suffix)//"=",(docc(iorb),iorb=1,Norb)
     write(LOGfile,"(A,10f18.12)")    "magX"//reg(ed_file_suffix)//"=",(magX(iorb),iorb=1,Norb)
@@ -643,16 +487,23 @@ contains
        call Bcast_MPI(MpiComm,ed_dens)
        call Bcast_MPI(MpiComm,ed_docc)
        call Bcast_MPI(MpiComm,ed_mag)
+       call Bcast_MPI(MpiComm,exct_s0)
+       call Bcast_MPI(MpiComm,exct_tx)
+       call Bcast_MPI(MpiComm,exct_ty)
+       call Bcast_MPI(MpiComm,exct_tz)    
        call Bcast_MPI(MpiComm,ed_imp_info)
        if(allocated(single_particle_density_matrix))call Bcast_MPI(MpiComm,single_particle_density_matrix)
     endif
 #endif
     !
+    if(MPIMASTER)then
+       call write_observables()
+    endif
+    !
     deallocate(dens,docc,dens_up,dens_dw,magz,sz2,n2)
     deallocate(magX,magY)
     deallocate(exct_S0,exct_Tz)
     deallocate(exct_Tx,exct_Ty)
-    deallocate(simp,zimp)
   end subroutine observables_nonsu2
 
 
@@ -664,275 +515,252 @@ contains
   !+-------------------------------------------------------------------+
   !PURPOSE  : Get internal energy from the Impurity problem.
   !+-------------------------------------------------------------------+
-  subroutine local_energy_nonsu2()
-    !Calculate the value of the local energy components
-    integer,dimension(2*Ns) :: ib
-    integer,dimension(2,Ns) :: Nud
-    integer,dimension(Ns)   :: IbUp,IbDw
-    real(8),dimension(Norb)         :: nup,ndw
-    real(8),dimension(Nspin,Norb)   :: eloc
-    !
+subroutine local_energy_nonsu2()
+  !Calculate the value of the local energy components
+  integer,dimension(2*Ns) :: ib
+  integer,dimension(2,Ns) :: Nud
+  integer,dimension(Ns)   :: IbUp,IbDw
+  real(8),dimension(Norb)         :: nup,ndw
+  real(8),dimension(Nspin,Norb)   :: eloc
+  !
 #ifdef _DEBUG
-    write(Logfile,"(A)")"DEBUG local_energy_nonsu2"
+  write(Logfile,"(A)")"DEBUG local_energy_nonsu2"
 #endif
-    !
-    Egs     = state_list%emin
-    ed_Ehartree= 0.d0
-    ed_Eknot   = 0.d0
-    ed_Epot    = 0.d0
-    ed_Dust    = 0.d0
-    ed_Dund    = 0.d0
-    ed_Dse     = 0.d0
-    ed_Dph     = 0.d0
-    !
-    !Get diagonal part of Hloc
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          eloc(ispin,iorb)=impHloc(ispin,ispin,iorb,iorb)
-       enddo
-    enddo
-    !
-    do istate=1,state_list%size
-       isector = es_return_sector(state_list,istate)
-       Ei      = es_return_energy(state_list,istate)
-       !
+  !
+  Egs     = state_list%emin
+  ed_Ehartree= 0.d0
+  ed_Eknot   = 0.d0
+  ed_Epot    = 0.d0
+  ed_Dust    = 0.d0
+  ed_Dund    = 0.d0
+  ed_Dse     = 0.d0
+  ed_Dph     = 0.d0
+  !
+  !Get diagonal part of Hloc
+  do ispin=1,Nspin
+     do iorb=1,Norb
+        eloc(ispin,iorb)=impHloc(ispin,ispin,iorb,iorb)
+     enddo
+  enddo
+  !
+  do istate=1,state_list%size
+     isector = es_return_sector(state_list,istate)
+     Ei      = es_return_energy(state_list,istate)
+     v_state    =  es_return_cvec(state_list,istate)
+     !
 #ifdef _DEBUG
-       if(ed_verbose>3)write(Logfile,"(A)")&
-            "DEBUG local_energy_nonsu2: get contribution from state:"//str(istate)
+     if(ed_verbose>3)write(Logfile,"(A)")&
+          "DEBUG local_energy_nonsu2: get contribution from state:"//str(istate)
+#endif
+     !
+     peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
+     peso = peso/zeta_function
+     !
+     if(Mpimaster)then
+        !
+        call build_sector(isector,sectorI)
+        do i=1,sectorI%Dim
+           gs_weight=peso*abs(v_state(i))**2
+           m  = sectorI%H(1)%map(i)
+           ib = bdecomp(m,2*Ns)
+           do iorb=1,Norb
+              nup(iorb)= dble(ib(iorb))
+              ndw(iorb)= dble(ib(iorb+Ns))
+           enddo
+           !
+           !start evaluating the Tr(H_loc) to estimate potential energy
+           !LOCAL ENERGY
+           ed_Eknot = ed_Eknot + dot_product(eloc(1,:),nup)*gs_weight + dot_product(eloc(Nspin,:),ndw)*gs_weight
+           !==> HYBRIDIZATION TERMS I: same or different orbitals, same spins.
+           do iorb=1,Norb
+              do jorb=1,Norb
+                 !SPIN UP
+                 if((ib(iorb)==0).AND.(ib(jorb)==1))then
+                    call c(jorb,m,k1,sg1)
+                    call cdg(iorb,k1,k2,sg2)
+                    j=binary_search(sectorI%H(1)%map,k2)
+                    if(Jz_basis.and.j==0)cycle
+                    ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
+                 endif
+                 !SPIN DW
+                 if((ib(iorb+Ns)==0).AND.(ib(jorb+Ns)==1))then
+                    call c(jorb+Ns,m,k1,sg1)
+                    call cdg(iorb+Ns,k1,k2,sg2)
+                    j=binary_search(sectorI%H(1)%map,k2)
+                    if(Jz_basis.and.j==0)cycle
+                    ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
+                 endif
+              enddo
+           enddo
+           !==> HYBRIDIZATION TERMS II: same or different orbitals, opposite spins.
+           do iorb=1,Norb
+              do jorb=1,Norb
+                 !UP-DW
+                 if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
+                    call c(jorb+Ns,m,k1,sg1)
+                    call cdg(iorb,k1,k2,sg2)
+                    j=binary_search(sectorI%H(1)%map,k2)
+                    if(Jz_basis.and.j==0)cycle
+                    ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
+                 endif
+                 !DW-UP
+                 if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
+                    call c(jorb,m,k1,sg1)
+                    call cdg(iorb+Ns,k1,k2,sg2)
+                    j=binary_search(sectorI%H(1)%map,k2)
+                    if(Jz_basis.and.j==0)cycle
+                    ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*v_state(i)*conjg(v_state(j))*peso
+                 endif
+              enddo
+           enddo
+           !
+           !DENSITY-DENSITY INTERACTION: SAME ORBITAL, OPPOSITE SPINS
+           !Euloc=\sum=i U_i*(n_u*n_d)_i
+           !ed_Epot = ed_Epot + dot_product(uloc,nup*ndw)*gs_weight
+           do iorb=1,Norb
+              ed_Epot = ed_Epot + Uloc(iorb)*nup(iorb)*ndw(iorb)*gs_weight
+           enddo
+           !
+           !DENSITY-DENSITY INTERACTION: DIFFERENT ORBITALS, OPPOSITE SPINS
+           !Eust=\sum_ij Ust*(n_up_i*n_dn_j + n_up_j*n_dn_i)
+           !    "="\sum_ij (Uloc - 2*Jh)*(n_up_i*n_dn_j + n_up_j*n_dn_i)
+           if(Norb>1)then
+              do iorb=1,Norb
+                 do jorb=iorb+1,Norb
+                    ed_Epot = ed_Epot + Ust*(nup(iorb)*ndw(jorb) + nup(jorb)*ndw(iorb))*gs_weight
+                    ed_Dust = ed_Dust + (nup(iorb)*ndw(jorb) + nup(jorb)*ndw(iorb))*gs_weight
+                 enddo
+              enddo
+           endif
+           !
+           !DENSITY-DENSITY INTERACTION: DIFFERENT ORBITALS, PARALLEL SPINS
+           !Eund = \sum_ij Und*(n_up_i*n_up_j + n_dn_i*n_dn_j)
+           !    "="\sum_ij (Ust-Jh)*(n_up_i*n_up_j + n_dn_i*n_dn_j)
+           !    "="\sum_ij (Uloc-3*Jh)*(n_up_i*n_up_j + n_dn_i*n_dn_j)
+           if(Norb>1)then
+              do iorb=1,Norb
+                 do jorb=iorb+1,Norb
+                    ed_Epot = ed_Epot + (Ust-Jh)*(nup(iorb)*nup(jorb) + ndw(iorb)*ndw(jorb))*gs_weight
+                    ed_Dund = ed_Dund + (nup(iorb)*nup(jorb) + ndw(iorb)*ndw(jorb))*gs_weight
+                 enddo
+              enddo
+           endif
+           !
+           !SPIN-EXCHANGE (S-E) TERMS
+           !S-E: Jh *( c^+_iorb_up c^+_jorb_dw c_iorb_dw c_jorb_up )  (i.ne.j) 
+           if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))then
+              do iorb=1,Norb
+                 do jorb=1,Norb
+                    Jcondition=((iorb/=jorb).AND.&
+                         (ib(jorb)==1)      .AND.&
+                         (ib(iorb+Ns)==1)   .AND.&
+                         (ib(jorb+Ns)==0)   .AND.&
+                         (ib(iorb)==0))
+                    if(Jcondition)then
+                       call c(jorb,m,k1,sg1)
+                       call c(iorb+Ns,k1,k2,sg2)
+                       call cdg(jorb+Ns,k2,k3,sg3)
+                       call cdg(iorb,k3,k4,sg4)
+                       j=binary_search(sectorI%H(1)%map,k4)
+                       if(Jz_basis.and.j==0)cycle
+                       ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                       ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                    endif
+                 enddo
+              enddo
+           endif
+           !
+           !
+           !PAIR-HOPPING (P-H) TERMS
+           !P-H: J c^+_iorb_up c^+_iorb_dw   c_jorb_dw   c_jorb_up  (i.ne.j) 
+           !P-H: J c^+_{iorb}  c^+_{iorb+Ns} c_{jorb+Ns} c_{jorb}
+           if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))then
+              do iorb=1,Norb
+                 do jorb=1,Norb
+                    Jcondition=((iorb/=jorb).AND.&
+                         (ib(jorb)==1)      .AND.&
+                         (ib(jorb+Ns)==1)   .AND.&
+                         (ib(iorb+Ns)==0)   .AND.&
+                         (ib(iorb)==0))
+                    if(Jcondition)then
+                       call c(jorb,m,k1,sg1)
+                       call c(jorb+Ns,k1,k2,sg2)
+                       call cdg(iorb+Ns,k2,k3,sg3)
+                       call cdg(iorb,k3,k4,sg4)
+                       j=binary_search(sectorI%H(1)%map,k4)
+                       if(Jz_basis.and.j==0)cycle
+                       ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                       ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*v_state(i)*conjg(v_state(j))*peso
+                    endif
+                 enddo
+              enddo
+           endif
+           !
+           !
+           !HARTREE-TERMS CONTRIBUTION:
+           if(hfmode)then
+              !ed_Ehartree=ed_Ehartree - 0.5d0*dot_product(uloc,nup+ndw)*gs_weight + 0.25d0*sum(uloc)*gs_weight
+              do iorb=1,Norb
+                 ed_Ehartree=ed_Ehartree - 0.5d0*uloc(iorb)*(nup(iorb)+ndw(iorb))*gs_weight + 0.25d0*uloc(iorb)*gs_weight
+              enddo
+              if(Norb>1)then
+                 do iorb=1,Norb
+                    do jorb=iorb+1,Norb
+                       ed_Ehartree=ed_Ehartree - 0.5d0*Ust*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.5d0*Ust*gs_weight
+                       ed_Ehartree=ed_Ehartree - 0.5d0*(Ust-Jh)*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.5d0*(Ust-Jh)*gs_weight
+                    enddo
+                 enddo
+              endif
+           endif
+        enddo
+        call delete_sector(sectorI)
+     endif
+     !
+     if(allocated(v_state))deallocate(v_state)
+     !
+  enddo
+  !
+#ifdef _DEBUG
+  write(Logfile,"(A)")""
 #endif
 #ifdef _MPI
-       if(MpiStatus)then
-          call es_return_cvector(MpiComm,state_list,istate,state_cvec) 
-       else
-          call es_return_cvector(state_list,istate,state_cvec) 
-       endif
-#else
-       call es_return_cvector(state_list,istate,state_cvec) 
+  if(MpiStatus)then
+     call Bcast_MPI(MpiComm,ed_Epot)
+     call Bcast_MPI(MpiComm,ed_Eknot)
+     call Bcast_MPI(MpiComm,ed_Ehartree)
+     call Bcast_MPI(MpiComm,ed_Dust)
+     call Bcast_MPI(MpiComm,ed_Dund)
+     call Bcast_MPI(MpiComm,ed_Dse)
+     call Bcast_MPI(MpiComm,ed_Dph)
+  endif
 #endif
-       !
-       peso = 1.d0 ; if(finiteT)peso=exp(-beta*(Ei-Egs))
-       peso = peso/zeta_function
-       !
-       if(Mpimaster)then
-          !
-          call build_sector(isector,sectorI)
-          do i=1,sectorI%Dim
-             gs_weight=peso*abs(state_cvec(i))**2
-             m  = sectorI%H(1)%map(i)
-             ib = bdecomp(m,2*Ns)
-             do iorb=1,Norb
-                nup(iorb)= dble(ib(iorb))
-                ndw(iorb)= dble(ib(iorb+Ns))
-             enddo
-             !
-             !start evaluating the Tr(H_loc) to estimate potential energy
-             !LOCAL ENERGY
-             ed_Eknot = ed_Eknot + dot_product(eloc(1,:),nup)*gs_weight + dot_product(eloc(Nspin,:),ndw)*gs_weight
-             !==> HYBRIDIZATION TERMS I: same or different orbitals, same spins.
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   !SPIN UP
-                   if((ib(iorb)==0).AND.(ib(jorb)==1))then
-                      call c(jorb,m,k1,sg1)
-                      call cdg(iorb,k1,k2,sg2)
-                      j=binary_search(sectorI%H(1)%map,k2)
-                      if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(1,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
-                   endif
-                   !SPIN DW
-                   if((ib(iorb+Ns)==0).AND.(ib(jorb+Ns)==1))then
-                      call c(jorb+Ns,m,k1,sg1)
-                      call cdg(iorb+Ns,k1,k2,sg2)
-                      j=binary_search(sectorI%H(1)%map,k2)
-                      if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
-                   endif
-                enddo
-             enddo
-             !==> HYBRIDIZATION TERMS II: same or different orbitals, opposite spins.
-             do iorb=1,Norb
-                do jorb=1,Norb
-                   !UP-DW
-                   if((impHloc(1,Nspin,iorb,jorb)/=zero).AND.(ib(iorb)==0).AND.(ib(jorb+Ns)==1))then
-                      call c(jorb+Ns,m,k1,sg1)
-                      call cdg(iorb,k1,k2,sg2)
-                      j=binary_search(sectorI%H(1)%map,k2)
-                      if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(1,Nspin,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
-                   endif
-                   !DW-UP
-                   if((impHloc(Nspin,1,iorb,jorb)/=zero).AND.(ib(iorb+Ns)==0).AND.(ib(jorb)==1))then
-                      call c(jorb,m,k1,sg1)
-                      call cdg(iorb+Ns,k1,k2,sg2)
-                      j=binary_search(sectorI%H(1)%map,k2)
-                      if(Jz_basis.and.j==0)cycle
-                      ed_Eknot = ed_Eknot + impHloc(Nspin,1,iorb,jorb)*sg1*sg2*state_cvec(i)*conjg(state_cvec(j))*peso
-                   endif
-                enddo
-             enddo
-             !
-             !DENSITY-DENSITY INTERACTION: SAME ORBITAL, OPPOSITE SPINS
-             !Euloc=\sum=i U_i*(n_u*n_d)_i
-             !ed_Epot = ed_Epot + dot_product(uloc,nup*ndw)*gs_weight
-             do iorb=1,Norb
-                ed_Epot = ed_Epot + Uloc(iorb)*nup(iorb)*ndw(iorb)*gs_weight
-             enddo
-             !
-             !DENSITY-DENSITY INTERACTION: DIFFERENT ORBITALS, OPPOSITE SPINS
-             !Eust=\sum_ij Ust*(n_up_i*n_dn_j + n_up_j*n_dn_i)
-             !    "="\sum_ij (Uloc - 2*Jh)*(n_up_i*n_dn_j + n_up_j*n_dn_i)
-             if(Norb>1)then
-                do iorb=1,Norb
-                   do jorb=iorb+1,Norb
-                      ed_Epot = ed_Epot + Ust*(nup(iorb)*ndw(jorb) + nup(jorb)*ndw(iorb))*gs_weight
-                      ed_Dust = ed_Dust + (nup(iorb)*ndw(jorb) + nup(jorb)*ndw(iorb))*gs_weight
-                   enddo
-                enddo
-             endif
-             !
-             !DENSITY-DENSITY INTERACTION: DIFFERENT ORBITALS, PARALLEL SPINS
-             !Eund = \sum_ij Und*(n_up_i*n_up_j + n_dn_i*n_dn_j)
-             !    "="\sum_ij (Ust-Jh)*(n_up_i*n_up_j + n_dn_i*n_dn_j)
-             !    "="\sum_ij (Uloc-3*Jh)*(n_up_i*n_up_j + n_dn_i*n_dn_j)
-             if(Norb>1)then
-                do iorb=1,Norb
-                   do jorb=iorb+1,Norb
-                      ed_Epot = ed_Epot + (Ust-Jh)*(nup(iorb)*nup(jorb) + ndw(iorb)*ndw(jorb))*gs_weight
-                      ed_Dund = ed_Dund + (nup(iorb)*nup(jorb) + ndw(iorb)*ndw(jorb))*gs_weight
-                   enddo
-                enddo
-             endif
-             !
-             !SPIN-EXCHANGE (S-E) TERMS
-             !S-E: Jh *( c^+_iorb_up c^+_jorb_dw c_iorb_dw c_jorb_up )  (i.ne.j) 
-             if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))then
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      Jcondition=((iorb/=jorb).AND.&
-                           (ib(jorb)==1)      .AND.&
-                           (ib(iorb+Ns)==1)   .AND.&
-                           (ib(jorb+Ns)==0)   .AND.&
-                           (ib(iorb)==0))
-                      if(Jcondition)then
-                         call c(jorb,m,k1,sg1)
-                         call c(iorb+Ns,k1,k2,sg2)
-                         call cdg(jorb+Ns,k2,k3,sg3)
-                         call cdg(iorb,k3,k4,sg4)
-                         j=binary_search(sectorI%H(1)%map,k4)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jx*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                         ed_Dse  = ed_Dse  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                      endif
-                   enddo
-                enddo
-             endif
-             !
-             !
-             !PAIR-HOPPING (P-H) TERMS
-             !P-H: J c^+_iorb_up c^+_iorb_dw   c_jorb_dw   c_jorb_up  (i.ne.j) 
-             !P-H: J c^+_{iorb}  c^+_{iorb+Ns} c_{jorb+Ns} c_{jorb}
-             if(Norb>1.AND.(Jx/=0d0.OR.Jp/=0d0))then
-                do iorb=1,Norb
-                   do jorb=1,Norb
-                      Jcondition=((iorb/=jorb).AND.&
-                           (ib(jorb)==1)      .AND.&
-                           (ib(jorb+Ns)==1)   .AND.&
-                           (ib(iorb+Ns)==0)   .AND.&
-                           (ib(iorb)==0))
-                      if(Jcondition)then
-                         call c(jorb,m,k1,sg1)
-                         call c(jorb+Ns,k1,k2,sg2)
-                         call cdg(iorb+Ns,k2,k3,sg3)
-                         call cdg(iorb,k3,k4,sg4)
-                         j=binary_search(sectorI%H(1)%map,k4)
-                         if(Jz_basis.and.j==0)cycle
-                         ed_Epot = ed_Epot + Jp*sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                         ed_Dph  = ed_Dph  + sg1*sg2*sg3*sg4*state_cvec(i)*conjg(state_cvec(j))*peso
-                      endif
-                   enddo
-                enddo
-             endif
-             !
-             !
-             !HARTREE-TERMS CONTRIBUTION:
-             if(hfmode)then
-                !ed_Ehartree=ed_Ehartree - 0.5d0*dot_product(uloc,nup+ndw)*gs_weight + 0.25d0*sum(uloc)*gs_weight
-                do iorb=1,Norb
-                   ed_Ehartree=ed_Ehartree - 0.5d0*uloc(iorb)*(nup(iorb)+ndw(iorb))*gs_weight + 0.25d0*uloc(iorb)*gs_weight
-                enddo
-                if(Norb>1)then
-                   do iorb=1,Norb
-                      do jorb=iorb+1,Norb
-                         ed_Ehartree=ed_Ehartree - 0.5d0*Ust*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.5d0*Ust*gs_weight
-                         ed_Ehartree=ed_Ehartree - 0.5d0*(Ust-Jh)*(nup(iorb)+ndw(iorb)+nup(jorb)+ndw(jorb))*gs_weight + 0.5d0*(Ust-Jh)*gs_weight
-                      enddo
-                   enddo
-                endif
-             endif
-          enddo
-          call delete_sector(sectorI)
-       endif
-       !
-       if(allocated(state_cvec))deallocate(state_cvec)
-       !
-    enddo
-    !
-#ifdef _DEBUG
-    write(Logfile,"(A)")""
-#endif
-#ifdef _MPI
-    if(MpiStatus)then
-       call Bcast_MPI(MpiComm,ed_Epot)
-       call Bcast_MPI(MpiComm,ed_Eknot)
-       call Bcast_MPI(MpiComm,ed_Ehartree)
-       call Bcast_MPI(MpiComm,ed_Dust)
-       call Bcast_MPI(MpiComm,ed_Dund)
-       call Bcast_MPI(MpiComm,ed_Dse)
-       call Bcast_MPI(MpiComm,ed_Dph)
-    endif
-#endif
-    !
-    ed_Eint = ed_Epot
-    ed_Epot = ed_Epot + ed_Ehartree
-    !
-    if(ed_verbose>=3)then
-       write(LOGfile,"(A,10f18.12)")"<Hint>  =",ed_Epot
-       write(LOGfile,"(A,10f18.12)")"<V>     =",ed_Epot-ed_Ehartree
-       write(LOGfile,"(A,10f18.12)")"<E0>    =",ed_Eknot
-       write(LOGfile,"(A,10f18.12)")"<Ehf>   =",ed_Ehartree    
-       write(LOGfile,"(A,10f18.12)")"Dust    =",ed_Dust
-       write(LOGfile,"(A,10f18.12)")"Dund    =",ed_Dund
-       write(LOGfile,"(A,10f18.12)")"Dse     =",ed_Dse
-       write(LOGfile,"(A,10f18.12)")"Dph     =",ed_Dph
-    endif
-    if(MPIMASTER)then
-       call write_energy()
-    endif
-    !
-    !
-  end subroutine local_energy_nonsu2
+  !
+  ed_Eint = ed_Epot
+  ed_Epot = ed_Epot + ed_Ehartree
+  !
+  if(ed_verbose>=3)then
+     write(LOGfile,"(A,10f18.12)")"<Hint>  =",ed_Epot
+     write(LOGfile,"(A,10f18.12)")"<V>     =",ed_Epot-ed_Ehartree
+     write(LOGfile,"(A,10f18.12)")"<E0>    =",ed_Eknot
+     write(LOGfile,"(A,10f18.12)")"<Ehf>   =",ed_Ehartree    
+     write(LOGfile,"(A,10f18.12)")"Dust    =",ed_Dust
+     write(LOGfile,"(A,10f18.12)")"Dund    =",ed_Dund
+     write(LOGfile,"(A,10f18.12)")"Dse     =",ed_Dse
+     write(LOGfile,"(A,10f18.12)")"Dph     =",ed_Dph
+  endif
+  !
+  if(MPIMASTER)then
+     call write_energy()
+  endif
+  !
+  !
+end subroutine local_energy_nonsu2
 
 
 
   !####################################################################
   !                    COMPUTATIONAL ROUTINES
   !####################################################################
-  !+-------------------------------------------------------------------+
-  !PURPOSE  : get scattering rate and renormalization constant Z
-  !+-------------------------------------------------------------------+
-  subroutine get_szr()
-    !Calculate the values of the scattering rate and quasiparticle weight
-    integer                  :: ispin,iorb
-    real(8)                  :: wm1,wm2
-    wm1 = pi/beta ; wm2=3d0*pi/beta
-    do ispin=1,Nspin
-       do iorb=1,Norb
-          simp(iorb,ispin) = dimag(impSmats(ispin,ispin,iorb,iorb,1)) - &
-               wm1*(dimag(impSmats(ispin,ispin,iorb,iorb,2))-dimag(impSmats(ispin,ispin,iorb,iorb,1)))/(wm2-wm1)
-          zimp(iorb,ispin)   = 1.d0/( 1.d0 + abs( dimag(impSmats(ispin,ispin,iorb,iorb,1))/wm1 ))
-       enddo
-    enddo
-  end subroutine get_szr
 
 
 
@@ -981,20 +809,6 @@ contains
     unit = free_unit()
     open(unit,file="magXYZ_info.ed")
     write(unit,"(A1,*(A10,6X))") "# ",(str(iorb)//"mag_"//str(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_info.ed")
-    write(unit,"(A1,*(A10,6X))") "# ",&
-         ((str(iorb+(ispin-1)*Norb)//"z_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_info.ed")
-    write(unit,"(A1,*(A10,6X))") "#",&
-         ((str(iorb+(ispin-1)*Norb)//"sig_"//str(iorb)//"s"//str(ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation
@@ -1058,18 +872,6 @@ contains
     unit = free_unit()
     open(unit,file="magZ_last"//reg(ed_file_suffix)//".ed")
     write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_last"//reg(ed_file_suffix)//".ed")
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation
@@ -1152,18 +954,6 @@ contains
     unit = free_unit()
     open(unit,file="magZ_all"//reg(ed_file_suffix)//".ed",position='append')
     write(unit,"(90(F15.9,1X))") (magz(iorb),iorb=1,Norb)
-    close(unit)
-    !
-    !Z renormalization constant
-    unit = free_unit()
-    open(unit,file="Z_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(90(F15.9,1X))") ((zimp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
-    close(unit)
-    !
-    !\Sigma scattering rate
-    unit = free_unit()
-    open(unit,file="Sig_all"//reg(ed_file_suffix)//".ed",position='append')
-    write(unit,"(*(F15.9,1X))") ((simp(iorb,ispin),iorb=1,Norb),ispin=1,Nspin)
     close(unit)
     !
     !Spin-Spin correlation

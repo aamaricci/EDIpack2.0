@@ -1,5 +1,4 @@
-subroutine ed_get_density_matrix_single(dm_)!,custom_rot,dm_eig_,dm_rot_)
-  implicit none
+subroutine get_density_matrix_single(dm_)!,custom_rot,dm_eig_,dm_rot_)
   !passed
   complex(8),allocatable,intent(out)           :: dm_(:,:)
   ! complex(8),allocatable,intent(in) ,optional  :: custom_rot(:,:)
@@ -54,11 +53,11 @@ subroutine ed_get_density_matrix_single(dm_)!,custom_rot,dm_eig_,dm_rot_)
   !
   call print_dm(dm_,1)!,dm_rot_,dm_eig_,dm_custom_rot,1)
   !
-end subroutine ed_get_density_matrix_single
+end subroutine get_density_matrix_single
 
 
 
-subroutine ed_get_density_matrix_lattice(dm_)!,custom_rot,dm_eig_,dm_rot_)
+subroutine get_density_matrix_lattice(dm_)!,custom_rot,dm_eig_,dm_rot_)
   implicit none
   !passed
   complex(8),allocatable,intent(out)           :: dm_(:,:,:)
@@ -130,7 +129,7 @@ subroutine ed_get_density_matrix_lattice(dm_)!,custom_rot,dm_eig_,dm_rot_)
      call print_dm(dm_tmp,ilat)!,dm_rot_tmp,dm_eig_tmp,dm_custom_rot_tmp,ilat)
      !
   enddo
-end subroutine ed_get_density_matrix_lattice
+end subroutine get_density_matrix_lattice
 
 
 subroutine print_dm(dm_,ndx)!,dm_rot_,dm_eig_,dm_custom_rot,ndx)

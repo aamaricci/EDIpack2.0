@@ -1,7 +1,7 @@
 MODULE ED_SECTOR
   !
   !Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones. 
-!
+  !
   USE ED_INPUT_VARS
   USE ED_VARS_GLOBAL
   USE ED_AUX_FUNX
@@ -50,9 +50,67 @@ MODULE ED_SECTOR
   end interface get_QuantumNumbers
 
 
+
+  interface apply_op_C
+     !
+     ! Apply the Fock operator :f:math:`C` to an input Fock state :f:var:`V` in a given sector :f:var:`sectorI`.
+     ! Output: a Fock state :f:var:`OV` in the sector :f:var:`sectorJ` with one less particle as allocatable double real or double complex allocatable type.  
+     !
+     module procedure :: apply_op_C_d
+     module procedure :: apply_op_C_c
+  end interface apply_op_C
+
+
+
+  interface apply_op_CDG
+     !
+     ! Apply the Fock operator :f:math:`C` to an input Fock state :f:var:`V` in a given sector :f:var:`sectorI`.
+     ! Output: a Fock state :f:var:`OV` in the sector :f:var:`sectorJ` with one less particle as allocatable double real or double complex allocatable type.  
+     !
+     module procedure :: apply_op_CDG_d
+     module procedure :: apply_op_CDG_c
+  end interface apply_op_CDG
+
+
+
+  interface apply_COps
+     !
+     ! Apply a linear combination of creation/destriction Fock operators :f:math:`\vec{C}=\sum_i a_i C^{o_i}_{p_i}` where :f:math:`a_i` are real or cmplx coeffients, :f:math:`o_i=\pm 1` indicate
+     ! respectively creation or destruction operators and :f:math:`p_i` are the respective positions. 
+     ! The input Fock state :f:var:`V` in a given sector :f:var:`sectorI`.
+     ! Output: a Fock state :f:var:`OV` in the sector :f:var:`sectorJ` with one more particle as allocatable double real or double complex allocatable type.  
+     !
+     module procedure :: apply_COps_d
+     module procedure :: apply_COps_c
+  end interface apply_COps
+
+
+
+  interface apply_op_Sz
+     !
+     ! Apply the Fock operator :f:math:`S_z` to an input Fock state :f:var:`V` in a given sector :f:var:`sectorI`.
+     ! Output: a Fock state :f:var:`OV`.  
+     !
+     module procedure :: apply_op_Sz_d
+     module procedure :: apply_op_Sz_c
+  end interface apply_op_Sz
+
+
+
+  interface apply_op_N
+     !
+     ! Apply the Fock operator :f:math:`N` to an input Fock state :f:var:`V` in a given sector :f:var:`sectorI`.
+     ! Output: a Fock state :f:var:`OV`.
+     !
+     module procedure :: apply_op_N_d
+     module procedure :: apply_op_N_c
+  end interface apply_op_N
+
+
   public :: build_sector
   public :: delete_sector
   !
+  public :: apply_Cops
   public :: apply_op_C
   public :: apply_op_CDG
   public :: apply_op_Sz
@@ -366,211 +424,953 @@ contains
 
 
 
-   subroutine map_allocate_scalar(H,N,Nsp)
-      type(sector_map) :: H
-      integer          :: N
-      integer,optional :: Nsp
-      if(H%status) call map_deallocate_scalar(H)
-      allocate(H%map(N))
-      if(present(Nsp))call sp_init_map(H%sp,Nsp)
-      H%status=.true.
-   end subroutine map_allocate_scalar
-   !
-   subroutine map_allocate_vector(H,N,Nsp)
-      type(sector_map),dimension(:)       :: H
-      integer,dimension(size(H))          :: N
-      integer,optional                    :: Nsp
-      integer                             :: i
-      do i=1,size(H)
-         if(present(Nsp))then
-            call map_allocate_scalar(H(i),N(i),Nsp)
-         else
-            call map_allocate_scalar(H(i),N(i))
-         endif
-      enddo
-   end subroutine map_allocate_vector
+  subroutine map_allocate_scalar(H,N,Nsp)
+    type(sector_map) :: H
+    integer          :: N
+    integer,optional :: Nsp
+    if(H%status) call map_deallocate_scalar(H)
+    allocate(H%map(N))
+    if(present(Nsp))call sp_init_map(H%sp,Nsp)
+    H%status=.true.
+  end subroutine map_allocate_scalar
+  !
+  subroutine map_allocate_vector(H,N,Nsp)
+    type(sector_map),dimension(:)       :: H
+    integer,dimension(size(H))          :: N
+    integer,optional                    :: Nsp
+    integer                             :: i
+    do i=1,size(H)
+       if(present(Nsp))then
+          call map_allocate_scalar(H(i),N(i),Nsp)
+       else
+          call map_allocate_scalar(H(i),N(i))
+       endif
+    enddo
+  end subroutine map_allocate_vector
 
 
 
-   subroutine map_deallocate_scalar(H)
-      type(sector_map) :: H
-      if(.not.H%status)then
-         write(*,*) "WARNING map_deallocate_scalar: H is not allocated"
-         return
-      endif
-      if(allocated(H%map))deallocate(H%map)
-      H%status=.false.
-   end subroutine map_deallocate_scalar
-   !
-   subroutine map_deallocate_vector(H)
-      type(sector_map),dimension(:) :: H
-      integer                       :: i
-      do i=1,size(H)
-         call map_deallocate_scalar(H(i))
-      enddo
-   end subroutine map_deallocate_vector
-
-
-
+  subroutine map_deallocate_scalar(H)
+    type(sector_map) :: H
+    if(.not.H%status)then
+       write(LOGfile,*) "WARNING map_deallocate_scalar: H is not allocated"
+       return
+    endif
+    if(allocated(H%map))deallocate(H%map)
+    H%status=.false.
+  end subroutine map_deallocate_scalar
+  !
+  subroutine map_deallocate_vector(H)
+    type(sector_map),dimension(:) :: H
+    integer                       :: i
+    do i=1,size(H)
+       call map_deallocate_scalar(H(i))
+    enddo
+  end subroutine map_deallocate_vector
 
 
 
 
 
-  !> i=instate , j=outstate, ipos=site+orb index, ialfa=?, ispin, sectorI=sector in,sectorJ=sector out
-  subroutine apply_op_C(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ) 
-    integer, intent(in)         :: i,ipos,ialfa,ispin
-    type(sector),intent(in)     :: sectorI,sectorJ
-    integer,intent(out)         :: j
-    real(8),intent(out)         :: sgn
-    integer                     :: ibeta,isite
-    integer                     :: r
-    integer                     :: iph,i_el,j_el,el_state
-    integer,dimension(2*Ns_Ud)  :: Indices
-    integer,dimension(2*Ns_Ud)  :: Jndices
-    integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
-    integer,dimension(2)        :: Iud
-    integer,dimension(2*Ns)     :: ib
+
+  !##################################################################
+  !##################################################################
+  !##################################################################
+  !##################################################################
+
+  
+  
+
+
+
+  function apply_op_C_d(V,iorb,ispin,isector,jsector) result(OV)
+    real(8),dimension(:),intent(in)  :: V
+    integer, intent(in)              :: iorb,ispin,isector,jsector
+    type(sector)                     :: sectorI,sectorJ
+    real(8),dimension(:),allocatable :: OV
+    real(8)                          :: sgn
+    integer                          :: ialfa,ibeta,ipos,isite
+    integer                          :: i,j,r
+    integer                          :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)       :: Indices
+    integer,dimension(2*Ns_Ud)       :: Jndices
+    integer,dimension(2,Ns_Orb)      :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)             :: Iud
+    integer,dimension(2*Ns)          :: ib
     !
-    j=0
-    sgn=0d0
-    !
-    select case(ed_mode)
-    case default
-       ibeta  = ialfa + (ispin-1)*Ns_Ud
-       iph = (i-1)/(sectorI%DimEl) + 1
-       i_el = mod(i-1,sectorI%DimEl) + 1
+    if(MpiMaster)then
        !
-       call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-       iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
-       iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
-       nud(1,:) = Bdecomp(iud(1),Ns_Orb)
-       nud(2,:) = Bdecomp(iud(2),Ns_Orb)
-       if(Nud(ispin,ipos)/=1)return
-       call c(ipos,iud(ispin),r,sgn)
-       Jndices        = Indices
-       Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
-       call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j)
+       if(ed_total_ud)then
+          ialfa = 1
+          ipos  = iorb
+       else
+          ialfa = iorb
+          ipos  = 1
+       endif
        !
-       j = j + (iph-1)*sectorJ%DimEl
+       call build_sector(isector,sectorI)
        !
-    case("superc","nonsu2")
-       isite= ipos + (ispin-1)*Ns
-       iph  = (i-1)/(sectorI%DimEl)+1
-       i_el = mod(i-1,sectorI%DimEl)+1
-       el_state = sectorI%H(1)%map(i_el)
-       ib   = bdecomp(el_state,2*Ns)
-       if(ib(isite)/=1)return
-       call c(isite,el_state,r,sgn)
+       if(size(V)/=sectorI%Dim)stop "apply_op_C ERROR: size(V) != sectorI.Dim"
        !
-       j_el    = binary_search(sectorJ%H(1)%map,r)
-       j = j_el + (iph-1)*sectorJ%DimEl
+       call build_sector(jsector,sectorJ)
        !
-    end select
-  end subroutine apply_op_C
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=0d0
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case ("normal")
+             write(LOGfile,"(A,I6,2I4,A,I6,2I4)")&
+                  'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
+                  ' -> apply C  :',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
+          case default;stop "apply_Op_C ERROR: called with ed_mode != normal"
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          ibeta = ialfa + (ispin-1)*Ns_Ud
+          iph   = (i-1)/(sectorI%DimEl) + 1
+          i_el  = mod(i-1,sectorI%DimEl) + 1
+          !
+          call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+          iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+          iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+          nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+          nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+          if(Nud(ispin,ipos)/=1)cycle
+          call c(ipos,iud(ispin),r,sgn)
+          Jndices        = Indices
+          Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
+          call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j)
+          j     = j + (iph-1)*sectorJ%DimEl
+          OV(j) = sgn*V(i)
+       enddo
+       call delete_sector(sectorI)
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=0d0
+    end if
+    !
+  end function apply_op_C_d
 
 
-  subroutine apply_op_CDG(i,j,sgn,ipos,ialfa,ispin,sectorI,sectorJ) 
-    integer, intent(in)         :: i,ipos,ialfa,ispin
-    type(sector),intent(in)     :: sectorI,sectorJ
-    integer,intent(out)         :: j
-    real(8),intent(out)         :: sgn
-    integer                     :: ibeta,isite
-    integer                     :: r
-    integer                     :: iph,i_el,j_el,el_state
-    integer,dimension(2*Ns_Ud)  :: Indices
-    integer,dimension(2*Ns_Ud)  :: Jndices
-    integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
-    integer,dimension(2)        :: Iud
-    integer,dimension(2*Ns)     :: ib
+
+  function apply_op_C_c(V,iorb,ispin,isector,jsector) result(OV)
+    complex(8),dimension(:),intent(in)  :: V
+    integer, intent(in)                 :: iorb,ispin,isector,jsector
+    type(sector)                        :: sectorI,sectorJ
+    complex(8),dimension(:),allocatable :: OV
+    real(8)                             :: sgn
+    integer                             :: ialfa,ibeta,isite
+    integer                             :: i,j,r
+    integer                             :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)          :: Indices
+    integer,dimension(2*Ns_Ud)          :: Jndices
+    integer,dimension(2,Ns_Orb)         :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)                :: Iud
+    integer,dimension(2*Ns)             :: ib
     !
-    j=0
-    sgn=0d0
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_C ERROR: size(V) != sectorI.Dim"
+       !
+       call build_sector(jsector,sectorJ)
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=zero
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default;stop "apply_op_C ERROR: called with ed_mode!=superc/nonsu2"
+          case ("superc")
+             write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                  'From:',sectorI%index,sectorI%Sz,&
+                  ' -> apply C  :',sectorJ%index,sectorJ%Sz
+          case ("nonsu2")
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply C  :',sectorJ%index,sectorJ%twoJz/2
+             else
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply C  :',sectorJ%index,sectorJ%Ntot
+             endif
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          isite= iorb + (ispin-1)*Ns
+          iph  = (i-1)/(sectorI%DimEl)+1
+          i_el = mod(i-1,sectorI%DimEl)+1
+          ei   = sectorI%H(1)%map(i_el)
+          ib   = bdecomp(ei,2*Ns)
+          if(ib(isite)/=1)cycle
+          call c(isite,ei,r,sgn)
+          j_el = binary_search(sectorJ%H(1)%map,r)
+          j    = j_el + (iph-1)*sectorJ%DimEl
+          !
+          OV(j) = sgn*V(i)
+       enddo
+       call delete_sector(sectorI)
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=zero
+    end if
     !
-    select case(ed_mode)
-    case default
-       ibeta  = ialfa + (ispin-1)*Ns_Ud
-       iph = (i-1)/(sectorI%DimEl) + 1
-       i_el = mod(i-1,sectorI%DimEl) + 1
-       !
-       call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-       iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
-       iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
-       nud(1,:) = Bdecomp(iud(1),Ns_Orb)
-       nud(2,:) = Bdecomp(iud(2),Ns_Orb)
-       if(Nud(ispin,ipos)/=0)return
-       call cdg(ipos,iud(ispin),r,sgn)
-       Jndices        = Indices
-       Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
-       call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j_el)
-       !
-       j = j_el + (iph-1)*sectorJ%DimEl
-       !
-    case("superc","nonsu2")
-       isite= ipos + (ispin-1)*Ns
-       iph  = (i-1)/(sectorI%DimEl)+1
-       i_el = mod(i-1,sectorI%DimEl) + 1
-       el_state = sectorI%H(1)%map(i_el)
-       ib   = bdecomp(el_state,2*Ns)
-       if(ib(isite)/=0)return
-       call cdg(isite,el_state,r,sgn)
-       !
-       j_el    = binary_search(sectorJ%H(1)%map,r)
-       j = j_el + (iph-1)*sectorJ%DimEl
-       !
-    end select
-  end subroutine apply_op_CDG
+  end function apply_op_C_c
 
 
-  subroutine apply_op_Sz(i,sgn,ipos,ialfa,sectorI) 
-    integer, intent(in)         :: i,ipos,ialfa
-    type(sector),intent(in)     :: sectorI
-    real(8),intent(out)         :: sgn
-    integer                     :: iph,i_el
-    integer,dimension(2*Ns_Ud)  :: Indices
-    integer,dimension(2*Ns_Ud)  :: Jndices
-    integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
-    integer,dimension(2)        :: Iud
-    !
-    sgn=0d0
-    !
-    iph = (i-1)/(sectorI%DimEl) + 1
-    i_el = mod(i-1,sectorI%DimEl) + 1
-    !
-    call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-    iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
-    iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
-    nud(1,:) = Bdecomp(iud(1),Ns_Orb)
-    nud(2,:) = Bdecomp(iud(2),Ns_Orb)
-    !
-    sgn = dble(nud(1,ipos))-dble(nud(2,ipos))
-    sgn = sgn/2d0
-  end subroutine apply_op_Sz
 
 
-  subroutine apply_op_N(i,sgn,ipos,ialfa,sectorI) 
-    integer, intent(in)         :: i,ipos,ialfa
-    type(sector),intent(in)     :: sectorI
-    real(8),intent(out)         :: sgn
-    integer                     :: iph,i_el
-    integer,dimension(2*Ns_Ud)  :: Indices
-    integer,dimension(2*Ns_Ud)  :: Jndices
-    integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
-    integer,dimension(2)        :: Iud
+
+
+  
+
+
+
+
+
+
+  function apply_op_CDG_d(V,iorb,ispin,isector,jsector) result(OV)
+    real(8),dimension(:),intent(in)  :: V
+    integer, intent(in)              :: iorb,ispin,isector,jsector
+    type(sector)                     :: sectorI,sectorJ
+    real(8),dimension(:),allocatable :: OV
+    real(8)                          :: sgn
+    integer                          :: ialfa,ibeta,ipos,isite
+    integer                          :: i,j,r
+    integer                          :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)       :: Indices
+    integer,dimension(2*Ns_Ud)       :: Jndices
+    integer,dimension(2,Ns_Orb)      :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)             :: Iud
+    integer,dimension(2*Ns)          :: ib
     !
-    sgn=0d0
     !
-    iph = (i-1)/(sectorI%DimEl) + 1
-    i_el = mod(i-1,sectorI%DimEl) + 1
+    if(MpiMaster)then
+       !
+       if(ed_total_ud)then
+          ialfa = 1
+          ipos  = iorb
+       else
+          ialfa = iorb
+          ipos  = 1
+       endif
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_CDG ERROR: size(V) != sectorI.Dim"
+       !
+       call build_sector(jsector,sectorJ)
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=0d0
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case ("normal")
+             write(LOGfile,"(A,I6,2I4,A,I6,2I4)")&
+                  'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
+                  ' -> apply C^+:',sectorJ%index,sectorJ%Nups,sectorJ%Ndws
+          case default;stop "apply_op_CDG ERROR: called with ed_mode/=normal"
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          ibeta  = ialfa + (ispin-1)*Ns_Ud
+          iph = (i-1)/(sectorI%DimEl) + 1
+          i_el = mod(i-1,sectorI%DimEl) + 1
+          !
+          call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+          iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+          iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+          nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+          nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+          if(Nud(ispin,ipos)/=0)cycle
+          call cdg(ipos,iud(ispin),r,sgn)
+          Jndices        = Indices
+          Jndices(ibeta) = binary_search(sectorJ%H(ibeta)%map,r)
+          call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j_el)
+          j     = j_el + (iph-1)*sectorJ%DimEl
+          OV(j) = sgn*V(i)
+       enddo
+       call delete_sector(sectorI)
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=0d0
+    end if
     !
-    call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
-    iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
-    iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
-    nud(1,:) = Bdecomp(iud(1),Ns_Orb)
-    nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+  end function apply_op_CDG_d
+
+
+  function apply_op_CDG_c(V,iorb,ispin,isector,jsector) result(OV)
+    complex(8),dimension(:),intent(in)  :: V
+    integer, intent(in)                 :: iorb,ispin,isector,jsector
+    type(sector)                        :: sectorI,sectorJ
+    complex(8),dimension(:),allocatable :: OV
+    real(8)                             :: sgn
+    integer                             :: ialfa,ibeta,isite
+    integer                             :: i,j,r
+    integer                             :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)          :: Indices
+    integer,dimension(2*Ns_Ud)          :: Jndices
+    integer,dimension(2,Ns_Orb)         :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)                :: Iud
+    integer,dimension(2*Ns)             :: ib
     !
-    sgn = dble(nud(1,ipos))+dble(nud(2,ipos))
-  end subroutine apply_op_N
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_CDG ERROR: size(V) != sectorI.Dim"
+       !
+       call build_sector(jsector,sectorJ)
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=zero
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default;stop "apply_op_CDG ERROR: called with ed_mode!=superc/nonsu2"
+          case ("superc")
+             write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                  'From:',sectorI%index,sectorI%Sz,&
+                  ' -> apply C^+:',sectorJ%index,sectorJ%Sz
+          case ("nonsu2")
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply C^+:',sectorJ%index,sectorJ%twoJz/2
+             else
+                write(LOGfile,"(A,I6,I3,A,I6,I3)")&
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply C^+:',sectorJ%index,sectorJ%Ntot
+             endif
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          isite= iorb + (ispin-1)*Ns
+          iph  = (i-1)/(sectorI%DimEl)+1
+          i_el = mod(i-1,sectorI%DimEl) + 1
+          ei   = sectorI%H(1)%map(i_el)
+          ib   = bdecomp(ei,2*Ns)
+          if(ib(isite)/=0)cycle
+          call cdg(isite,ei,r,sgn)
+          j_el = binary_search(sectorJ%H(1)%map,r)
+          j    = j_el + (iph-1)*sectorJ%DimEl
+          OV(j) = sgn*V(i)
+       enddo
+       call delete_sector(sectorI)
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=zero
+    end if
+    !
+  end function apply_op_CDG_c
+
+
+
+
+
+
+
+
+
+
+
+  function apply_COps_d(V,As,Os,Pos,Spin,isector,jsector) result(OV)
+    real(8),dimension(:),intent(in)        :: V
+    real(8),dimension(:),intent(in)        :: As
+    integer,dimension(size(As)),intent(in) :: Os
+    integer,dimension(size(As)),intent(in) :: Pos,Spin
+    integer, intent(in)                    :: isector,jsector
+    type(sector)                           :: sectorI,sectorJ
+    real(8),dimension(:),allocatable       :: OV
+    integer                                :: ipos,ispin,ios,isite
+    integer                                :: i,j,Nos,is,N,iph,i_el,j_el,ei
+    real(8)                                :: sgn
+    integer                                :: r
+    integer                                :: fi
+    integer,dimension(2*Ns_Ud)             :: Indices
+    integer,dimension(2*Ns_Ud)             :: Jndices
+    integer,dimension(2,Ns_Orb)            :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)                   :: Iud
+    integer,dimension(2*Ns)                :: ib
+    character(2),dimension(-1:1)           :: Cstr = ["C ","  ","C*"]
+    character(:),allocatable               :: a,sg,Ostr
+    !
+    if(ed_mode == "normal" .and. .not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
+    !       
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_COps ERROR: size(V) != sectorI.Dim"
+       !
+       call build_sector(jsector,sectorJ)
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=zero
+       !
+       if(ed_verbose>2)then
+          Ostr = ""
+          do is=1,size(As)
+             ipos  = Pos(is)
+             ispin = Spin(is)
+             ios   = Os(is)
+             sg = "";if(is>1)sg=" + "
+             a  = str(As(is),2)
+             if(As(is)==one)then
+                a=""
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-one)then
+                a=""
+                sg = " - "
+             endif
+             if(As(is)==xi)then
+                a="i."
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-xi)then
+                a="i."
+                sg = " - "
+             endif
+             if(As(is)==one+xi)then
+                a="(1+i)."
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-one+xi)then
+                a="(-1+i)."
+                sg = " + "
+             endif
+             if(As(is)==one-xi)then
+                a="(1-i)."
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-one-xi)then
+                a="(1+i)."
+                sg = " - "
+             endif
+             Ostr  = Ostr//sg//a//str(Cstr(ios))//"_l"//str(ipos)//"s"//str(ispin)
+          enddo
+          N = max(20,len(Ostr))
+          !
+          select case(ed_mode)
+          case default;stop "apply_op_Cops ERROR: called with ed_mode/=normal"
+          case ("normal")
+             write(LOGfile,"(A,I6,2I4,A,A"//str(N)//",I6,2I4)")&
+                  'From:',sectorI%index,sectorI%Nups,sectorI%Ndws,&
+                  ' -> apply:',Ostr,sectorJ%index,sectorJ%Nups,sectorJ%Ndws
+          end select
+       endif
+       !
+       do is=1,size(As)
+          ipos  = Pos(is)
+          ispin = Spin(is)
+          ios   = Os(is)
+          do i=1,sectorI%Dim
+             iph  = (i-1)/(sectorI%DimEl) + 1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+             iud(1)   = sectorI%H(1)%map(Indices(1))
+             iud(2)   = sectorI%H(2)%map(Indices(2))
+             Nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+             Nud(2,:) = Bdecomp(iud(2),Ns_Orb)             
+             select case(ios)
+             case default;stop "apply_COps ERROR: ios sign not \in [-1,1]"
+             case(-1)
+                if(Nud(ispin,ipos)/=1)cycle
+                call c(ipos,iud(ispin),r,sgn)
+             case(1)
+                if(Nud(ispin,ipos)/=0)cycle
+                call cdg(ipos,iud(ispin),r,sgn)
+             end select
+             Jndices        = Indices
+             Jndices(ispin) = binary_search(sectorJ%H(ispin)%map,r)
+             call indices2state(Jndices,[sectorJ%DimUps,sectorJ%DimDws],j_el)
+             j     = j_el + (iph-1)*sectorJ%DimEl
+             OV(j) = OV(j) + sgn*V(i)*As(is)
+          enddo
+       enddo
+       call delete_sector(sectorI)
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=0d0
+    end if
+  end function apply_COps_d
+
+
+
+
+
+  function apply_COps_c(V,As,Os,Pos,Spin,isector,jsector) result(OV)
+    complex(8),dimension(:),intent(in)     :: V
+    complex(8),dimension(:),intent(in)     :: As
+    integer,dimension(size(As)),intent(in) :: Os
+    integer,dimension(size(As)),intent(in) :: Pos,Spin
+    integer, intent(in)                    :: isector,jsector
+    type(sector)                           :: sectorI,sectorJ
+    complex(8),dimension(:),allocatable    :: OV
+    integer                                :: ipos,ispin,ios,isite
+    integer                                :: i,j,Nos,is,N,iph,i_el,j_el,ei
+    real(8)                                :: sgn
+    integer                                :: r
+    integer                                :: fi
+    integer,dimension(2*Ns_Ud)             :: Indices
+    integer,dimension(2*Ns_Ud)             :: Jndices
+    integer,dimension(2,Ns_Orb)            :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)                   :: Iud
+    integer,dimension(2*Ns)                :: ib
+    character(2),dimension(-1:1)           :: Cstr = ["C ","  ","C*"]
+    character(:),allocatable               :: a,sg,Ostr
+    !
+    if(ed_mode == "normal" .and. .not.ed_total_ud)stop "apply_COps ERROR: called with ed_total_ud=F"
+    !
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_COps ERROR: size(V) != sectorI.Dim"
+       !
+       call build_sector(jsector,sectorJ)
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorJ%Dim)) ; OV=zero
+       !
+       if(ed_verbose>2)then
+          Ostr = ""
+          do is=1,size(As)
+             ipos  = Pos(is)
+             ispin = Spin(is)
+             ios   = Os(is)
+             sg = "";if(is>1)sg=" + "
+             a  = str(As(is),2)
+             if(As(is)==one)then
+                a=""
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-one)then
+                a=""
+                sg = " - "
+             endif
+             if(As(is)==xi)then
+                a="i."
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-xi)then
+                a="i."
+                sg = " - "
+             endif
+             if(As(is)==one+xi)then
+                a="(1+i)."
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-one+xi)then
+                a="(-1+i)."
+                sg = " + "
+             endif
+             if(As(is)==one-xi)then
+                a="(1-i)."
+                if(is>1)sg = " + "
+             endif
+             if(As(is)==-one-xi)then
+                a="(1+i)."
+                sg = " - "
+             endif
+             Ostr  = Ostr//sg//a//str(Cstr(ios))//"_l"//str(ipos)//"s"//str(ispin)
+          enddo
+          N = max(20,len(Ostr))
+          !
+          select case(ed_mode)
+          case default;stop "apply_op_CDG ERROR: called with ed_mode!=superc/nonsu2"
+          case ("superc")
+             write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
+                  'From:',sectorI%index,sectorI%Sz,&
+                  ' -> apply:',Ostr,sectorJ%index,sectorJ%Sz
+          case ("nonsu2")
+             if(Jz_basis)then                    
+                write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
+                     'From:',sectorI%index,sectorI%twoJz/2.,&
+                     ' -> apply:',Ostr,sectorJ%index,sectorJ%twoJz/2
+             else
+                write(LOGfile,"(A,I6,I3,A,A"//str(N)//",I6,I3))")&
+                     'From:',sectorI%index,sectorI%Ntot,&
+                     ' -> apply:',Ostr,sectorJ%index,sectorJ%Ntot
+             endif
+          end select
+       endif
+       !
+       do is=1,size(As)
+          ipos  = Pos(is)
+          ispin = Spin(is)
+          ios   = Os(is)
+          do i=1,sectorI%Dim
+             isite= ipos + (ispin-1)*Ns
+             iph  = (i-1)/(sectorI%DimEl)+1
+             i_el = mod(i-1,sectorI%DimEl) + 1
+             fi   = sectorI%H(1)%map(i_el)
+             ib   = bdecomp(fi,2*Ns)
+             select case(ios)
+             case default;stop "apply_COps ERROR: ios sign not \in [-1,1]"
+             case(-1)
+                if(ib(isite)/=1)cycle
+                call c(isite,fi,r,sgn)
+             case(1)
+                if(ib(isite)/=0)cycle
+                call cdg(isite,fi,r,sgn)
+             end select
+             j_el = binary_search(sectorJ%H(1)%map,r)
+             j    = j_el + (iph-1)*sectorJ%DimEl
+             OV(j) = OV(j) + sgn*V(i)*As(is)
+          enddo
+       enddo
+       call delete_sector(sectorI)
+       call delete_sector(sectorJ)
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=zero
+    end if
+  end function apply_COps_c
+
+
+
+
+
+
+
+
+
+
+
+  function apply_op_Sz_d(V,iorb,isector) result(OV)
+    real(8),dimension(:),intent(in)  :: V
+    integer, intent(in)              :: iorb,isector
+    real(8),dimension(:),allocatable :: OV
+    type(sector)                     :: sectorI
+    real(8)                          :: sgn
+    integer                          :: ialfa,ibeta,ipos,isite
+    integer                          :: i,j,r
+    integer                          :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)       :: Indices
+    integer,dimension(2*Ns_Ud)       :: Jndices
+    integer,dimension(2,Ns_Orb)      :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)             :: Iud
+    integer,dimension(2*Ns)          :: ib
+    !
+    if(ed_total_ud)then
+       ialfa = 1
+       ipos  = iorb
+    else
+       ialfa = iorb
+       ipos  = 1
+    endif
+    !
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_Sz ERROR: size(V) != sectorI.Dim"
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorI%Dim)) ; OV=0d0
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default;stop "apply_op_Sz ERROR: called with ed_mode/=normal"
+          case ("normal")
+             write(LOGfile,"(A,I6,2I4)")&
+                  'apply Sz :',sectorI%index,sectorI%Nups,sectorI%Ndws
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          iph = (i-1)/(sectorI%DimEl) + 1
+          i_el = mod(i-1,sectorI%DimEl) + 1
+          call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+          iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+          iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+          nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+          nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+          sgn      = dble(nud(1,ipos))-dble(nud(2,ipos))
+          sgn      = sgn/2d0
+          OV(i)    = sgn*V(i)
+       enddo
+       !
+       call delete_sector(sectorI)
+       !
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=0d0
+    end if
+    !
+  end function apply_op_Sz_d
+
+
+
+
+  function apply_op_Sz_c(V,iorb,isector) result(OV)
+    complex(8),dimension(:),intent(in)  :: V
+    integer, intent(in)                 :: iorb,isector
+    type(sector)                        :: sectorI
+    complex(8),dimension(:),allocatable :: OV
+    real(8)                             :: sgn
+    integer                             :: ialfa,ibeta,ipos,isite
+    integer                             :: i,j,r
+    integer                             :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)          :: Indices
+    integer,dimension(2*Ns_Ud)          :: Jndices
+    integer,dimension(2,Ns_Orb)         :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)                :: Iud
+    integer,dimension(2*Ns)             :: ib
+    !
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_Sz ERROR: size(V) != sectorI.Dim"
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorI%Dim)) ; OV=zero
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default;stop "apply_op_Sz ERROR: called with ed_mode/=superc/nonsu2"
+          case ("superc")
+             write(LOGfile,"(A,I6,I3)")&
+                  'apply Sz :',sectorI%index,sectorI%Sz
+          case ("nonsu2")
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply Sz :',sectorI%index,sectorI%twoJz/2.
+             else
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply Sz :',sectorI%index,sectorI%Ntot
+             endif
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          iph   = (i-1)/(sectorI%DimEl)+1
+          i_el  = mod(i-1,sectorI%DimEl)+1
+          ei    = sectorI%H(1)%map(i_el)
+          ib    = bdecomp(ei,2*Ns)
+          sgn   = dble(ib(ipos))-dble(ib(ipos+Ns))
+          sgn   = sgn/2d0
+          OV(i) = sgn*V(i)
+       enddo
+       !
+       call delete_sector(sectorI)
+       !
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=zero
+    end if
+    !
+  end function apply_op_Sz_c
+
+
+
+
+
+
+
+
+
+
+  function apply_op_N_d(V,iorb,isector) result(OV)
+    real(8),dimension(:),intent(in) :: V
+    integer, intent(in)                :: iorb,isector
+    type(sector)                  :: sectorI
+    real(8),dimension(:),allocatable :: OV
+    real(8)                            :: sgn
+    integer                            :: ialfa,ibeta,ipos,isite
+    integer                            :: i,j,r
+    integer                            :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)         :: Indices
+    integer,dimension(2*Ns_Ud)         :: Jndices
+    integer,dimension(2,Ns_Orb)        :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)               :: Iud
+    integer,dimension(2*Ns)            :: ib
+    !
+    if(MpiMaster)then
+       !
+       if(ed_total_ud)then
+          ialfa = 1
+          ipos  = iorb
+       else
+          ialfa = iorb
+          ipos  = 1
+       endif
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_N ERROR: size(V) != sectorI.Dim"
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorI%Dim)) ; OV=0d0
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default;stop "apply_op_N ERROR: called with ed_mode/=normal"
+          case ("normal")
+             write(LOGfile,"(A,I6,2I4)")&
+                  'apply N  :',sectorI%index,sectorI%Nups,sectorI%Ndws
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          iph = (i-1)/(sectorI%DimEl) + 1
+          i_el = mod(i-1,sectorI%DimEl) + 1
+          call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+          iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+          iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+          nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+          nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+          sgn      = dble(nud(1,ipos))+dble(nud(2,ipos))
+          OV(i)    = sgn*V(i)
+       enddo
+       !
+       call delete_sector(sectorI)       
+       !
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=0d0
+    end if
+    !
+  end function apply_op_N_d
+  !
+
+
+
+  function apply_op_N_c(V,iorb,isector) result(OV)
+    complex(8),dimension(:),intent(in) :: V
+    integer, intent(in)                :: iorb,isector
+    type(sector)                        :: sectorI
+    complex(8),dimension(:),allocatable :: OV
+    real(8)                            :: sgn
+    integer                            :: ialfa,ibeta,ipos,isite
+    integer                            :: i,j,r
+    integer                            :: iph,i_el,j_el,ei
+    integer,dimension(2*Ns_Ud)         :: Indices
+    integer,dimension(2*Ns_Ud)         :: Jndices
+    integer,dimension(2,Ns_Orb)        :: Nud !Nbits(Ns_Orb)
+    integer,dimension(2)               :: Iud
+    integer,dimension(2*Ns)            :: ib
+    !
+    if(MpiMaster)then
+       !
+       call build_sector(isector,sectorI)
+       !
+       if(size(V)/=sectorI%Dim)stop "apply_op_N ERROR: size(V) != sectorI.Dim"
+       !
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(sectorI%Dim)) ; OV=zero
+       !
+       if(ed_verbose>2)then
+          select case(ed_mode)
+          case default;stop "apply_op_N ERROR: called with ed_mode/=superc/nonsu2"
+          case ("superc")
+             write(LOGfile,"(A,I6,I3)")&
+                  'apply N  :',sectorI%index,sectorI%Sz
+          case ("nonsu2")
+             if(Jz_basis)then
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply N  :',sectorI%index,sectorI%twoJz/2.
+             else
+                write(LOGfile,"(A,I6,I3)")&
+                     'apply N  :',sectorI%index,sectorI%Ntot
+             endif
+          end select
+       endif
+       !
+       do i=1,sectorI%Dim
+          iph   = (i-1)/(sectorI%DimEl)+1
+          i_el  = mod(i-1,sectorI%DimEl)+1
+          ei    = sectorI%H(1)%map(i_el)
+          ib    = bdecomp(ei,2*Ns)
+          sgn   = dble(ib(ipos))+dble(ib(ipos+Ns))
+          OV(i) = sgn*V(i)
+       enddo
+       !
+       call delete_sector(sectorI)
+       !
+    else
+       if(allocated(OV))deallocate(OV)
+       allocate(OV(1)) ; OV=zero
+    end if
+    !
+  end function apply_op_N_c
+  !
+
+
+
+
+
+  ! subroutine apply_op_Sz(i,sgn,ipos,ialfa,sectorI) 
+  !   integer, intent(in)               :: i,ipos,ialfa
+  !   type(sector),intent(in)           :: sectorI
+  !   real(8),intent(out)               :: sgn
+  !   integer                           :: iph,i_el
+  !   integer,dimension(2*Ns_Ud)        :: Indices
+  !   integer,dimension(2*Ns_Ud)        :: Jndices
+  !   integer,dimension(2,Ns_Orb)       :: Nud !Nbits(Ns_Orb)
+  !   integer,dimension(2)              :: Iud
+  !   !
+  !   sgn=0d0
+  !   !
+  !   iph = (i-1)/(sectorI%DimEl) + 1
+  !   i_el = mod(i-1,sectorI%DimEl) + 1
+  !   !
+  !   call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+  !   iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+  !   iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+  !   nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+  !   nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+  !   !
+  !   sgn = dble(nud(1,ipos))-dble(nud(2,ipos))
+  !   sgn = sgn/2d0
+  ! end subroutine apply_op_Sz
+
+
+  ! subroutine apply_op_N(i,sgn,ipos,ialfa,sectorI) 
+  !   integer, intent(in)         :: i,ipos,ialfa
+  !   type(sector),intent(in)     :: sectorI
+  !   real(8),intent(out)         :: sgn
+  !   integer                     :: iph,i_el
+  !   integer,dimension(2*Ns_Ud)  :: Indices
+  !   integer,dimension(2*Ns_Ud)  :: Jndices
+  !   integer,dimension(2,Ns_Orb) :: Nud !Nbits(Ns_Orb)
+  !   integer,dimension(2)        :: Iud
+  !   !
+  !   sgn=0d0
+  !   !
+  !   iph = (i-1)/(sectorI%DimEl) + 1
+  !   i_el = mod(i-1,sectorI%DimEl) + 1
+  !   !
+  !   call state2indices(i_el,[sectorI%DimUps,sectorI%DimDws],Indices)
+  !   iud(1)   = sectorI%H(ialfa)%map(Indices(ialfa))
+  !   iud(2)   = sectorI%H(ialfa+Ns_Ud)%map(Indices(ialfa+Ns_Ud))
+  !   nud(1,:) = Bdecomp(iud(1),Ns_Orb)
+  !   nud(2,:) = Bdecomp(iud(2),Ns_Orb)
+  !   !
+  !   sgn = dble(nud(1,ipos))+dble(nud(2,ipos))
+  ! end subroutine apply_op_N
+
+
+
+
+
+
 
 
   subroutine build_op_Ns(i,Nup,Ndw,sectorI) 
