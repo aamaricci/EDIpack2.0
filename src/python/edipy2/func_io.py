@@ -220,11 +220,11 @@ def get_phi(self, ilat=None, iorb=None, jorb=None):
    :type iorb: int
    :param iorb: the first orbital index
    
-   :type iorb: int
-   :param iorb: the second orbital index
+   :type jorb: int
+   :param jorb: the second orbital index
    
-   :return: the full :math:`\\phi` tensor has dimensions [ :code:`Nlat` ,Norb, Norb]. Depending on \
-   which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
+   :return: :math:`\\phi`. The full tensor has dimensions [ :code:`Nlat`, :data:`Norb`, :data:`Norb`]. \
+   Depending on which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
    :rtype: float **or** np.array(dtype=float)
    
    """
