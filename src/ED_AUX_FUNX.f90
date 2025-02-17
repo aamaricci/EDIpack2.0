@@ -102,6 +102,8 @@ MODULE ED_AUX_FUNX
 
   !SET local Impurity Hamiltonian (excluded the interaction part)
   public :: ed_set_Hloc
+  public :: set_impHloc
+  !
   !FERMIONIC OPERATORS IN BITWISE OPERATIONS
   public :: c,cdg
   !AUX BIT OPERATIONS
@@ -286,7 +288,14 @@ contains
   end subroutine ed_set_Hloc_lattice_N5
 
 
-
+  subroutine set_impHloc(site)
+    integer :: site
+    if(allocated(impHloc))deallocate(impHloc)
+    allocate(impHloc(Nspin,Nspin,Norb,Norb));impHloc=zero
+    if(.not.allocated(Hloc_ineq))stop "set_impHloc error: called with Hloc_ineq not allocated"
+    impHloc = Hloc_ineq(site,:,:,:,:)
+  end subroutine set_impHloc
+  
 
 
   !##################################################################
@@ -445,8 +454,7 @@ contains
     !from a file named :code:`"file"//str(ed_file_suffix)//.restart"` taking into account the value of the global variable :f:var:`ed_file_suffix` ,
     !which is :code:`"_ineq_Nineq"` padded with 4 zeros in the case of inequivalent sites, as per documentation
     character(len=*),optional :: file
-    character(len=256)        :: file_
-    
+    character(len=256)        :: file_    
     !
     if(allocated(impGmatrix))call deallocate_GFmatrix(impGmatrix)
     if(allocated(impGmatrix))deallocate(impGmatrix)

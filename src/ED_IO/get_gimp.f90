@@ -107,6 +107,18 @@ subroutine ed_get_gimp_lattice_n3(self,nlat,axis,type,z)
   complex(8),dimension(:),allocatable           :: z_
   integer                                       :: ilat
   complex(8),dimension(:,:,:,:,:,:),allocatable :: gf
+  integer                                       :: MPI_ID=0
+  integer                                       :: MPI_SIZE=1
+  integer                                       :: mpi_err 
+#ifdef _MPI    
+  if(check_MPI())then
+     MPI_ID     = get_Rank_MPI()
+     MPI_SIZE   = get_Size_MPI()
+  endif
+#endif
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Gimp_lattice_n3"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -133,8 +145,9 @@ subroutine ed_get_gimp_lattice_n3(self,nlat,axis,type,z)
   allocate(gf(Nlat,Nspin,Nspin,Norb,Norb,L))
   gf = zero
   !
-  do ilat=1,Nlat
+  do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
      call ed_set_suffix(ilat)
+     call set_impHloc(ilat)
      call read_impGmatrix()
      select case(type_)
      case default; stop "ed_get_gimp ERROR: type is neither Normal, nor Anomalous"
@@ -143,7 +156,11 @@ subroutine ed_get_gimp_lattice_n3(self,nlat,axis,type,z)
      end select
   enddo
   !
-  self = nnn2lso_reshape(gf,Nlat,Nspin,Norb,Lreal)
+#ifdef _MPI
+  if(check_MPI())call MPI_AllReduce(MPI_IN_PLACE, gf, size(gf), MPI_Double_Complex, MPI_Sum, MPI_COMM_WORLD, MPI_ERR)
+#endif
+  !
+  self = nnn2lso_reshape(gf,Nlat,Nspin,Norb,L)
   !
   call ed_reset_suffix()
   call deallocate_grids()
@@ -164,6 +181,18 @@ subroutine ed_get_gimp_lattice_n4(self,nlat,axis,type,z)
   complex(8),dimension(:),allocatable         :: z_
   integer                                     :: ilat
   complex(8),dimension(:,:,:,:,:),allocatable :: gf
+  integer                                     :: MPI_ID=0
+  integer                                     :: MPI_SIZE=1
+  integer                                     :: mpi_err 
+#ifdef _MPI    
+  if(check_MPI())then
+     MPI_ID     = get_Rank_MPI()
+     MPI_SIZE   = get_Size_MPI()
+  endif
+#endif
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Gimp_lattice_n4"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -187,8 +216,9 @@ subroutine ed_get_gimp_lattice_n4(self,nlat,axis,type,z)
   !
   allocate(gf(Nspin,Nspin,Norb,Norb,L))
   gf = zero
-  do ilat=1,Nlat
+  do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
      call ed_set_suffix(ilat)
+     call set_impHloc(ilat)
      call read_impGmatrix()
      !
      select case(type_)
@@ -200,6 +230,10 @@ subroutine ed_get_gimp_lattice_n4(self,nlat,axis,type,z)
      self(ilat,:,:,:) = nn2so_reshape(gf,Nspin,Norb,L)
      !
   enddo
+  !
+#ifdef _MPI
+  if(check_MPI())call MPI_AllReduce(MPI_IN_PLACE, self, size(self), MPI_Double_Complex, MPI_Sum, MPI_COMM_WORLD, MPI_ERR)
+#endif
   !
   call ed_reset_suffix()
   call deallocate_grids()
@@ -219,6 +253,18 @@ subroutine ed_get_gimp_lattice_n6(self,nlat,axis,type,z)
   character(len=1)                                :: type_
   complex(8),dimension(:),allocatable             :: z_
   integer                                         :: ilat
+  integer                                         :: MPI_ID=0
+  integer                                         :: MPI_SIZE=1
+  integer                                         :: mpi_err 
+#ifdef _MPI    
+  if(check_MPI())then
+     MPI_ID     = get_Rank_MPI()
+     MPI_SIZE   = get_Size_MPI()
+  endif
+#endif
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_Gimp_lattice_n4"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -238,10 +284,11 @@ subroutine ed_get_gimp_lattice_n6(self,nlat,axis,type,z)
   !
   L = size(z_)
   !
-  call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,Lmats],'ed_get_gimp','self')
+  call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,L],'ed_get_gimp','self')
   !
-  do ilat=1,Nlat
+  do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
      call ed_set_suffix(ilat)
+     call set_impHloc(ilat)
      call read_impGmatrix()
      select case(type_)
      case default; stop "ed_get_gimp ERROR: type is neither Normal, nor Anomalous"
@@ -249,6 +296,10 @@ subroutine ed_get_gimp_lattice_n6(self,nlat,axis,type,z)
      case ('a','A');self(ilat,:,:,:,:,:) = get_impF(z_,axis_)
      end select
   enddo
+  !
+#ifdef _MPI
+  if(check_MPI())call MPI_AllReduce(MPI_IN_PLACE, self, size(self), MPI_Double_Complex, MPI_Sum, MPI_COMM_WORLD, MPI_ERR)
+#endif
   !
   call ed_reset_suffix()
   call deallocate_grids()

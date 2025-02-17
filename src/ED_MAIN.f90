@@ -313,7 +313,6 @@ contains
        if(.not.check_dim) stop "init_lattice_bath: wrong bath size dimension 1 or 2 "
     end do
     !
-    Dmats_ph_ineq = zero ; Dreal_ph_ineq = zero 
     dens_ineq     = 0d0  ; docc_ineq     = 0d0
     mag_ineq      = 0d0  ; phisc_ineq    = 0d0  
     e_ineq        = 0d0  ; dd_ineq       = 0d0 

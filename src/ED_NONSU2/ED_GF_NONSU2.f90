@@ -520,6 +520,7 @@ contains
     invG  = get_impG_nonsu2(zeta)
     !
     !Get Sigma= G0^-1 - G^-1
+    Sigma = zero
     do i=1,size(zeta)     
        iGzeta =  nn2so_reshape(invG(:,:,:,:,i),Nspin,Norb)
        call inv(iGzeta)

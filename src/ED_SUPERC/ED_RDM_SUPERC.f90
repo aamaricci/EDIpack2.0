@@ -190,7 +190,7 @@ contains
           write(LOGfile,*)ed_dens_up(1)-ed_docc(1),abs(ed_dens_up(1)-ed_docc(1)-impurity_density_matrix(2,2))
           write(LOGfile,*)ed_dens_dw(1)-ed_docc(1),abs(ed_dens_dw(1)-ed_docc(1)-impurity_density_matrix(3,3))
           write(LOGfile,*)ed_docc(1),abs(ed_docc(1)-impurity_density_matrix(4,4))
-          write(LOGfile,*)ed_phisc(1),-impurity_density_matrix(1,4),abs(ed_phisc(1)+impurity_density_matrix(1,4))
+          write(LOGfile,*)ed_phisc(1,1),-impurity_density_matrix(1,4),abs(ed_phisc(1,1)+impurity_density_matrix(1,4))
 #endif
        endif
     endif

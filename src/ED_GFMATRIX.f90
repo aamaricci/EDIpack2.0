@@ -390,7 +390,7 @@ contains
     integer          :: unit_
     integer          :: i1,i2,i3,i4
 #ifdef _DEBUG
-    if(ed_verbose>4)write(Logfile,"(A)")"DEBUG reading_gfmatrix_single: reading self"
+    if(ed_verbose>1)write(Logfile,"(A)")"DEBUG reading_gfmatrix_single: "//str(file)
 #endif
     call deallocate_GFmatrix(self)
     unit_=free_unit()

@@ -576,6 +576,8 @@ contains
     !Get G^-1
     invG  = get_impG_normal(zeta)
     !
+    Sigma = zero
+    !
     !Get Sigma= G0^-1 - G^-1
     do ispin=1,Nspin
        do i=1,size(zeta)

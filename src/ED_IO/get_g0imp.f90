@@ -98,6 +98,18 @@ subroutine ed_get_g0imp_lattice_n3(self,bath,axis,type,z)
   complex(8),dimension(:),allocatable           :: z_
   integer                                       :: ilat,Nlat
   complex(8),dimension(:,:,:,:,:,:),allocatable :: gf
+  integer                                       :: MPI_ID=0
+  integer                                       :: MPI_SIZE=1
+  integer                                       :: mpi_err 
+#ifdef _MPI    
+  if(check_MPI())then
+     MPI_ID     = get_Rank_MPI()
+     MPI_SIZE   = get_Size_MPI()
+  endif
+#endif
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_G0imp_lattice_n3"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -124,12 +136,17 @@ subroutine ed_get_g0imp_lattice_n3(self,bath,axis,type,z)
   allocate(gf(Nlat,Nspin,Nspin,Norb,Norb,L))
   gf = zero
   !
-  do ilat=1,Nlat
+  do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
      call ed_set_suffix(ilat)
+     call set_impHloc(ilat)
      call ed_get_g0and(z_,bath(ilat,:),gf(ilat,:,:,:,:,:),axis=axis_,type=type_)
   enddo
   !
-  self = nnn2lso_reshape(gf,Nlat,Nspin,Norb,Lreal)
+#ifdef _MPI
+  if(check_MPI())call MPI_AllReduce(MPI_IN_PLACE, gf, size(gf), MPI_Double_Complex, MPI_Sum, MPI_COMM_WORLD, MPI_ERR)
+#endif
+  !
+  self = nnn2lso_reshape(gf,Nlat,Nspin,Norb,L)
   !
   call ed_reset_suffix()
   call deallocate_grids()
@@ -148,6 +165,18 @@ subroutine ed_get_g0imp_lattice_n4(self,bath,axis,type,z)
   complex(8),dimension(:),allocatable         :: z_
   integer                                     :: ilat,Nlat
   complex(8),dimension(:,:,:,:,:),allocatable :: gf
+  integer                                       :: MPI_ID=0
+  integer                                       :: MPI_SIZE=1
+  integer                                       :: mpi_err 
+#ifdef _MPI    
+  if(check_MPI())then
+     MPI_ID     = get_Rank_MPI()
+     MPI_SIZE   = get_Size_MPI()
+  endif
+#endif
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_g0imp_lattice_n3"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -172,13 +201,18 @@ subroutine ed_get_g0imp_lattice_n4(self,bath,axis,type,z)
   !
   allocate(gf(Nspin,Nspin,Norb,Norb,L))
   gf = zero
-  do ilat=1,Nlat
+  do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
      call ed_set_suffix(ilat)
+     call set_impHloc(ilat)
      call ed_get_g0and(z_,bath(ilat,:),gf,axis=axis_,type=type_)
      !
      self(ilat,:,:,:) = nn2so_reshape(gf,Nspin,Norb,L)
      !
   enddo
+  !
+#ifdef _MPI
+  if(check_MPI())call MPI_AllReduce(MPI_IN_PLACE, self, size(self), MPI_Double_Complex, MPI_Sum, MPI_COMM_WORLD, MPI_ERR)
+#endif
   !
   call ed_reset_suffix()
   call deallocate_grids()
@@ -196,6 +230,18 @@ subroutine ed_get_g0imp_lattice_n6(self,bath,axis,type,z)
   character(len=1)                                :: type_
   complex(8),dimension(:),allocatable             :: z_
   integer                                         :: ilat,Nlat
+  integer                                       :: MPI_ID=0
+  integer                                       :: MPI_SIZE=1
+  integer                                       :: mpi_err 
+#ifdef _MPI    
+  if(check_MPI())then
+     MPI_ID     = get_Rank_MPI()
+     MPI_SIZE   = get_Size_MPI()
+  endif
+#endif
+#ifdef _DEBUG
+  if(ed_verbose>1)write(Logfile,"(A)")"DEBUG get_G0imp_lattice_n3"
+#endif
   !
   axis_='m';if(present(axis))axis_=trim(axis)
   type_='n';if(present(type))type_=trim(type)
@@ -216,12 +262,17 @@ subroutine ed_get_g0imp_lattice_n6(self,bath,axis,type,z)
   L = size(z_)
   Nlat=size(bath,1)
   !
-  call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,Lmats],'ed_get_g0imp','self')
+  call assert_shape(self,[Nlat,Nspin,Nspin,Norb,Norb,L],'ed_get_g0imp','self')
   !
-  do ilat=1,Nlat
+  do ilat = 1 + MPI_ID, Nlat, MPI_SIZE
      call ed_set_suffix(ilat)
+     call set_impHloc(ilat)
      call ed_get_g0and(z_,bath(ilat,:),self(ilat,:,:,:,:,:),axis=axis_,type=type_)
   enddo
+  !
+#ifdef _MPI
+  if(check_MPI())call MPI_AllReduce(MPI_IN_PLACE, self, size(self), MPI_Double_Complex, MPI_Sum, MPI_COMM_WORLD, MPI_ERR)
+#endif
   !
   call ed_reset_suffix()
   call deallocate_grids()
