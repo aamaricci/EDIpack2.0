@@ -13,7 +13,9 @@ These functions pass to the userspace the observables and response functions cal
    
 .. autofunction:: edipy2.global_env.get_eimp
    
-.. autofunction:: edipy2.global_env.get_mag  
+.. autofunction:: edipy2.global_env.get_mag 
+
+.. autofunction:: edipy2.global_env.get_phi
 
 .. autofunction:: edipy2.global_env.get_gimp
 

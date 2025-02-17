@@ -20,7 +20,7 @@ def get_dens(self, ilat=None, iorb=None):
     :param iorb: the orbital index. If none is provided, the whole density vector is returned
    
     :return: the full charge density tensor has dimensions [ :code:`Nlat` ,Norb]. Depending on \
-    which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
+    which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
     :rtype: float **or** np.array(dtype=float) 
     
     """
@@ -83,7 +83,7 @@ def get_mag(self, icomp=None, ilat=None, iorb=None):
        :param iorb: the orbital index. If none is provided, the whole density vector is returned
        
        :return: the full magnetization tensor has dimensions [ :code:`Nlat` ,3,Norb]. Depending on \
-       which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
+       which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
        :rtype: float **or** np.array(dtype=float) 
        
      """
@@ -162,7 +162,7 @@ def get_docc(self, ilat=None, iorb=None):
    :param iorb: the orbital index. If none is provided, the whole density vector is returned
    
    :return: the full double-occupation tensor has dimensions [ :code:`Nlat` ,Norb]. Depending on \
-   which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
+   which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
    :rtype: float **or** np.array(dtype=float)
    
    """
@@ -205,6 +205,86 @@ def get_docc(self, ilat=None, iorb=None):
             return doccvec[ilat, :]
         else:
             return doccvec
+            
+            
+# superconductive phi
+def get_phi(self, ilat=None, iorb=None, jorb=None):
+    """
+    This function returns the value of the superconductive order \
+    parameter :math:`\\phi = \\langle c_{\\uparrow} c_{\\downarrow} \\rangle`
+  
+   :type ilat: int
+   :param ilat: if the case of real-space DMFT, if only the Green's function of a \
+   specific inequivalent site is needed, this can be specified.
+   
+   :type iorb: int
+   :param iorb: the first orbital index
+   
+   :type iorb: int
+   :param iorb: the second orbital index
+   
+   :return: the full :math:`\\phi` tensor has dimensions [ :code:`Nlat` ,Norb, Norb]. Depending on \
+   which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
+   :rtype: float **or** np.array(dtype=float)
+   
+   """
+
+
+    aux_norb = c_int.in_dll(self.library, "Norb").value
+
+    ed_get_phisc_n2_wrap = self.library.ed_get_phisc_n2
+    ed_get_phisc_n2_wrap.argtypes = [
+        np.ctypeslib.ndpointer(dtype=float, ndim=2, flags="F_CONTIGUOUS") #self
+    ]
+    ed_get_phisc_n2_wrap.restype = None
+
+    ed_get_phisc_n3_wrap = self.library.ed_get_phisc_n3
+    ed_get_phisc_n3_wrap.argtypes = [
+        np.ctypeslib.ndpointer(dtype=float, ndim=3, flags="F_CONTIGUOUS"), #self
+        c_int, #Nlat
+    ]
+    ed_get_phisc_n3_wrap.restype = None
+
+    if self.Nineq == 0:
+        phivec = np.zeros((aux_norb, aux_norb), dtype=float, order="F")
+        ed_get_phisc_n2_wrap(phivec)
+        phivec = np.asarray(phivec)
+
+        if ilat is not None:
+            raise ValueError("ilat cannot be none for single-impurity DMFT")
+        elif iorb is not None and jorb is not None:
+            return phivec[iorb,jorb]
+        elif iorb is not None and jorb is None:
+            return phivec[iorb,:]
+        elif jorb is not None and iorb is None:
+            return phivec[:,jorb]
+        else:
+            return phivec
+    else:
+        phivec = np.zeros([self.Nineq, aux_norb,aux_norb], dtype=float, order="F")
+        ed_get_docc_n3_wrap(phivec, self.Nineq)
+        phivec = np.asarray(phivec)
+
+        if ilat is not None:
+            if iorb is not None and jorb is not None:
+                return phivec[ilat,iorb,jorb]
+            if iorb is not None and jorb is None:
+                return phivec[ilat,iorb,:]
+            if jorb is not None and iorb is None:
+                return phivec[ilat,:,jorb]
+            else:
+                return phivec[ilat,:,:]
+        else:
+            if iorb is not None and jorb is not None:
+                return phivec[:,iorb,jorb]
+            if iorb is not None and jorb is None:
+                return phivec[:,iorb,:]
+            if jorb is not None and iorb is None:
+                return phivec[:,:,jorb]
+            else:
+                return phivec
+            
+
 
 
 # energy
@@ -225,7 +305,7 @@ def get_eimp(self, ilat=None, ikind=None):
         * :code:`4`: ed_Eknot: on-site part of the kinetic term
        
        :return: the full local energy tensor has dimensions [ :code:`Nlat` ,4]. Depending on \
-       which keyworod arguments are (or not) provided, this is sliced on the corresponding axis.
+       which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
        :rtype: float **or** np.array(dtype=float)    
     """
 

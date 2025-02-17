@@ -251,6 +251,7 @@ global_env.get_delta = types.MethodType(func_io.get_delta, global_env)
 global_env.get_dens = types.MethodType(func_io.get_dens, global_env)
 global_env.get_mag = types.MethodType(func_io.get_mag, global_env)
 global_env.get_docc = types.MethodType(func_io.get_docc, global_env)
+global_env.get_phi = types.MethodType(func_io.get_phi, global_env)
 global_env.get_eimp = types.MethodType(func_io.get_eimp, global_env)
 
 # bath_fit

@@ -1,6 +1,7 @@
 subroutine ed_get_phisc_n0(self,iorb,jorb)
   real(8)          :: self ! :math:`\phi` value or array of values
-  integer,optional :: iorb,jorb ! orbital index
+  integer,optional :: iorb ! first orbital index
+  integer,optional :: jorb ! second orbital index
   integer          :: iorb_,jorb_
   iorb_=1;if(present(iorb))iorb_=iorb
   jorb_=1;if(present(jorb))jorb_=jorb

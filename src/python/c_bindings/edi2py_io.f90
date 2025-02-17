@@ -51,6 +51,21 @@ subroutine ed_get_docc_n2_c(self,Nlat) bind(c,name="ed_get_docc_n2")
   call ed_get_docc(self,Nlat)
 end subroutine ed_get_docc_n2_c
 
+!superconductive phi
+subroutine ed_get_phisc_n2_c(self) bind(c,name="ed_get_phisc_n2")
+  use, intrinsic :: iso_c_binding
+  real(c_double)     :: self(Norb,Norb)
+  call ed_get_phi(self)
+end subroutine ed_get_phisc_n2_c
+
+subroutine ed_get_phisc_n3_c(self,Nlat) bind(c,name="ed_get_phisc_n3")
+  use, intrinsic :: iso_c_binding
+  integer(c_int),value     :: Nlat
+  real(c_double)           :: self(Nlat,Norb,Norb)
+  call ed_get_phi(self,Nlat)
+end subroutine ed_get_phisc_n3_c
+
+
 !energy
 subroutine ed_get_eimp_n1_c(self) bind(c,name="ed_get_eimp_n1")
   use, intrinsic :: iso_c_binding
