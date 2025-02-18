@@ -1093,9 +1093,7 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
        :type axis: str
        :param axis: the axis on which to calculate :math:`\\chi`. Possible values \
        :code:`matsubara` ( :code:`m`), :code:`real` ( :code:`r`), :code:`time` \
-        ( code:`t`). If :code:`zeta` and :code:`axis` are not provided, this \
-        defaults to :code:`m`. If :code:`zeta` is prodived, this has to be \
-        specified.
+        ( :code:`t`). This parameter has to be specificed.
        
        :type ilat: int
        :param axis: for real-space DMFT, if this flag is specified only the \
