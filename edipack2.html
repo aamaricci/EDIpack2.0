@@ -1,0 +1,668 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EDIpack2.0 Fortran Library &mdash; EDIpack2.0 2.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=60b53102" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c2377ec0"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="EDIpack2 Fortran Module" href="structure/edipackmodule.html" />
+    <link rel="prev" title="In-plane excitons in quantum spin Hall insulators" href="examples/03_excBHZ.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/01_anderson.html">Solving a Single Impurity Anderson model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/02_dmft.html">Solving Dynamical Mean-Field Theory with <cite>EDIpack2.0</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Further examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/01_bhz.html">Interacting Bernevig-Hughes-Zhang model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/02_ahm.html">Attractive Hubbard model: a superconductive example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/03_excBHZ.html">In-plane excitons in quantum spin Hall insulators</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EDIpack2.0 Fortran Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#library-frontend">Library Frontend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/edipackmodule.html">EDIpack2 Fortran Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#core-solver-routines">Core Solver Routines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/main.html">Impurity Problem Solution Routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#general-environment">General Environment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/general/01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/general/02_ed_vars_global.html">Global Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/general/03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure/general/04_ed_setup.html">Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sparse-matrix">Sparse Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/classes/01_ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#eigenspace">EigenSpace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/classes/02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sectors">Sectors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bath">Bath</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/bath.html">Impurity Model Bath</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="structure/bath.html#bath-auxiliary">Bath Auxiliary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/bath.html#bath-dmft">Bath DMFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/bath.html#bath-functions">Bath Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hamiltonian">Hamiltonian</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/index_hamiltonian.html">Hamiltonian Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_hamiltonian.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_hamiltonian.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_hamiltonian.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exact-diagonalization">Exact Diagonalization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/index_diag.html">Impurity Diagonalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="structure/diag.html">Impurity diagonalization interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_diag.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_diag.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_diag.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#green-s-functions">Green’s Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/index_greensfunctions.html">Impurity Green’s functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="structure/greensfunctions.html">Impurity response functions interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_greensfunctions.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_greensfunctions.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_greensfunctions.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#observables">Observables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/index_observables.html">Impurity observbales</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="structure/observables.html">Impurity observables interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_observables.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_observables.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_observables.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#reduced-density-matrix">Reduced Density Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/index_rdm.html">Impurity Reduced Density Matrix</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="structure/rdm.html">Impurity RDM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_rdm.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_rdm.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structure/index_rdm.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#input-output">Input/Output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#chi-2-fit"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure/fit.html"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="edipy2.html">Python API for EDIpack2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api/pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.beta"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Jh"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.dmft_error"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.ed_total_ud"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.ed_twin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.eps"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Jx"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Jp"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lfloat"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lmats"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.LOGfile"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lpos"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Lreal"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lreal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Ltau"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nbath"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nloop"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Norb"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nph"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.nread"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nspin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Nsuccess"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.sb_field"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Uloc"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.Ust"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.wini"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.wfin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.xmin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.xmax"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/globvars.html#edipy2.global_env.xmu"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/functions.html">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/2_bath.html">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/2_bath.html#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/3_inputoutput.html">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_phi"><code class="docutils literal notranslate"><span class="pre">get_phi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_g0and"><code class="docutils literal notranslate"><span class="pre">get_g0and()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_delta"><code class="docutils literal notranslate"><span class="pre">get_delta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/3_inputoutput.html#edipy2.global_env.get_chi"><code class="docutils literal notranslate"><span class="pre">get_chi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/funcs/4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="python_api/funcs/4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Browse code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="browsecode.html">Browse code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_aux_funx.html">ED_AUX_FUNX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath.html">ED_BATH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_aux.html">ED_BATH_AUX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_dim.html">ED_BATH_DIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_dmft.html">ED_BATH_DMFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_fit.html">ED_BATH_FIT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_functions.html">ED_BATH_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_replica.html">ED_BATH_REPLICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_bath_user.html">ED_BATH_USER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_dens.html">ED_CHI_DENS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_exct.html">ED_CHI_EXCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_functions.html">ED_CHI_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_pair.html">ED_CHI_PAIR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_chi_spin.html">ED_CHI_SPIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag.html">ED_DIAG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag_nonsu2.html">ED_DIAG_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag_normal.html">ED_DIAG_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_diag_superc.html">ED_DIAG_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_eigenspace.html">ED_EIGENSPACE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_common.html">ED_FIT_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_general.html">ED_FIT_GENERAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_hybrid.html">ED_FIT_HYBRID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_normal.html">ED_FIT_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_fit_replica.html">ED_FIT_REPLICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gf_nonsu2.html">ED_GF_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gf_normal.html">ED_GF_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gf_superc.html">ED_GF_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_gfmatrix.html">ED_GFMATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_greens_functions.html">ED_GREENS_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian.html">ED_HAMILTONIAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2.html">ED_HAMILTONIAN_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2_common.html">ED_HAMILTONIAN_NONSU2_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2_direct_hxv.html">ED_HAMILTONIAN_NONSU2_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_nonsu2_stored_hxv.html">ED_HAMILTONIAN_NONSU2_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal.html">ED_HAMILTONIAN_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal_common.html">ED_HAMILTONIAN_NORMAL_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal_direct_hxv.html">ED_HAMILTONIAN_NORMAL_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_normal_stored_hxv.html">ED_HAMILTONIAN_NORMAL_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc.html">ED_HAMILTONIAN_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc_common.html">ED_HAMILTONIAN_SUPERC_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc_direct_hxv.html">ED_HAMILTONIAN_SUPERC_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_hamiltonian_superc_stored_hxv.html">ED_HAMILTONIAN_SUPERC_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_input_vars.html">ED_INPUT_VARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_io.html">ED_IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_main.html">ED_MAIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables.html">ED_OBSERVABLES</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables_nonsu2.html">ED_OBSERVABLES_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables_normal.html">ED_OBSERVABLES_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_observables_superc.html">ED_OBSERVABLES_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_rdm.html">ED_RDM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_rdm_nonsu2.html">ED_RDM_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_rdm_normal.html">ED_RDM_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_rdm_superc.html">ED_RDM_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_sector.html">ED_SECTOR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_setup.html">ED_SETUP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_sparse_map.html">ED_SPARSE_MAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_sparse_matrix.html">ED_SPARSE_MATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_vars_global.html">ED_VARS_GLOBAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/ed_version.html">ED_VERSION</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/edi2py_bindings.html">EDI2PY_BINDINGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="browsesource/module/edipack2.html">EDIPACK2</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">External Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/edipack/EDIpack2.0">EDIpack2.0 on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/SciFortran/SciFortran">SciFortran on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">EDIpack2.0 Fortran Library</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/edipack2.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="edipack2-0-fortran-library">
+<h1>EDIpack2.0 Fortran Library<a class="headerlink" href="#edipack2-0-fortran-library" title="Link to this heading"></a></h1>
+<p>Here we give an overview of the structure of the EDIpack2.0 library,
+with a detailed description of the relevant modules and procedures.</p>
+<section id="library-frontend">
+<h2>Library Frontend<a class="headerlink" href="#library-frontend" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="structure/edipackmodule.html#f/edipack2" title="f/edipack2"><code class="xref f f-mod docutils literal notranslate"><span class="pre">edipack2</span></code></a> represents the user interface or Fortran API
+of the library, giving access to all therequried procedures and
+variables needed to solve a quantum impurity problem.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/edipackmodule.html">EDIpack2 Fortran Module</a></li>
+</ul>
+</div>
+</section>
+<section id="core-solver-routines">
+<h2>Core Solver Routines<a class="headerlink" href="#core-solver-routines" title="Link to this heading"></a></h2>
+<p>The module of the <cite>EDIpack2.0</cite> library which wraps up the
+solver into three functions according to three steps: initialization,
+solution and finalization.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/main.html">Impurity Problem Solution Routines</a></li>
+</ul>
+</div>
+</section>
+<section id="general-environment">
+<h2>General Environment<a class="headerlink" href="#general-environment" title="Link to this heading"></a></h2>
+<p>This include a set of modules which contains input variables
+<a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars" title="f/ed_input_vars: Contains all global input variables which can be set by the user through the input file. A specific preocedure :f:func:`ed_read_input` should be called to read the input file using :f:func:`parse_input_variable` procedure from SciFortran. All variables are automatically set to a default, looked for and updated by reading into the file and, sequentially looked for and updated from command line (std.input) using the notation `variable_name=variable_value(s)` (case independent)."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_input_vars</span></code></a>, global ones and shared classes/data structure in
+<a class="reference internal" href="structure/general/02_ed_vars_global.html#f/ed_vars_global" title="f/ed_vars_global: Contains all variables, arrays and derived types instances shared throughout the code. Specifically, it contains definitions of the :f:var:`effective_bath`, the :f:var:`gfmatrix` and the :f:var:`sector` data structures."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_vars_global</span></code></a>, global memory (de)allocation and evaluation
+of symmetry sectors dimensions <a class="reference internal" href="structure/general/04_ed_setup.html#f/ed_setup" title="f/ed_setup: Contains procedures to set up the Exact Diagonalization calculation, executing all internal consistency checks and allocation of the global memory."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_setup</span></code></a> as well as
+generic functions which are used throughout the code <a class="reference internal" href="structure/general/03_ed_aux_funx.html#f/ed_aux_funx" title="f/ed_aux_funx: Hosts a number of auxiliary procedures required in different parts of the code. Specifically, it implements: creation/annihilation fermionic operators, binary decomposition of integer representation of Fock states and setup the local impurity Hamiltonian"><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_aux_funx</span></code></a>.</p>
+<p><a class="reference internal" href="structure/general/02_ed_vars_global.html#f/ed_vars_global" title="f/ed_vars_global: Contains all variables, arrays and derived types instances shared throughout the code. Specifically, it contains definitions of the :f:var:`effective_bath`, the :f:var:`gfmatrix` and the :f:var:`sector` data structures."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_vars_global</span></code></a>  contains the definition of simple data
+structures, such as  <code class="xref f f-type docutils literal notranslate"><span class="pre">gfmatrix</span></code>  storing all weights and poles of the Green’s functions or
+<a class="reference internal" href="structure/bath_aux/00_ed_vars_global.html#f/ed_vars_global/effective_bath" title="f/ed_vars_global/effective_bath"><code class="xref f f-type docutils literal notranslate"><span class="pre">effective_bath</span></code></a> gathering the different bath components
+according to value of <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> and <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/general/01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure/general/02_ed_vars_global.html">Global Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure/general/03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure/general/04_ed_setup.html">Setup</a></li>
+</ul>
+</div>
+</section>
+<section id="sparse-matrix">
+<h2>Sparse Matrix<a class="headerlink" href="#sparse-matrix" title="Link to this heading"></a></h2>
+<p>The module  <a class="reference internal" href="structure/classes/01_ed_sparse_matrix.html#f/ed_sparse_matrix" title="f/ed_sparse_matrix: This class defines a data structure to efficiently store sparse matrices into dedicated CSR matrices, featuring support to MPI parallel storage, so that each matrix is spread across the threads."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sparse_matrix</span></code></a> contains the implementation of a
+suitable Compact Row Stored sparse matrix, used to store sparse Hamiltonians in each symmetry
+sector. The data structure essentially corresponds to an array of
+rows as dynamical vectors, one for the values and one for the columns index of
+the non-zero elements of the matrix. This enables <span class="math notranslate nohighlight">\(O(1)\)</span>
+access. If MPI parallelization is enabled the structure includes an
+automatic rows split balanced among the different threads and a
+further subdivision of the columns/values in local and non-local
+blocks.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/classes/01_ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</div>
+</section>
+<section id="eigenspace">
+<h2>EigenSpace<a class="headerlink" href="#eigenspace" title="Link to this heading"></a></h2>
+<p>In  <a class="reference internal" href="structure/classes/02_ed_eigenspace.html#f/ed_eigenspace" title="f/ed_eigenspace: A class implementing a data structure to efficiently store the low part of the Fock space spectrum, automatically spreading and retrieving the eigenstates among/from MPI threads."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_eigenspace</span></code></a> we implement an ordered
+single linked list to efficiently store the lower part of the energy
+spectrum, including eigenvectors, eigenvalues, symmetry sector index and
+twin states, i.e. states in sectors with exchanged quantum numbers which do
+have same energy.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/classes/02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</div>
+</section>
+<section id="sectors">
+<h2>Sectors<a class="headerlink" href="#sectors" title="Link to this heading"></a></h2>
+<p>The direct diagonalization of the Hamiltonian for a finite system
+becomes quickly impossible due to the exponential increase of its
+size <span class="math notranslate nohighlight">\(D^{Ns}\)</span>, where <span class="math notranslate nohighlight">\(D\)</span> is the dimension of the local
+Hilbert space (<span class="math notranslate nohighlight">\(D=4\)</span> for spin-<span class="math notranslate nohighlight">\(1/2\)</span> electrons).</p>
+<p>A way to partially soften such severe behavior is to take into account
+conserved quantities. For any quantity <span class="math notranslate nohighlight">\({\cal Q}\)</span> such that
+<span class="math notranslate nohighlight">\([H,{\cal Q}]=0\)</span>,  we can separate the structure of the
+Hamiltonian matrix into different blocks, each corresponding to a
+discrete value <span class="math notranslate nohighlight">\(q\)</span> of the spectrum of <span class="math notranslate nohighlight">\(Q\)</span>.
+Analyzing one-by-one such symmetry sector it becomes possible to
+construct at least part of the energy spectrum.</p>
+<p>In <a class="reference internal" href="structure/ed_sector.html#f/ed_sector" title="f/ed_sector: Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sector</span></code></a> we implement the construction of the symmetry
+sectors for the three cases considered in <cite>EDIpack2.0</cite>, that we
+recall are:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\vec{Q}=[\vec{N}_\uparrow,\vec{N}_\downarrow]\)</span> for which
+either the number of total or orbital spin up and down electrons is
+conserved: <strong>NORMAL</strong></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vec{Q}=S_z\)</span>  with conserved total magnetization:  <strong>SUPERConducting</strong></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vec{Q}=N_{\rm tot}\)</span>  where spin degrees freedom is not fully
+conserved:  <strong>NON-SU(2)</strong></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</div>
+</section>
+<section id="bath">
+<h2>Bath<a class="headerlink" href="#bath" title="Link to this heading"></a></h2>
+<p>The construction and the handling of the bath is a crucial part of the
+description of the generic single impurity Anderson problem.
+The bath is described by two set of parameters: the local
+hamiltonian <span class="math notranslate nohighlight">\(\hat{h}^p\)</span> and the hybridization <span class="math notranslate nohighlight">\(\hat{V}^p\)</span>,
+for <span class="math notranslate nohighlight">\(p=1,\dots,N_{bath}\)</span>. The first describes the local
+properties of each bath element (be that a single electronic level or
+a more complex structure made of few levels), the second describes the
+coupling with the impurity.</p>
+<p>In <cite>EDIpack2.0</cite> the bath is handled using a Reverse Communication Strategy.
+The user accesses the bath as a double precision rank-1 array
+containing in a given order all the parameters. This array is passed
+as input to <cite>EDIpack2.0</cite> procedures and dumped into an internal data
+structure, implemented in <a class="reference internal" href="structure/bath_dmft/01_ed_bath_dmft.html#f/ed_bath_dmft" title="f/ed_bath_dmft: A class for the the :f:var:`effective_bath` data structure describing the effective bath in the code."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_bath_dmft</span></code></a>.</p>
+<p>We implemented different bath topologies, which can be
+selected using the variable <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> =
+<code class="code docutils literal notranslate"><span class="pre">normal,</span> <span class="pre">hybrid,</span> <span class="pre">replica,</span> <span class="pre">general</span></code> .</p>
+<p>For <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">normal</span></code> (<code class="code docutils literal notranslate"><span class="pre">hybrid</span></code>) a number <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/nbath" title="f/ed_input_vars/nbath"><code class="xref f f-var docutils literal notranslate"><span class="pre">nbath</span></code></a> of electronic
+levels are coupled to each orbital level (to any orbital level) of the
+impurity site. The bath local Hamiltonian is diagonal
+<span class="math notranslate nohighlight">\(\hat{h}^p\equiv\epsilon^p_a\delta_{ab}\)</span> while the
+hybridizations are:  <span class="math notranslate nohighlight">\(\hat{V}^p=V^p_{a}\delta_{ab}\)</span>
+(<span class="math notranslate nohighlight">\(\hat{V}^p=V^p_{ab}\)</span>).
+If  <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">superc</span></code> the bath includes a set of parameters
+<span class="math notranslate nohighlight">\(\Delta_p\)</span> describing the superconductive amplitude on each bath
+level.</p>
+<p>For <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">replica</span></code> (<code class="code docutils literal notranslate"><span class="pre">general</span></code>) a number <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/nbath" title="f/ed_input_vars/nbath"><code class="xref f f-var docutils literal notranslate"><span class="pre">nbath</span></code></a> of copies of the
+impurity structure are  coupled to the impurity itself.  Each bath
+element is made of a number <span class="math notranslate nohighlight">\(N_{orb}\)</span> of electronic levels,
+i.e. the number of orbitals in the impurity site.
+The hybridization to the impurity site is
+<span class="math notranslate nohighlight">\(\hat{V}^p=V^p_{a}\delta_{ab}\)</span> (<span class="math notranslate nohighlight">\(\hat{V}^p=V^p_{ab}\)</span>).
+The local bath  Hamiltonian is <span class="math notranslate nohighlight">\(\hat{h}^p = \sum_{m=1}^{M} \lambda^p_m O_m\)</span>.
+The set  <span class="math notranslate nohighlight">\(\{O\}_m\)</span> is a user defined matrix basis for the impurity
+Hamiltonian or, equally, for the local Hamiltonian of the lattice
+problem. The numbers  <span class="math notranslate nohighlight">\(\lambda^p_m\in{\mathbb R}\)</span> are
+variational parameters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The enumeration of the total bath electronic levels is different
+among the different cases. This number is automatically evaluated
+upon calling <a class="reference internal" href="structure/bath_aux/02_ed_bath_dim.html#f/ed_bath_dim/get_bath_dimension" title="f/ed_bath_dim/get_bath_dimension"><code class="xref f f-func docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a>, see
+<a class="reference internal" href="structure/bath_aux/02_ed_bath_dim.html#f/ed_bath_dim" title="f/ed_bath_dim: Returns or check the dimensions to which the user should allocate the bath array."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_bath_dim</span></code></a>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">replica,</span> <span class="pre">general</span></code> bath topologies are available also for
+the superconductive case <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">superc</span></code>. In this case the
+structure of the matrix basis should be set to the proper
+multi-orbital Nambu basis, so that off-diagonal blocks corresponds
+to anomalous components.</p>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/bath.html">Impurity Model Bath</a></li>
+</ul>
+</div>
+</section>
+<section id="hamiltonian">
+<h2>Hamiltonian<a class="headerlink" href="#hamiltonian" title="Link to this heading"></a></h2>
+<p>This part of the <cite>EDIpack2.0</cite> code implements the setup of the
+sector Hamiltonian in each  operational modes,  corresponding to the
+choice of one of the  symmetries implemented in the code selected by the variable <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =  <code class="code docutils literal notranslate"><span class="pre">normal,</span> <span class="pre">superc,</span> <span class="pre">nosu2</span></code>. See
+<a class="reference internal" href="structure/ed_sector.html#f/ed_sector" title="f/ed_sector: Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sector</span></code></a> for more info about the symmetries implemented in
+the code.</p>
+<p>Any of three different mode is implemented in a distinct class of
+modules performing all the  operations required for the construction
+of the Hamiltonian and the definition of the corresponding matrix
+vector product, required by the Arpack/Lanczos.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/index_hamiltonian.html">Hamiltonian Setup</a></li>
+</ul>
+</div>
+</section>
+<section id="exact-diagonalization">
+<h2>Exact Diagonalization<a class="headerlink" href="#exact-diagonalization" title="Link to this heading"></a></h2>
+<p>This part of the <cite>EDIpack2.0</cite> code implements the exact
+diagonalization of the general, single-site, multi-orbital quantum
+impurity problem in each of the specific symmetry implemented in the
+code. The operational modes are selected by the variable
+<a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =  <code class="code docutils literal notranslate"><span class="pre">normal,</span> <span class="pre">superc,</span> <span class="pre">nosu2</span></code>. See
+<a class="reference internal" href="structure/ed_sector.html#f/ed_sector" title="f/ed_sector: Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sector</span></code></a> for more info about the symmetries implemented
+in the code.</p>
+<p>As above, we implemented the three different channels in
+distinct class of modules.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/index_diag.html">Impurity Diagonalization</a></li>
+</ul>
+</div>
+</section>
+<section id="green-s-functions">
+<h2>Green’s Functions<a class="headerlink" href="#green-s-functions" title="Link to this heading"></a></h2>
+<p>This part of the <cite>EDIpack2.0</cite> code implements the calculation of the
+impurity interacting Green’s functions, self-energy functions and
+impurity susceptibilities. Calculations are performed in  each operational mode,  corresponding to the
+choice of the specific symmetry implemented in the code, i.e. which
+quantum numbers are to be conserved. The operational modes are selected
+by the variable <a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =  <code class="code docutils literal notranslate"><span class="pre">normal,</span> <span class="pre">superc,</span> <span class="pre">nosu2</span></code>. See
+<a class="reference internal" href="structure/ed_sector.html#f/ed_sector" title="f/ed_sector: Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sector</span></code></a> for more info about the symmetries implemented in
+the code.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/index_greensfunctions.html">Impurity Green’s functions</a></li>
+</ul>
+</div>
+</section>
+<section id="observables">
+<h2>Observables<a class="headerlink" href="#observables" title="Link to this heading"></a></h2>
+<p>This part of the <cite>EDIpack2.0</cite> code implements the calculation of the
+impurity observables and static correlations, such as density,
+internal energy or double occupation. Calculations are performed in
+each operational mode,  corresponding to the choice of the specific
+symmetry implemented in the code, i.e. which quantum numbers are to be
+conserved. The operational modes are selected by the variable
+<a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =  <code class="code docutils literal notranslate"><span class="pre">normal,</span> <span class="pre">superc,</span> <span class="pre">nosu2</span></code>. The observables
+are printed in plain text files and are accessible to the user
+through the routines lited in <a class="reference internal" href="structure/io/ed_io.html#f/ed_io" title="f/ed_io: Contains a set of routines that retrieve quantities such as Green's functions, self-energies (see :f:mod:`ed_greens_functions` ) and observables (from :f:mod:`ed_observables` ) and pass them to the user, as well ass routines to read and store Green's function and self-energies."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_io</span></code></a>. See <a class="reference internal" href="structure/ed_sector.html#f/ed_sector" title="f/ed_sector: Contains procedures to construct the symmetry sectors corresponding to a given set of quantum numbers :math:`\vec{Q}`, in particular it allocated and build the  :f:var:`sector_map` connecting the states of a given sector with the corresponding Fock ones."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_sector</span></code></a>
+for more info about the symmetries implemented in the code.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/index_observables.html">Impurity observbales</a></li>
+</ul>
+</div>
+</section>
+<section id="reduced-density-matrix">
+<h2>Reduced Density Matrix<a class="headerlink" href="#reduced-density-matrix" title="Link to this heading"></a></h2>
+<p>This part of the <cite>EDIpack2.0</cite> code implements the calculation of the
+impurity Reduced Density Matrix (RDM). Calculations are performed in
+each operational mode,  corresponding to the choice of the specific
+symmetry implemented in the code, i.e. which quantum numbers are to be
+conserved. The operational modes are selected by the variable
+<a class="reference internal" href="structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =  <code class="code docutils literal notranslate"><span class="pre">normal,</span> <span class="pre">superc,</span> <span class="pre">nosu2</span></code>.
+The evaluation of the RDM exploit an efficient sparse algorithm to
+avoid tracing over the exponentially many bath configuration.
+The RDM is saved to file and made available to the user
+through the routines listed in <a class="reference internal" href="structure/io/ed_io.html#f/ed_io" title="f/ed_io: Contains a set of routines that retrieve quantities such as Green's functions, self-energies (see :f:mod:`ed_greens_functions` ) and observables (from :f:mod:`ed_observables` ) and pass them to the user, as well ass routines to read and store Green's function and self-energies."><code class="xref f f-mod docutils literal notranslate"><span class="pre">ed_io</span></code></a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/index_rdm.html">Impurity Reduced Density Matrix</a></li>
+</ul>
+</div>
+</section>
+<section id="input-output">
+<h2>Input/Output<a class="headerlink" href="#input-output" title="Link to this heading"></a></h2>
+<p>This module provides access to the results of the exact
+diagonalization. All quantities such as dynamical response functions,
+self-energy components  or impurity observables  can be retrieved
+using specific functions. Additionally we provide procedure to perform
+on-the-fly re-calculation of the impurity Green’s functions and
+self-energy on a given arbitrary set of points in the complex
+frequency domain.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</div>
+</section>
+<section id="chi-2-fit">
+<h2><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit<a class="headerlink" href="#chi-2-fit" title="Link to this heading"></a></h2>
+<p>In  this module we provide to the user a generic function
+<a class="reference internal" href="structure/fit.html#f/ed_bath_fit/ed_chi2_fitgf" title="f/ed_bath_fit/ed_chi2_fitgf"><code class="xref f f-func docutils literal notranslate"><span class="pre">ed_chi2_fitgf()</span></code></a> performing the minimization of a user provided
+Weiss field against the corresponding model of non-interacting
+Anderson Green’s function with the aim of updating the user bath parameters.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure/fit.html"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples/03_excBHZ.html" class="btn btn-neutral float-left" title="In-plane excitons in quantum spin Hall insulators" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="structure/edipackmodule.html" class="btn btn-neutral float-right" title="EDIpack2 Fortran Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

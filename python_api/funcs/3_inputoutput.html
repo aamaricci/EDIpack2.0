@@ -1,0 +1,686 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input / Output Functions &mdash; EDIpack2.0 2.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=60b53102" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c2377ec0"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Auxiliary procedures" href="4_auxiliary.html" />
+    <link rel="prev" title="Bath Manipulation" href="2_bath.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/01_anderson.html">Solving a Single Impurity Anderson model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/02_dmft.html">Solving Dynamical Mean-Field Theory with <cite>EDIpack2.0</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Further examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/01_bhz.html">Interacting Bernevig-Hughes-Zhang model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/02_ahm.html">Attractive Hubbard model: a superconductive example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/03_excBHZ.html">In-plane excitons in quantum spin Hall insulators</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html">EDIpack2.0 Fortran Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#library-frontend">Library Frontend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/edipackmodule.html">EDIpack2 Fortran Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#core-solver-routines">Core Solver Routines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/main.html">Impurity Problem Solution Routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#general-environment">General Environment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/02_ed_vars_global.html">Global Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/04_ed_setup.html">Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#sparse-matrix">Sparse Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/classes/01_ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#eigenspace">EigenSpace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/classes/02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#sectors">Sectors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#bath">Bath</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/bath.html">Impurity Model Bath</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/bath.html#bath-auxiliary">Bath Auxiliary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/bath.html#bath-dmft">Bath DMFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/bath.html#bath-functions">Bath Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#hamiltonian">Hamiltonian</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_hamiltonian.html">Hamiltonian Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_hamiltonian.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_hamiltonian.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_hamiltonian.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#exact-diagonalization">Exact Diagonalization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_diag.html">Impurity Diagonalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/diag.html">Impurity diagonalization interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_diag.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_diag.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_diag.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#green-s-functions">Green’s Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_greensfunctions.html">Impurity Green’s functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/greensfunctions.html">Impurity response functions interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_greensfunctions.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_greensfunctions.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_greensfunctions.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#observables">Observables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_observables.html">Impurity observbales</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/observables.html">Impurity observables interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_observables.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_observables.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_observables.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#reduced-density-matrix">Reduced Density Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_rdm.html">Impurity Reduced Density Matrix</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/rdm.html">Impurity RDM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_rdm.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_rdm.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_rdm.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#input-output">Input/Output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#chi-2-fit"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/fit.html"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../edipy2.html">Python API for EDIpack2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.beta"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Jh"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.dmft_error"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.ed_total_ud"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.ed_twin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.eps"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Jx"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Jp"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lfloat"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lmats"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.LOGfile"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lpos"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lreal"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lreal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Ltau"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nloop"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Norb"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nph"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.nread"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nsuccess"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.sb_field"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Uloc"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Ust"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.wini"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.wfin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.xmin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.xmax"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.xmu"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="2_bath.html">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="2_bath.html#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_phi"><code class="docutils literal notranslate"><span class="pre">get_phi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_g0and"><code class="docutils literal notranslate"><span class="pre">get_g0and()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_delta"><code class="docutils literal notranslate"><span class="pre">get_delta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_chi"><code class="docutils literal notranslate"><span class="pre">get_chi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Browse code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../browsecode.html">Browse code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_aux_funx.html">ED_AUX_FUNX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath.html">ED_BATH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_aux.html">ED_BATH_AUX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_dim.html">ED_BATH_DIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_dmft.html">ED_BATH_DMFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_fit.html">ED_BATH_FIT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_functions.html">ED_BATH_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_replica.html">ED_BATH_REPLICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_user.html">ED_BATH_USER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_dens.html">ED_CHI_DENS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_exct.html">ED_CHI_EXCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_functions.html">ED_CHI_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_pair.html">ED_CHI_PAIR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_spin.html">ED_CHI_SPIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag.html">ED_DIAG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_nonsu2.html">ED_DIAG_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_normal.html">ED_DIAG_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_superc.html">ED_DIAG_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_eigenspace.html">ED_EIGENSPACE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_common.html">ED_FIT_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_general.html">ED_FIT_GENERAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_hybrid.html">ED_FIT_HYBRID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_normal.html">ED_FIT_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_replica.html">ED_FIT_REPLICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_nonsu2.html">ED_GF_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_normal.html">ED_GF_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_superc.html">ED_GF_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gfmatrix.html">ED_GFMATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_greens_functions.html">ED_GREENS_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian.html">ED_HAMILTONIAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2.html">ED_HAMILTONIAN_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_common.html">ED_HAMILTONIAN_NONSU2_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_direct_hxv.html">ED_HAMILTONIAN_NONSU2_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_stored_hxv.html">ED_HAMILTONIAN_NONSU2_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal.html">ED_HAMILTONIAN_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_common.html">ED_HAMILTONIAN_NORMAL_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_direct_hxv.html">ED_HAMILTONIAN_NORMAL_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_stored_hxv.html">ED_HAMILTONIAN_NORMAL_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc.html">ED_HAMILTONIAN_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_common.html">ED_HAMILTONIAN_SUPERC_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_direct_hxv.html">ED_HAMILTONIAN_SUPERC_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_stored_hxv.html">ED_HAMILTONIAN_SUPERC_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_input_vars.html">ED_INPUT_VARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_io.html">ED_IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_main.html">ED_MAIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables.html">ED_OBSERVABLES</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_nonsu2.html">ED_OBSERVABLES_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_normal.html">ED_OBSERVABLES_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_superc.html">ED_OBSERVABLES_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm.html">ED_RDM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm_nonsu2.html">ED_RDM_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm_normal.html">ED_RDM_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm_superc.html">ED_RDM_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sector.html">ED_SECTOR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_setup.html">ED_SETUP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sparse_map.html">ED_SPARSE_MAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sparse_matrix.html">ED_SPARSE_MATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_vars_global.html">ED_VARS_GLOBAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_version.html">ED_VERSION</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/edi2py_bindings.html">EDI2PY_BINDINGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/edipack2.html">EDIPACK2</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">External Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/edipack/EDIpack2.0">EDIpack2.0 on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/SciFortran/SciFortran">SciFortran on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../edipy2.html">Python API for EDIpack2</a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">Input / Output Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/funcs/3_inputoutput.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="input-output-functions">
+<h1>Input / Output Functions<a class="headerlink" href="#input-output-functions" title="Link to this heading"></a></h1>
+<p>These functions pass to the userspace the observables and response functions calculated and stored within the EDIpack2 library.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_dens">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_dens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_dens" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the charge density</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the Green’s function of     a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the orbital index. If none is provided, the whole density      vector is returned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full charge density tensor has dimensions [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,Norb].      Depending on which keyword arguments are (or not) provided, this is sliced      on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_docc">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_docc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_docc" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the double occupation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the Green’s function of a     specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the orbital index. If none is provided, the whole density vector     is returned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full double-occupation tensor has dimensions [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,Norb].     Depending on which keyword arguments are (or not) provided, this is sliced     on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_eimp">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_eimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ikind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_eimp" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the local energy components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the Green’s function of        a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ikind</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – <p>index of the component. It is</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">1</span></code>: ed_Epot: the potential energy from interaction</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">2</span></code>: ed_Eint: ed-Epot - ed_Ehartree (? it is not assigned)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: ed_Ehartree: Hartree part of interaction energy</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: ed_Eknot: on-site part of the kinetic term</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full local energy tensor has dimensions [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,4]. Depending on         which keyword arguments are (or not) provided, this is sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_mag">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_mag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icomp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_mag" title="Link to this definition"></a></dt>
+<dd><p>This function returns the value of the magnetization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>icomp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – the component of the magnetization, <code class="code docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>,        <code class="code docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> or <code class="code docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> (default).</p></li>
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the Green’s function        of a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the orbital index. If none is provided, the whole density        vector is returned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the full magnetization tensor has dimensions [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,3,Norb].         Depending on which keyword arguments are (or not) provided, this is         sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_phi">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_phi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_phi" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>This function returns the value of the superconductive order     parameter <span class="math notranslate nohighlight">\(\phi = \langle c_{\uparrow} c_{\downarrow} \rangle\)</span></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the Green’s function of a     specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>iorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the first orbital index</p></li>
+<li><p><strong>jorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the second orbital index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\phi\)</span>. The full tensor has dimensions [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code>,    <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a>, <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a>]. Depending on which keyword arguments are     (or not) provided, this is sliced on the corresponding axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float <strong>or</strong> np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_gimp">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_gimp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_gimp" title="Link to this definition"></a></dt>
+<dd><p>This function generates the impurity Green’s function for a user-chosen set      of frequencies in the complex plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the self-energy of     a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ishape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – <p>this variable determines the shape of the returned array.      Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case, it will return an array of the shape        [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>        <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]. In the real-space DMFT case,        it will return an array of the shape        [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by        assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, ValueError is returned.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, it will return an array of the shape        [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>        <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> <cite>. :code:`Nlat</cite> will        be determined from the module by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code>       is set, the output will have one dimension less.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, it will return an array of the        shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ].</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, it will return an array of the        shape [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ].        <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module by assessing the shape of Hloc.        If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, the output will have one dimension less.</p></li>
+</ul>
+</p></li>
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – if <code class="code docutils literal notranslate"><span class="pre">zeta</span></code> is not provided, return the self-energy on the      Matsubara or Real axis with parameters set in the input file.      Can be <code class="code docutils literal notranslate"><span class="pre">m</span></code> for Matsubara(default) or <code class="code docutils literal notranslate"><span class="pre">r</span></code> for real.</p></li>
+<li><p><strong>typ</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – whether to return the normal or anomalous self-energy      (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal (default) or     <code class="code docutils literal notranslate"><span class="pre">a</span></code> for anomalous.</p></li>
+<li><p><strong>zeta</strong> (complex <strong>or</strong> [complex] <strong>or</strong> np.array(dtype=complex)) – user-defined array of frequencies in the whole complex plane.      If none is provided, according to <code class="code docutils literal notranslate"><span class="pre">axis</span></code> the Matsubara or real axis is chosen</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is incompatible woth <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> or      not in the previous list.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> is not in the previous list.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the impurity Green’s function along the      specific axis, with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">zeta</span></code>, if present.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_sigma">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_sigma" title="Link to this definition"></a></dt>
+<dd><p>This function generates the self-energy for a user-chosen set of frequencies     in the complex plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – if the case of real-space DMFT, if only the self-energy of     a specific inequivalent site is needed, this can be specified.</p></li>
+<li><p><strong>ishape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – <p>this variable determines the shape of the returned array.      Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case, it will return an array of the shape        [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>        <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]. In the real-space DMFT case,        it will return an array of the shape        [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from the module 
+by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set, ValueError is returned.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, it will return an array of the shape        [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>        <span class="math notranslate nohighlight">\(\cdot\)</span>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> <cite>. :code:`Nlat</cite> will        be determined from the module by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is        set, the output will have one dimension less.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, it will return an array of the        shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ].</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, it will return an array of the        shape [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,        <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]. <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> will be determined from        the module by assessing the shape of Hloc. If <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> is set,        the output will have one dimension less.</p></li>
+</ul>
+</p></li>
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – if <code class="code docutils literal notranslate"><span class="pre">zeta</span></code> is not provided, return the self-energy on the      Matsubara or Real axis with parameters set in the input file.      Can be <code class="code docutils literal notranslate"><span class="pre">m</span></code> for Matsubara(default) or <code class="code docutils literal notranslate"><span class="pre">r</span></code> for real.</p></li>
+<li><p><strong>typ</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – whether to return the normal or anomalous self-energy      (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal (default)       or <code class="code docutils literal notranslate"><span class="pre">a</span></code> for anomalous.</p></li>
+<li><p><strong>zeta</strong> (complex <strong>or</strong> [complex] <strong>or</strong> np.array(dtype=complex)) – user-defined array of frequencies in the whole complex plane.      If none is provided, according to <code class="code docutils literal notranslate"><span class="pre">axis</span></code> the Matsubara or real axis is chosen</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is incompatible woth <code class="code docutils literal notranslate"><span class="pre">ilat</span></code> or      not in the previous list.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> is not in the previous list.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the self-energy along the      specific axis, with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">zeta</span></code>, if present.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_g0and">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_g0and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_g0and" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the value of the Anderson Impurity Model’s        noninteracting Green’s function on a given frequency array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#complex" title="(in Python v3.13)"><em>complex</em></a>) – the array of frequencies (only frequencies on the real and         imaginary axes are supported)</p></li>
+<li><p><strong>bath</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – the user-accessible bath array</p></li>
+<li><p><strong>ishape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – <p>this variable determines the shape of the returned array.        Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: the output array will have shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>           <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>            <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: the output array will have shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,            <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]</p></li>
+</ul>
+</p></li>
+<li><p><strong>typ</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – whether to return the normal or anomalous Green’s function         (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal or <code class="code docutils literal notranslate"><span class="pre">a</span></code>        for anomalous.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">zeta</span></code> is not completely real or completely         imaginary</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is not 3 or 5.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of complex that contains <span class="math notranslate nohighlight">\(G^{And}_{0}(z)\)</span> function          along the specific frequency array, with dimension set by         <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and <code class="code docutils literal notranslate"><span class="pre">zeta</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_delta">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ishape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_delta" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the value of the Anderson Impurity Model’s        hybridization function on a given frequency array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#complex" title="(in Python v3.13)"><em>complex</em></a>) – the array of frequencies (only frequencies on the real and         imaginary axes are supported)</p></li>
+<li><p><strong>bath</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – the user-accessible bath array</p></li>
+<li><p><strong>ishape</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – <p>this variable determines the shape of the returned array.         Possible values:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">None</span></code>: the same shape as <code class="code docutils literal notranslate"><span class="pre">Hloc</span></code> plus one axis for frequency</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: the output array will have shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>           <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>           <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: the output array will have shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,            <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ]</p></li>
+</ul>
+</p></li>
+<li><p><strong>typ</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – whether to return the normal or anomalous Green’s function         (for the superconducting case). Can be <code class="code docutils literal notranslate"><span class="pre">n</span></code> for normal or <code class="code docutils literal notranslate"><span class="pre">a</span></code>        for anomalous.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">zeta</span></code> is not completely real or completely         imaginary</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> is not 3 or 5.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of complex that contains <span class="math notranslate nohighlight">\(\Delta(z)\)</span> along the         specific frequency array, with dimension set by <code class="code docutils literal notranslate"><span class="pre">ishape</span></code> and         <code class="code docutils literal notranslate"><span class="pre">zeta</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_chi">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_chi" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the value of the Anderson Impurity Model’s        response functions <span class="math notranslate nohighlight">\(\chi\)</span> in the spin, density, pairing and        exciton channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chan</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – the channel of the response function. Possible values are         <code class="code docutils literal notranslate"><span class="pre">spin</span></code> ( <code class="code docutils literal notranslate"><span class="pre">s</span></code> ), <code class="code docutils literal notranslate"><span class="pre">dens</span></code> ( <code class="code docutils literal notranslate"><span class="pre">c</span></code> ), <code class="code docutils literal notranslate"><span class="pre">pair</span></code>         ( <code class="code docutils literal notranslate"><span class="pre">p</span></code> ), <code class="code docutils literal notranslate"><span class="pre">exct</span></code> ( <code class="code docutils literal notranslate"><span class="pre">e</span></code> ). Default is <code class="code docutils literal notranslate"><span class="pre">spin</span></code>.</p></li>
+<li><p><strong>zeta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#complex" title="(in Python v3.13)"><em>complex</em></a>) – the array of frequencies or times (only frequencies on         the real imaginary axes and imaginary times are supported). If no array
+is provided, depending on the value of <code class="xref py py-data docutils literal notranslate"><span class="pre">axis</span></code>, an array will be         generated on the positive Matsubara axis ( <a class="reference internal" href="../globvars.html#edipy2.global_env.Lmats" title="edipy2.global_env.Lmats"><code class="xref py py-data docutils literal notranslate"><span class="pre">Lmats</span></code></a> values ), on         the real axis ( <a class="reference internal" href="../globvars.html#edipy2.global_env.Lreal" title="edipy2.global_env.Lreal"><code class="xref py py-data docutils literal notranslate"><span class="pre">Lreal</span></code></a> values between <code class="code docutils literal notranslate"><span class="pre">0</span></code> and          <a class="reference internal" href="../globvars.html#edipy2.global_env.wfin" title="edipy2.global_env.wfin"><code class="xref py py-data docutils literal notranslate"><span class="pre">wfin</span></code></a>) or on the imaginary time axis (<a class="reference internal" href="../globvars.html#edipy2.global_env.Ltau" title="edipy2.global_env.Ltau"><code class="xref py py-data docutils literal notranslate"><span class="pre">Ltau</span></code></a> values         between 0 and <a class="reference internal" href="../globvars.html#edipy2.global_env.beta" title="edipy2.global_env.beta"><code class="xref py py-data docutils literal notranslate"><span class="pre">beta</span></code></a>)</p></li>
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – the axis on which to calculate <span class="math notranslate nohighlight">\(\chi\)</span>. Possible values        <code class="code docutils literal notranslate"><span class="pre">matsubara</span></code> ( <code class="code docutils literal notranslate"><span class="pre">m</span></code>), <code class="code docutils literal notranslate"><span class="pre">real</span></code> ( <code class="code docutils literal notranslate"><span class="pre">r</span></code>), <code class="code docutils literal notranslate"><span class="pre">time</span></code>         ( <code class="code docutils literal notranslate"><span class="pre">t</span></code>). This parameter has to be specificed.</p></li>
+<li><p><strong>ilat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – for real-space DMFT, if this flag is specified only the         susceptibility for the relative inequivalent atom is returned
+specified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> is not <code class="code docutils literal notranslate"><span class="pre">normal</span></code></p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">axis</span></code> not provided or invalid</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If <code class="code docutils literal notranslate"><span class="pre">chan</span></code> is invalid</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>An array of complex that contains <span class="math notranslate nohighlight">\(\chi\)</span> along the chosen         axis. The dimension of the array depends on the chosen channel:</p>
+<ul class="simple">
+<li><p>[ <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a>, <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ] for           channel <code class="code docutils literal notranslate"><span class="pre">spin</span></code>, <code class="code docutils literal notranslate"><span class="pre">dens</span></code>, <code class="code docutils literal notranslate"><span class="pre">pair</span></code></p></li>
+<li><p>[ <code class="code docutils literal notranslate"><span class="pre">3</span></code>, <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a>, <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">len(zeta)</span></code> ] for channel           <code class="code docutils literal notranslate"><span class="pre">exct</span></code>, corresponding to singlet, triplet(xy) and triplet(z)</p></li>
+</ul>
+<p>One dimension corresponding to the number of inequivalent sites is added         at the beginning for the case of real-space DMFT and if ilat is None.</p>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="2_bath.html" class="btn btn-neutral float-left" title="Bath Manipulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="4_auxiliary.html" class="btn btn-neutral float-right" title="Auxiliary procedures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

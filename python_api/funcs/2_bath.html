@@ -1,0 +1,686 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bath Manipulation &mdash; EDIpack2.0 2.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=60b53102" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c2377ec0"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Input / Output Functions" href="3_inputoutput.html" />
+    <link rel="prev" title="Impurity Problem Initialization, Solution and Finalization" href="1_solver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            EDIpack2.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#id1">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#uninstall">Uninstall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#install-python-api">Install Python API</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/01_anderson.html">Solving a Single Impurity Anderson model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart/02_dmft.html">Solving Dynamical Mean-Field Theory with <cite>EDIpack2.0</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Further examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/01_bhz.html">Interacting Bernevig-Hughes-Zhang model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/02_ahm.html">Attractive Hubbard model: a superconductive example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/03_excBHZ.html">In-plane excitons in quantum spin Hall insulators</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpack2</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../edipack2.html">EDIpack2.0 Fortran Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#library-frontend">Library Frontend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/edipackmodule.html">EDIpack2 Fortran Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#core-solver-routines">Core Solver Routines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/main.html">Impurity Problem Solution Routines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#general-environment">General Environment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/01_ed_input_vars.html">Input Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/02_ed_vars_global.html">Global Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/03_ed_aux_funx.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/general/04_ed_setup.html">Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#sparse-matrix">Sparse Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/classes/01_ed_sparse_matrix.html">Sparse Matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#eigenspace">EigenSpace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/classes/02_ed_eigenspace.html">EigenSpace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#sectors">Sectors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/ed_sector.html">Quantum Numbers Sectors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#bath">Bath</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/bath.html">Impurity Model Bath</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/bath.html#bath-auxiliary">Bath Auxiliary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/bath.html#bath-dmft">Bath DMFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/bath.html#bath-functions">Bath Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#hamiltonian">Hamiltonian</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_hamiltonian.html">Hamiltonian Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_hamiltonian.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_hamiltonian.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_hamiltonian.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#exact-diagonalization">Exact Diagonalization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_diag.html">Impurity Diagonalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/diag.html">Impurity diagonalization interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_diag.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_diag.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_diag.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#green-s-functions">Green’s Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_greensfunctions.html">Impurity Green’s functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/greensfunctions.html">Impurity response functions interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_greensfunctions.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_greensfunctions.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_greensfunctions.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#observables">Observables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_observables.html">Impurity observbales</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/observables.html">Impurity observables interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_observables.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_observables.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_observables.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#reduced-density-matrix">Reduced Density Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/index_rdm.html">Impurity Reduced Density Matrix</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/rdm.html">Impurity RDM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_rdm.html#normal-mode">Normal mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_rdm.html#superconductive-mode">Superconductive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../structure/index_rdm.html#non-su-2-mode">Non-SU(2) mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#input-output">Input/Output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/io/ed_io.html">Input / Output Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../edipack2.html#chi-2-fit"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../structure/fit.html"><span class="math notranslate nohighlight">\(\chi^2\)</span> Fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EDIpy2</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../edipy2.html">Python API for EDIpack2</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../pyinstallation.html">EDIpy2 Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basicusage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../globvars.html">Global variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.beta"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Jh"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.dmft_error"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.dmft_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.ed_total_ud"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_total_ud</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.ed_twin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.ed_twin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.eps"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.eps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Jx"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Jp"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Jp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lfloat"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lfloat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lmats"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lmats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.LOGfile"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.LOGfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lpos"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lpos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Lreal"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Lreal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Ltau"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ltau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nbath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nloop"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nloop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Norb"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Norb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nph"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.nread"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.nread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nspin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Nsuccess"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Nsuccess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.sb_field"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.sb_field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Uloc"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Uloc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.Ust"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.Ust</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.wini"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.wfin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.wfin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.xmin"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.xmax"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmax</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../globvars.html#edipy2.global_env.xmu"><code class="docutils literal notranslate"><span class="pre">edipy2.global_env.xmu</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="0_readinput.html">Input file manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="0_readinput.html#edipy2.global_env.read_input"><code class="docutils literal notranslate"><span class="pre">read_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="1_solver.html">Impurity Problem Initialization, Solution and Finalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.finalize_solver"><code class="docutils literal notranslate"><span class="pre">finalize_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.init_solver"><code class="docutils literal notranslate"><span class="pre">init_solver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.set_hloc"><code class="docutils literal notranslate"><span class="pre">set_hloc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="1_solver.html#edipy2.global_env.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bath Manipulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.bath_inspect"><code class="docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.break_symmetry_bath"><code class="docutils literal notranslate"><span class="pre">break_symmetry_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.chi2_fitgf"><code class="docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.get_bath_dimension"><code class="docutils literal notranslate"><span class="pre">get_bath_dimension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.orb_equality_bath"><code class="docutils literal notranslate"><span class="pre">orb_equality_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.orb_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">orb_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.ph_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">ph_symmetrize_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.save_array_as_bath"><code class="docutils literal notranslate"><span class="pre">save_array_as_bath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.set_hgeneral"><code class="docutils literal notranslate"><span class="pre">set_hgeneral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.set_hreplica"><code class="docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edipy2.global_env.spin_symmetrize_bath"><code class="docutils literal notranslate"><span class="pre">spin_symmetrize_bath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="3_inputoutput.html">Input / Output Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_dens"><code class="docutils literal notranslate"><span class="pre">get_dens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_docc"><code class="docutils literal notranslate"><span class="pre">get_docc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_eimp"><code class="docutils literal notranslate"><span class="pre">get_eimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_mag"><code class="docutils literal notranslate"><span class="pre">get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_phi"><code class="docutils literal notranslate"><span class="pre">get_phi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_gimp"><code class="docutils literal notranslate"><span class="pre">get_gimp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_sigma"><code class="docutils literal notranslate"><span class="pre">get_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_g0and"><code class="docutils literal notranslate"><span class="pre">get_g0and()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_delta"><code class="docutils literal notranslate"><span class="pre">get_delta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="3_inputoutput.html#edipy2.global_env.get_chi"><code class="docutils literal notranslate"><span class="pre">get_chi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="4_auxiliary.html">Auxiliary procedures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.check_convergence"><code class="docutils literal notranslate"><span class="pre">check_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.get_bath_type"><code class="docutils literal notranslate"><span class="pre">get_bath_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.get_ed_mode"><code class="docutils literal notranslate"><span class="pre">get_ed_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="4_auxiliary.html#edipy2.global_env.search_variable"><code class="docutils literal notranslate"><span class="pre">search_variable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Browse code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../browsecode.html">Browse code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_aux_funx.html">ED_AUX_FUNX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath.html">ED_BATH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_aux.html">ED_BATH_AUX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_dim.html">ED_BATH_DIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_dmft.html">ED_BATH_DMFT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_fit.html">ED_BATH_FIT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_functions.html">ED_BATH_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_replica.html">ED_BATH_REPLICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_bath_user.html">ED_BATH_USER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_dens.html">ED_CHI_DENS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_exct.html">ED_CHI_EXCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_functions.html">ED_CHI_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_pair.html">ED_CHI_PAIR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_chi_spin.html">ED_CHI_SPIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag.html">ED_DIAG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_nonsu2.html">ED_DIAG_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_normal.html">ED_DIAG_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_diag_superc.html">ED_DIAG_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_eigenspace.html">ED_EIGENSPACE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_common.html">ED_FIT_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_general.html">ED_FIT_GENERAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_hybrid.html">ED_FIT_HYBRID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_normal.html">ED_FIT_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_fit_replica.html">ED_FIT_REPLICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_nonsu2.html">ED_GF_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_normal.html">ED_GF_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gf_superc.html">ED_GF_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_gfmatrix.html">ED_GFMATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_greens_functions.html">ED_GREENS_FUNCTIONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian.html">ED_HAMILTONIAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2.html">ED_HAMILTONIAN_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_common.html">ED_HAMILTONIAN_NONSU2_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_direct_hxv.html">ED_HAMILTONIAN_NONSU2_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_nonsu2_stored_hxv.html">ED_HAMILTONIAN_NONSU2_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal.html">ED_HAMILTONIAN_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_common.html">ED_HAMILTONIAN_NORMAL_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_direct_hxv.html">ED_HAMILTONIAN_NORMAL_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_normal_stored_hxv.html">ED_HAMILTONIAN_NORMAL_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc.html">ED_HAMILTONIAN_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_common.html">ED_HAMILTONIAN_SUPERC_COMMON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_direct_hxv.html">ED_HAMILTONIAN_SUPERC_DIRECT_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_hamiltonian_superc_stored_hxv.html">ED_HAMILTONIAN_SUPERC_STORED_HxV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_input_vars.html">ED_INPUT_VARS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_io.html">ED_IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_main.html">ED_MAIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables.html">ED_OBSERVABLES</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_nonsu2.html">ED_OBSERVABLES_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_normal.html">ED_OBSERVABLES_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_observables_superc.html">ED_OBSERVABLES_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm.html">ED_RDM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm_nonsu2.html">ED_RDM_NONSU2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm_normal.html">ED_RDM_NORMAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_rdm_superc.html">ED_RDM_SUPERC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sector.html">ED_SECTOR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_setup.html">ED_SETUP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sparse_map.html">ED_SPARSE_MAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_sparse_matrix.html">ED_SPARSE_MATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_vars_global.html">ED_VARS_GLOBAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/ed_version.html">ED_VERSION</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/edi2py_bindings.html">EDI2PY_BINDINGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../browsesource/module/edipack2.html">EDIPACK2</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">External Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/edipack/EDIpack2.0">EDIpack2.0 on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/SciFortran/SciFortran">SciFortran on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EDIpack2.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../edipy2.html">Python API for EDIpack2</a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">Bath Manipulation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/funcs/2_bath.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bath-manipulation">
+<span id="bath"></span><h1>Bath Manipulation<a class="headerlink" href="#bath-manipulation" title="Link to this heading"></a></h1>
+<p>These functions manipulate the user-accessible bath array</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.bath_inspect">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">bath_inspect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.bath_inspect" title="Link to this definition"></a></dt>
+<dd><p>This function translates between the user-accessible continuous        bath array and the bath components (energy level, hybridization and so on).        It functions in both ways, given the array returns the components and        vice-versa. It autonomously determines the type of bath and ED mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>e</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath levels ( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =         <code class="code docutils literal notranslate"><span class="pre">NORMAL,</span> <span class="pre">NONSU2,</span> <span class="pre">SUPERC</span></code>). It has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,         <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ] for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> bath,         [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ] for <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath</p></li>
+<li><p><strong>v</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath hybridizations ( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> =         <code class="code docutils literal notranslate"><span class="pre">NORMAL,</span> <span class="pre">NONSU2,</span> <span class="pre">SUPERC</span></code>). It has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> , <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,         <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ] for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> and <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath.         For <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> bath it has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ] and for         <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath it has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> , <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>         <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ]</p></li>
+<li><p><strong>d</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath anomalous enery levels( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a>         = <code class="code docutils literal notranslate"><span class="pre">SUPERC</span></code>). It has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,         <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ] for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> bath, [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> , <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ]         for <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath</p></li>
+<li><p><strong>u</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the bath spin off-diagonal hybridization         ( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">NONSU2</span></code>). It has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>,         <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> ] for <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> and <code class="code docutils literal notranslate"><span class="pre">HYBRID</span></code> bath</p></li>
+<li><p><strong>l</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – an array for the linear coefficients of the Replica matrix         linear combination ( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">REPLICA,GENERAL</span></code>).         It has dimension [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ], the latter being         the number of terms on the linear combination</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – if both <code class="code docutils literal notranslate"><span class="pre">bath</span></code> and some among <code class="code docutils literal notranslate"><span class="pre">e,u,v,d,l</span></code>         are provided, none is provided, the shapes are inconsistent         or the inputs are inconsistent with <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> and <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> .</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>if <code class="code docutils literal notranslate"><span class="pre">bath</span></code> is provided, returns <code class="code docutils literal notranslate"><span class="pre">e,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,d,v</span></code>,            <code class="code docutils literal notranslate"><span class="pre">e,v,u</span></code> or <code class="code docutils literal notranslate"><span class="pre">l,v</span></code> depending on <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a></p></li>
+<li><p>if <code class="code docutils literal notranslate"><span class="pre">e,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,d,v</span></code>, <code class="code docutils literal notranslate"><span class="pre">e,v,u</span></code> or <code class="code docutils literal notranslate"><span class="pre">l,v</span></code>            depending on <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a>  are provided, returns <code class="code docutils literal notranslate"><span class="pre">bath</span></code></p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.break_symmetry_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">break_symmetry_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.break_symmetry_bath" title="Link to this definition"></a></dt>
+<dd><p>This function breaks the spin symmetry of the bath, useful     for magnetic calculations to incite symmetry breaking.    Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – the magnitude of the symmetry-breaking shift</p></li>
+<li><p><strong>sign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – the sign of the symmetry-breaking shift</p></li>
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.chi2_fitgf">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">chi2_fitgf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ispin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iorb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.chi2_fitgf" title="Link to this definition"></a></dt>
+<dd><p>This function fits the Weiss field or Hybridization function (delta) with       a discrete set of level. The fit parameters are the bath parameters       contained in the user-accessible array. Depending on the type of system       we are considering (normal, superconductive, non-SU(2))       a different set of inputs has to be passed. The specifics of the numerical      fitting routines are controlled in the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>[</em><em>np.array</em><em>(</em><em>dtype=complex</em><em>,</em><em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em><em>,       </em><em>np.array</em><em>(</em><em>dtype=float</em><em>)</em><em>]</em><em>**or**</em><em> [</em><em>np.array</em><em>(</em><em>dtype=complex</em><em>,       </em><em>np.array</em><em>(</em><em>dtype=float</em><em>)</em><em>]</em>) – <p>The positional arguments are the function(s)       to fit and the bath array.</p>
+<p>If the system is not superconductive ( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">NORMAL</span></code> or        <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">NONSU2</span></code>) the argumens are</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">g</span></code>: the function to fit</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">bath</span></code>: the bath</p></li>
+</ul>
+<p>If the system is superconductive ( <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/ed_mode" title="f/ed_input_vars/ed_mode"><code class="xref f f-var docutils literal notranslate"><span class="pre">ed_mode</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">SUPERC</span></code>) the        arguments are</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">g</span></code>: the normal function to fit</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">f</span></code>: the anomalous function to fit</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">bath</span></code>: the bath</p></li>
+</ul>
+<p>The dimensions of the previous arrays can vary:</p>
+<p>The dimension of <code class="code docutils literal notranslate"><span class="pre">bath</span></code> can be</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">Nb</span></code>: if single-impurity, the output of <code class="xref py py-func docutils literal notranslate"><span class="pre">get_bath_gimension()</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[Nlat</span> <span class="pre">,Nb]</span></code>: if real-space DMFT</p></li>
+</ul>
+<p>Accordingly, the dimension of g (and f) can be:</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the single-impurity case,  an array of          the shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a>          <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> ].</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">3</span></code>: in the real-space DMFT case, an array of          the shape [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>          <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>          <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> ]</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">4</span></code>: in the real-space DMFT case, an array of          the shape [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span>          <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> ]</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">5</span></code>: in the single-impurity case, an array of          the shape [ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,           <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> ]</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">6</span></code>: in the real-space DMFT case, an array of          the shape [ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,           <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> ]</p></li>
+</ul>
+<p>where <code class="code docutils literal notranslate"><span class="pre">Lfit</span></code> is a given number of frequencies.</p>
+</p></li>
+<li><p><strong>ispin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – spin species to be fitted. For the normal case,       if <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">2</span></code>, the fitting function       needs to be called twice. Only the corresponding elements of <code class="code docutils literal notranslate"><span class="pre">bath</span></code>       will be updated each time. For the non-SU(2) case, this argument is       irrelevant, since all the elements of the Weiss/Delta function need to be       fitted. This is also the case if <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">REPLICA,</span> <span class="pre">GENERAL</span></code>.</p></li>
+<li><p><strong>iorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the orbital to be fitted. If omitted, all orbitals will be fitted</p></li>
+<li><p><strong>fmpi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – flag to automatically do and broadcast the fit over MPI, if defined</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – if the shapes of the positional arguments are incompatible</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – if a number of positional arguments different        from 2 or 3 are passed</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An array of floats that contains the bath parameters        for the impurity problem. This is a required input of <a class="reference internal" href="1_solver.html#edipy2.global_env.solve" title="edipy2.global_env.solve"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code></a>        and <a class="reference internal" href="#edipy2.global_env.chi2_fitgf" title="edipy2.global_env.chi2_fitgf"><code class="xref py py-func docutils literal notranslate"><span class="pre">chi2_fitgf()</span></code></a>. Its elements are ordered differently        depending on the bath geometry. They are (de)compactified for        user interaction via <a class="reference internal" href="#edipy2.global_env.bath_inspect" title="edipy2.global_env.bath_inspect"><code class="xref py py-func docutils literal notranslate"><span class="pre">bath_inspect()</span></code></a>. Specific        symmetrization operations are implemented and listed in        the <a class="reference internal" href="#bath"><span class="std std-ref">Bath Manipulation</span></a> section.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.get_bath_dimension">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">get_bath_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.get_bath_dimension" title="Link to this definition"></a></dt>
+<dd><p>This function returns the correct dimension for the bath to be allocated (for each impurity) given the parameters of the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a number which is the dimension of the bath array for each impurity.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.orb_equality_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">orb_equality_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.orb_equality_bath" title="Link to this definition"></a></dt>
+<dd><p>This function sets every orbital component to be equal to the        one of orbital <code class="code docutils literal notranslate"><span class="pre">indx</span></code>. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>iorb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – the orbital index to which every other will be set as equal</p></li>
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – if the orbital index is out of bounds</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the modified bath array</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.orb_symmetrize_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">orb_symmetrize_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orb1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orb2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.orb_symmetrize_bath" title="Link to this definition"></a></dt>
+<dd><p>This function enforces equality of the different-orbital components        of the bath array. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>orb1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – first orbital index</p></li>
+<li><p><strong>orb2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – second orbital index</p></li>
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.ph_symmetrize_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">ph_symmetrize_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.ph_symmetrize_bath" title="Link to this definition"></a></dt>
+<dd><p>This function enforces particle-hole symmetry of the bath hybridization        function. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.save_array_as_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">save_array_as_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.save_array_as_bath" title="Link to this definition"></a></dt>
+<dd><p>This function takes the user-accessible array and saves it in the        correct format for every bath type in the file <code class="code docutils literal notranslate"><span class="pre">hamiltonian.restart</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.set_hgeneral">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">set_hgeneral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdavec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.set_hgeneral" title="Link to this definition"></a></dt>
+<dd><p>This function is specific to <code class="code docutils literal notranslate"><span class="pre">BATH_TYPE=GENERAL</span></code>. It sets the basis of matrices       and scalar parameters that, upon linear combination, make up the bath replica.        The input is the same as that of <a class="reference internal" href="#edipy2.global_env.set_hreplica" title="edipy2.global_env.set_hreplica"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_hreplica()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hvec</strong> (<em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em>) – <p>array of bath matrices. They decompose the nonzero part of the replica in a set.       Each element of the set correspond to a variational parameter.       That way the bath replica matrix is updated while preserving symmetries       of the user’s choosing. The array can have the following shapes:</p>
+<ul>
+<li><p>[<code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span><a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]:        3-dimensional, where Nnambu refers to the superconducting case and Nsym         is the number of matrices that make up the linear combination</p></li>
+<li><p>[<code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]:        5-dimensional, where Nnambu refers to the superconducting case and Nsym is         the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+<li><p><strong>lambdavec</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – <p>the array of coefficients of the linear combination.       This, along with the hybridizations V, are the fitting parameters of        the bath. The array has the following shape</p>
+<ul>
+<li><p>[ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]: for single-impurity DMFT, 2-dimensional,        where Nsym is the number of matrices that make up the linear combination</p></li>
+<li><p>[ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code>,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]: for real-space DMFT, 3-dimensional,        where Nlat is the number of inequivalent impurity sites and Nsym is        the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – if the shapes of the arrays are inconsistent</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.set_hreplica">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">set_hreplica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdavec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.set_hreplica" title="Link to this definition"></a></dt>
+<dd><p>This function is specific to <a class="reference internal" href="../../structure/general/01_ed_input_vars.html#f/ed_input_vars/bath_type" title="f/ed_input_vars/bath_type"><code class="xref f f-var docutils literal notranslate"><span class="pre">bath_type</span></code></a> = <code class="code docutils literal notranslate"><span class="pre">=replica</span></code>. It sets the basis of matrices       and scalar parameters that, upon linear combination, make up the bath replica.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hvec</strong> (<em>np.array</em><em>(</em><em>dtype=complex</em><em>)</em>) – <p>array of bath matrices. They decompose the nonzero part of the replica in a set.       Each element of the set correspond to a variational parameter.       That way the bath replica matrix is updated while preserving symmetries       of the user’s choosing. The array can have the following shapes:</p>
+<ul>
+<li><p>[ <code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]:        3-dimensional, where Nnambu refers to the superconducting case and Nsym         is the number of matrices that make up the linear combination</p></li>
+<li><p>[<code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code> <span class="math notranslate nohighlight">\(\cdot\)</span> <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">(Nnambu)</span></code>  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nspin" title="edipy2.global_env.Nspin"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nspin</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> ,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Norb" title="edipy2.global_env.Norb"><code class="xref py py-data docutils literal notranslate"><span class="pre">Norb</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]:        5-dimensional, where Nnambu refers to the superconducting case and Nsym is         the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+<li><p><strong>lambdavec</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – <p>the array of coefficients of the linear combination.       This, along with the hybridizations V, are the fitting parameters of        the bath. The array has the following shape</p>
+<ul>
+<li><p>[ <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]: for single-impurity DMFT, 2-dimensional,        where Nsym is the number of matrices that make up the linear combination</p></li>
+<li><p>[ <code class="code docutils literal notranslate"><span class="pre">Nlat</span></code>,  <a class="reference internal" href="../globvars.html#edipy2.global_env.Nbath" title="edipy2.global_env.Nbath"><code class="xref py py-data docutils literal notranslate"><span class="pre">Nbath</span></code></a> , <code class="code docutils literal notranslate"><span class="pre">Nsym</span></code> ]: for real-space DMFT, 3-dimensional,        where Nlat is the number of inequivalent impurity sites and Nsym is        the number of matrices that make up the linear combination</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – if the shapes of the arrays are inconsistent</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edipy2.global_env.spin_symmetrize_bath">
+<span class="sig-prename descclassname"><span class="pre">edipy2.global_env.</span></span><span class="sig-name descname"><span class="pre">spin_symmetrize_bath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edipy2.global_env.spin_symmetrize_bath" title="Link to this definition"></a></dt>
+<dd><p>This function enforces equality of the opposite-spin components       of the bath array. Not compatible with <code class="code docutils literal notranslate"><span class="pre">REPLICA</span></code> or <code class="code docutils literal notranslate"><span class="pre">GENERAL</span></code> bath types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bath</strong> (<em>np.array</em><em>(</em><em>dtype=float</em><em>)</em>) – The user-accessible bath array</p></li>
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – whether to save the symmetry-broken bath for reading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified bath array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array(dtype=float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="1_solver.html" class="btn btn-neutral float-left" title="Impurity Problem Initialization, Solution and Finalization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="3_inputoutput.html" class="btn btn-neutral float-right" title="Input / Output Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lorenzo Crippa and Adriano Amaricci.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
