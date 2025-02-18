@@ -334,16 +334,104 @@ end subroutine ed_get_delta_d3_c
 
 subroutine ed_get_delta_d5_c(warray,dim_warray,bath,dim_bath,Delta,dim_Delta,axis,typ) bind(c, name='get_delta_n5')
   use, intrinsic :: iso_c_binding
-  integer(c_int),value                                                        :: dim_warray, dim_bath
-  integer(c_int64_t)                                                          :: dim_Delta(5)
-  complex(c_double_complex),dimension(dim_warray)                             :: warray
-  real(c_double),dimension(dim_bath)                                          :: bath
+  integer(c_int),value                                                                                  :: dim_warray, dim_bath
+  integer(c_int64_t)                                                                                    :: dim_Delta(5)
+  complex(c_double_complex),dimension(dim_warray)                                                       :: warray
+  real(c_double),dimension(dim_bath)                                                                    :: bath
   complex(c_double_complex),dimension(dim_Delta(1),dim_Delta(2),dim_Delta(3),dim_Delta(4),dim_Delta(5)) :: Delta
-  character(kind=c_char), dimension(1),optional                               :: axis,typ
-  character(len=1)                                                            :: axis_,typ_
+  character(kind=c_char), dimension(1),optional                                                         :: axis,typ
+  character(len=1)                                                                                      :: axis_,typ_
   typ_(1:1)=typ(1)
   axis_(1:1)=axis(1)
   
   call ed_get_Delta(warray,bath,Delta,axis_,typ_)
   
 end subroutine ed_get_delta_d5_c
+
+
+!----------------!
+!SUSCEPTIBILITIES!
+!----------------!
+
+  subroutine get_spinChi_c(self,zeta,dim_zeta,axis,Nsites,latticeflag) bind(c, name='ed_get_spinchi')
+    use, intrinsic :: iso_c_binding
+    integer(c_int),value                                                :: dim_zeta
+    complex(c_double_complex),dimension(dim_zeta)                       :: zeta
+    integer(c_int),value                                                :: axis  ! 0="m", 1="r", 2="t"
+    integer(c_int),value                                                :: latticeflag, Nsites
+    character(len=1)                                                    :: axis_
+    complex(c_double_complex),dimension(Nsites,Norb,Norb,dim_zeta)      :: self
+    !
+    if(axis==0)axis_="m"
+    if(axis==1)axis_="r"
+    if(axis==2)axis_="t"
+    !
+    if (latticeflag==0)then
+      call ed_get_spinChi(self(1,:,:,:),axis_,zeta)
+    else
+      call ed_get_spinChi(self,Nsites,axis_,zeta)
+    endif
+  end subroutine get_spinChi_c
+  
+  subroutine get_densChi_c(self,zeta,dim_zeta,axis,Nsites,latticeflag) bind(c,name='ed_get_denschi')
+    use, intrinsic :: iso_c_binding
+    integer(c_int),value                                                       :: dim_zeta
+    complex(c_double_complex),dimension(dim_zeta)                              :: zeta
+    integer(c_int),value                                                       :: axis  ! 0="m", 1="r", 2="t"
+    integer(c_int),value                                                       :: latticeflag, Nsites
+    character(len=1)                                                           :: axis_
+    complex(c_double_complex),dimension(Nsites,Norb,Norb,dim_zeta)             :: self
+    !
+    if(axis==0)axis_="m"
+    if(axis==1)axis_="r"
+    if(axis==2)axis_="t"
+    !
+    if (latticeflag==0)then
+      call ed_get_densChi(self(1,:,:,:),axis_,zeta)
+    else
+      call ed_get_densChi(self,Nsites,axis_,zeta)
+    endif
+    !
+  end subroutine get_densChi_c
+  
+  subroutine get_pairChi_c(self,zeta,dim_zeta,axis,Nsites,latticeflag) bind(c,name='ed_get_pairchi')
+    use, intrinsic :: iso_c_binding
+    integer(c_int),value                                                :: dim_zeta
+    complex(c_double_complex),dimension(dim_zeta)                       :: zeta
+    integer(c_int),value                                                :: axis  ! 0="m", 1="r", 2="t"
+    integer(c_int),value                                                :: latticeflag, Nsites
+    character(len=1)                                                    :: axis_
+    complex(c_double_complex),dimension(Nsites,Norb,Norb,dim_zeta)      :: self
+    !
+    if(axis==0)axis_="m"
+    if(axis==1)axis_="r"
+    if(axis==2)axis_="t"
+    !
+    if (latticeflag==0)then
+      call ed_get_pairChi(self(1,:,:,:),axis_,zeta)
+    else
+      call ed_get_pairChi(self,Nsites,axis_,zeta)
+    endif
+    !
+  end subroutine get_pairChi_c
+  
+  subroutine get_exctChi_c(self,zeta,dim_zeta,axis,Nsites,latticeflag) bind(c,name='ed_get_exctchi')
+    use, intrinsic :: iso_c_binding
+    integer(c_int),value                                                :: dim_zeta
+    complex(c_double_complex),dimension(dim_zeta)                       :: zeta
+    integer(c_int),value                                                :: axis  ! 0="m", 1="r", 2="t"
+    integer(c_int),value                                                :: latticeflag, Nsites
+    character(len=1)                                                    :: axis_
+    complex(c_double_complex),dimension(Nsites,3,Norb,Norb,dim_zeta)    :: self
+    !
+    if(axis==0)axis_="m"
+    if(axis==1)axis_="r"
+    if(axis==2)axis_="t"
+    !
+    if (latticeflag==0)then
+      call ed_get_exctChi(self(1,:,:,:,:),axis_,zeta)
+    else
+      call ed_get_exctChi(self,Nsites,axis_,zeta)
+    endif
+    !
+  end subroutine get_exctChi_c
