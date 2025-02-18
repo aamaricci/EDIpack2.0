@@ -99,7 +99,14 @@ The exposed global variables can be accessed as methods of the :class:`edipy2.gl
    
    :type: int
    :default: 100
+  
+.. data:: edipy2.global_env.Lreal
+
+   Number of frequencies, real axis
    
+   :type: int
+   :default: 5000
+
 .. data:: edipy2.global_env.Ltau
 
    Number of imaginary time points

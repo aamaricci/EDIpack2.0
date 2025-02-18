@@ -1074,7 +1074,8 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
     """
 
        This function calculates the value of the Anderson Impurity Model's \
-       response functions in the spin, density, pairing and exciton channels.
+       response functions :math:`\\chi` in the spin, density, pairing and \
+       exciton channels.
 
        :type chan: str 
        :param chan: the channel of the response function. Possible values are \
@@ -1086,8 +1087,8 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
         the real imaginary axes and imaginary times are supported). If no array
         is provided, depending on the value of :data:`axis`, an array will be \
         generated on the positive Matsubara axis ( :data:`Lmats` values ), on \
-        the real axis ( :data: `Lreal` values between :data:`Wini` and  \
-        :data:`Wfin`) or on the imaginary time axis (:data:`ltau` values \
+        the real axis ( :data:`Lreal` values between :code:`0` and  \
+        :data:`wfin`) or on the imaginary time axis (:data:`Ltau` values \
         between 0 and :data:`beta`)
 
        :type axis: str
@@ -1096,22 +1097,21 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
         ( :code:`t`). This parameter has to be specificed.
        
        :type ilat: int
-       :param axis: for real-space DMFT, if this flag is specified only the \
+       :param ilat: for real-space DMFT, if this flag is specified only the \
         susceptibility for the relative inequivalent atom is returned
         specified.
        
        
        :raise ValueError: If :f:var:`ed_mode` is not :code:`normal`
-       :raise ValueError: If :code:`axis` not provided
+       :raise ValueError: If :code:`axis` not provided or invalid
        :raise ValueError: If :code:`chan` is invalid
-       :raise ValueError: If :code:`axis` is invalid
                
        :return: An array of complex that contains :math:`\\chi` along the chosen \
         axis. The dimension of the array depends on the chosen channel:
 
         * [ :data:`Norb`, :data:`Norb` , :code:`len(zeta)` ] for \
           channel :code:`spin`, :code:`dens`, :code:`pair`
-        * [ 3, :data:`Norb`, :data:`Norb` , :code:`len(zeta)` ] for channel \
+        * [ :code:`3`, :data:`Norb`, :data:`Norb` , :code:`len(zeta)` ] for channel \
           :code:`exct`, corresponding to singlet, triplet(xy) and triplet(z)
           
         One dimension corresponding to the number of inequivalent sites is added \
