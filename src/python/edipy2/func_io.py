@@ -161,15 +161,15 @@ def get_docc(self, ilat=None, iorb=None):
   
    :type ilat: int
    :param ilat: if the case of real-space DMFT, if only the Green's function of a \
-   specific inequivalent site is needed, this can be specified.
+    specific inequivalent site is needed, this can be specified.
    
    :type iorb: int
    :param iorb: the orbital index. If none is provided, the whole density vector \
     is returned
    
    :return: the full double-occupation tensor has dimensions [ :code:`Nlat` ,Norb]. \
-   Depending on which keyword arguments are (or not) provided, this is sliced \
-   on the corresponding axis.
+    Depending on which keyword arguments are (or not) provided, this is sliced \
+    on the corresponding axis.
    :rtype: float **or** np.array(dtype=float)
    
    """
@@ -212,8 +212,8 @@ def get_docc(self, ilat=None, iorb=None):
             return doccvec[ilat, :]
         else:
             return doccvec
-            
-            
+
+
 # superconductive phi
 def get_phi(self, ilat=None, iorb=None, jorb=None):
     """
@@ -222,7 +222,7 @@ def get_phi(self, ilat=None, iorb=None, jorb=None):
   
    :type ilat: int
    :param ilat: if the case of real-space DMFT, if only the Green's function of a \
-   specific inequivalent site is needed, this can be specified.
+    specific inequivalent site is needed, this can be specified.
    
    :type iorb: int
    :param iorb: the first orbital index
@@ -232,24 +232,23 @@ def get_phi(self, ilat=None, iorb=None, jorb=None):
    
    :return: :math:`\\phi`. The full tensor has dimensions [ :code:`Nlat`, \
    :data:`Norb`, :data:`Norb`]. Depending on which keyword arguments are \
-   (or not) provided, this is sliced on the corresponding axis.
+    (or not) provided, this is sliced on the corresponding axis.
    :rtype: float **or** np.array(dtype=float)
    
    """
-
 
     aux_norb = c_int.in_dll(self.library, "Norb").value
 
     ed_get_phisc_n2_wrap = self.library.ed_get_phisc_n2
     ed_get_phisc_n2_wrap.argtypes = [
-        np.ctypeslib.ndpointer(dtype=float, ndim=2, flags="F_CONTIGUOUS") #self
+        np.ctypeslib.ndpointer(dtype=float, ndim=2, flags="F_CONTIGUOUS")  # self
     ]
     ed_get_phisc_n2_wrap.restype = None
 
     ed_get_phisc_n3_wrap = self.library.ed_get_phisc_n3
     ed_get_phisc_n3_wrap.argtypes = [
-        np.ctypeslib.ndpointer(dtype=float, ndim=3, flags="F_CONTIGUOUS"), #self
-        c_int, #Nlat
+        np.ctypeslib.ndpointer(dtype=float, ndim=3, flags="F_CONTIGUOUS"),  # self
+        c_int,  # Nlat
     ]
     ed_get_phisc_n3_wrap.restype = None
 
@@ -261,38 +260,36 @@ def get_phi(self, ilat=None, iorb=None, jorb=None):
         if ilat is not None:
             raise ValueError("ilat cannot be none for single-impurity DMFT")
         elif iorb is not None and jorb is not None:
-            return phivec[iorb,jorb]
+            return phivec[iorb, jorb]
         elif iorb is not None and jorb is None:
-            return phivec[iorb,:]
+            return phivec[iorb, :]
         elif jorb is not None and iorb is None:
-            return phivec[:,jorb]
+            return phivec[:, jorb]
         else:
             return phivec
     else:
-        phivec = np.zeros([self.Nineq, aux_norb,aux_norb], dtype=float, order="F")
+        phivec = np.zeros([self.Nineq, aux_norb, aux_norb], dtype=float, order="F")
         ed_get_docc_n3_wrap(phivec, self.Nineq)
         phivec = np.asarray(phivec)
 
         if ilat is not None:
             if iorb is not None and jorb is not None:
-                return phivec[ilat,iorb,jorb]
+                return phivec[ilat, iorb, jorb]
             if iorb is not None and jorb is None:
-                return phivec[ilat,iorb,:]
+                return phivec[ilat, iorb, :]
             if jorb is not None and iorb is None:
-                return phivec[ilat,:,jorb]
+                return phivec[ilat, :, jorb]
             else:
-                return phivec[ilat,:,:]
+                return phivec[ilat, :, :]
         else:
             if iorb is not None and jorb is not None:
-                return phivec[:,iorb,jorb]
+                return phivec[:, iorb, jorb]
             if iorb is not None and jorb is None:
-                return phivec[:,iorb,:]
+                return phivec[:, iorb, :]
             if jorb is not None and iorb is None:
-                return phivec[:,:,jorb]
+                return phivec[:, :, jorb]
             else:
                 return phivec
-            
-
 
 
 # energy
@@ -313,7 +310,7 @@ def get_eimp(self, ilat=None, ikind=None):
         * :code:`4`: ed_Eknot: on-site part of the kinetic term
        
        :return: the full local energy tensor has dimensions [ :code:`Nlat` ,4]. Depending on \
-       which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
+        which keyword arguments are (or not) provided, this is sliced on the corresponding axis.
        :rtype: float **or** np.array(dtype=float)    
     """
 
@@ -381,36 +378,36 @@ def get_sigma(self, ilat=None, ishape=None, axis="m", typ="n", zeta=None):
    
      * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
      * :code:`3`: in the single-impurity case, it will return an array of the shape \
-     [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` \
-     :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT case, \
-     it will return an array of the shape \
-     [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
-     :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
-     :code:`len(zeta)` ]. :code:`Nlat` will be determined from the module 
-     by assessing the shape of Hloc. If :code:`ilat` is set, ValueError is returned.
+       [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` \
+       :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT case, \
+       it will return an array of the shape \
+       [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
+       :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
+       :code:`len(zeta)` ]. :code:`Nlat` will be determined from the module 
+       by assessing the shape of Hloc. If :code:`ilat` is set, ValueError is returned.
      * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
-     [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` \
-     :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` `. :code:`Nlat` will \
-     be determined from the module by assessing the shape of Hloc. If :code:`ilat` is \
-     set, the output will have one dimension less.
+       [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` \
+       :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` `. :code:`Nlat` will \
+       be determined from the module by assessing the shape of Hloc. If :code:`ilat` is \
+       set, the output will have one dimension less.
      * :code:`5`: in the single-impurity case, it will return an array of the \
-     shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , \
-     :code:`len(zeta)` ].
+       shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , \
+       :code:`len(zeta)` ].
      * :code:`6`: in the real-space DMFT case, it will return an array of the \
-     shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` , \
-     :data:`Norb` , :code:`len(zeta)` ]. :code:`Nlat` will be determined from \
-      the module by assessing the shape of Hloc. If :code:`ilat` is set, \ 
-      the output will have one dimension less.
+       shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` , \
+       :data:`Norb` , :code:`len(zeta)` ]. :code:`Nlat` will be determined from \
+       the module by assessing the shape of Hloc. If :code:`ilat` is set, \
+       the output will have one dimension less.
 
     :type axis: str 
     :param axis: if :code:`zeta` is not provided, return the self-energy on the \
-    Matsubara or Real axis with parameters set in the input file. \
-    Can be :code:`m` for Matsubara(default) or :code:`r` for real.
+     Matsubara or Real axis with parameters set in the input file. \
+     Can be :code:`m` for Matsubara(default) or :code:`r` for real.
         
     :type typ: str 
     :param typ: whether to return the normal or anomalous self-energy \
-    (for the superconducting case). Can be :code:`n` for normal (default)  \
-    or :code:`a` for anomalous.
+     (for the superconducting case). Can be :code:`n` for normal (default)  \
+     or :code:`a` for anomalous.
     
 
     :type zeta: complex **or** [complex] **or** np.array(dtype=complex)
@@ -423,7 +420,7 @@ def get_sigma(self, ilat=None, ishape=None, axis="m", typ="n", zeta=None):
     :raise ValueError: If :code:`axis` is not in the previous list.
      
     :return: An array of floats that contains the self-energy along the \
-    specific axis, with dimension set by :code:`ishape` and :code:`zeta`, if present.  
+     specific axis, with dimension set by :code:`ishape` and :code:`zeta`, if present.  
     :rtype: np.array(dtype=float) 
     """
 
@@ -601,40 +598,40 @@ def get_gimp(self, ilat=None, ishape=None, axis="m", typ="n", zeta=None):
     a specific inequivalent site is needed, this can be specified.
         
     :type ishape: int 
-    :param ishape: this variable determines the shape of the returned array. \ 
-    Possible values:
+    :param ishape: this variable determines the shape of the returned array. \
+     Possible values:
    
      * :code:`None`: the same shape as :code:`Hloc` plus one axis for frequency 
      * :code:`3`: in the single-impurity case, it will return an array of the shape \
-     [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` \
-     :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT case, \
-     it will return an array of the shape \
-     [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
-     :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
-     :code:`len(zeta)` ]. :code:`Nlat` will be determined from the module by \ 
-     assessing the shape of Hloc. If :code:`ilat` is set, ValueError is returned.
+       [ :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` \
+       :data:`Norb` , :code:`len(zeta)` ]. In the real-space DMFT case, \
+       it will return an array of the shape \
+       [ :code:`Nlat` :math:`\\cdot`  :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
+       :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot`  :data:`Norb` , \
+       :code:`len(zeta)` ]. :code:`Nlat` will be determined from the module by \
+       assessing the shape of Hloc. If :code:`ilat` is set, ValueError is returned.
      * :code:`4`: in the real-space DMFT case, it will return an array of the shape \
-     [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` \
-     :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` `. :code:`Nlat` will \
-     be determined from the module by assessing the shape of Hloc. If :code:`ilat`\
-     is set, the output will have one dimension less.
+       [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot`  :data:`Norb` ,  :data:`Nspin` \
+       :math:`\\cdot`  :data:`Norb` , :code:`len(zeta)` `. :code:`Nlat` will \
+       be determined from the module by assessing the shape of Hloc. If :code:`ilat`\
+       is set, the output will have one dimension less.
      * :code:`5`: in the single-impurity case, it will return an array of the \
-     shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , \
-     :code:`len(zeta)` ].
+       shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , \
+       :code:`len(zeta)` ].
      * :code:`6`: in the real-space DMFT case, it will return an array of the \
-     shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` , \
-     :data:`Norb` , :code:`len(zeta)` ]. \
-     :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
-     If :code:`ilat` is set, the output will have one dimension less.
+       shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` , \
+       :data:`Norb` , :code:`len(zeta)` ]. \
+       :code:`Nlat` will be determined from the module by assessing the shape of Hloc. \
+       If :code:`ilat` is set, the output will have one dimension less.
 
     :type axis: str 
     :param axis: if :code:`zeta` is not provided, return the self-energy on the \
-    Matsubara or Real axis with parameters set in the input file. \
-    Can be :code:`m` for Matsubara(default) or :code:`r` for real.
+     Matsubara or Real axis with parameters set in the input file. \
+     Can be :code:`m` for Matsubara(default) or :code:`r` for real.
         
     :type typ: str 
     :param typ: whether to return the normal or anomalous self-energy \
-    (for the superconducting case). Can be :code:`n` for normal (default) or \
+     (for the superconducting case). Can be :code:`n` for normal (default) or \
     :code:`a` for anomalous.
     
 
@@ -648,7 +645,7 @@ def get_gimp(self, ilat=None, ishape=None, axis="m", typ="n", zeta=None):
     :raise ValueError: If :code:`axis` is not in the previous list.
      
     :return: An array of floats that contains the impurity Green's function along the \
-    specific axis, with dimension set by :code:`ishape` and :code:`zeta`, if present.  
+     specific axis, with dimension set by :code:`ishape` and :code:`zeta`, if present.  
     :rtype: np.array(dtype=float) 
     """
 
@@ -834,10 +831,10 @@ def get_g0and(self, zeta, bath, ishape=None, typ="n"):
           :data:`Norb` , :code:`len(zeta)` ]
         * :code:`5`: the output array will have shape [ :data:`Nspin` ,  \
           :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` ,  :code:`len(zeta)` ]
-               
+          
        :type typ: str 
        :param typ: whether to return the normal or anomalous Green's function \
-       (for the superconducting case). Can be :code:`n` for normal or :code:`a`\
+        (for the superconducting case). Can be :code:`n` for normal or :code:`a`\
         for anomalous.
        
        :raise ValueError: If :code:`zeta` is not completely real or completely \
@@ -845,7 +842,7 @@ def get_g0and(self, zeta, bath, ishape=None, typ="n"):
        :raise ValueError: If :code:`ishape` is not 3 or 5.
                
        :return: An array of complex that contains :math:`G^{And}_{0}(z)` function \
-        along the specific frequency array, with dimension set by \
+         along the specific frequency array, with dimension set by \
         :code:`ishape` and :code:`zeta`.  
        :rtype: np.array(dtype=complex)
        
@@ -963,7 +960,7 @@ def get_delta(self, zeta, bath, ishape=None, typ="n"):
           :data:`Norb` , :code:`len(zeta)` ]
         * :code:`5`: the output array will have shape [ :data:`Nspin` ,  \
           :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` ,  :code:`len(zeta)` ]
-               
+          
        :type typ: str 
        :param typ: whether to return the normal or anomalous Green's function \
         (for the superconducting case). Can be :code:`n` for normal or :code:`a`\
@@ -1066,11 +1063,12 @@ def get_delta(self, zeta, bath, ishape=None, typ="n"):
     else:
         raise ValueError("Shape(array) != 3,5 in get_delta")
     return Delta
-    
-    
+
+
 ###################
-#Susceptibilities #
+# Susceptibilities #
 ###################
+
 
 def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
     """
@@ -1080,7 +1078,7 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
 
        :type chan: str 
        :param chan: the channel of the response function. Possible values are \
-        :code:`spin` ( :code:`s` ), :code:`dens` ( :d:`c` ), :code:`pair` \
+        :code:`spin` ( :code:`s` ), :code:`dens` ( :code:`c` ), :code:`pair` \
         ( :code:`p` ), :code:`exct` ( :code:`e` ). Default is :code:`spin`.
        
        :type zeta: complex 
@@ -1093,30 +1091,30 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
         between 0 and :data:`beta`)
 
        :type axis: str
-       :param axis: the axis on which to calculate :math:`chi`. Possible values \
+       :param axis: the axis on which to calculate :math:`\\chi`. Possible values \
        :code:`matsubara` ( :code:`m`), :code:`real` ( :code:`r`), :code:`time` \
-       ( code:`t`). If :code:`zeta` and :code:`axis` are not provided, this \
-       defaults to :code:`m`. If :code:`zeta` is prodived, this has to be \
-       specified.
+        ( code:`t`). If :code:`zeta` and :code:`axis` are not provided, this \
+        defaults to :code:`m`. If :code:`zeta` is prodived, this has to be \
+        specified.
        
        :type ilat: int
        :param axis: for real-space DMFT, if this flag is specified only the \
         susceptibility for the relative inequivalent atom is returned
-       specified.
+        specified.
        
        
        :raise ValueError: If :f:var:`ed_mode` is not :code:`normal`
-       :raise ValueError: If :code:`zeta` is provided but :code:`axis` not
+       :raise ValueError: If :code:`axis` not provided
        :raise ValueError: If :code:`chan` is invalid
        :raise ValueError: If :code:`axis` is invalid
                
        :return: An array of complex that contains :math:`\\chi` along the chosen \
-       axis. The dimension of the array depends on the chosen channel:
+        axis. The dimension of the array depends on the chosen channel:
 
         * [ :data:`Norb`, :data:`Norb` , :code:`len(zeta)` ] for \
           channel :code:`spin`, :code:`dens`, :code:`pair`
-        * [ :data:`Norb`, :data:`Norb` , :code:`len(zeta)` ] for channel \
-          :code:`exct`, corresponding to the three cartesian components
+        * [ 3, :data:`Norb`, :data:`Norb` , :code:`len(zeta)` ] for channel \
+          :code:`exct`, corresponding to singlet, triplet(xy) and triplet(z)
           
         One dimension corresponding to the number of inequivalent sites is added \
         at the beginning for the case of real-space DMFT and if ilat is None.
@@ -1126,48 +1124,52 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
     """
     ed_get_spinchi = self.library.ed_get_spinchi
     ed_get_spinchi.argtypes = [
-        np.ctypeslib.ndpointer(dtype=complex, ndim=4, flags="F_CONTIGUOUS"), #self
-        np.ctypeslib.ndpointer(dtype=float, ndim=1, flags="F_CONTIGUOUS"), #zeta
-        c_int,  #dim_zeta
-        c_int,  #axis
-        c_int,  #nsites
-        c_int   #latticeflag
+        np.ctypeslib.ndpointer(dtype=complex, ndim=4, flags="F_CONTIGUOUS"),  # self
+        np.ctypeslib.ndpointer(dtype=complex, ndim=1, flags="F_CONTIGUOUS"),  # zeta
+        c_int,  # dim_zeta
+        c_int,  # zetaflag
+        c_int,  # axis
+        c_int,  # nsites
+        c_int,  # latticeflag
     ]
-    ed_get_spinchi.restype = None    
+    ed_get_spinchi.restype = None
 
     ed_get_denschi = self.library.ed_get_denschi
     ed_get_denschi.argtypes = [
-        np.ctypeslib.ndpointer(dtype=complex, ndim=4, flags="F_CONTIGUOUS"), #self
-        np.ctypeslib.ndpointer(dtype=float, ndim=1, flags="F_CONTIGUOUS"), #zeta
-        c_int, #dim_zeta
-        c_int,  #axis
-        c_int,  #nsites
-        c_int   #latticeflag
+        np.ctypeslib.ndpointer(dtype=complex, ndim=4, flags="F_CONTIGUOUS"),  # self
+        np.ctypeslib.ndpointer(dtype=complex, ndim=1, flags="F_CONTIGUOUS"),  # zeta
+        c_int,  # dim_zeta
+        c_int,  # zetaflag
+        c_int,  # axis
+        c_int,  # nsites
+        c_int,  # latticeflag
     ]
-    ed_get_denschi.restype = None    
+    ed_get_denschi.restype = None
 
     ed_get_pairchi = self.library.ed_get_pairchi
     ed_get_pairchi.argtypes = [
-        np.ctypeslib.ndpointer(dtype=complex, ndim=4, flags="F_CONTIGUOUS"), #self
-        np.ctypeslib.ndpointer(dtype=float, ndim=1, flags="F_CONTIGUOUS"), #zeta
-        c_int, #dim_zeta
-        c_int,  #axis
-        c_int,  #nsites
-        c_int   #latticeflag
+        np.ctypeslib.ndpointer(dtype=complex, ndim=4, flags="F_CONTIGUOUS"),  # self
+        np.ctypeslib.ndpointer(dtype=complex, ndim=1, flags="F_CONTIGUOUS"),  # zeta
+        c_int,  # dim_zeta
+        c_int,  # zetaflag
+        c_int,  # axis
+        c_int,  # nsites
+        c_int,  # latticeflag
     ]
-    ed_get_pairchi.restype = None    
+    ed_get_pairchi.restype = None
 
-    ed_get_exctchi = self.library.ed_get_pairchi
+    ed_get_exctchi = self.library.ed_get_exctchi
     ed_get_exctchi.argtypes = [
-        np.ctypeslib.ndpointer(dtype=complex, ndim=5, flags="F_CONTIGUOUS"), #self
-        np.ctypeslib.ndpointer(dtype=float, ndim=1, flags="F_CONTIGUOUS"), #zeta
-        c_int, #dim_zeta
-        c_int,  #axis
-        c_int,  #nsites
-        c_int   #latticeflag
+        np.ctypeslib.ndpointer(dtype=complex, ndim=5, flags="F_CONTIGUOUS"),  # self
+        np.ctypeslib.ndpointer(dtype=complex, ndim=1, flags="F_CONTIGUOUS"),  # zeta
+        c_int,  # dim_zeta
+        c_int,  # zetaflag
+        c_int,  # axis
+        c_int,  # nsites
+        c_int,  # latticeflag
     ]
     ed_get_exctchi.restype = None
-    
+
     if self.Nineq == 0:
         Nsites = 1
         latticeflag = 0
@@ -1176,67 +1178,65 @@ def get_chi(self, chan="spin", zeta=None, axis=None, ilat=None):
         latticeflag = 1
 
     aux_norb = c_int.in_dll(self.library, "Norb").value
-    aux_eps = c_int.in_dll(self.library, "eps").value
-    aux_beta = c_int.in_dll(self.library, "Beta").value
     aux_Lmats = c_int.in_dll(self.library, "Lmats").value
     aux_Lreal = c_int.in_dll(self.library, "Lreal").value
-    aux_Wini = c_int.in_dll(self.library, "Wini").value
-    aux_Wfin = c_int.in_dll(self.library, "Wfin").value
     aux_Ltau = c_int.in_dll(self.library, "Ltau").value
-    
     edmode = self.get_ed_mode()
-    
+
     if edmode != 1:
-        raise ValueError("Susceptibility calculation not supported for ed_mode "
-                         "not = normal")
-    
-    if zeta is None and axis is None:
-        zeta = np.pi / aux_beta * ( 2 * aux_Lmats + 1 )
-        axisflag = 0
-    elif zeta is not None and axis is None:
-        raise ValueError("If zeta is specified, axis is required")
-    elif zeta is None and axis is not None:
-        if axis == "m":
-            zeta = np.arange(np.pi / aux_beta * ( 2 * aux_Lmats + 1 ),dtype = complex)
-            zeta *= 1j
-            axisflag = 0
-        if axis == "r":
-            zeta = np.linspace(aux_Wini, aux_Wfin, aux_Lreal,dtype=complex)
-            z += aux_eps * 1j
-            axisflag = 1
-        if axis == "t":
-            zeta = np.linspace(0.0, aux_beta, aux_Ltau,dtype=complex)
-            axisflag = 2
+        raise ValueError(
+            "Susceptibility calculation not supported for ed_mode " "not = normal"
+        )
+
+    zetaflag = 1
+
+    if axis is None:
+        raise ValueError("Axis is required")
     else:
-        if axis == "m":
-            axisflag = 0
-        elif axis == "r":
-            axisflag = 1
-        elif axis == "t":
-            axisflag = 2
+        if zeta is None:
+            if axis == "m":
+                zeta = np.array([0.0], dtype=complex)
+                zetaflag = 0
+                axisflag = 0
+                nfreq = aux_Lmats
+            if axis == "r":
+                zeta = np.array([0.0], dtype=complex)
+                zetaflag = 0
+                axisflag = 1
+                nfreq = aux_Lreal
+            if axis == "t":
+                zeta = np.array([0.0], dtype=complex)
+                zetaflag = 0
+                axisflag = 2
+                nfreq = aux_Ltau
         else:
-            raise ValueError("axis can only be m, r or t")
-    
-    nfreq = np.shape(zeta)[0]
-            
+            if axis == "m":
+                axisflag = 0
+            elif axis == "r":
+                axisflag = 1
+            elif axis == "t":
+                axisflag = 2
+            else:
+                raise ValueError("axis can only be m, r or t")
+            nfreq = np.shape(zeta)[0]
+
     if chan.lower() == "spin" or chan.lower() == "s":
-        chi = np.zeros([Nsites, aux_norb, aux_norb, nfreq], dtype = complex)
-        ed_get_spinchi(chi, zeta, nfreq, axisflag, nsites, latticeflag)
+        chi = np.zeros([Nsites, aux_norb, aux_norb, nfreq], dtype=complex, order="F")
+        ed_get_spinchi(chi, zeta, nfreq, zetaflag, axisflag, Nsites, latticeflag)
     if chan.lower() == "dens" or chan.lower() == "d":
-        chi = np.zeros([Nsites, aux_norb, aux_norb, nfreq], dtype = complex)
-        ed_get_denschi(chi, zeta, nfreq, axisflag, nsites, latticeflag)
+        chi = np.zeros([Nsites, aux_norb, aux_norb, nfreq], dtype=complex, order="F")
+        ed_get_denschi(chi, zeta, nfreq, zetaflag, axisflag, Nsites, latticeflag)
     if chan.lower() == "pair" or chan.lower() == "p":
-        chi = np.zeros([Nsites, aux_norb, aux_norb, nfreq], dtype = complex)
-        ed_get_pairchi(chi, zeta, nfreq, axisflag, nsites, latticeflag)
+        chi = np.zeros([Nsites, aux_norb, aux_norb, nfreq], dtype=complex, order="F")
+        ed_get_pairchi(chi, zeta, nfreq, zetaflag, axisflag, Nsites, latticeflag)
     if chan.lower() == "exct" or chan.lower() == "e":
-        chi = np.zeros([Nsites, 3, aux_norb, aux_norb, nfreq], dtype = complex)
-        ed_get_exctchi(chi, zeta, nfreq, axisflag, nsites, latticeflag)
-    
+        chi = np.zeros([Nsites, 3, aux_norb, aux_norb, nfreq], dtype=complex, order="F")
+        ed_get_exctchi(chi, zeta, nfreq, zetaflag, axisflag, Nsites, latticeflag)
+
     if self.Nineq == 0:
-        return chi
+        return chi[0]
     else:
         if ilat == None:
             return chi
         else:
             return chi[ilat]
-        

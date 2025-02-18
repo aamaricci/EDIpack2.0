@@ -527,34 +527,45 @@ def bath_inspect(self, bath=None, e=None, v=None, d=None, u=None, l=None):
        :param bath: The user-accessible bath array
        
        :type e: np.array(dtype=float)
-       :param e: an array for the bath levels ( :f:var:`ed_mode` = :code:`NORMAL, NONSU2, SUPERC`) \
-       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` bath, \
-       [ :data:`Nspin` ,  :data:`Nbath` ] for :code:`HYBRID` bath 
+       :param e: an array for the bath levels ( :f:var:`ed_mode` = \
+        :code:`NORMAL, NONSU2, SUPERC`). It has dimension [ :data:`Nspin` , \
+        :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` bath, \
+        [ :data:`Nspin` ,  :data:`Nbath` ] for :code:`HYBRID` bath 
        
        :type v: np.array(dtype=float)
-       :param v: an array for the bath hybridizations ( :f:var:`ed_mode` = :code:`NORMAL, NONSU2, SUPERC`). \
-       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` and :code:`HYBRID` bath. \
-       For :code:`REPLICA` bath it has dimension [ :data:`Nbath` ] and for :code:`GENERAL` bath it has dimension [ :data:`Nbath` , :data:`Nspin` :math:`\\cdot` :data:`Norb` ]
+       :param v: an array for the bath hybridizations ( :f:var:`ed_mode` = \
+        :code:`NORMAL, NONSU2, SUPERC`). It has dimension [ :data:`Nspin` , :data:`Norb` , \
+        :data:`Nbath` ] for :code:`NORMAL` and :code:`HYBRID` bath. \
+        For :code:`REPLICA` bath it has dimension [ :data:`Nbath` ] and for \
+        :code:`GENERAL` bath it has dimension [ :data:`Nbath` , :data:`Nspin` \
+        :math:`\\cdot` :data:`Norb` ]
        
        :type d: np.array(dtype=float)
-       :param d: an array for the bath anomalous enery levels( :f:var:`ed_mode` = :code:`SUPERC`). \
-       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` bath, \
-       [ :data:`Nspin` ,  :data:`Nbath` ] for :code:`HYBRID` bath
+       :param d: an array for the bath anomalous enery levels( :f:var:`ed_mode` \
+        = :code:`SUPERC`). It has dimension [ :data:`Nspin` ,  :data:`Norb` , \
+        :data:`Nbath` ] for :code:`NORMAL` bath, [ :data:`Nspin` , :data:`Nbath` ] \
+        for :code:`HYBRID` bath
        
        :type u: np.array(dtype=float)
-       :param u: an array for the bath spin off-diagonal hybridization ( :f:var:`ed_mode` = :code:`NONSU2`). \
-       It has dimension [ :data:`Nspin` ,  :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` and :code:`HYBRID` bath
+       :param u: an array for the bath spin off-diagonal hybridization \
+        ( :f:var:`ed_mode` = :code:`NONSU2`). It has dimension [ :data:`Nspin`, \
+        :data:`Norb` ,  :data:`Nbath` ] for :code:`NORMAL` and :code:`HYBRID` bath
 
        :type l: np.array(dtype=float)
-       :param l: an array for the linear coefficients of the Replica matrix linear combination ( :f:var:`bath_type` = :code:`REPLICA,GENERAL`). \
-       It has dimension [ :data:`Nbath` , :code:`Nsym` ], the latter being the number of terms on the linear combination
+       :param l: an array for the linear coefficients of the Replica matrix \
+        linear combination ( :f:var:`bath_type` = :code:`REPLICA,GENERAL`). \
+        It has dimension [ :data:`Nbath` , :code:`Nsym` ], the latter being \
+        the number of terms on the linear combination
 
-       :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d,l` are provided, none is provided, the shapes are inconsistent \
+       :raise ValueError: if both :code:`bath` and some among :code:`e,u,v,d,l` \
+        are provided, none is provided, the shapes are inconsistent \
         or the inputs are inconsistent with :f:var:`bath_type` and :f:var:`ed_mode` .
 
        :return: 
-         - if :code:`bath` is provided, returns :code:`e,v`, :code:`e,d,v`, :code:`e,v,u` or :code:`l,v` depending on :f:var:`ed_mode`
-         - if :code:`e,v`, :code:`e,d,v`, :code:`e,v,u` or :code:`l,v` depending on :f:var:`ed_mode`  are provided, returns :code:`bath` 
+         - if :code:`bath` is provided, returns :code:`e,v`, :code:`e,d,v`, \
+           :code:`e,v,u` or :code:`l,v` depending on :f:var:`ed_mode`
+         - if :code:`e,v`, :code:`e,d,v`, :code:`e,v,u` or :code:`l,v` \
+           depending on :f:var:`ed_mode`  are provided, returns :code:`bath` 
        :rtype: np.array(dtype=float) 
     """
 

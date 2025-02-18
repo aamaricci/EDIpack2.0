@@ -5,7 +5,7 @@ requires = ['meson-python']
 
 [project]
 name = 'edipy2'
-version = '2.0.4'
+version = '2.0.5'
 description = 'Edipack2 python API'
 authors = [
   {name = 'Lorenzo Crippa', email = 'crippa.lorenzo@gmail.com'},

@@ -14,11 +14,13 @@ subroutine ed_get_spinChi_site_n3(self,axis,z)
      allocate(z_, source=z)
   else
      select case(axis_)
-     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
+     case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis, nor Time"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -49,9 +51,11 @@ subroutine ed_get_densChi_site_n3(self,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -82,9 +86,11 @@ subroutine ed_get_pairChi_site_n3(self,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -114,9 +120,11 @@ subroutine ed_get_exctChi_site_n3(self,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -155,9 +163,11 @@ subroutine ed_get_spinChi_lattice_n3(self,nlat,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -201,9 +211,11 @@ subroutine ed_get_densChi_lattice_n3(self,nlat,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -245,9 +257,11 @@ subroutine ed_get_pairChi_lattice_n3(self,nlat,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !
@@ -290,9 +304,11 @@ subroutine ed_get_exctChi_lattice_n3(self,nlat,axis,z)
      select case(axis_)
      case default;stop "ed_get_sigma ERROR: axis is neither Matsubara, nor Realaxis"
      case ('m','M')
-        allocate(z_, source=dcmplx(0d0,wm))
+        allocate(z_, source=dcmplx(0d0,vm))
      case ('r','R')
-        allocate(z_, source=dcmplx(wr,eps))
+        allocate(z_, source=dcmplx(vr,eps))
+     case ('t','T')
+      allocate(z_, source=dcmplx(tau,0d0))
      end select
   endif
   !

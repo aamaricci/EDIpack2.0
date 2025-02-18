@@ -13,19 +13,28 @@ def set_hloc(self, hloc, Nlat=None):
     :type hloc: np.array(dtype=complex)
     :param hloc: Local Hamiltonian matrix. This can have the following shapes:
 
-     * [ :data:`Nspin` :math:`\\cdot` :data:`Norb` , :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: single-impurity case, 2-dimensional array
-     * [ :data:`Nspin` , :data:`Nspin` , :data:`Norb` , :data:`Norb` ]: single-impurity case, 4-dimensional array
-     * [ :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: real-space DMFT case, 2-dimensional array.
-     * [ :code:`Nlat` , :data:`Nspin` :math:`\\cdot` :data:`Norb` , :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: single-impurity case, 3-dimensional array.
-     * [ :code:`Nlat` , :data:`Nspin` , :data:`Nspin` , :data:`Norb` , :data:`Norb` ]: single-impurity case, 5-dimensional array.
+     * [ :data:`Nspin` :math:`\\cdot` :data:`Norb` , :data:`Nspin` \
+       :math:`\\cdot` :data:`Norb` ]: single-impurity case, 2-dimensional array
+     * [ :data:`Nspin` , :data:`Nspin` , :data:`Norb` , :data:`Norb` ]: \
+       single-impurity case, 4-dimensional array
+     * [ :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , \
+       :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` ]: \
+       real-space DMFT case, 2-dimensional array.
+     * [ :code:`Nlat` , :data:`Nspin` :math:`\\cdot` :data:`Norb` , :data:`Nspin`\
+       :math:`\\cdot` :data:`Norb` ]: single-impurity case, 3-dimensional array.
+     * [ :code:`Nlat` , :data:`Nspin` , :data:`Nspin` , :data:`Norb` ,  \
+       :data:`Norb` ]: single-impurity case, 5-dimensional array.
 
      The array is ordered in F convention inside the function.
 
-     **Note**: the way the EDIpack2 library passes from 1 comulative to 2 or 3 running indices is, from slower to faster: ``lat``, ``spin``, ``orb``
+     **Note**: the way the EDIpack2 library passes from 1 comulative to 2 or 3 \
+               running indices is, from slower to faster: ``lat``, ``spin``, ``orb``
 
     :type Nlat: int
-    :param Nlat: Number of inequivalent sites for real-space DMFT. The function will raise a ValueError if the dimensions of ``hloc`` are inconsistent with the presence or absence of Nlat.
-     The EDIpack2 library will check the correctness of the dimensions of ``hloc`` and terminate execution if inconsistent.
+    :param Nlat: Number of inequivalent sites for real-space DMFT. The function \
+     will raise a ValueError if the dimensions of ``hloc`` are inconsistent with \
+     the presence or absence of Nlat. The EDIpack2 library will check the \
+     correctness of the dimensions of ``hloc`` and terminate execution if inconsistent.
 
     :raise ValueError: If hloc is not provided or has the wrong shape
 
@@ -100,7 +109,9 @@ def set_hloc(self, hloc, Nlat=None):
 def search_variable(self, var, ntmp, converged):
     """
 
-    This function checks the value of the read density :code:`ntmp` against the desired value :data:`nread` (if different from zero) and adjusts :code:`var` accordingly (in a monotonous way).
+    This function checks the value of the read density :code:`ntmp` against the \
+    desired value :data:`nread` (if different from zero) and adjusts :code:`var` \
+    accordingly (in a monotonous way).
 
     :type var: float
     :param var: the variable to be adjusted (usually :data:`xmu` )
@@ -109,7 +120,8 @@ def search_variable(self, var, ntmp, converged):
     :param ntmp: the density value at the given iteration
 
     :type converged: bool
-    :param converged: whether the DMFT loop has achieved a sufficiently small error independently on the density
+    :param converged: whether the DMFT loop has achieved a sufficiently small \
+     error independently on the density
 
     :return:
      - the new value of :code:`var`
@@ -140,19 +152,21 @@ def search_variable(self, var, ntmp, converged):
 def check_convergence(self, func, threshold=None, N1=None, N2=None):
     """
     
-    This function checks the relative variation of a given quantity (Weiss field, Delta, ...) \
-    against the one for the previous step. It is used to determined whether the DMFT loop has converged. 
-    If a maximum number of loops is exceeded, returns :code:`True` with a warning and appends 
-    it to the plain text file :code:`ERROR.README`.
+    This function checks the relative variation of a given quantity (Weiss field, \
+    Delta, ...) against the one for the previous step. It is used to determine \
+    whether the DMFT loop has converged. If a maximum number of loops is exceeded, \
+    returns :code:`True` with a warning and appends it to the plain text file \
+    :code:`ERROR.README`.
 
     :type func: np.array(dtype=complex) 
-    :param func: the quantity to be checked. It can have any rank and shape, but the last dimension is 
-      summed over to get the relative error. All the components in the other dimensions are evalutated
-      in the same way. The overall error is the average of the component-resolved error.
-      It is appended to the plain text file :code:`error.err`.
-      The maximum and minimum component-resolve errors,  as well as all the finite component-resolved 
-      error values are appended to the plain text files :code:`error.err.max` , :code:`error.err.min` 
-      :code:`error.err.distribution` respectively.
+    :param func: the quantity to be checked. It can have any rank and shape, \
+     but the last dimension is summed over to get the relative error. All the \
+     components in the other dimensions are evalutated in the same way. \
+     The overall error is the average of the component-resolved error. It is \
+     appended to the plain text file :code:`error.err`. The maximum and minimum \
+     component-resolve errors,  as well as all the finite component-resolved \
+     error values are appended to the plain text files :code:`error.err.max`, \
+     :code:`error.err.min` and :code:`error.err.distribution` respectively.
    
     :type threshold: float 
     :param threshold: the error threshold (default = :data:`dmft_error`)

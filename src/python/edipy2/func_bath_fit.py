@@ -6,16 +6,19 @@ import types
 
 def chi2_fitgf(self, *args, ispin=0, iorb=None, fmpi=True):
     """
-      This function fits the Weiss field or Hybridization function (delta) with a discretized version.\
-      The fit parameters are the bath parameters contained in the user-accessible array.\
-      Depending on the type of system we are considering (normal, superconductive, non-SU(2))\
+      This function fits the Weiss field or Hybridization function (delta) with \
+      a discrete set of level. The fit parameters are the bath parameters \
+      contained in the user-accessible array. Depending on the type of system \
+      we are considering (normal, superconductive, non-SU(2)) \
       a different set of inputs has to be passed. The specifics of the numerical\
       fitting routines are controlled in the input file.
        
         
-      :type args: [np.array(dtype=complex,np.array(dtype=complex),np.array(dtype=float)]\
-      **or** [np.array(dtype=complex,np.array(dtype=float)]
-      :param args: The positional arguments are the function(s) to fit and the bath array. 
+      :type args: [np.array(dtype=complex,np.array(dtype=complex), \
+      np.array(dtype=float)]**or** [np.array(dtype=complex, \
+      np.array(dtype=float)]
+      :param args: The positional arguments are the function(s) \
+      to fit and the bath array. 
        
        If the system is not superconductive ( :f:var:`ed_mode` = :code:`NORMAL` or\
         :f:var:`ed_mode` = :code:`NONSU2`) the argumens are
@@ -23,7 +26,8 @@ def chi2_fitgf(self, *args, ispin=0, iorb=None, fmpi=True):
        * :code:`g`: the function to fit
        * :code:`bath`: the bath
       
-       If the system is superconductive ( :f:var:`ed_mode` = :code:`SUPERC`) the arguments are
+       If the system is superconductive ( :f:var:`ed_mode` = :code:`SUPERC`) the \
+       arguments are
 
        * :code:`g`: the normal function to fit
        * :code:`f`: the anomalous function to fit
@@ -39,15 +43,21 @@ def chi2_fitgf(self, *args, ispin=0, iorb=None, fmpi=True):
        Accordingly, the dimension of g (and f) can be:
        
        * :code:`3`: in the single-impurity case,  an array of \
-       the shape [ :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]. 
+         the shape [ :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` \
+         :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]. 
        * :code:`3`: in the real-space DMFT case, an array of \
-       the shape [ :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]
+         the shape [ :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` \
+         :data:`Norb` ,  :code:`Nlat` :math:`\\cdot` :data:`Nspin` :math:`\\cdot` \
+         :data:`Norb` , :code:`Lfit` ]
        * :code:`4`: in the real-space DMFT case, an array of \
-       the shape [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]
+         the shape [ :code:`Nlat` ,  :data:`Nspin` :math:`\\cdot` \
+         :data:`Norb` ,  :data:`Nspin` :math:`\\cdot` :data:`Norb` , :code:`Lfit` ]
        * :code:`5`: in the single-impurity case, an array of \
-       the shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`Lfit` ]
+         the shape [ :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  \
+         :data:`Norb` , :code:`Lfit` ]
        * :code:`6`: in the real-space DMFT case, an array of \
-       the shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  :data:`Norb` ,  :data:`Norb` , :code:`Lfit` ]
+         the shape [ :code:`Nlat` ,  :data:`Nspin` ,  :data:`Nspin` ,  \
+         :data:`Norb` ,  :data:`Norb` , :code:`Lfit` ]
        
        where :code:`Lfit` is a given number of frequencies.
 
@@ -57,9 +67,9 @@ def chi2_fitgf(self, *args, ispin=0, iorb=None, fmpi=True):
       :param ispin: spin species to be fitted. For the normal case, \
       if :data:`Nspin` = :code:`2`, the fitting function \
       needs to be called twice. Only the corresponding elements of :code:`bath` \
-      will be updated each time. For the non-SU(2) case, this argument is irrelevant, \
-      since all the elements of the Weiss/Delta function need to be fitted. This is also \
-      the case if :f:var:`bath_type` = :code:`REPLICA, GENERAL`.
+      will be updated each time. For the non-SU(2) case, this argument is \
+      irrelevant, since all the elements of the Weiss/Delta function need to be \
+      fitted. This is also the case if :f:var:`bath_type` = :code:`REPLICA, GENERAL`.
         
       :type iorb: int 
       :param iorb: the orbital to be fitted. If omitted, all orbitals will be fitted
@@ -68,14 +78,16 @@ def chi2_fitgf(self, *args, ispin=0, iorb=None, fmpi=True):
       :param fmpi: flag to automatically do and broadcast the fit over MPI, if defined
 
       :raise ValueError: if the shapes of the positional arguments are incompatible
-      :raise ValueError: if a number of positional arguments different from 2 or 3 are passed   
+      :raise ValueError: if a number of positional arguments different \
+       from 2 or 3 are passed   
          
       :return: An array of floats that contains the bath parameters \
-      for the impurity problem. This is a required input of :func:`solve` \
-      and :func:`chi2_fitgf`. Its elements are ordered differently \
-      depending on the bath geometry. They are (de)compactified for \
-      user interaction via :func:`bath_inspect`. Specific \
-      symmetrization operations are implemented and listed in the :ref:`bath` section.
+       for the impurity problem. This is a required input of :func:`solve` \
+       and :func:`chi2_fitgf`. Its elements are ordered differently \
+       depending on the bath geometry. They are (de)compactified for \
+       user interaction via :func:`bath_inspect`. Specific \
+       symmetrization operations are implemented and listed in \
+       the :ref:`bath` section.
       :rtype: np.array(dtype=float) 
     """
 

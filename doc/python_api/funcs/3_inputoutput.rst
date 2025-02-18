@@ -21,6 +21,8 @@ These functions pass to the userspace the observables and response functions cal
 
 .. autofunction:: edipy2.global_env.get_delta
 
+.. autofunction:: edipy2.global_env.get_chi
+
 
 
 
